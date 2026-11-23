@@ -184,6 +184,8 @@ Route::middleware('auth')->group(function () {
         Route::get('/site-cash/cash-transfers', [SiteCashController::class, 'getCashTransfers'])->name('site-cash.cash-transfers');
         Route::post('/site-cash', [SiteCashController::class, 'store'])->name('site-cash.store');
         Route::get('/site-cash/{encryptedId}', [SiteCashController::class, 'show'])->name('site-cash.show');
+        Route::put('/site-cash/{id}', [SiteCashController::class, 'update']);
+        Route::post('/site-cash/{id}/update', [SiteCashController::class, 'update'])->name('site-cash.update');
         Route::post('/site-cash/{id}/delete', [SiteCashController::class, 'destroy'])->name('site-cash.destroy');
         Route::delete('/site-cash/{id}', [SiteCashController::class, 'destroy']);
 
