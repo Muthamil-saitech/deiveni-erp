@@ -157,6 +157,64 @@ test('site cash detail page renders successfully with database transaction detai
     $response->assertSee('Labour wages for slab casting');
 });
 
+test('site cash detail page allows editing transaction and changing project site with spent recalculation', function () {
+    $site2 = ProjectSite::create([
+        'client_id' => $this->client->id,
+        'name' => 'Trichy Branch Site',
+        'location' => 'Trichy',
+        'work_type' => 'Commercial',
+        'status' => 'Ongoing',
+        'spent' => 0.0,
+        'created_by' => $this->siteManager->id,
+    ]);
+
+    $txn = SiteCash::create([
+        'project_site_id' => $this->site->id,
+        'transaction_type' => 'Tool Rental',
+        'flow_type' => 'outflow',
+        'amount' => 5000.00,
+        'in_amount' => 0.00,
+        'out_amount' => 5000.00,
+        'is_expense' => true,
+        'bill_no' => 'RENT-101',
+        'payment_date' => '2026-11-04',
+        'description' => 'Scaffolding rental',
+        'created_by' => $this->siteManager->id,
+    ]);
+
+    $this->site->update(['spent' => 5000.0]);
+
+    // View detail page contains edit modal
+    $detailResponse = $this->actingAs($this->siteManager)->get("/site-cash/{$txn->encrypted_id}");
+    $detailResponse->assertStatus(200);
+    $detailResponse->assertSee('editSiteCashModal');
+    $detailResponse->assertSee('Edit Entry (பதிவை திருத்து)');
+
+    // Update transaction to site2 with new amount
+    $updateResponse = $this->actingAs($this->siteManager)->postJson("/site-cash/{$txn->id}/update", [
+        'project_site_id' => $site2->id,
+        'transaction_type' => 'Tool Rental',
+        'amount' => 6000.00,
+        'payment_date' => '2026-11-05',
+        'description' => 'Updated rental on new site',
+    ]);
+
+    $updateResponse->assertStatus(200)
+        ->assertJson(['success' => true]);
+
+    // Check DB
+    $this->assertDatabaseHas('site_cashes', [
+        'id' => $txn->id,
+        'project_site_id' => $site2->id,
+        'amount' => 6000.00,
+        'description' => 'Updated rental on new site',
+    ]);
+
+    // Spent on old site should be recalculated to 0, spent on site2 should be 6000
+    expect((float) $this->site->fresh()->spent)->toBe(0.0);
+    expect((float) $site2->fresh()->spent)->toBe(6000.0);
+});
+
 test('deleting an expense transaction recalculates project_sites spent column', function () {
     $txn = SiteCash::create([
         'project_site_id' => $this->site->id,

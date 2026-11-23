@@ -33,6 +33,7 @@ return new class extends Migration
                 $table->unsignedBigInteger('cash_transfer_id')->nullable();
                 $table->string('wage_cash_source')->nullable();
                 $table->unsignedBigInteger('return_site_cash_id')->nullable();
+                $table->json('returned_wage_ids')->nullable();
                 $table->json('extra_workers')->nullable();
                 $table->foreignId('supplier_id')->nullable()->constrained('suppliers')->nullOnDelete();
                 $table->string('supplier_name')->nullable();

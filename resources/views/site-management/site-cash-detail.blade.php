@@ -42,6 +42,16 @@
                             <span>{{ $formattedDateTime }}</span></small>
                     </div>
                 </div>
+                <div class="d-flex align-items-center gap-2">
+                    <button type="button" class="btn btn-warning btn-sm d-inline-flex align-items-center shadow-sm"
+                        data-bs-toggle="modal" data-bs-target="#editSiteCashModal">
+                        <i class="bi bi-pencil-square me-1"></i> Edit Entry (பதிவை திருத்து)
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary btn-sm d-inline-flex align-items-center"
+                        onclick="window.print()">
+                        <i class="bi bi-printer me-1"></i> Print
+                    </button>
+                </div>
             </div>
         </div>
 
@@ -82,7 +92,7 @@
                 </div>
 
                 <!-- 3. Project Site -->
-                <div class="col-12 col-s  m-6 col-xl-3">
+                <div class="col-12 col-sm-6 col-xl-3">
                     <div class="card-custom p-3 bg-white h-100 border-start border-4 border-info">
                         <div class="d-flex justify-content-between align-items-center">
                             <div>
@@ -90,6 +100,10 @@
                                 <h6 class="fw-bold mb-0 text-dark mt-1 text-truncate" style="max-width: 170px;">
                                     {{ $siteName }}
                                 </h6>
+                                <button type="button" class="btn btn-link btn-sm p-0 text-decoration-none mt-1 small text-info fw-semibold"
+                                    data-bs-toggle="modal" data-bs-target="#editSiteCashModal" title="Change Project Site">
+                                    <i class="bi bi-pencil-square me-1"></i>Change Site (மாற்ற)
+                                </button>
                             </div>
                             <div class="bg-info-subtle text-info p-2 rounded-3">
                                 <i class="bi bi-building fs-5"></i>
@@ -598,4 +612,236 @@
             </div>
         </div>
     @endif
+
+    <!-- Edit Site Cash Transaction Modal -->
+    <div class="modal fade" id="editSiteCashModal" tabindex="-1" aria-labelledby="editSiteCashModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content shadow border-0">
+                <div class="modal-header bg-light">
+                    <h6 class="modal-title fw-bold" id="editSiteCashModalLabel">
+                        <i class="bi bi-pencil-square text-warning me-2"></i>Edit Site Cash Transaction (தள ரொக்க பதிவை திருத்து)
+                    </h6>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form id="editSiteCashForm" enctype="multipart/form-data">
+                    @csrf
+                    <div class="modal-body p-4">
+                        <div id="editAlertBox" class="alert alert-danger d-none mb-3 py-2 px-3 small"></div>
+
+                        <div class="row g-3">
+                            <!-- Project Site Dropdown -->
+                            <div class="col-12 col-md-6">
+                                <label class="form-label fw-semibold small text-dark">
+                                    Project Site (திட்ட தளம்) <span class="text-danger">*</span>
+                                </label>
+                                <select class="form-select form-select-sm" name="project_site_id" id="edit_project_site_id" required>
+                                    <option value="">-- Select Project Site --</option>
+                                    @if(isset($sites))
+                                        @foreach($sites as $site)
+                                            <option value="{{ $site->id }}" {{ $transaction->project_site_id == $site->id ? 'selected' : '' }}>
+                                                {{ $site->name }} ({{ $site->location ?? 'Site' }})
+                                            </option>
+                                        @endforeach
+                                    @endif
+                                </select>
+                                <div class="form-text small text-muted">
+                                    Wrong site-ல் entry போடப்பட்டிருந்தால் இங்கிருந்து சரியான தளத்தை மாற்றிக்கொள்ளலாம்.
+                                </div>
+                            </div>
+
+                            <!-- Transaction Type Dropdown -->
+                            <div class="col-12 col-md-6">
+                                <label class="form-label fw-semibold small text-dark">
+                                    Transaction Type (பரிவர்த்தனை வகை) <span class="text-danger">*</span>
+                                </label>
+                                <select class="form-select form-select-sm" name="transaction_type" id="edit_transaction_type" required>
+                                    <optgroup label="Expense (செலவு)">
+                                        <option value="Material Purchase" {{ $transaction->transaction_type === 'Material Purchase' ? 'selected' : '' }}>Material Purchase (பொருள் கொள்முதல்)</option>
+                                        <option value="Supplier Payment" {{ $transaction->transaction_type === 'Supplier Payment' ? 'selected' : '' }}>Supplier Payment (சப்ளையர் பட்டுவாடா)</option>
+                                        <option value="Daily Wage Payment" {{ $transaction->transaction_type === 'Daily Wage Payment' ? 'selected' : '' }}>Daily Wage Payment (தினக்கூலி பட்டுவாடா)</option>
+                                        <option value="Tool Rental" {{ $transaction->transaction_type === 'Tool Rental' ? 'selected' : '' }}>Tool Rental (உபகரண வாடகை)</option>
+                                        <option value="Other Expense" {{ $transaction->transaction_type === 'Other Expense' ? 'selected' : '' }}>Other Expense (இதர செலவு)</option>
+                                        <option value="Balance Returned" {{ $transaction->transaction_type === 'Balance Returned' ? 'selected' : '' }}>Balance Returned (மீத ரொக்கம் திரும்ப ஒப்படைப்பு)</option>
+                                    </optgroup>
+                                    <optgroup label="Inflow (வரவு)">
+                                        <option value="Owner Advance" {{ $transaction->transaction_type === 'Owner Advance' ? 'selected' : '' }}>Owner Advance (உரிமையாளர் முன்பணம்)</option>
+                                        <option value="Advance Received" {{ $transaction->transaction_type === 'Advance Received' ? 'selected' : '' }}>Advance Received (முன்பணம் வரவு)</option>
+                                        <option value="Client Advance" {{ $transaction->transaction_type === 'Client Advance' ? 'selected' : '' }}>Client Advance (கிளையண்ட் அட்வான்ஸ்)</option>
+                                        <option value="Client Collection" {{ $transaction->transaction_type === 'Client Collection' ? 'selected' : '' }}>Client Collection (கிளையண்ட் வரவு)</option>
+                                    </optgroup>
+                                </select>
+                            </div>
+
+                            <!-- Amount -->
+                            <div class="col-12 col-md-6">
+                                <label class="form-label fw-semibold small text-dark">
+                                    Amount (தொகை ₹) <span class="text-danger">*</span>
+                                </label>
+                                <div class="input-group input-group-sm">
+                                    <span class="input-group-text fw-bold">₹</span>
+                                    <input type="number" step="0.01" min="0.01" class="form-control" name="amount" id="edit_amount" value="{{ (float) $transaction->amount }}" required>
+                                </div>
+                            </div>
+
+                            <!-- Payment Date -->
+                            <div class="col-12 col-md-6">
+                                <label class="form-label fw-semibold small text-dark">
+                                    Payment Date (தேதி) <span class="text-danger">*</span>
+                                </label>
+                                <input type="date" class="form-control form-control-sm" name="payment_date" id="edit_payment_date"
+                                    value="{{ \Carbon\Carbon::parse($transaction->payment_date)->format('Y-m-d') }}" required>
+                            </div>
+
+                            <!-- Payment Mode -->
+                            <div class="col-12 col-md-4">
+                                <label class="form-label fw-semibold small text-dark">
+                                    Payment Mode (கட்டண முறை)
+                                </label>
+                                <select class="form-select form-select-sm" name="payment_mode" id="edit_payment_mode">
+                                    <option value="Cash" {{ ($transaction->payment_mode ?? 'Cash') === 'Cash' ? 'selected' : '' }}>Cash (ரொக்கம்)</option>
+                                    <option value="Cheque" {{ ($transaction->payment_mode ?? '') === 'Cheque' ? 'selected' : '' }}>Cheque (காசோலை)</option>
+                                    <option value="UPI" {{ ($transaction->payment_mode ?? '') === 'UPI' ? 'selected' : '' }}>UPI / Online Transfer</option>
+                                </select>
+                            </div>
+
+                            <!-- Payment Reference (UTR / Cheque No) -->
+                            <div class="col-12 col-md-4">
+                                <label class="form-label fw-semibold small text-dark">
+                                    Ref / Cheque / UTR No
+                                </label>
+                                <input type="text" class="form-control form-control-sm" name="payment_reference" id="edit_payment_reference"
+                                    value="{{ $transaction->payment_reference ?? '' }}" placeholder="Cheque / UTR / Txn No">
+                            </div>
+
+                            <!-- Bill / Voucher No -->
+                            <div class="col-12 col-md-4">
+                                <label class="form-label fw-semibold small text-dark">
+                                    Bill / Voucher No (ரசீது எண்)
+                                </label>
+                                <input type="text" class="form-control form-control-sm" name="bill_no" id="edit_bill_no"
+                                    value="{{ $transaction->bill_no ?? '' }}" placeholder="e.g. VCH-0012">
+                            </div>
+
+                            <!-- Paid To / Receiver Name -->
+                            <div class="col-12 col-md-6">
+                                <label class="form-label fw-semibold small text-dark">
+                                    Paid To / Receiver Name (பெறுபவர் பெயர்)
+                                </label>
+                                <input type="text" class="form-control form-control-sm" name="receiver_name" id="edit_receiver_name"
+                                    value="{{ $transaction->receiver_name ?: $transaction->paid_to }}" placeholder="e.g. Electrician Kumar / Driver">
+                            </div>
+
+                            <!-- Paid By / Issuer -->
+                            <div class="col-12 col-md-6">
+                                <label class="form-label fw-semibold small text-dark">
+                                    Paid By (வழங்கியவர்)
+                                </label>
+                                <input type="text" class="form-control form-control-sm" name="paid_by" id="edit_paid_by"
+                                    value="{{ $transaction->paid_by ?? '' }}" placeholder="e.g. Site Manager">
+                            </div>
+
+                            <!-- Description / Remarks -->
+                            <div class="col-12">
+                                <label class="form-label fw-semibold small text-dark">
+                                    Description / Remarks (குறிப்புகள்)
+                                </label>
+                                <textarea class="form-control form-control-sm" name="description" id="edit_description" rows="3"
+                                    placeholder="Enter details or reasons for adjustment...">{{ $transaction->description ?? '' }}</textarea>
+                            </div>
+
+                            <!-- Receipt Image Replacement -->
+                            <div class="col-12">
+                                <label class="form-label fw-semibold small text-dark">
+                                    Update Receipt Image (ரசீது படம் மாற்ற)
+                                </label>
+                                <input type="file" class="form-control form-control-sm" name="receipt_image" id="edit_receipt_image" accept="image/*">
+                                <div class="form-text small text-muted">
+                                    Leave blank to keep existing receipt image. Allowed formats: PNG, JPG, JPEG, WEBP (Max 5MB).
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer bg-light">
+                        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel (ரத்து)</button>
+                        <button type="submit" class="btn btn-primary btn-sm d-inline-flex align-items-center" id="saveEditBtn">
+                            <i class="bi bi-check-circle me-1"></i> Save Changes (சேமிக்கவும்)
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 @endsection
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const editForm = document.getElementById('editSiteCashForm');
+    const saveBtn = document.getElementById('saveEditBtn');
+    const alertBox = document.getElementById('editAlertBox');
+
+    if (editForm) {
+        editForm.addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            alertBox.classList.add('d-none');
+            alertBox.innerHTML = '';
+            saveBtn.disabled = true;
+            const originalBtnHtml = saveBtn.innerHTML;
+            saveBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span> Saving...';
+
+            const formData = new FormData(editForm);
+
+            try {
+                const response = await fetch("{{ route('site-cash.update', $transaction->id) }}", {
+                    method: 'POST',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Accept': 'application/json'
+                    },
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (!response.ok || !data.success) {
+                    let errorMsg = data.message || 'Error updating transaction. Please check input.';
+                    if (data.errors) {
+                        const firstKey = Object.keys(data.errors)[0];
+                        if (firstKey && data.errors[firstKey].length > 0) {
+                            errorMsg = data.errors[firstKey][0];
+                        }
+                    }
+                    alertBox.textContent = errorMsg;
+                    alertBox.classList.remove('d-none');
+                    saveBtn.disabled = false;
+                    saveBtn.innerHTML = originalBtnHtml;
+                    return;
+                }
+
+                // Success
+                saveBtn.innerHTML = '<i class="bi bi-check-circle me-1"></i> Saved!';
+                if (typeof showToast === 'function') {
+                    showToast(data.message || 'Transaction updated successfully!', 'success');
+                }
+
+                setTimeout(() => {
+                    if (data.encrypted_id) {
+                        window.location.href = "{{ url('/site-cash') }}/" + data.encrypted_id;
+                    } else {
+                        window.location.reload();
+                    }
+                }, 700);
+
+            } catch (err) {
+                console.error('Update error:', err);
+                alertBox.textContent = 'A network or server error occurred. Please try again.';
+                alertBox.classList.remove('d-none');
+                saveBtn.disabled = false;
+                saveBtn.innerHTML = originalBtnHtml;
+            }
+        });
+    }
+});
+</script>
+@endpush

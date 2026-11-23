@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreSiteCashRequest;
+use App\Http\Requests\UpdateSiteCashRequest;
 use App\Models\CashTransfer;
 use App\Models\DailyAllocation;
 use App\Models\DailyAllocationItem;
@@ -547,10 +548,45 @@ class SiteCashController extends Controller
             ]);
         }
 
+        $sites = $this->projectSiteService->getAllSites();
+        $suppliers = Supplier::query()->where('status', 'Active')->orderBy('name')->get();
+
         return view('site-management.site-cash-detail', [
             'transaction' => $transaction,
             'id' => $id,
+            'sites' => $sites,
+            'suppliers' => $suppliers,
         ]);
+    }
+
+    /**
+     * Update the specified site cash transaction.
+     * Recalculates project_sites.spent automatically for expenses and site transfers.
+     */
+    public function update(UpdateSiteCashRequest $request, int|string $id): JsonResponse|RedirectResponse
+    {
+        $numericId = IdCipherService::decrypt((string) $id) ?: (int) $id;
+        $payload = $request->validated();
+
+        if ($request->hasFile('receipt_image')) {
+            $payload['receipt_image'] = $request->file('receipt_image');
+        } elseif ($request->filled('image')) {
+            $payload['receipt_image'] = $request->input('image');
+        }
+
+        $transaction = $this->siteCashService->updateTransaction($numericId, $payload);
+
+        if ($request->wantsJson() || $request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Cash transaction updated successfully! (தள ரொக்க பதிவு வெற்றிகரமாக திருத்தப்பட்டது)',
+                'data' => $transaction,
+                'encrypted_id' => $transaction->encrypted_id,
+            ]);
+        }
+
+        return redirect()->route('site-cash.show', $transaction->encrypted_id)
+            ->with('success', 'Cash transaction updated successfully! (தள ரொக்க பதிவு வெற்றிகரமாக திருத்தப்பட்டது)');
     }
 
     /**
