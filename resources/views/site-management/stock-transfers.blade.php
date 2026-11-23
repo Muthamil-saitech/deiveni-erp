@@ -68,7 +68,7 @@
                     <i class="bi bi-arrow-left-right text-primary me-2"></i>Inter-Site Stock Transfer
                 </h4>
                 <p class="text-muted small mb-0">
-                    Transfer materials between sites (e.g. 100 bags at Site A &rarr; 10 bags to Site B) and track returned stock.
+                    Transfer materials between sites (e.g. 100 bags at Site A &rarr; 10 bags to Site B) with real-time stock balance tracking.
                 </p>
             </div>
             <div class="col-12 col-md-6 text-md-end">
@@ -86,7 +86,7 @@
             <div class="col-6 col-lg-3">
                 <div class="card-stat h-100">
                     <div class="d-flex align-items-center justify-content-between mb-2">
-                        <span class="text-muted small fw-semibold">Outward Transfers</span>
+                        <span class="text-muted small fw-semibold">Total Transfers (பரிமாற்றங்கள்)</span>
                         <div class="stat-icon-wrapper bg-primary bg-opacity-10 text-primary">
                             <i class="bi bi-box-arrow-right"></i>
                         </div>
@@ -98,25 +98,25 @@
             <div class="col-6 col-lg-3">
                 <div class="card-stat h-100">
                     <div class="d-flex align-items-center justify-content-between mb-2">
-                        <span class="text-muted small fw-semibold">Pending Returns</span>
-                        <div class="stat-icon-wrapper bg-warning bg-opacity-10 text-warning">
-                            <i class="bi bi-hourglass-split"></i>
+                        <span class="text-muted small fw-semibold">Transfer Value (மதிப்பு)</span>
+                        <div class="stat-icon-wrapper bg-success bg-opacity-10 text-success">
+                            <i class="bi bi-currency-rupee"></i>
                         </div>
                     </div>
-                    <h4 class="fw-bold mb-0 text-warning">{{ (int) ($stats['pending_returns_count'] ?? 0) }}</h4>
-                    <div class="small text-muted mt-1">Pending Qty: <strong class="text-warning">{{ number_format((float) ($stats['pending_returns_qty'] ?? 0), 2) }}</strong></div>
+                    <h4 class="fw-bold mb-0 text-success">₹{{ number_format((float) ($stats['total_transfer_value'] ?? 0), 2) }}</h4>
+                    <div class="small text-muted mt-1">Estimated transfer worth</div>
                 </div>
             </div>
             <div class="col-6 col-lg-3">
                 <div class="card-stat h-100">
                     <div class="d-flex align-items-center justify-content-between mb-2">
-                        <span class="text-muted small fw-semibold">Returns Received</span>
-                        <div class="stat-icon-wrapper bg-success bg-opacity-10 text-success">
-                            <i class="bi bi-arrow-return-left"></i>
+                        <span class="text-muted small fw-semibold">Active Sites (தளங்கள்)</span>
+                        <div class="stat-icon-wrapper bg-warning bg-opacity-10 text-warning">
+                            <i class="bi bi-buildings"></i>
                         </div>
                     </div>
-                    <h4 class="fw-bold mb-0 text-success">{{ (int) ($stats['total_returns_count'] ?? 0) }}</h4>
-                    <div class="small text-muted mt-1">Returned: <strong class="text-success">{{ number_format((float) ($stats['total_returned_qty'] ?? 0), 2) }}</strong> items</div>
+                    <h4 class="fw-bold mb-0 text-warning">{{ (int) ($stats['sites_count'] ?? 0) }}</h4>
+                    <div class="small text-muted mt-1">Sites exchanging material</div>
                 </div>
             </div>
             <div class="col-6 col-lg-3">
@@ -127,8 +127,8 @@
                             <i class="bi bi-check2-all"></i>
                         </div>
                     </div>
-                    <h4 class="fw-bold mb-0 text-info">{{ (int) ($stats['fully_returned_count'] ?? 0) }}</h4>
-                    <div class="small text-muted mt-1">Fully settled between sites</div>
+                    <h4 class="fw-bold mb-0 text-info">{{ (int) ($stats['completed_transfers_count'] ?? ($stats['total_transfers_count'] ?? 0)) }}</h4>
+                    <div class="small text-muted mt-1">Successfully transferred</div>
                 </div>
             </div>
         </div>
@@ -137,14 +137,14 @@
         <div class="card-custom p-3 mb-3 bg-white">
             <form method="GET" action="{{ route('stock-transfers.index') }}" id="filterForm">
                 <div class="row g-2 align-items-center">
-                    <div class="col-12 col-md-3">
+                    <div class="col-12 col-md-4">
                         <div class="input-group input-group-sm">
                             <span class="input-group-text bg-light text-muted"><i class="bi bi-search"></i></span>
                             <input type="text" class="form-control" name="search" id="filterSearch"
                                 placeholder="Search by transfer #, vehicle, driver..." value="{{ $filters['search'] ?? '' }}">
                         </div>
                     </div>
-                    <div class="col-6 col-md-2">
+                    <div class="col-6 col-md-3">
                         <select class="form-select form-select-sm" name="site_id" id="filterSite">
                             <option value="">-- All Sites (தளங்கள்) --</option>
                             @foreach ($sites as $site)
@@ -154,7 +154,7 @@
                             @endforeach
                         </select>
                     </div>
-                    <div class="col-6 col-md-2">
+                    <div class="col-6 col-md-3">
                         <select class="form-select form-select-sm" name="material_id" id="filterMaterial">
                             <option value="">-- All Materials (பொருட்கள்) --</option>
                             @foreach ($materials as $mat)
@@ -164,16 +164,7 @@
                             @endforeach
                         </select>
                     </div>
-                    <div class="col-6 col-md-2">
-                        <select class="form-select form-select-sm" name="return_status" id="filterReturnStatus">
-                            <option value="">-- Return Status --</option>
-                            <option value="Pending Return" {{ ($filters['return_status'] ?? '') === 'Pending Return' ? 'selected' : '' }}>Pending Return (பாக்கி)</option>
-                            <option value="Partially Returned" {{ ($filters['return_status'] ?? '') === 'Partially Returned' ? 'selected' : '' }}>Partially Returned (பகுதி திரும்பியது)</option>
-                            <option value="Fully Returned" {{ ($filters['return_status'] ?? '') === 'Fully Returned' ? 'selected' : '' }}>Fully Returned (நிறைவு)</option>
-                            <option value="No Return Needed" {{ ($filters['return_status'] ?? '') === 'No Return Needed' ? 'selected' : '' }}>No Return Needed (வழங்கியது)</option>
-                        </select>
-                    </div>
-                    <div class="col-6 col-md-3 text-md-end">
+                    <div class="col-12 col-md-2 text-md-end">
                         <button type="submit" class="btn btn-dark btn-sm px-3">
                             <i class="bi bi-funnel me-1"></i> Filter
                         </button>
@@ -196,7 +187,6 @@
                             <th style="min-width: 220px;">Movement (தளம் நகர்வு)</th>
                             <th style="min-width: 180px;">Material &amp; Unit (பொருள்)</th>
                             <th class="text-center" style="width: 110px;">Quantity</th>
-                            <th class="text-center" style="width: 130px;">Return Status</th>
                             <th style="min-width: 140px;">Vehicle &amp; Ref</th>
                             <th style="min-width: 120px;">Created By</th>
                             <th class="text-end pe-3" style="width: 140px;">Action</th>
@@ -228,7 +218,6 @@
                                 data-from-site="{{ $tr->from_project_site_id }}"
                                 data-to-site="{{ $tr->to_project_site_id }}"
                                 data-material-ids="{{ implode(',', $allMatIds) }}"
-                                data-return-status="{{ $tr->return_status ?? '' }}"
                                 data-date="{{ $tr->transfer_date?->format('Y-m-d') ?? '' }}">
                                 <td class="ps-3 text-muted fw-semibold serial-cell">{{ str_pad($loop->iteration, 2, '0', STR_PAD_LEFT) }}</td>
                                 <td>
@@ -236,15 +225,9 @@
                                     <div class="text-muted small" style="font-size:0.75rem;">
                                         <i class="bi bi-calendar3 me-1"></i>{{ $tr->transfer_date?->format('d M Y') }}
                                     </div>
-                                    @if ($tr->transfer_type === 'RETURN')
-                                        <span class="badge bg-success-subtle text-success border border-success-subtle mt-1" style="font-size:0.68rem;">
-                                            <i class="bi bi-arrow-return-left me-1"></i>RETURN
-                                        </span>
-                                    @else
-                                        <span class="badge bg-primary-subtle text-primary border border-primary-subtle mt-1" style="font-size:0.68rem;">
-                                            <i class="bi bi-box-arrow-right me-1"></i>TRANSFER
-                                        </span>
-                                    @endif
+                                    <span class="badge bg-primary-subtle text-primary border border-primary-subtle mt-1" style="font-size:0.68rem;">
+                                        <i class="bi bi-box-arrow-right me-1"></i>TRANSFER
+                                    </span>
                                 </td>
                                 <td>
                                     <div class="transfer-arrow-badge">
@@ -295,27 +278,6 @@
                                     <div class="text-muted small" style="font-size:0.72rem;">{{ $tr->unit ?? 'Items' }}</div>
                                     @if ((float) $tr->total_amount > 0)
                                         <div class="small text-primary fw-semibold" style="font-size:0.72rem;">₹{{ number_format((float) $tr->total_amount, 2) }}</div>
-                                    @endif
-                                </td>
-                                <td class="text-center">
-                                    @if ($tr->transfer_type === 'RETURN')
-                                        <span class="badge bg-light text-secondary border">Returned Entry</span>
-                                    @elseif (!$tr->return_expected)
-                                        <span class="badge bg-light text-muted border">No Return Needed</span>
-                                    @elseif ($tr->return_status === 'Fully Returned')
-                                        <span class="badge bg-success-subtle text-success border border-success-subtle">
-                                            <i class="bi bi-check2-circle me-1"></i>Fully Returned
-                                        </span>
-                                        <div class="small text-muted mt-1" style="font-size:0.7rem;">{{ (float) $tr->returned_quantity }} / {{ (float) $tr->quantity }}</div>
-                                    @elseif ($tr->return_status === 'Partially Returned')
-                                        <span class="badge bg-warning-subtle text-warning border border-warning-subtle">
-                                            <i class="bi bi-hourglass-split me-1"></i>Partial ({{ (float) $tr->pending_return_quantity }} left)
-                                        </span>
-                                        <div class="small text-muted mt-1" style="font-size:0.7rem;">{{ (float) $tr->returned_quantity }} / {{ (float) $tr->quantity }} returned</div>
-                                    @else
-                                        <span class="badge bg-warning-subtle text-dark border border-warning">
-                                            <i class="bi bi-clock-history me-1"></i>Pending ({{ (float) $tr->pending_return_quantity }} {{ $tr->unit }})
-                                        </span>
                                     @endif
                                 </td>
                                 <td>
@@ -369,7 +331,7 @@
                             </tr>
                         @empty
                             <tr id="emptyTransfersRow">
-                                <td colspan="9" class="text-center py-5 text-muted">
+                                <td colspan="8" class="text-center py-5 text-muted">
                                     <i class="bi bi-arrow-left-right fs-1 d-block mb-2 text-secondary opacity-50"></i>
                                     <h6>No stock transfers recorded yet</h6>
                                     <p class="small mb-3">Click "+ New Stock Transfer" to transfer material between project sites.</p>
@@ -380,7 +342,7 @@
                             </tr>
                         @endforelse
                         <tr id="noResultsRow" class="d-none">
-                            <td colspan="9" class="text-center py-5 text-muted">
+                            <td colspan="8" class="text-center py-5 text-muted">
                                 <i class="bi bi-search fs-2 d-block mb-2 text-secondary"></i>
                                 No matching stock transfers found for your search or filter criteria.
                             </td>
@@ -557,20 +519,6 @@
                                     </table>
                                 </div>
                                 <div class="invalid-feedback d-block" id="errItemsTable" style="display:none !important;"></div>
-                            </div>
-
-                            <!-- Return Expected Checkbox -->
-                            <div class="col-12 d-flex align-items-center">
-                                <div class="form-check form-switch pb-1">
-                                    <input class="form-check-input" type="checkbox" role="switch" id="returnExpectedSwitch"
-                                        name="return_expected" value="1" checked>
-                                    <label class="form-check-label fw-semibold small" for="returnExpectedSwitch">
-                                        Return Expected (பொருள் திரும்ப பெற வேண்டும்)
-                                    </label>
-                                    <div class="text-muted small" style="font-size: 0.72rem;">
-                                        Check if Site B will return this stock to Site A when they receive their material load.
-                                    </div>
-                                </div>
                             </div>
 
                             <!-- Transport / Logistics Details -->
@@ -808,18 +756,9 @@
                         </div>
 
                         <div class="row g-2 mb-2">
-                            <div class="col-12 col-md-8">
+                            <div class="col-12">
                                 <label class="form-label small fw-semibold mb-1">Remarks (குறிப்புகள்)</label>
                                 <textarea class="form-control form-control-sm" id="editTransferRemarks" rows="2" placeholder="Optional notes..."></textarea>
-                            </div>
-                            <div class="col-12 col-md-4 d-flex align-items-center">
-                                <div class="form-check p-3 bg-light rounded border w-100 mt-2">
-                                    <input class="form-check-input" type="checkbox" id="editTransferReturnExpected" value="1">
-                                    <label class="form-check-label small fw-semibold" for="editTransferReturnExpected">
-                                        <i class="bi bi-arrow-return-left text-success me-1"></i>Return Expected?<br>
-                                        <span class="text-muted fw-normal" style="font-size:0.75rem;">Material will be returned to source site later</span>
-                                    </label>
-                                </div>
                             </div>
                         </div>
                     </form>
@@ -1200,7 +1139,7 @@
                     transfer_date: $('#transferDate').val(),
                     from_project_site_id: fromSiteId,
                     to_project_site_id: toSiteId,
-                    return_expected: $('#returnExpectedSwitch').is(':checked') ? 1 : 0,
+                    return_expected: 0,
                     vehicle_no: $('input[name="vehicle_no"]').val(),
                     driver_name: $('input[name="driver_name"]').val(),
                     remarks: $('textarea[name="remarks"]').val(),
@@ -1407,14 +1346,6 @@
                         <li class="list-group-item d-flex justify-content-between px-0">
                             <span class="text-muted">Transfer Type</span>
                             <span class="fw-semibold">${tr.transfer_type}</span>
-                        </li>
-                        <li class="list-group-item d-flex justify-content-between px-0">
-                            <span class="text-muted">Return Status</span>
-                            <span class="fw-semibold">${tr.return_status}</span>
-                        </li>
-                        <li class="list-group-item d-flex justify-content-between px-0">
-                            <span class="text-muted">Returned Quantity</span>
-                            <span class="fw-semibold">${tr.returned_quantity} ${tr.unit || ''}</span>
                         </li>
                         <li class="list-group-item d-flex justify-content-between px-0">
                             <span class="text-muted">Vehicle / Transport</span>
@@ -1717,7 +1648,7 @@
                 const driverName = $('#editTransferDriverName').val();
                 const challanNo = $('#editTransferChallanNo').val();
                 const remarks = $('#editTransferRemarks').val();
-                const returnExpected = $('#editTransferReturnExpected').is(':checked') ? 1 : 0;
+                const returnExpected = 0;
 
                 if (!transferDate) {
                     showToast('Please select a valid transfer date.', 'warning');
@@ -1821,7 +1752,6 @@
                 const q = ($('#filterSearch').val() || '').toLowerCase().trim();
                 const site = $('#filterSite').val() || '';
                 const matId = $('#filterMaterial').val() || '';
-                const status = $('#filterReturnStatus').val() || '';
 
                 const matching = [];
                 $('#transfersTableBody tr.transfer-row').each(function () {
@@ -1830,14 +1760,12 @@
                     const fromSite = String(row.data('from-site') || '');
                     const toSite = String(row.data('to-site') || '');
                     const matIds = String(row.data('material-ids') || '').split(',');
-                    const retStatus = String(row.data('return-status') || '');
 
                     const matchesQuery = !q || searchVal.includes(q);
                     const matchesSite = !site || fromSite === site || toSite === site;
                     const matchesMat = !matId || matIds.includes(matId);
-                    const matchesStatus = !status || retStatus === status;
 
-                    if (matchesQuery && matchesSite && matchesMat && matchesStatus) {
+                    if (matchesQuery && matchesSite && matchesMat) {
                         matching.push(this);
                     }
                 });
@@ -1963,7 +1891,7 @@
                 }
             });
 
-            $('#filterSearch, #filterSite, #filterMaterial, #filterReturnStatus').on('input change', function () {
+            $('#filterSearch, #filterSite, #filterMaterial').on('input change', function () {
                 currentPage = 1;
                 updatePagination();
             });
@@ -1980,7 +1908,6 @@
                     $('#filterSearch').val('');
                     $('#filterSite').val('');
                     $('#filterMaterial').val('');
-                    $('#filterReturnStatus').val('');
                     currentPage = 1;
                     updatePagination();
                 }

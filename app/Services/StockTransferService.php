@@ -938,7 +938,14 @@ class StockTransferService implements StockTransferServiceInterface
         $allReturns = (clone $query)->where('transfer_type', 'RETURN')->get();
 
         $totalTransfersCount = $allTransfers->count();
-        $totalTransferredQty = $allTransfers->sum('quantity');
+        $totalTransferredQty = (float) $allTransfers->sum('quantity');
+        $totalTransferValue = (float) $allTransfers->sum('total_amount');
+        $completedTransfersCount = $allTransfers->where('status', 'Completed')->count();
+        $sitesCount = $allTransfers->pluck('from_project_site_id')
+            ->merge($allTransfers->pluck('to_project_site_id'))
+            ->filter(fn ($s) => (int) $s > 0)
+            ->unique()
+            ->count();
         $totalReturnsCount = $allReturns->count();
         $totalReturnedQty = $allReturns->sum('quantity');
 
@@ -950,7 +957,10 @@ class StockTransferService implements StockTransferServiceInterface
 
         return [
             'total_transfers_count' => $totalTransfersCount,
-            'total_transferred_qty' => (float) $totalTransferredQty,
+            'total_transferred_qty' => $totalTransferredQty,
+            'total_transfer_value' => $totalTransferValue,
+            'completed_transfers_count' => $completedTransfersCount,
+            'sites_count' => $sitesCount,
             'total_returns_count' => $totalReturnsCount,
             'total_returned_qty' => (float) $totalReturnedQty,
             'pending_returns_count' => $pendingReturnsCount,

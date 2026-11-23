@@ -635,7 +635,6 @@
                                         <th style="min-width:200px;">MATERIALS <span class="ta-text fw-normal text-lowercase" style="font-size:0.68rem;">(பொருட்கள்)</span></th>
                                         <th class="text-center">QTY <span class="ta-text fw-normal text-lowercase" style="font-size:0.68rem;">(அளவு)</span></th>
                                         <th class="text-end">VALUE (₹) <span class="ta-text fw-normal text-lowercase" style="font-size:0.68rem;">(மதிப்பு)</span></th>
-                                        <th>RETURN STATUS <span class="ta-text fw-normal text-lowercase" style="font-size:0.68rem;">(திரும்ப நிலை)</span></th>
                                         <th>BY <span class="ta-text fw-normal text-lowercase" style="font-size:0.68rem;">(பதிவு)</span></th>
                                     </tr>
                                 </thead>
@@ -703,28 +702,6 @@
                                                     <div class="fw-bold text-primary">₹{{ number_format((float) $st->total_amount, 2) }}</div>
                                                 @else
                                                     <span class="text-muted">—</span>
-                                                @endif
-                                            </td>
-                                            <td>
-                                                @php
-                                                    $rs = $st->return_status ?? 'Pending Return';
-                                                @endphp
-                                                @if (!$st->return_expected)
-                                                    <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle" style="font-size:0.7rem;">No Return Needed</span>
-                                                @elseif (str_contains($rs, 'Fully'))
-                                                    <span class="badge bg-success-subtle text-success border border-success-subtle" style="font-size:0.7rem;">
-                                                        <i class="bi bi-check2-circle me-1"></i>Fully Returned
-                                                    </span>
-                                                    <div class="text-muted mt-1" style="font-size:0.68rem;">{{ (float) $st->returned_quantity }}/{{ (float) $st->quantity }}</div>
-                                                @elseif (str_contains($rs, 'Partial'))
-                                                    <span class="badge bg-warning-subtle text-warning border border-warning-subtle" style="font-size:0.7rem;">
-                                                        <i class="bi bi-hourglass-split me-1"></i>Partial
-                                                    </span>
-                                                    <div class="text-muted mt-1" style="font-size:0.68rem;">{{ (float) $st->returned_quantity }}/{{ (float) $st->quantity }} returned</div>
-                                                @else
-                                                    <span class="badge bg-warning-subtle text-dark border border-warning" style="font-size:0.7rem;">
-                                                        <i class="bi bi-clock-history me-1"></i>Pending ({{ (float) ($st->pending_return_quantity ?? $st->quantity) }} {{ $st->unit }})
-                                                    </span>
                                                 @endif
                                             </td>
                                             <td>
