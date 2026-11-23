@@ -204,3 +204,89 @@ test('purchases index view displays interactive status dropdown with Order Recei
     $response->assertSee('Order Received');
     $response->assertSee('Confirm as Order Received');
 });
+
+test('material usage prevents using purchase order dated after usage date', function () {
+    $today = Carbon::today()->toDateString();
+    $pastUsageDate = Carbon::today()->subDays(3)->toDateString();
+
+    $po = PurchaseOrder::create([
+        'po_number' => 'PO-2026-TODAY-01',
+        'order_date' => $today,
+        'project_site_id' => $this->site->id,
+        'supplier_id' => $this->supplier->id,
+        'supplier_name' => $this->supplier->name,
+        'status' => 'Order Received',
+        'total_amount' => 41000,
+        'created_by' => $this->user->id,
+    ]);
+
+    $poItem = PurchaseOrderItem::create([
+        'purchase_order_id' => $po->id,
+        'material_id' => $this->material->id,
+        'material_name' => 'Cement',
+        'quantity' => 100,
+        'unit' => 'Bags',
+        'unit_price' => 410,
+        'total_price' => 41000,
+    ]);
+
+    // Check that getSiteMaterialsForUsage returns order_date_raw
+    $muService = app(MaterialUsageServiceInterface::class);
+    $siteMaterials = $muService->getSiteMaterialsForUsage($this->site->id);
+    expect($siteMaterials['pos'][0]['order_date_raw'])->toBe($today);
+
+    // Attempting to use materials from $today PO on a past usage date ($pastUsageDate) must fail
+    $failResponse = $this->actingAs($this->user)->postJson('/material-usages', [
+        'project_site_id' => $this->site->id,
+        'purchase_order_id' => $po->id,
+        'material_source' => 'third_party',
+        'usage_date' => $pastUsageDate,
+        'items' => [
+            [
+                'purchase_order_item_id' => $poItem->id,
+                'material_id' => $this->material->id,
+                'material_name' => 'Cement',
+                'source_type' => 'Third-Party Supplier',
+                'source_reference' => $po->po_number,
+                'inward_quantity' => 100,
+                'used_quantity' => 10,
+                'unit' => 'Bags',
+                'unit_price' => 410,
+                'total_price' => 4100,
+            ],
+        ],
+    ]);
+
+    $failResponse->assertStatus(422);
+    $failResponse->assertJsonFragment([
+        'success' => false,
+    ]);
+    expect($failResponse->json('message'))->toContain('Materials cannot be used before their purchase date');
+
+    // Using materials on or after the PO order date ($today) must succeed
+    $successResponse = $this->actingAs($this->user)->postJson('/material-usages', [
+        'project_site_id' => $this->site->id,
+        'purchase_order_id' => $po->id,
+        'material_source' => 'third_party',
+        'usage_date' => $today,
+        'items' => [
+            [
+                'purchase_order_item_id' => $poItem->id,
+                'material_id' => $this->material->id,
+                'material_name' => 'Cement',
+                'source_type' => 'Third-Party Supplier',
+                'source_reference' => $po->po_number,
+                'inward_quantity' => 100,
+                'used_quantity' => 10,
+                'unit' => 'Bags',
+                'unit_price' => 410,
+                'total_price' => 4100,
+            ],
+        ],
+    ]);
+
+    $successResponse->assertStatus(200);
+    $successResponse->assertJsonFragment([
+        'success' => true,
+    ]);
+});

@@ -13,6 +13,7 @@ use App\Models\StockTransfer;
 use App\Models\WarehouseItem;
 use App\Models\WarehouseMovement;
 use App\Services\Contracts\MaterialUsageServiceInterface;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Auth;
@@ -109,6 +110,13 @@ class MaterialUsageService implements MaterialUsageServiceInterface
 
             if ($projectSiteId <= 0) {
                 throw new InvalidArgumentException('Please select a Project Site (தளத்தை தேர்வு செய்யவும்).');
+            }
+
+            $usageDate = ! empty($data['usage_date']) ? Carbon::parse($data['usage_date'])->format('Y-m-d') : now()->toDateString();
+            if ($po && $po->order_date && $po->order_date->format('Y-m-d') > $usageDate) {
+                throw new InvalidArgumentException(
+                    "Purchase Order {$po->po_number} was ordered on {$po->order_date->format('d-m-Y')}, which is after the Usage Date (".Carbon::parse($usageDate)->format('d-m-Y').'). Materials cannot be used before their purchase date.'
+                );
             }
 
             $this->ensureSiteManagerOwnsSite($projectSiteId);
@@ -243,6 +251,17 @@ class MaterialUsageService implements MaterialUsageServiceInterface
                     }
 
                     // Deduct already-used quantity from previous usages for this transfer reference and material
+                    $xferId = ! empty($item['stock_transfer_id']) ? (int) $item['stock_transfer_id'] : null;
+                    $xferObj = $xferId ? StockTransfer::find($xferId) : null;
+                    if (! $xferObj && ! empty($sourceRef)) {
+                        $xferObj = StockTransfer::where('transfer_no', $sourceRef)->first();
+                    }
+                    if ($xferObj && $xferObj->transfer_date && $xferObj->transfer_date->format('Y-m-d') > $usageDate) {
+                        throw new InvalidArgumentException(
+                            "Stock Transfer {$xferObj->transfer_no} was transferred on {$xferObj->transfer_date->format('d-m-Y')}, which is after the Usage Date (".Carbon::parse($usageDate)->format('d-m-Y').'). Materials cannot be used before their transfer date.'
+                        );
+                    }
+
                     $alreadyUsed = (float) MaterialUsageItem::whereHas('materialUsage', function ($q) use ($projectSiteId) {
                         $q->where('project_site_id', $projectSiteId)->where('status', '!=', 'Cancelled');
                     })
@@ -296,6 +315,11 @@ class MaterialUsageService implements MaterialUsageServiceInterface
                     $poItem = $poItemId ? PurchaseOrderItem::with('purchaseOrder')->find($poItemId) : null;
 
                     $itemPo = $poItem ? $poItem->purchaseOrder : $po;
+                    if ($itemPo && $itemPo->order_date && $itemPo->order_date->format('Y-m-d') > $usageDate) {
+                        throw new InvalidArgumentException(
+                            "Purchase Order {$itemPo->po_number} was ordered on {$itemPo->order_date->format('d-m-Y')}, which is after the Usage Date (".Carbon::parse($usageDate)->format('d-m-Y').'). Materials cannot be used before their purchase date.'
+                        );
+                    }
                     $inwardQty = $poItem ? (float) $poItem->quantity : (float) ($item['inward_quantity'] ?? $usedQty);
                     $unitPrice = $poItem ? (float) $poItem->unit_price : (float) ($item['unit_price'] ?? 0);
                     $unitName = $poItem ? (string) $poItem->unit : (string) ($item['unit'] ?? '');
@@ -829,6 +853,7 @@ class MaterialUsageService implements MaterialUsageServiceInterface
                 'source_type' => $po->source_type,
                 'supplier_name' => $po->supplier_name,
                 'order_date' => $po->order_date?->format('d-m-Y'),
+                'order_date_raw' => $po->order_date?->format('Y-m-d') ?? '',
                 'items_count' => $po->items->count(),
             ];
 
@@ -846,6 +871,8 @@ class MaterialUsageService implements MaterialUsageServiceInterface
                     'po_number' => $po->po_number,
                     'supplier_name' => $po->supplier_name,
                     'source_type' => $po->source_type,
+                    'order_date' => $po->order_date?->format('d-m-Y') ?? '',
+                    'order_date_raw' => $po->order_date?->format('Y-m-d') ?? '',
                     'material_id' => $poItem->material_id,
                     'material_name' => $poItem->material_name ?: ($poItem->material?->name_en ?? 'Material'),
                     'material_name_ta' => $poItem->material?->name_ta ?? '',
@@ -883,6 +910,8 @@ class MaterialUsageService implements MaterialUsageServiceInterface
                 'source_type' => 'Stock Transfer',
                 'supplier_name' => "Transferred from {$fromName}",
                 'order_date' => $xfer->transfer_date?->format('d-m-Y'),
+                'order_date_raw' => $xfer->transfer_date?->format('Y-m-d') ?? '',
+                'transfer_date_raw' => $xfer->transfer_date?->format('Y-m-d') ?? '',
                 'items_count' => $xfer->items->count(),
                 'is_transfer' => true,
             ];
@@ -908,6 +937,9 @@ class MaterialUsageService implements MaterialUsageServiceInterface
                     'po_number' => $xfer->transfer_no,
                     'supplier_name' => "Transferred from {$fromName}",
                     'source_type' => 'Stock Transfer',
+                    'order_date' => $xfer->transfer_date?->format('d-m-Y') ?? '',
+                    'order_date_raw' => $xfer->transfer_date?->format('Y-m-d') ?? '',
+                    'transfer_date_raw' => $xfer->transfer_date?->format('Y-m-d') ?? '',
                     'material_id' => $xferItem->material_id,
                     'material_name' => $xferItem->material_name ?: ($xferItem->material?->name_en ?? 'Material'),
                     'material_name_ta' => $xferItem->material?->name_ta ?? '',

@@ -612,6 +612,7 @@
                             <div class="invalid-feedback d-block" id="poValidationFeedback" style="display:none;">
                                 Please select at least one Purchase Order.
                             </div>
+                            <div id="poDateMismatchFeedback" class="small mt-1 fw-semibold text-danger" style="display:none;"></div>
 
                             {{-- Selected PO Chips Area --}}
                             <div id="selectedPOChipsRow" class="mt-2" style="display: none;">
@@ -1088,14 +1089,49 @@
         }
     }
 
+    // Helper to get YYYY-MM-DD from PO or Transfer
+    function getPoDateYmd(item) {
+        if (!item) return '';
+        if (item.order_date_raw) return item.order_date_raw;
+        if (item.transfer_date_raw) return item.transfer_date_raw;
+        const dStr = item.order_date || item.transfer_date;
+        if (dStr && typeof dStr === 'string' && dStr.includes('-')) {
+            const parts = dStr.trim().split('-');
+            if (parts[0].length === 4) return dStr.trim();
+            if (parts.length === 3 && parts[2].length === 4) {
+                return `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`;
+            }
+        }
+        return '';
+    }
+
+    function formatDmy(ymdStr) {
+        if (!ymdStr) return '';
+        const parts = String(ymdStr).trim().split('-');
+        if (parts.length === 3 && parts[0].length === 4) {
+            return `${parts[2]}-${parts[1]}-${parts[0]}`;
+        }
+        return ymdStr;
+    }
+
+    function getSelectedUsageDate() {
+        return document.getElementById('usageDateField')?.value || '{{ date('Y-m-d') }}';
+    }
+
     // ── Render PO Items inside Dropdown ───────────────────────
     function renderPOCheckboxes() {
         const poBtn = document.getElementById('poDropdownBtn');
         const emptyDiv = document.getElementById('poDropdownEmpty');
         const container = document.getElementById('poCheckboxContainer');
         const listDiv = document.getElementById('poCheckboxList');
+        const feedbackDiv = document.getElementById('poDateMismatchFeedback');
+        const usageDate = getSelectedUsageDate();
 
         listDiv.innerHTML = '';
+        if (feedbackDiv) {
+            feedbackDiv.style.display = 'none';
+            feedbackDiv.innerHTML = '';
+        }
 
         if (!sitePOs.length) {
             poBtn.disabled = true;
@@ -1109,14 +1145,46 @@
             return;
         }
 
+        // Filter: For the past Usage Date, Current date / future POs should NOT show and NOT selectable
+        const eligiblePOs = sitePOs.filter(po => {
+            const poYmd = getPoDateYmd(po);
+            return !poYmd || !usageDate || poYmd <= usageDate;
+        });
+        const futureCount = sitePOs.length - eligiblePOs.length;
+
+        if (!eligiblePOs.length) {
+            poBtn.disabled = true;
+            document.getElementById('poDropdownText').textContent = 'No POs Available on or before ' + formatDmy(usageDate);
+            document.getElementById('poDropdownText').className = 'text-truncate small text-danger fw-semibold';
+            emptyDiv.innerHTML = `<span class="text-danger fw-semibold"><i class="bi bi-x-circle me-1"></i>No Purchase Orders available on or before ${formatDmy(usageDate)}.</span>`;
+            emptyDiv.style.display = 'block';
+            container.style.display = 'none';
+
+            if (feedbackDiv) {
+                feedbackDiv.style.display = 'block';
+                feedbackDiv.innerHTML = `<i class="bi bi-exclamation-triangle-fill me-1"></i>No POs available on or before ${formatDmy(usageDate)}. (பயன்பாட்டு தேதிக்கு பிந்தைய கொள்முதல் ஆணைகளை பயன்படுத்த முடியாது.)`;
+            }
+
+            document.getElementById('materialsEmptyState').style.display = 'block';
+            document.getElementById('emptyStateMessage').textContent = `No active Purchase Orders found on or before ${formatDmy(usageDate)}.`;
+            return;
+        }
+
         poBtn.disabled = false;
         emptyDiv.style.display = 'none';
         container.style.display = 'block';
         updatePODropdownLabel();
 
-        sitePOs.forEach(po => {
+        // Show error / warning notice below PO select if some POs are excluded due to past usage date
+        if (futureCount > 0 && feedbackDiv) {
+            feedbackDiv.style.display = 'block';
+            feedbackDiv.innerHTML = `<i class="bi bi-exclamation-circle text-danger me-1"></i><span class="text-danger fw-semibold">POs dated after usage date are hidden. (பயன்பாட்டு தேதிக்கு பிந்தைய கொள்முதல் ஆணைகள் மறைக்கப்பட்டுள்ளன.)</span>`;
+        }
+
+        eligiblePOs.forEach(po => {
+            const isChecked = selectedPOIds.has(po.id);
             const label = document.createElement('label');
-            label.className = 'po-dropdown-item';
+            label.className = 'po-dropdown-item' + (isChecked ? ' checked' : '');
             label.htmlFor = `po_chk_${po.id}`;
             label.id = `po_item_wrap_${po.id}`;
             
@@ -1125,7 +1193,7 @@
                 : '<span class="badge bg-primary-subtle text-primary border" style="font-size:0.65rem;">Supplier PO</span>';
 
             label.innerHTML = `
-                <input type="checkbox" class="po-checkbox" value="${po.id}" id="po_chk_${po.id}">
+                <input type="checkbox" class="po-checkbox" value="${po.id}" id="po_chk_${po.id}" ${isChecked ? 'checked' : ''}>
                 <div class="flex-grow-1 min-w-0">
                     <div class="d-flex justify-content-between align-items-center mb-1">
                         <strong class="text-primary small">${esc(po.po_number)}</strong>
@@ -1158,8 +1226,8 @@
             });
         });
 
-        document.getElementById('materialsEmptyState').style.display = 'block';
-        document.getElementById('emptyStateMessage').textContent = `Found ${sitePOs.length} Purchase Order(s). Please click "Select Purchase Order(s)" above to pick.`;
+        document.getElementById('materialsEmptyState').style.display = selectedPOIds.size > 0 ? 'none' : 'block';
+        document.getElementById('emptyStateMessage').textContent = `Found ${eligiblePOs.length} Purchase Order(s) eligible on or before ${formatDmy(usageDate)}. Please click "Select Purchase Order(s)" above to pick.`;
     }
 
     // ── Render Stock Transfer Items inside Dropdown ───────────
@@ -1168,8 +1236,14 @@
         const emptyDiv = document.getElementById('poDropdownEmpty');
         const container = document.getElementById('poCheckboxContainer');
         const listDiv = document.getElementById('poCheckboxList');
+        const feedbackDiv = document.getElementById('poDateMismatchFeedback');
+        const usageDate = getSelectedUsageDate();
 
         listDiv.innerHTML = '';
+        if (feedbackDiv) {
+            feedbackDiv.style.display = 'none';
+            feedbackDiv.innerHTML = '';
+        }
 
         if (!siteTransfers.length) {
             poBtn.disabled = true;
@@ -1183,21 +1257,52 @@
             return;
         }
 
+        // Filter: Transferred stock strictly on or before the selected Usage Date
+        const eligibleTransfers = siteTransfers.filter(xfr => {
+            const xfrYmd = getPoDateYmd(xfr);
+            return !xfrYmd || !usageDate || xfrYmd <= usageDate;
+        });
+        const futureCount = siteTransfers.length - eligibleTransfers.length;
+
+        if (!eligibleTransfers.length) {
+            poBtn.disabled = true;
+            document.getElementById('poDropdownText').textContent = 'No Transferred Stock on or before ' + formatDmy(usageDate);
+            document.getElementById('poDropdownText').className = 'text-truncate small text-danger fw-semibold';
+            emptyDiv.innerHTML = `<span class="text-danger fw-semibold"><i class="bi bi-x-circle me-1"></i>No stock transfers available on or before ${formatDmy(usageDate)}.</span>`;
+            emptyDiv.style.display = 'block';
+            container.style.display = 'none';
+
+            if (feedbackDiv) {
+                feedbackDiv.style.display = 'block';
+                feedbackDiv.innerHTML = `<i class="bi bi-exclamation-triangle-fill me-1"></i>No stock transfers available on or before ${formatDmy(usageDate)}. (பயன்பாட்டு தேதிக்கு பிந்தைய பரிமாற்றங்களை பயன்படுத்த முடியாது.)`;
+            }
+
+            document.getElementById('materialsEmptyState').style.display = 'block';
+            document.getElementById('emptyStateMessage').textContent = `No stock transfers received on or before ${formatDmy(usageDate)}.`;
+            return;
+        }
+
         poBtn.disabled = false;
         emptyDiv.style.display = 'none';
         container.style.display = 'block';
         updatePODropdownLabel();
 
-        siteTransfers.forEach(xfr => {
+        if (futureCount > 0 && feedbackDiv) {
+            feedbackDiv.style.display = 'block';
+            feedbackDiv.innerHTML = `<i class="bi bi-exclamation-circle text-danger me-1"></i><span class="text-danger fw-semibold">Transfers dated after usage date are hidden. (பயன்பாட்டு தேதிக்கு பிந்தைய பரிமாற்றங்கள் மறைக்கப்பட்டுள்ளன.)</span>`;
+        }
+
+        eligibleTransfers.forEach(xfr => {
+            const isChecked = selectedTransferIds.has(xfr.id);
             const label = document.createElement('label');
-            label.className = 'po-dropdown-item';
+            label.className = 'po-dropdown-item' + (isChecked ? ' checked' : '');
             label.htmlFor = `xfr_chk_${xfr.id}`;
             label.id = `xfr_item_wrap_${xfr.id}`;
             
             const sourceBadge = '<span class="badge border" style="background:#f3e8ff;color:#7e22ce;border-color:#e9d5ff!important;font-size:0.65rem;"><i class="bi bi-arrow-left-right me-1"></i>Stock Transfer</span>';
 
             label.innerHTML = `
-                <input type="checkbox" class="transfer-checkbox" value="${xfr.id}" id="xfr_chk_${xfr.id}">
+                <input type="checkbox" class="transfer-checkbox" value="${xfr.id}" id="xfr_chk_${xfr.id}" ${isChecked ? 'checked' : ''}>
                 <div class="flex-grow-1 min-w-0">
                     <div class="d-flex justify-content-between align-items-center mb-1">
                         <strong class="small" style="color:#7e22ce;">${esc(xfr.transfer_no)}</strong>
@@ -1230,8 +1335,8 @@
             });
         });
 
-        document.getElementById('materialsEmptyState').style.display = 'block';
-        document.getElementById('emptyStateMessage').textContent = `Found ${siteTransfers.length} Stock Transfer(s). Please click "Select Purchase Order(s)" above to pick transferred materials.`;
+        document.getElementById('materialsEmptyState').style.display = selectedTransferIds.size > 0 ? 'none' : 'block';
+        document.getElementById('emptyStateMessage').textContent = `Found ${eligibleTransfers.length} Stock Transfer(s) eligible on or before ${formatDmy(usageDate)}. Please click "Select Purchase Order(s)" above to pick transferred materials.`;
     }
 
     // ── Select All / Clear All POs / Transfers ────────────────
@@ -1239,7 +1344,7 @@
         e.stopPropagation();
         const currentSource = document.querySelector('input[name="material_source"]:checked')?.value || 'third_party';
         if (currentSource === 'stock_transfer') {
-            document.querySelectorAll('.transfer-checkbox').forEach(chk => {
+            document.querySelectorAll('#poCheckboxList .transfer-checkbox').forEach(chk => {
                 chk.checked = true;
                 const xfrId = parseInt(chk.value, 10);
                 selectedTransferIds.add(xfrId);
@@ -1247,7 +1352,7 @@
                 if (wrap) wrap.classList.add('checked');
             });
         } else {
-            document.querySelectorAll('.po-checkbox').forEach(chk => {
+            document.querySelectorAll('#poCheckboxList .po-checkbox').forEach(chk => {
                 chk.checked = true;
                 const poId = parseInt(chk.value, 10);
                 selectedPOIds.add(poId);
@@ -1262,7 +1367,7 @@
         e.stopPropagation();
         const currentSource = document.querySelector('input[name="material_source"]:checked')?.value || 'third_party';
         if (currentSource === 'stock_transfer') {
-            document.querySelectorAll('.transfer-checkbox').forEach(chk => {
+            document.querySelectorAll('#poCheckboxList .transfer-checkbox').forEach(chk => {
                 chk.checked = false;
                 const xfrId = parseInt(chk.value, 10);
                 const wrap = document.getElementById(`xfr_item_wrap_${xfrId}`);
@@ -1270,7 +1375,7 @@
             });
             selectedTransferIds.clear();
         } else {
-            document.querySelectorAll('.po-checkbox').forEach(chk => {
+            document.querySelectorAll('#poCheckboxList .po-checkbox').forEach(chk => {
                 chk.checked = false;
                 const poId = parseInt(chk.value, 10);
                 const wrap = document.getElementById(`po_item_wrap_${poId}`);
@@ -1279,6 +1384,41 @@
             selectedPOIds.clear();
         }
         syncPOSelections();
+    });
+
+    // ── When Usage Date Changes: auto-filter and deselect future POs ───
+    document.getElementById('usageDateField').addEventListener('change', function () {
+        const newUsageDate = this.value;
+        const currentSource = document.querySelector('input[name="material_source"]:checked')?.value || 'third_party';
+        let deselectedCount = 0;
+
+        if (currentSource === 'stock_transfer') {
+            Array.from(selectedTransferIds).forEach(xfrId => {
+                const xfr = siteTransfers.find(x => x.id === xfrId);
+                const xfrYmd = xfr ? getPoDateYmd(xfr) : '';
+                if (xfrYmd && newUsageDate && xfrYmd > newUsageDate) {
+                    selectedTransferIds.delete(xfrId);
+                    deselectedCount++;
+                }
+            });
+            renderTransferCheckboxes();
+        } else if (currentSource === 'third_party') {
+            Array.from(selectedPOIds).forEach(poId => {
+                const po = sitePOs.find(p => p.id === poId);
+                const poYmd = po ? getPoDateYmd(po) : '';
+                if (poYmd && newUsageDate && poYmd > newUsageDate) {
+                    selectedPOIds.delete(poId);
+                    deselectedCount++;
+                }
+            });
+            renderPOCheckboxes();
+        }
+
+        syncPOSelections();
+
+        if (deselectedCount > 0) {
+            showToast('Items dated after the usage date were deselected.', 'warning');
+        }
     });
 
     // ── Synchronize PO / Transfer selections & update Table ──
@@ -1733,6 +1873,26 @@
             valid = false;
         }
 
+        if (source === 'third_party' && selectedPOIds.size > 0) {
+            const invalidDatePos = [];
+            selectedPOIds.forEach(poId => {
+                const po = sitePOs.find(p => p.id === poId);
+                const poYmd = po ? getPoDateYmd(po) : '';
+                if (poYmd && dateFld.value && poYmd > dateFld.value) {
+                    invalidDatePos.push(po.po_number);
+                }
+            });
+            if (invalidDatePos.length > 0) {
+                const feedbackDiv = document.getElementById('poDateMismatchFeedback');
+                if (feedbackDiv) {
+                    feedbackDiv.style.display = 'block';
+                    feedbackDiv.innerHTML = `<i class="bi bi-exclamation-triangle-fill me-1"></i>Purchase Order(s) ${invalidDatePos.join(', ')} were ordered after the Usage Date (${formatDmy(dateFld.value)}). Please select POs on or before the Usage Date.`;
+                }
+                showToast(`Selected PO(s) cannot be used for past Usage Date (${formatDmy(dateFld.value)}).`, 'danger');
+                valid = false;
+            }
+        }
+
         const rows = document.querySelectorAll('#muMaterialsBody tr');
         if (rows.length === 0) {
             showToast(source === 'own_warehouse' 
@@ -1990,9 +2150,18 @@
                 headers: { 'X-Requested-With': 'XMLHttpRequest', Accept: 'application/json' }
             }).then(r => r.json()).catch(() => ({ materials: [] }))
         ]).then(([siteRes, whRes]) => {
+            const editUsageDate = document.getElementById('editUsageDateField')?.value || '';
             const allItems = (siteRes && siteRes.data && siteRes.data.items) ? siteRes.data.items : [];
-            const poItems = allItems.filter(it => it.source_type !== 'Stock Transfer' && !String(it.source_reference || '').startsWith('XFR'));
-            const transferItems = allItems.filter(it => it.source_type === 'Stock Transfer' || it.stock_transfer_id || String(it.source_reference || '').startsWith('XFR'));
+            const poItems = allItems.filter(it => {
+                if (it.source_type === 'Stock Transfer' || String(it.source_reference || '').startsWith('XFR')) return false;
+                const itYmd = getPoDateYmd(it);
+                return !itYmd || !editUsageDate || itYmd <= editUsageDate;
+            });
+            const transferItems = allItems.filter(it => {
+                if (!(it.source_type === 'Stock Transfer' || it.stock_transfer_id || String(it.source_reference || '').startsWith('XFR'))) return false;
+                const itYmd = getPoDateYmd(it);
+                return !itYmd || !editUsageDate || itYmd <= editUsageDate;
+            });
             const whItems = (whRes && whRes.materials) ? whRes.materials : [];
 
             let html = '<option value="">-- Choose Material to Add --</option>';
@@ -2334,6 +2503,12 @@
                 tbody.innerHTML = '<tr><td colspan="10" class="text-center py-3 text-danger">Network error loading details.</td></tr>';
             });
         });
+    });
+
+    document.getElementById('editUsageDateField')?.addEventListener('change', function () {
+        if (window._editUsageSiteId) {
+            loadEditUsageMaterialsPicker(window._editUsageSiteId);
+        }
     });
 
     const saveEditUsageBtn = document.getElementById('saveEditUsageBtn');

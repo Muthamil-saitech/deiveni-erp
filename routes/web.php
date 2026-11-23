@@ -105,7 +105,7 @@ Route::middleware('auth')->group(function () {
         Route::put('/banks/{id}', [BankController::class, 'update'])->name('banks.update.put');
         Route::post('/banks/{id}/delete', [BankController::class, 'destroy'])->name('banks.destroy');
         Route::delete('/banks/{id}', [BankController::class, 'destroy']);
-        Route::get('/bank-master', fn() => redirect()->route('banks.index'));
+        Route::get('/bank-master', fn () => redirect()->route('banks.index'));
 
         Route::get('/branches', [BranchController::class, 'index'])->name('branches.index');
         Route::post('/branches', [BranchController::class, 'store'])->name('branches.store');
@@ -114,7 +114,7 @@ Route::middleware('auth')->group(function () {
         Route::put('/branches/{id}', [BranchController::class, 'update']);
         Route::post('/branches/{id}/delete', [BranchController::class, 'destroy'])->name('branches.destroy');
         Route::delete('/branches/{id}', [BranchController::class, 'destroy']);
-        Route::get('/branch-master', fn() => redirect()->route('branches.index'));
+        Route::get('/branch-master', fn () => redirect()->route('branches.index'));
 
         Route::get('/properties', [PropertyController::class, 'index'])->name('properties.index');
         Route::post('/properties', [PropertyController::class, 'store'])->name('properties.store');
@@ -123,7 +123,7 @@ Route::middleware('auth')->group(function () {
         Route::put('/properties/{id}', [PropertyController::class, 'update']);
         Route::post('/properties/{id}/delete', [PropertyController::class, 'destroy'])->name('properties.destroy');
         Route::delete('/properties/{id}', [PropertyController::class, 'destroy']);
-        Route::get('/property-master', fn() => redirect()->route('properties.index'));
+        Route::get('/property-master', fn () => redirect()->route('properties.index'));
 
         Route::get('/property-types', [PropertyTypeController::class, 'index'])->name('property-types.index');
         Route::post('/property-types', [PropertyTypeController::class, 'store'])->name('property-types.store');
@@ -132,7 +132,7 @@ Route::middleware('auth')->group(function () {
         Route::put('/property-types/{id}', [PropertyTypeController::class, 'update']);
         Route::post('/property-types/{id}/delete', [PropertyTypeController::class, 'destroy'])->name('property-types.destroy');
         Route::delete('/property-types/{id}', [PropertyTypeController::class, 'destroy']);
-        Route::get('/property-type-master', fn() => redirect()->route('property-types.index'));
+        Route::get('/property-type-master', fn () => redirect()->route('property-types.index'));
 
         // Backwards compatibility for rentals
         Route::get('/rentals', [PropertyTypeController::class, 'index'])->name('rentals.index');
@@ -142,7 +142,7 @@ Route::middleware('auth')->group(function () {
         Route::put('/rentals/{id}', [PropertyTypeController::class, 'update']);
         Route::post('/rentals/{id}/delete', [PropertyTypeController::class, 'destroy'])->name('rentals.destroy');
         Route::delete('/rentals/{id}', [PropertyTypeController::class, 'destroy']);
-        Route::get('/rental-master', fn() => redirect()->route('property-types.index'));
+        Route::get('/rental-master', fn () => redirect()->route('property-types.index'));
     });
 
     // 4.5 & 4.6 Site Operations (Accessible by Admin and Site Manager)
