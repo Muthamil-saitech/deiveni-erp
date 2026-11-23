@@ -1,0 +1,1 @@
+@include('masters.property-types')
