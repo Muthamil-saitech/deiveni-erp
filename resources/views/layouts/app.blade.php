@@ -997,9 +997,9 @@
                     <div>
                         <strong>Deiveni Construction Management System</strong> &bull; Phase 1 Prototype
                     </div>
-                    <div class="ta-text text-muted" style="font-size: 0.8rem;">
+                    <!-- <div class="ta-text text-muted" style="font-size: 0.8rem;">
                         மேஸ்திரி, கொத்தனார் & சித்தாள் தினசரி கூலி மற்றும் கணக்கு நிர்வாக மென்பொருள்
-                    </div>
+                    </div> -->
                 </div>
             </footer>
         </div>
