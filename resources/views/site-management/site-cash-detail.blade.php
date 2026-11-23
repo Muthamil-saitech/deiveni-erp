@@ -674,13 +674,32 @@
 
                             <!-- Amount -->
                             <div class="col-12 col-md-6">
-                                <label class="form-label fw-semibold small text-dark">
-                                    Amount (தொகை ₹) <span class="text-danger">*</span>
+                                <label class="form-label fw-semibold small text-dark d-flex justify-content-between align-items-center">
+                                    <span>Amount (தொகை ₹) <span class="text-danger">*</span></span>
+                                    @if ($transaction->isFromAccountManager())
+                                        <span class="badge bg-warning-subtle text-dark border border-warning-subtle" style="font-size: 0.72rem;">
+                                            <i class="bi bi-lock-fill me-1"></i>From Account Manager (Read-Only)
+                                        </span>
+                                    @endif
                                 </label>
                                 <div class="input-group input-group-sm">
                                     <span class="input-group-text fw-bold">₹</span>
-                                    <input type="number" step="0.01" min="0.01" class="form-control" name="amount" id="edit_amount" value="{{ (float) $transaction->amount }}" required>
+                                    <input type="number" step="0.01" min="0.01" class="form-control {{ $transaction->isFromAccountManager() ? 'bg-light text-muted' : '' }}" 
+                                        name="amount" id="edit_amount" 
+                                        value="{{ (float) $transaction->amount }}" 
+                                        {{ $transaction->isFromAccountManager() ? 'readonly tabindex=-1' : '' }} 
+                                        required>
+                                    @if ($transaction->isFromAccountManager())
+                                        <span class="input-group-text bg-light text-warning" title="Amount is locked because it came from Account Manager">
+                                            <i class="bi bi-lock-fill"></i>
+                                        </span>
+                                    @endif
                                 </div>
+                                @if ($transaction->isFromAccountManager())
+                                    <div class="form-text small text-danger mt-1">
+                                        <i class="bi bi-shield-lock me-1"></i>இந்தத் தொகை Account Manager / Accountant-ஆல் வழங்கப்பட்டது என்பதால் தொகையை மாற்ற முடியாது (Read-Only). தளம், தேதி அல்லது குறிப்புகளை மட்டுமே திருத்த முடியும்.
+                                    </div>
+                                @endif
                             </div>
 
                             <!-- Payment Date -->
@@ -736,8 +755,8 @@
                                 <label class="form-label fw-semibold small text-dark">
                                     Paid By (வழங்கியவர்)
                                 </label>
-                                <input type="text" class="form-control form-control-sm" name="paid_by" id="edit_paid_by"
-                                    value="{{ $transaction->paid_by ?? '' }}" placeholder="e.g. Site Manager">
+                                <input type="text" class="form-control form-control-sm {{ $transaction->isFromAccountManager() ? 'bg-light' : '' }}" name="paid_by" id="edit_paid_by"
+                                    value="{{ $transaction->paid_by ?? '' }}" placeholder="e.g. Site Manager" {{ $transaction->isFromAccountManager() ? 'readonly tabindex=-1' : '' }}>
                             </div>
 
                             <!-- Description / Remarks -->

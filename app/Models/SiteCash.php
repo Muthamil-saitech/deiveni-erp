@@ -172,4 +172,44 @@ class SiteCash extends Model
     {
         return $this->belongsTo(CashTransfer::class, 'cash_transfer_id');
     }
+
+    /**
+     * Determine if this cash transaction or its funds originated from the Account Manager / Accountant.
+     */
+    public function isFromAccountManager(): bool
+    {
+        // 1. Explicitly recorded as paid by Account Manager / Accountant / Office
+        if (! empty($this->paid_by) && (
+            stripos($this->paid_by, 'Account Manager') !== false ||
+            stripos($this->paid_by, 'Accountant') !== false ||
+            stripos($this->paid_by, 'Office') !== false
+        )) {
+            return true;
+        }
+
+        // 2. Project Cash received from Account Manager
+        if ($this->transaction_type === 'Project Cash Received') {
+            return true;
+        }
+
+        // 3. Directly linked to a CashTransfer from Office / Account Manager
+        if (! empty($this->cash_transfer_id)) {
+            return true;
+        }
+
+        // 4. Paid from office cash (e.g., wage payments handled by Account Manager)
+        if ($this->wage_cash_source === 'office_cash') {
+            return true;
+        }
+
+        // 5. Created by an Account Manager user
+        if ($this->created_by) {
+            $user = $this->relationLoaded('creator') ? $this->creator : $this->creator()->first();
+            if ($user && method_exists($user, 'isAccountManager') && $user->isAccountManager()) {
+                return true;
+            }
+        }
+
+        return false;
+    }
 }

@@ -344,11 +344,16 @@ class SiteCashService implements SiteCashServiceInterface
         $type = trim((string) ($data['transaction_type'] ?? ''));
         $amount = (float) ($data['amount'] ?? 0);
 
+        // If transaction originated from Account Manager, amount cannot be changed
+        if ($existing && $existing->isFromAccountManager()) {
+            $amount = (float) $existing->amount;
+        }
+
         // Classify inflow vs outflow vs expense
-        $inflowTypes = ['Owner Advance', 'Advance Received', 'Client Advance', 'Client Collection'];
+        $inflowTypes = ['Owner Advance', 'Advance Received', 'Client Advance', 'Client Collection', 'Project Cash Received'];
         $returnTypes = ['Balance Returned', 'Balance Returned to AM', 'Balance Returned to Account Manager'];
 
-        $isInflow = in_array($type, $inflowTypes, true);
+        $isInflow = in_array($type, $inflowTypes, true) || ($existing && $existing->flow_type === 'inflow' && empty($type));
         $isReturn = in_array($type, $returnTypes, true);
 
         if ($isInflow) {
@@ -457,6 +462,9 @@ class SiteCashService implements SiteCashServiceInterface
         // Recipient / Handled By
         $paidTo = ! empty($data['paid_to']) ? trim((string) $data['paid_to']) : ($existing?->paid_to ?? 'Site Manager');
         $paidBy = ! empty($data['paid_by']) ? trim((string) $data['paid_by']) : ($existing?->paid_by ?? null);
+        if ($existing && $existing->isFromAccountManager()) {
+            $paidBy = $existing->paid_by;
+        }
         $ledgerId = ! empty($data['ledger_id']) ? (int) $data['ledger_id'] : ($existing?->ledger_id ?? null);
         $cashTransferId = ! empty($data['cash_transfer_id']) ? (int) $data['cash_transfer_id'] : ($existing?->cash_transfer_id ?? null);
 

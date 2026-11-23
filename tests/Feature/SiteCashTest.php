@@ -215,6 +215,48 @@ test('site cash detail page allows editing transaction and changing project site
     expect((float) $site2->fresh()->spent)->toBe(6000.0);
 });
 
+test('transactions from account manager have readonly amount on edit and preserve original amount upon update', function () {
+    $txn = SiteCash::create([
+        'project_site_id' => $this->site->id,
+        'transaction_type' => 'Project Cash Received',
+        'flow_type' => 'inflow',
+        'amount' => 50000.00,
+        'in_amount' => 50000.00,
+        'out_amount' => 0.00,
+        'is_expense' => false,
+        'paid_by' => 'Account Manager',
+        'paid_to' => 'Site Manager',
+        'payment_date' => '2026-11-10',
+        'created_by' => $this->siteManager->id,
+    ]);
+
+    expect($txn->isFromAccountManager())->toBeTrue();
+
+    // Verify detail page has readonly amount and Account Manager warning
+    $detailResponse = $this->actingAs($this->siteManager)->get("/site-cash/{$txn->encrypted_id}");
+    $detailResponse->assertStatus(200);
+    $detailResponse->assertSee('From Account Manager (Read-Only)');
+    $detailResponse->assertSee('readonly tabindex=-1', false);
+
+    // Attempt to update the transaction with a tampered/different amount
+    $updateResponse = $this->actingAs($this->siteManager)->postJson("/site-cash/{$txn->id}/update", [
+        'project_site_id' => $this->site->id,
+        'transaction_type' => 'Project Cash Received',
+        'amount' => 1000.00, // Attempted tamper to 1000
+        'payment_date' => '2026-11-12',
+        'description' => 'Updated notes only',
+    ]);
+
+    $updateResponse->assertStatus(200)
+        ->assertJson(['success' => true]);
+
+    // Amount must strictly remain the original 50,000.00
+    $freshTxn = $txn->fresh();
+    expect((float) $freshTxn->amount)->toBe(50000.0);
+    expect((float) $freshTxn->in_amount)->toBe(50000.0);
+    expect($freshTxn->description)->toBe('Updated notes only');
+});
+
 test('deleting an expense transaction recalculates project_sites spent column', function () {
     $txn = SiteCash::create([
         'project_site_id' => $this->site->id,
