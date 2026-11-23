@@ -79,7 +79,7 @@ beforeEach(function () {
         'supplier_id' => null,
         'supplier_name' => 'Test Supplier',
         'source_type' => 'Third-Party Supplier',
-        'status' => 'Ordered',
+        'status' => 'Order Received',
         'delivery_status' => 'Received',
         'subtotal' => 67000,
         'tax_amount' => 0,

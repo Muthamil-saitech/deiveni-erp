@@ -1,7 +1,15 @@
 <?php
 
+use App\Enums\UserRole;
+use App\Models\Client;
+use App\Models\Ledger;
 use App\Models\Material;
+use App\Models\ProjectSite;
+use App\Models\PurchaseOrder;
+use App\Models\PurchaseOrderItem;
 use App\Models\Supplier;
+use App\Models\Unit;
+use App\Models\User;
 use App\Repositories\Contracts\SupplierRepositoryInterface;
 use App\Repositories\Eloquent\SupplierRepository;
 use App\Services\Contracts\SupplierServiceInterface;
@@ -383,4 +391,88 @@ test('suppliers index page renders table pagination elements and controls', func
     $response->assertSee('paginationNav');
     $response->assertSee('Rows per page:');
     $response->assertSee('paginationSummary');
+});
+
+test('supplier detail page renders total purchased, balance payable, site-based materials breakdown, and date filter', function () {
+    $user = User::factory()->create(['role' => UserRole::SiteManager]);
+    $supplier = Supplier::create([
+        'name' => 'Royal Granites & Cement',
+        'contact_person' => 'S. Kumaran',
+        'phone' => '9876543210',
+        'address' => 'Salem Main Road',
+        'status' => 'Active',
+    ]);
+
+    $client = Client::create([
+        'name' => 'Vignesh Homes',
+        'phone' => '9840112233',
+        'created_by' => $user->id,
+    ]);
+
+    $site = ProjectSite::create([
+        'client_id' => $client->id,
+        'name' => 'Kumaran Avenue Villa',
+        'location' => 'Salem',
+        'work_type' => 'Residential',
+        'created_by' => $user->id,
+    ]);
+
+    $unit = Unit::firstOrCreate(['name_en' => 'Bags'], ['code' => 'BAGS', 'status' => 'Active']);
+    $material = Material::firstOrCreate(['name_en' => 'OPC 53 Grade Cement'], ['name_ta' => 'சிமெண்ட்', 'unit_id' => $unit->id, 'status' => 'Active']);
+
+    $po = PurchaseOrder::create([
+        'po_number' => 'PO-SUP-TEST-01',
+        'order_date' => '2026-11-20',
+        'project_site_id' => $site->id,
+        'supplier_id' => $supplier->id,
+        'supplier_name' => $supplier->name,
+        'status' => 'Ordered',
+        'delivery_status' => 'Received',
+        'subtotal' => 45000,
+        'tax_amount' => 0,
+        'total_amount' => 45000,
+        'created_by' => $user->id,
+    ]);
+
+    PurchaseOrderItem::create([
+        'purchase_order_id' => $po->id,
+        'material_id' => $material->id,
+        'material_name' => 'OPC 53 Grade Cement',
+        'quantity' => 100,
+        'unit' => 'Bags',
+        'unit_price' => 450,
+        'total_price' => 45000,
+    ]);
+
+    // Record partial ledger payment of 15,000 to this supplier
+    Ledger::create([
+        'entry_date' => '2026-11-21',
+        'flow' => 'expense',
+        'source' => 'Supplier',
+        'amount' => 15000,
+        'supplier_id' => $supplier->id,
+        'supplier_name' => $supplier->name,
+        'project_site_id' => $site->id,
+        'created_by' => $user->id,
+    ]);
+
+    $response = $this->actingAs($user)->get(route('suppliers.show', $supplier->encrypted_id));
+
+    $response->assertOk();
+    $response->assertSee('Royal Granites & Cement');
+    $response->assertSee('Total Purchased');
+    $response->assertSee('₹45,000.00'); // Total purchased
+    $response->assertSee('Total Paid');
+    $response->assertSee('₹15,000.00'); // Paid
+    $response->assertSee('Balance to Pay');
+    $response->assertSee('₹30,000.00'); // Balance = 45000 - 15000
+    $response->assertSee('From Date');
+    $response->assertSee('Kumaran Avenue Villa'); // Site based
+    $response->assertSee('OPC 53 Grade Cement');
+    $response->assertSee('100.00 Bags');
+    $response->assertSee('₹450.00');
+    $response->assertSee('projectFilterSelect');
+    $response->assertSee('Select Project');
+    $response->assertSee('Total Stock');
+    $response->assertSee('Print Statement');
 });
