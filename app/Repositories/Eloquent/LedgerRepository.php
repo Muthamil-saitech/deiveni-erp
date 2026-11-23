@@ -9,6 +9,7 @@ use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Schema;
 
 class LedgerRepository implements LedgerRepositoryInterface
 {
@@ -24,12 +25,14 @@ class LedgerRepository implements LedgerRepositoryInterface
         if ($user && ! $user->isAdmin()) {
             if ($user->isAccountManager()) {
                 $query->where(function ($q) use ($user, $column) {
-                    $q->where($column, $user->id)
-                        ->orWhereHas('cashTransfer', function ($ctq) use ($user) {
+                    $q->where($column, $user->id);
+                    if (Schema::hasTable('cash_transfers')) {
+                        $q->orWhereHas('cashTransfer', function ($ctq) use ($user) {
                             $ctq->where('accepted_by', $user->id)
                                 ->orWhere('created_by', $user->id)
                                 ->orWhere('transfer_direction', 'site_to_office');
                         });
+                    }
                 });
             } else {
                 $query->where($column, $user->id);

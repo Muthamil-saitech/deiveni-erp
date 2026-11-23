@@ -62,29 +62,73 @@ class DashboardService implements DashboardServiceInterface
     }
 
     /**
+     * Get start date, end date, and label for a given period filter.
+     *
+     * @return array{start: string, end: string, label: string, ta_label: string}
+     */
+    public function getDateRangeForPeriod(string $period): array
+    {
+        $now = Carbon::now();
+
+        return match ($period) {
+            'this_week' => [
+                'start' => $now->copy()->subDays(6)->toDateString(),
+                'end' => $now->toDateString(),
+                'label' => 'This Week',
+                'ta_label' => 'இந்த வாரம்',
+            ],
+            'this_month' => [
+                'start' => $now->copy()->startOfMonth()->toDateString(),
+                'end' => $now->copy()->endOfMonth()->toDateString(),
+                'label' => 'This Month',
+                'ta_label' => 'இந்த மாதம்',
+            ],
+            'this_year' => [
+                'start' => $now->copy()->startOfYear()->toDateString(),
+                'end' => $now->copy()->endOfYear()->toDateString(),
+                'label' => 'This Year',
+                'ta_label' => 'இந்த ஆண்டு',
+            ],
+            default => [
+                'start' => $now->toDateString(),
+                'end' => $now->toDateString(),
+                'label' => 'Today',
+                'ta_label' => 'இன்று',
+            ],
+        };
+    }
+
+    /**
      * Get aggregated dashboard data for the authenticated user based on role.
      *
      * @return array<string, mixed>
      */
-    public function getDashboardData(?User $user = null): array
+    public function getDashboardData(?User $user = null, string $period = 'today'): array
     {
         $user = $user ?? Auth::user();
 
         // 1. Full dynamic site manager metrics
         $siteManagerData = $this->getSiteManagerDashboardData($user);
 
-        // 2. Full dynamic account manager metrics
-        $accountManagerData = $this->getAccountManagerDashboardData($user);
+        // 2. Full dynamic account manager / admin metrics
+        $accountManagerData = $this->getAccountManagerDashboardData($user, $period);
 
-        // Tailor 7-day cashflow chart specifically to the Ledger table for Account Managers
-        if ($user && $user->isAccountManager()) {
-            $ledgerChartData = $this->getLedger7DayChartData($user);
+        // Period cashflow chart tailored to Ledger table for Admin and Account Manager
+        if ($user && ($user->isAdmin() || $user->isAccountManager())) {
+            $ledgerChartData = $this->getLedger7DayChartData($user, $period);
             $accountManagerData = array_merge($accountManagerData, $ledgerChartData);
         }
+
+        $periodInfo = $this->getDateRangeForPeriod($period);
 
         return array_merge([
             'currentUser' => $user,
             'todayFormatted' => Carbon::now()->format('l, d M Y'),
+            'selectedPeriod' => $period,
+            'periodLabel' => $periodInfo['label'],
+            'periodLabelTa' => $periodInfo['ta_label'],
+            'periodStart' => $periodInfo['start'],
+            'periodEnd' => $periodInfo['end'],
         ], $siteManagerData, $accountManagerData);
     }
 
@@ -315,14 +359,31 @@ class DashboardService implements DashboardServiceInterface
      *
      * @return array<string, mixed>
      */
-    public function getAccountManagerDashboardData(?User $user = null): array
+    public function getAccountManagerDashboardData(?User $user = null, string $period = 'today'): array
     {
         $today = Carbon::today()->toDateString();
+        $dateRange = $this->getDateRangeForPeriod($period);
+        $startDate = $dateRange['start'];
+        $endDate = $dateRange['end'];
 
-        // 1. Today's Ledger Income & Expense
+        // 1. Period-aware Ledger Income & Expense
+        $periodIncome = (float) $this->scopeForUser(Ledger::income(), $user)
+            ->whereBetween('entry_date', [$startDate, $endDate])
+            ->sum('amount');
+        $periodIncomeCount = (int) $this->scopeForUser(Ledger::income(), $user)
+            ->whereBetween('entry_date', [$startDate, $endDate])
+            ->count();
+
+        $periodExpense = (float) $this->scopeForUser(Ledger::expense(), $user)
+            ->whereBetween('entry_date', [$startDate, $endDate])
+            ->sum('amount');
+        $periodExpenseCount = (int) $this->scopeForUser(Ledger::expense(), $user)
+            ->whereBetween('entry_date', [$startDate, $endDate])
+            ->count();
+
+        // Also calculate today's specific numbers
         $todayIncome = (float) $this->scopeForUser(Ledger::income(), $user)->whereDate('entry_date', $today)->sum('amount');
         $todayIncomeCount = (int) $this->scopeForUser(Ledger::income(), $user)->whereDate('entry_date', $today)->count();
-
         $todayExpense = (float) $this->scopeForUser(Ledger::expense(), $user)->whereDate('entry_date', $today)->sum('amount');
         $todayExpenseCount = (int) $this->scopeForUser(Ledger::expense(), $user)->whereDate('entry_date', $today)->count();
 
@@ -338,6 +399,19 @@ class DashboardService implements DashboardServiceInterface
         $ledgerTotalIncome = (float) ($ledgerTotals['total_income'] ?? 0.0);
         $ledgerTotalExpense = (float) ($ledgerTotals['total_expense'] ?? 0.0);
         $ledgerClosingBalance = (float) ($ledgerTotals['closing_balance'] ?? 0.0);
+
+        // Period-specific Labour & Allocation metrics
+        $periodAllocationsQuery = $this->scopeForUser(DailyAllocation::query(), $user)
+            ->whereBetween('date', [$startDate, $endDate]);
+        $periodAllocationsCount = (int) $periodAllocationsQuery->count();
+        $periodLabourCount = (int) $periodAllocationsQuery->sum('total_labour_count');
+        $periodWagesTotal = (float) $periodAllocationsQuery->sum('grand_total');
+
+        // Period-specific Purchases & PO metrics
+        $periodPurchaseOrdersQuery = $this->scopeForUser(PurchaseOrder::query(), $user)
+            ->whereBetween('order_date', [$startDate, $endDate]);
+        $periodPurchaseOrdersCount = (int) $periodPurchaseOrdersQuery->count();
+        $periodPurchasesTotal = (float) $periodPurchaseOrdersQuery->sum('total_amount');
 
         // 2. Bank Master & Branch Master
         $activeBanksList = Bank::query()
@@ -383,6 +457,16 @@ class DashboardService implements DashboardServiceInterface
             ->get();
 
         return [
+            'periodIncome' => $periodIncome,
+            'periodIncomeCount' => $periodIncomeCount,
+            'periodExpense' => $periodExpense,
+            'periodExpenseCount' => $periodExpenseCount,
+            'periodNet' => $periodIncome - $periodExpense,
+            'periodAllocationsCount' => $periodAllocationsCount,
+            'periodLabourCount' => $periodLabourCount,
+            'periodWagesTotal' => $periodWagesTotal,
+            'periodPurchaseOrdersCount' => $periodPurchaseOrdersCount,
+            'periodPurchasesTotal' => $periodPurchasesTotal,
             'todayLedgerIncome' => $todayIncome,
             'todayIncomeCount' => $todayIncomeCount,
             'todayLedgerExpense' => $todayExpense,
@@ -410,46 +494,115 @@ class DashboardService implements DashboardServiceInterface
     }
 
     /**
-     * Get 7-day income, expense and net cashflow data from the Ledger table.
+     * Get income, expense and net cashflow data from the Ledger table for a period.
      *
      * @return array<string, mixed>
      */
-    public function getLedger7DayChartData(?User $user = null): array
+    public function getLedger7DayChartData(?User $user = null, string $period = 'today'): array
     {
         $chartLabels = [];
         $incomeData = [];
         $expenseData = [];
-        $sevenDayIncome = 0.0;
-        $sevenDayExpense = 0.0;
+        $totalPeriodIncome = 0.0;
+        $totalPeriodExpense = 0.0;
 
-        for ($i = 6; $i >= 0; $i--) {
-            $date = Carbon::today()->subDays($i);
-            $dateStr = $date->toDateString();
-            $chartLabels[] = $date->format('D d');
+        if ($period === 'this_year') {
+            // Group by 12 months of the year
+            $year = Carbon::now()->year;
+            for ($month = 1; $month <= 12; $month++) {
+                $monthStart = Carbon::create($year, $month, 1)->startOfMonth()->toDateString();
+                $monthEnd = Carbon::create($year, $month, 1)->endOfMonth()->toDateString();
+                $chartLabels[] = Carbon::create($year, $month, 1)->format('M');
 
-            $dayInflow = (float) $this->scopeForUser(Ledger::income(), $user)
-                ->whereDate('entry_date', $dateStr)
-                ->sum('amount');
+                $monthInflow = (float) $this->scopeForUser(Ledger::income(), $user)
+                    ->whereBetween('entry_date', [$monthStart, $monthEnd])
+                    ->sum('amount');
 
-            $dayOutflow = (float) $this->scopeForUser(Ledger::expense(), $user)
-                ->whereDate('entry_date', $dateStr)
-                ->sum('amount');
+                $monthOutflow = (float) $this->scopeForUser(Ledger::expense(), $user)
+                    ->whereBetween('entry_date', [$monthStart, $monthEnd])
+                    ->sum('amount');
 
-            $incomeData[] = $dayInflow;
-            $expenseData[] = $dayOutflow;
-            $sevenDayIncome += $dayInflow;
-            $sevenDayExpense += $dayOutflow;
+                $incomeData[] = $monthInflow;
+                $expenseData[] = $monthOutflow;
+                $totalPeriodIncome += $monthInflow;
+                $totalPeriodExpense += $monthOutflow;
+            }
+        } elseif ($period === 'this_month') {
+            // Group by each week or 5-day buckets or days in current month
+            $startOfMonth = Carbon::now()->startOfMonth();
+            $endOfMonth = Carbon::now()->endOfMonth();
+            $daysInMonth = $endOfMonth->day;
+
+            // Step by 2 or 3 days if month is large, or daily up to end of month
+            for ($d = 1; $d <= $daysInMonth; $d++) {
+                $date = Carbon::now()->startOfMonth()->day($d);
+                $dateStr = $date->toDateString();
+                $chartLabels[] = $date->format('d M');
+
+                $dayInflow = (float) $this->scopeForUser(Ledger::income(), $user)
+                    ->whereDate('entry_date', $dateStr)
+                    ->sum('amount');
+
+                $dayOutflow = (float) $this->scopeForUser(Ledger::expense(), $user)
+                    ->whereDate('entry_date', $dateStr)
+                    ->sum('amount');
+
+                $incomeData[] = $dayInflow;
+                $expenseData[] = $dayOutflow;
+                $totalPeriodIncome += $dayInflow;
+                $totalPeriodExpense += $dayOutflow;
+            }
+        } elseif ($period === 'this_week') {
+            // 7 days rolling window ending today
+            for ($i = 6; $i >= 0; $i--) {
+                $date = Carbon::today()->subDays($i);
+                $dateStr = $date->toDateString();
+                $chartLabels[] = $date->format('D d');
+
+                $dayInflow = (float) $this->scopeForUser(Ledger::income(), $user)
+                    ->whereDate('entry_date', $dateStr)
+                    ->sum('amount');
+
+                $dayOutflow = (float) $this->scopeForUser(Ledger::expense(), $user)
+                    ->whereDate('entry_date', $dateStr)
+                    ->sum('amount');
+
+                $incomeData[] = $dayInflow;
+                $expenseData[] = $dayOutflow;
+                $totalPeriodIncome += $dayInflow;
+                $totalPeriodExpense += $dayOutflow;
+            }
+        } else {
+            // 'today': show today's specific hourly or daily summary, or 7-day trend ending today
+            for ($i = 6; $i >= 0; $i--) {
+                $date = Carbon::today()->subDays($i);
+                $dateStr = $date->toDateString();
+                $chartLabels[] = $date->format('D d');
+
+                $dayInflow = (float) $this->scopeForUser(Ledger::income(), $user)
+                    ->whereDate('entry_date', $dateStr)
+                    ->sum('amount');
+
+                $dayOutflow = (float) $this->scopeForUser(Ledger::expense(), $user)
+                    ->whereDate('entry_date', $dateStr)
+                    ->sum('amount');
+
+                $incomeData[] = $dayInflow;
+                $expenseData[] = $dayOutflow;
+                $totalPeriodIncome += $dayInflow;
+                $totalPeriodExpense += $dayOutflow;
+            }
         }
 
-        $sevenDayNet = $sevenDayIncome - $sevenDayExpense;
+        $periodNet = $totalPeriodIncome - $totalPeriodExpense;
 
         return [
             'chartLabels' => $chartLabels,
             'incomeData' => $incomeData,
             'expenseData' => $expenseData,
-            'sevenDayIncome' => $sevenDayIncome,
-            'sevenDayExpense' => $sevenDayExpense,
-            'sevenDayNet' => $sevenDayNet,
+            'sevenDayIncome' => $period === 'today' ? ($todayIncome ?? $totalPeriodIncome) : $totalPeriodIncome,
+            'sevenDayExpense' => $period === 'today' ? ($todayExpense ?? $totalPeriodExpense) : $totalPeriodExpense,
+            'sevenDayNet' => $period === 'today' ? (($todayIncome ?? $totalPeriodIncome) - ($todayExpense ?? $totalPeriodExpense)) : $periodNet,
         ];
     }
 }

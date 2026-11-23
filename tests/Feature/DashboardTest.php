@@ -349,3 +349,21 @@ test('admin user with owner role slug sees admin dashboard', function () {
     $response->assertSee('Cash in Hand', false);
     $response->assertSee('Trade Categories', false);
 });
+
+test('admin can filter dashboard data by period tabs', function (string $period) {
+    $admin = User::where('role', 'owner')->first() ?? User::factory()->create([
+        'name' => 'Owner Admin',
+        'role' => 'owner',
+    ]);
+
+    $response = $this->actingAs($admin)->get('/dashboard?period='.$period);
+
+    $response->assertStatus(200);
+    $response->assertSee('கால வடிப்பான்', false);
+    $response->assertSee(match ($period) {
+        'this_week' => 'This Week',
+        'this_month' => 'This Month',
+        'this_year' => 'This Year',
+        default => 'Today',
+    }, false);
+})->with(['today', 'this_week', 'this_month', 'this_year']);

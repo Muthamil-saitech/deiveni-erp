@@ -11,26 +11,26 @@ interface DashboardServiceInterface
      *
      * @return array<string, mixed>
      */
-    public function getDashboardData(?User $user = null): array;
+    public function getDashboardData(?User $user = null, string $period = 'today'): array;
 
     /**
      * Get dynamic site manager dashboard metrics, chart datasets, and tables.
      *
      * @return array<string, mixed>
      */
-    public function getSiteManagerDashboardData(): array;
+    public function getSiteManagerDashboardData(?User $user = null): array;
 
     /**
      * Get dynamic account manager dashboard metrics, master summaries, and recent ledgers.
      *
      * @return array<string, mixed>
      */
-    public function getAccountManagerDashboardData(): array;
+    public function getAccountManagerDashboardData(?User $user = null, string $period = 'today'): array;
 
     /**
-     * Get 7-day income, expense and net cashflow data from the Ledger table.
+     * Get income, expense and net cashflow data from the Ledger table for a period.
      *
      * @return array<string, mixed>
      */
-    public function getLedger7DayChartData(): array;
+    public function getLedger7DayChartData(?User $user = null, string $period = 'today'): array;
 }

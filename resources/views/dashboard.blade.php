@@ -38,6 +38,8 @@
                         <span class="ta-text text-secondary">
                             @if (Auth::user()?->isAccountManager())
                                 தினசரி பேரேடு, வரவு-செலவு, வங்கிகள், வாடகை மற்றும் சப்ளையர் கணக்குகள்.
+                            @elseif (Auth::user()?->isAdmin())
+                                நிறுவனத்தின் வரவு-செலவு, தளங்கள், தொழிலாளர் மற்றும் கொள்முதல் ஒட்டுமொத்த சுருக்கம்.
                             @else
                                 மேஸ்திரி, கொத்தனார் தினக்கூலி மற்றும் வரவு-செலவு சுருக்கம்.
                             @endif
@@ -87,6 +89,44 @@
                 </div>
             </div>
         </div>
+
+        @if (auth()->user()?->isAdmin())
+            <!-- Admin Period Filter Bar -->
+            <div class="card-custom p-2 p-md-3 mb-3 bg-white border">
+                <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-2">
+                    <div class="d-flex align-items-center gap-2 flex-wrap">
+                        <span class="small text-muted fw-bold d-flex align-items-center gap-1">
+                            <i class="bi bi-funnel-fill text-primary"></i> கால வடிப்பான் (Filter):
+                        </span>
+                        @php
+                            $periodOptions = [
+                                'today' => ['en' => 'Today', 'ta' => 'இன்று', 'icon' => 'bi-calendar-day'],
+                                'this_week' => ['en' => 'This Week', 'ta' => 'இந்த வாரம்', 'icon' => 'bi-calendar-week'],
+                                'this_month' => ['en' => 'This Month', 'ta' => 'இந்த மாதம்', 'icon' => 'bi-calendar-month'],
+                                'this_year' => ['en' => 'This Year', 'ta' => 'இந்த ஆண்டு', 'icon' => 'bi-calendar'],
+                            ];
+                        @endphp
+                        <div class="btn-group btn-group-sm" role="group">
+                            @foreach ($periodOptions as $pKey => $pMeta)
+                                <a href="{{ route('dashboard', ['period' => $pKey]) }}"
+                                   class="btn {{ ($selectedPeriod ?? 'today') === $pKey ? 'btn-primary active fw-bold' : 'btn-outline-secondary' }}">
+                                    <i class="bi {{ $pMeta['icon'] }} me-1"></i>{{ $pMeta['en'] }} ({{ $pMeta['ta'] }})
+                                </a>
+                            @endforeach
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="badge bg-primary-subtle text-primary border border-primary-subtle py-2 px-3 small">
+                            <i class="bi bi-clock-history me-1"></i> {{ $periodLabel ?? 'Today' }} ({{ $periodLabelTa ?? 'இன்று' }}): 
+                            <strong>{{ \Carbon\Carbon::parse($periodStart ?? now())->format('d M Y') }}</strong>
+                            @if (($periodStart ?? '') !== ($periodEnd ?? ''))
+                                &sim; <strong>{{ \Carbon\Carbon::parse($periodEnd ?? now())->format('d M Y') }}</strong>
+                            @endif
+                        </span>
+                    </div>
+                </div>
+            </div>
+        @endif
 
         <!-- Summary KPI Cards -->
         <div class="row g-2 g-md-3 mb-3 mb-md-4">
@@ -327,120 +367,116 @@
                     </a>
                 </div>
             @else
-                <!-- Admin Standard Cards -->
+                <!-- Admin Standard Cards (No hyperlinks) -->
                 <div class="col-6 col-lg-2">
-                    <!-- <a href="{{ route('ledger.index', ['flow' => 'income']) }}" class="text-decoration-none"> -->
-                        <div class="card-stat h-100">
-                            <div class="d-flex justify-content-between align-items-start mb-2">
-                                <span class="text-muted small fw-semibold">Today's Income</span>
-                                <div class="stat-icon-wrapper bg-income-subtle">
-                                    <i class="bi bi-arrow-down-left-circle-fill"></i>
-                                </div>
-                            </div>
-                            <h4 class="fw-bold text-success mb-1 fs-5 fs-md-4">₹{{ number_format($todayLedgerIncome ?? 0) }}</h4>
-                            <div class="d-flex align-items-center small text-muted">
-                                <span class="ta-text" style="font-size:0.75rem;">வரவு (Dr)</span>
-                                <span class="badge bg-success-subtle text-success ms-auto">
-                                    {{ ($todayIncomeCount ?? 0) > 0 ? $todayIncomeCount . ' ' . \Illuminate\Support\Str::plural('entry', $todayIncomeCount) : '0 entries' }}
-                                </span>
+                    <div class="card-stat h-100">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <span class="text-muted small fw-semibold">Today's Income</span>
+                            <div class="stat-icon-wrapper bg-income-subtle">
+                                <i class="bi bi-arrow-down-left-circle-fill"></i>
                             </div>
                         </div>
-                    <!-- </a> -->
+                        <h4 class="fw-bold text-success mb-1 fs-5 fs-md-4">₹{{ number_format(($selectedPeriod ?? 'today') === 'today' ? ($todayLedgerIncome ?? 0) : ($periodIncome ?? 0)) }}</h4>
+                        <div class="d-flex align-items-center small text-muted">
+                            <span class="ta-text" style="font-size:0.75rem;">வரவு (Dr) &bull; {{ $periodLabelTa ?? 'இன்று' }}</span>
+                            <span class="badge bg-success-subtle text-success ms-auto">
+                                {{ (($selectedPeriod ?? 'today') === 'today' ? ($todayIncomeCount ?? 0) : ($periodIncomeCount ?? 0)) }} {{ \Illuminate\Support\Str::plural('entry', ($selectedPeriod ?? 'today') === 'today' ? ($todayIncomeCount ?? 0) : ($periodIncomeCount ?? 0)) }}
+                            </span>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="col-6 col-lg-2">
-                    <!-- <a href="{{ route('ledger.index', ['flow' => 'expense']) }}" class="text-decoration-none"> -->
-                        <div class="card-stat h-100">
-                            <div class="d-flex justify-content-between align-items-start mb-2">
-                                <span class="text-muted small fw-semibold">Today's Expense</span>
-                                <div class="stat-icon-wrapper bg-expense-subtle">
-                                    <i class="bi bi-arrow-up-right-circle-fill"></i>
-                                </div>
-                            </div>
-                            <h4 class="fw-bold text-danger mb-1 fs-5 fs-md-4">₹{{ number_format($todayLedgerExpense ?? 0) }}</h4>
-                            <div class="d-flex align-items-center small text-muted">
-                                <span class="ta-text" style="font-size:0.75rem;">செலவு (Cr)</span>
-                                <span class="badge bg-danger-subtle text-danger ms-auto">
-                                    {{ ($todayExpenseCount ?? 0) > 0 ? $todayExpenseCount . ' ' . \Illuminate\Support\Str::plural('bill', $todayExpenseCount) : '0 bills' }}
-                                </span>
+                    <div class="card-stat h-100">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <span class="text-muted small fw-semibold">Today's Expense</span>
+                            <div class="stat-icon-wrapper bg-expense-subtle">
+                                <i class="bi bi-arrow-up-right-circle-fill"></i>
                             </div>
                         </div>
-                    <!-- </a> -->
+                        <h4 class="fw-bold text-danger mb-1 fs-5 fs-md-4">₹{{ number_format(($selectedPeriod ?? 'today') === 'today' ? ($todayLedgerExpense ?? 0) : ($periodExpense ?? 0)) }}</h4>
+                        <div class="d-flex align-items-center small text-muted">
+                            <span class="ta-text" style="font-size:0.75rem;">செலவு (Cr) &bull; {{ $periodLabelTa ?? 'இன்று' }}</span>
+                            <span class="badge bg-danger-subtle text-danger ms-auto">
+                                {{ (($selectedPeriod ?? 'today') === 'today' ? ($todayExpenseCount ?? 0) : ($periodExpenseCount ?? 0)) }} {{ \Illuminate\Support\Str::plural('bill', ($selectedPeriod ?? 'today') === 'today' ? ($todayExpenseCount ?? 0) : ($periodExpenseCount ?? 0)) }}
+                            </span>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="col-6 col-lg-2">
-                    <!-- <a href="{{ url('/daily-allocation') }}" class="text-decoration-none"> -->
-                        <div class="card-stat h-100">
-                            <div class="d-flex justify-content-between align-items-start mb-2">
-                                <span class="text-muted small fw-semibold">Labour on Site</span>
-                                <div class="stat-icon-wrapper bg-workers-subtle">
-                                    <i class="bi bi-people-fill"></i>
-                                </div>
-                            </div>
-                            <h4 class="fw-bold text-primary mb-1 fs-5 fs-md-4">{{ $labourCount ?? 0 }} <small
-                                    class="fs-6 text-muted fw-normal">Present</small></h4>
-                            <div class="d-flex align-items-center small text-muted">
-                                <span class="ta-text" style="font-size:0.75rem;">தொழிலாளர்கள்</span>
-                                <span class="text-primary fw-semibold ms-auto">{{ $labourSitesBadge ?? '0 Sites' }}</span>
+                    <div class="card-stat h-100">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <span class="text-muted small fw-semibold">Labour on Site</span>
+                            <div class="stat-icon-wrapper bg-workers-subtle">
+                                <i class="bi bi-people-fill"></i>
                             </div>
                         </div>
-                    <!-- </a> -->
+                        <h4 class="fw-bold text-primary mb-1 fs-5 fs-md-4">
+                            {{ ($selectedPeriod ?? 'today') === 'today' ? ($labourCount ?? 0) : ($periodLabourCount ?? 0) }} 
+                            <small class="fs-6 text-muted fw-normal">Present</small>
+                        </h4>
+                        <div class="d-flex align-items-center small text-muted">
+                            <span class="ta-text" style="font-size:0.75rem;">தொழிலாளர்கள்</span>
+                            <span class="text-primary fw-semibold ms-auto">
+                                @if (($selectedPeriod ?? 'today') === 'today')
+                                    {{ $labourSitesBadge ?? '0 Sites' }}
+                                @else
+                                    {{ $periodAllocationsCount ?? 0 }} {{ \Illuminate\Support\Str::plural('Day', $periodAllocationsCount ?? 0) }}
+                                @endif
+                            </span>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="col-6 col-lg-2">
-                    <!-- <a href="{{ url('/sites') }}" class="text-decoration-none"> -->
-                        <div class="card-stat h-100">
-                            <div class="d-flex justify-content-between align-items-start mb-2">
-                                <span class="text-muted small fw-semibold">Active Sites</span>
-                                <div class="stat-icon-wrapper bg-sites-subtle">
-                                    <i class="bi bi-building-fill-gear"></i>
-                                </div>
-                            </div>
-                            <h4 class="fw-bold text-warning mb-1 fs-5 fs-md-4">{{ $activeSitesCount ?? 0 }} <small
-                                    class="fs-6 text-muted fw-normal">Sites</small></h4>
-                            <div class="d-flex align-items-center small text-muted">
-                                <span class="ta-text" style="font-size:0.75rem;">தளங்கள்</span>
-                                <span class="badge bg-warning-subtle text-dark ms-auto">{{ $completedSitesCount ?? 0 }} Done</span>
+                    <div class="card-stat h-100">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <span class="text-muted small fw-semibold">Active Sites</span>
+                            <div class="stat-icon-wrapper bg-sites-subtle">
+                                <i class="bi bi-building-fill-gear"></i>
                             </div>
                         </div>
-                    <!-- </a> -->
+                        <h4 class="fw-bold text-warning mb-1 fs-5 fs-md-4">{{ $activeSitesCount ?? 0 }} <small
+                                class="fs-6 text-muted fw-normal">Sites</small></h4>
+                        <div class="d-flex align-items-center small text-muted">
+                            <span class="ta-text" style="font-size:0.75rem;">தளங்கள்</span>
+                            <span class="badge bg-warning-subtle text-dark ms-auto">{{ $completedSitesCount ?? 0 }} Done</span>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="col-6 col-lg-2">
-                    <!-- <a href="{{ url('/site-cash') }}" class="text-decoration-none"> -->
-                        <div class="card-stat h-100 border-success border-opacity-50">
-                            <div class="d-flex justify-content-between align-items-start mb-2">
-                                <span class="text-muted small fw-semibold">Cash in Hand</span>
-                                <div class="stat-icon-wrapper bg-cash-subtle">
-                                    <i class="bi bi-wallet2"></i>
-                                </div>
-                            </div>
-                            <h4 class="fw-bold text-success mb-1 fs-5 fs-md-4">₹{{ number_format($cashInHand ?? 0) }}</h4>
-                            <div class="d-flex align-items-center small text-muted">
-                                <span class="ta-text" style="font-size:0.75rem;">ரொக்கம்</span>
-                                <span class="text-success fw-bold ms-auto">Live</span>
+                    <div class="card-stat h-100 border-success border-opacity-50">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <span class="text-muted small fw-semibold">Cash in Hand</span>
+                            <div class="stat-icon-wrapper bg-cash-subtle">
+                                <i class="bi bi-wallet2"></i>
                             </div>
                         </div>
-                    <!-- </a> -->
+                        <h4 class="fw-bold text-success mb-1 fs-5 fs-md-4">₹{{ number_format($cashInHand ?? 0) }}</h4>
+                        <div class="d-flex align-items-center small text-muted">
+                            <span class="ta-text" style="font-size:0.75rem;">ரொக்கம்</span>
+                            <span class="text-success fw-bold ms-auto">Live</span>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="col-6 col-lg-2">
-                    <!-- <a href="{{ url('/worker-categories') }}" class="text-decoration-none"> -->
-                        <div class="card-stat h-100">
-                            <div class="d-flex justify-content-between align-items-start mb-2">
-                                <span class="text-muted small fw-semibold">Trade Categories</span>
-                                <div class="stat-icon-wrapper bg-warehouse-subtle">
-                                    <i class="bi bi-person-badge-fill"></i>
-                                </div>
-                            </div>
-                            <h4 class="fw-bold mb-1 fs-5 fs-md-4" style="color: #7c3aed;">{{ $workerCategoriesCount ?? 0 }} <small
-                                    class="fs-6 text-muted fw-normal">Trades</small></h4>
-                            <div class="d-flex align-items-center small text-muted">
-                                <span class="ta-text" style="font-size:0.75rem;">பிரிவுகள்</span>
-                                <span class="badge bg-primary-subtle text-primary ms-auto">Wages set</span>
+                    <div class="card-stat h-100">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <span class="text-muted small fw-semibold">Trade Categories</span>
+                            <div class="stat-icon-wrapper bg-warehouse-subtle">
+                                <i class="bi bi-person-badge-fill"></i>
                             </div>
                         </div>
-                    <!-- </a> -->
+                        <h4 class="fw-bold mb-1 fs-5 fs-md-4" style="color: #7c3aed;">{{ $workerCategoriesCount ?? 0 }} <small
+                                class="fs-6 text-muted fw-normal">Trades</small></h4>
+                        <div class="d-flex align-items-center small text-muted">
+                            <span class="ta-text" style="font-size:0.75rem;">பிரிவுகள்</span>
+                            <span class="badge bg-primary-subtle text-primary ms-auto">Wages set</span>
+                        </div>
+                    </div>
                 </div>
             @endif
         </div>
@@ -453,7 +489,17 @@
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <div>
                             <h6 class="fw-bold mb-0 text-dark">Income & Expense Overview (வரவு - செலவு போக்கு)</h6>
-                            <small class="text-muted">7-Day Ledger Activity (Notebook Running Totals)</small>
+                            <small class="text-muted">
+                                @if (($selectedPeriod ?? 'today') === 'today')
+                                    7-Day Activity Trend ending Today (இன்றைய 7 நாள் போக்கு)
+                                @elseif (($selectedPeriod ?? '') === 'this_week')
+                                    Past 7 Days Activity (இந்த வார சுருக்கம்)
+                                @elseif (($selectedPeriod ?? '') === 'this_month')
+                                    This Month Daily Activity (இந்த மாத சுருக்கம்)
+                                @else
+                                    This Year Monthly Activity (இந்த ஆண்டு சுருக்கம்)
+                                @endif
+                            </small>
                         </div>
                         <span
                             class="badge bg-success-subtle text-success border border-success-subtle d-none d-sm-inline">{{ ($sevenDayNet ?? 0) >= 0 ? '+' : '' }}₹{{ number_format($sevenDayNet ?? 0) }}
@@ -464,15 +510,15 @@
                     </div>
                     <div class="row text-center mt-3 pt-3 border-top g-2">
                         <div class="col-4">
-                            <div class="text-muted small" style="font-size: 0.75rem;">7-Day Income</div>
+                            <div class="text-muted small" style="font-size: 0.75rem;">{{ $periodLabel ?? 'Period' }} Income (வரவு)</div>
                             <div class="fw-bold text-success fs-6">₹{{ number_format($sevenDayIncome ?? 0) }}</div>
                         </div>
                         <div class="col-4">
-                            <div class="text-muted small" style="font-size: 0.75rem;">7-Day Expense</div>
+                            <div class="text-muted small" style="font-size: 0.75rem;">{{ $periodLabel ?? 'Period' }} Expense (செலவு)</div>
                             <div class="fw-bold text-danger fs-6">₹{{ number_format($sevenDayExpense ?? 0) }}</div>
                         </div>
                         <div class="col-4">
-                            <div class="text-muted small" style="font-size: 0.75rem;">Net Balance</div>
+                            <div class="text-muted small" style="font-size: 0.75rem;">Net Balance (மீதி)</div>
                             <div class="fw-bold text-primary fs-6">{{ ($sevenDayNet ?? 0) >= 0 ? '+' : '' }}₹{{ number_format($sevenDayNet ?? 0) }}</div>
                         </div>
                     </div>
@@ -567,6 +613,59 @@
         </div>
 
         <!-- Active Projects & Live Notebook Daily Wages or Financial Overview -->
+        @if (auth()->user()?->isAdmin())
+            <!-- Admin Essential Details & Financial Summary -->
+            <div class="row g-3 g-md-4 mb-3 mb-md-4">
+                <div class="col-12 col-md-4">
+                    <div class="card-custom p-3 p-md-4 h-100 bg-white border">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="small fw-semibold text-muted">All-Time Net Balance (ஒட்டுமொத்த மீதி)</span>
+                            <span class="badge bg-success-subtle text-success">Overall</span>
+                        </div>
+                        <h3 class="fw-bold {{ ($ledgerClosingBalance ?? 0) >= 0 ? 'text-success' : 'text-danger' }} mb-1">
+                            ₹{{ number_format($ledgerClosingBalance ?? 0) }}
+                        </h3>
+                        <div class="small text-muted d-flex justify-content-between pt-2 border-top mt-2">
+                            <span>Income: <strong class="text-success">₹{{ number_format($ledgerTotalIncome ?? 0) }}</strong></span>
+                            <span>Expense: <strong class="text-danger">₹{{ number_format($ledgerTotalExpense ?? 0) }}</strong></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-12 col-md-4">
+                    <div class="card-custom p-3 p-md-4 h-100 bg-white border">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="small fw-semibold text-muted">{{ $periodLabel ?? 'Period' }} Labour & Wages (கூலி)</span>
+                            <span class="badge bg-primary-subtle text-primary">{{ $periodLabelTa ?? 'இன்று' }}</span>
+                        </div>
+                        <h3 class="fw-bold text-primary mb-1">
+                            ₹{{ number_format($periodWagesTotal ?? 0) }}
+                        </h3>
+                        <div class="small text-muted d-flex justify-content-between pt-2 border-top mt-2">
+                            <span>Days Logged: <strong>{{ $periodAllocationsCount ?? 0 }}</strong></span>
+                            <span>Total Labour: <strong>{{ $periodLabourCount ?? 0 }} Present</strong></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-12 col-md-4">
+                    <div class="card-custom p-3 p-md-4 h-100 bg-white border">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="small fw-semibold text-muted">Supplier Payables (சப்ளையர் பாக்கி)</span>
+                            <span class="badge bg-danger-subtle text-danger">Payables</span>
+                        </div>
+                        <h3 class="fw-bold text-danger mb-1">
+                            ₹{{ number_format($pendingSupplierPayables ?? 0) }}
+                        </h3>
+                        <div class="small text-muted d-flex justify-content-between pt-2 border-top mt-2">
+                            <span>Suppliers: <strong>{{ $activeSuppliersCount ?? 0 }} Active</strong></span>
+                            <span>Period Purchases: <strong>₹{{ number_format($periodPurchasesTotal ?? 0) }}</strong></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        @endif
+
         @if (!auth()->user()?->isAccountManager() && (auth()->user()?->canAccess('sites') ?? true))
             <div class="row g-3 g-md-4 mb-3 mb-md-4">
                 <!-- Active Project Sites Summary -->

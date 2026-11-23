@@ -8,6 +8,7 @@ use App\Repositories\Contracts\SiteCashRepositoryInterface;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Schema;
 
 class SiteCashRepository implements SiteCashRepositoryInterface
 {
@@ -36,14 +37,16 @@ class SiteCashRepository implements SiteCashRepositoryInterface
                 $q->where('created_by', $user->id)
                     ->orWhereHas('projectSite', function ($sq) use ($user) {
                         $sq->where('created_by', $user->id);
-                    })
-                    ->orWhereHas('cashTransfer', function ($cq) use ($user) {
+                    });
+
+                if (Schema::hasTable('cash_transfers')) {
+                    $q->orWhereHas('cashTransfer', function ($cq) use ($user) {
                         $cq->where('created_by', $user->id)
                             ->orWhere('received_by', 'like', "%{$user->name}%")
                             ->orWhere('received_by', 'like', '%Site Manager%')
                             ->orWhere('received_by', 'like', '%Site Engineer%');
                     });
-
+                }
             });
         }
 
