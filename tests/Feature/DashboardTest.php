@@ -380,3 +380,72 @@ test('admin can filter dashboard by custom date range', function () {
     $response->assertStatus(200);
     $response->assertSee('01 Nov - 20 Nov 2026', false);
 });
+
+test('admin dashboard metrics, po orders, and ledgers strictly filter according to active period', function () {
+    $admin = User::where('role', 'owner')->first() ?? User::factory()->create([
+        'name' => 'Owner Admin',
+        'role' => 'owner',
+    ]);
+
+    $today = Carbon::today()->toDateString();
+    $tenDaysAgo = Carbon::today()->subDays(10)->toDateString();
+
+    $supplier = Supplier::first() ?? Supplier::create([
+        'name' => 'Period Test Supplier',
+        'contact_person' => 'Supplier Contact',
+        'phone' => '9840123456',
+        'status' => 'Active',
+    ]);
+
+    // Transaction for today
+    Ledger::create([
+        'entry_date' => $today,
+        'flow' => 'income',
+        'source' => 'Construction',
+        'amount' => 5000.00,
+        'description' => 'Today Payment Received',
+        'created_by' => $admin->id,
+    ]);
+
+    // Transaction 10 days ago
+    Ledger::create([
+        'entry_date' => $tenDaysAgo,
+        'flow' => 'income',
+        'source' => 'Construction',
+        'amount' => 15000.00,
+        'description' => 'Past Payment Received',
+        'created_by' => $admin->id,
+    ]);
+
+    // Purchase order 10 days ago
+    PurchaseOrder::create([
+        'po_number' => 'PO-PERIOD-10D',
+        'order_date' => $tenDaysAgo,
+        'project_site_id' => $this->site->id,
+        'supplier_id' => $supplier->id,
+        'supplier_name' => $supplier->name,
+        'source_type' => 'supplier',
+        'status' => 'Pending',
+        'delivery_status' => 'Pending',
+        'subtotal' => 8500.00,
+        'tax_amount' => 0.00,
+        'total_amount' => 8500.00,
+        'created_by' => $admin->id,
+    ]);
+
+    // 1. When filtering by today
+    $todayRes = $this->actingAs($admin)->get('/dashboard?period=today');
+    $todayRes->assertStatus(200);
+    $todayRes->assertViewHas('periodIncome', 5000.0);
+    $todayRes->assertViewHas('periodPurchasesTotal', 0.0);
+    $todayRes->assertSee('Today Payment Received');
+    $todayRes->assertDontSee('Past Payment Received');
+
+    // 2. When filtering by custom dates covering 10 days ago
+    $customRes = $this->actingAs($admin)->get("/dashboard?period=custom&start_date={$tenDaysAgo}&end_date={$tenDaysAgo}");
+    $customRes->assertStatus(200);
+    $customRes->assertViewHas('periodIncome', 15000.0);
+    $customRes->assertViewHas('periodPurchasesTotal', 8500.0);
+    $customRes->assertSee('Past Payment Received');
+    $customRes->assertDontSee('Today Payment Received');
+});

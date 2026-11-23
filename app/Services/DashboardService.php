@@ -148,6 +148,29 @@ class DashboardService implements DashboardServiceInterface
             $adminExpenseBreakdown = $this->getAdminExpenseBreakdown($user, $periodInfo['start'], $periodInfo['end']);
         }
 
+        // Attach period spent to active sites based on date filter
+        $sitePeriodExpenses = $this->scopeForUser(Ledger::expense(), $user)
+            ->whereNotNull('project_site_id')
+            ->whereBetween('entry_date', [$periodInfo['start'], $periodInfo['end']])
+            ->groupBy('project_site_id')
+            ->selectRaw('project_site_id, SUM(amount) as total_spent')
+            ->pluck('total_spent', 'project_site_id');
+
+        $sitePeriodAllocations = $this->scopeForUser(DailyAllocation::query(), $user)
+            ->whereNotNull('project_site_id')
+            ->whereBetween('date', [$periodInfo['start'], $periodInfo['end']])
+            ->groupBy('project_site_id')
+            ->selectRaw('project_site_id, SUM(grand_total) as total_spent')
+            ->pluck('total_spent', 'project_site_id');
+
+        if (isset($siteManagerData['activeSites'])) {
+            foreach ($siteManagerData['activeSites'] as $site) {
+                $ledgerSpent = (float) ($sitePeriodExpenses[$site->id] ?? 0.0);
+                $allocSpent = (float) ($sitePeriodAllocations[$site->id] ?? 0.0);
+                $site->period_spent = max($ledgerSpent, $allocSpent);
+            }
+        }
+
         return array_merge([
             'currentUser' => $user,
             'todayFormatted' => Carbon::now()->format('l, d M Y'),
@@ -466,11 +489,15 @@ class DashboardService implements DashboardServiceInterface
         $activeSuppliersCount = Supplier::where('status', 'Active')->count();
         $totalPurchaseOrdersCount = $this->scopeForUser(PurchaseOrder::query(), $user)->count();
         $pendingSupplierPayables = (float) $this->scopeForUser(PurchaseOrder::where('status', '!=', 'Paid'), $user)->sum('total_amount');
+        $periodPendingPayables = (float) $this->scopeForUser(PurchaseOrder::where('status', '!=', 'Paid'), $user)
+            ->whereBetween('order_date', [$startDate, $endDate])
+            ->sum('total_amount');
         $totalSupplierPurchases = (float) $this->scopeForUser(PurchaseOrder::query(), $user)->sum('total_amount');
         $totalSupplierMaterialsCount = SupplierMaterial::count();
 
-        // 5. Recent Ledger Entries
+        // 5. Recent Ledger Entries filtered by date range
         $recentLedgers = $this->scopeForUser(Ledger::query(), $user)
+            ->whereBetween('entry_date', [$startDate, $endDate])
             ->with([
                 'projectSite.client',
                 'supplier',
@@ -483,7 +510,7 @@ class DashboardService implements DashboardServiceInterface
             ])
             ->orderBy('entry_date', 'desc')
             ->orderBy('id', 'desc')
-            ->take(6)
+            ->take(8)
             ->get();
 
         return [
@@ -517,6 +544,7 @@ class DashboardService implements DashboardServiceInterface
             'activeSuppliersCount' => $activeSuppliersCount,
             'totalPurchaseOrdersCount' => $totalPurchaseOrdersCount,
             'pendingSupplierPayables' => $pendingSupplierPayables,
+            'periodPendingPayables' => $periodPendingPayables,
             'totalSupplierPurchases' => $totalSupplierPurchases,
             'totalSupplierMaterialsCount' => $totalSupplierMaterialsCount,
             'recentLedgers' => $recentLedgers,
@@ -678,9 +706,9 @@ class DashboardService implements DashboardServiceInterface
             'chartLabels' => $chartLabels,
             'incomeData' => $incomeData,
             'expenseData' => $expenseData,
-            'sevenDayIncome' => $period === 'today' ? ($todayIncome ?? $totalPeriodIncome) : $totalPeriodIncome,
-            'sevenDayExpense' => $period === 'today' ? ($todayExpense ?? $totalPeriodExpense) : $totalPeriodExpense,
-            'sevenDayNet' => $period === 'today' ? (($todayIncome ?? $totalPeriodIncome) - ($todayExpense ?? $totalPeriodExpense)) : $periodNet,
+            'sevenDayIncome' => $totalPeriodIncome,
+            'sevenDayExpense' => $totalPeriodExpense,
+            'sevenDayNet' => $periodNet,
         ];
     }
 
@@ -720,38 +748,7 @@ class DashboardService implements DashboardServiceInterface
             $total += $amount;
         }
 
-        // If no expenses in the selected date range, check all-time expenses for meaningful donut chart
-        if ($total <= 0) {
-            $allTimeExpenses = $this->scopeForUser(Ledger::expense(), $user)
-                ->selectRaw('source, SUM(amount) as total_amount')
-                ->groupBy('source')
-                ->having('total_amount', '>', 0)
-                ->orderByDesc('total_amount')
-                ->get();
-
-            foreach ($allTimeExpenses as $row) {
-                $sourceLabel = match ($row->source) {
-                    'Construction' => 'Construction Sites (தள செலவுகள்)',
-                    'Supplier' => 'Supplier Purchases (சப்ளையர்)',
-                    'Office and other expenses' => 'Office & Admin (அலுவலக செலவு)',
-                    'Rental' => 'Rental Properties (வாடகை)',
-                    'Bank', 'Bank Valuation' => 'Bank / Financial (வங்கி)',
-                    default => $row->source ?: 'General Expense',
-                };
-
-                $amount = (float) $row->total_amount;
-                $labels[] = $sourceLabel;
-                $data[] = $amount;
-                $total += $amount;
-            }
-        }
-
-        // Fallback placeholder categories if database has no expenses at all
-        if (empty($labels)) {
-            $labels = ['Construction Sites (தள செலவுகள்)', 'Supplier Purchases (சப்ளையர்)', 'Office & Admin (அலுவலக செலவு)'];
-            $data = [0, 0, 0];
-        }
-
+        // When expenses exist for this period, calculate percentages
         foreach ($labels as $index => $label) {
             $val = $data[$index] ?? 0.0;
             $items[] = [

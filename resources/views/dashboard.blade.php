@@ -474,7 +474,13 @@
                         <h4 class="fw-bold text-success mb-1 fs-5 fs-md-4">₹{{ number_format($cashInHand ?? 0) }}</h4>
                         <div class="d-flex align-items-center small text-muted">
                             <span class="ta-text" style="font-size:0.75rem;">ரொக்கம்</span>
-                            <span class="text-success fw-bold ms-auto">Live</span>
+                            @if (($selectedPeriod ?? 'today') !== 'today')
+                                <span class="{{ ($periodNet ?? 0) >= 0 ? 'text-success' : 'text-danger' }} fw-bold ms-auto">
+                                    {{ ($periodNet ?? 0) >= 0 ? '+' : '' }}₹{{ number_format($periodNet ?? 0) }} Net
+                                </span>
+                            @else
+                                <span class="text-success fw-bold ms-auto">Live</span>
+                            @endif
                         </div>
                     </div>
                 </div>
@@ -510,13 +516,15 @@
                     </div>
                     <div class="row text-center mt-3 pt-3 border-top g-2">
                         <div class="col-4">
-                            <div class="text-muted small" style="font-size: 0.75rem;">{{ $periodLabel ?? 'Period' }} Income
-                                (வரவு)</div>
+                            <div class="text-muted small" style="font-size: 0.75rem;">
+                                {{ ($selectedPeriod ?? 'today') === 'today' ? '7-Day' : ($periodLabel ?? 'Period') }} Income (வரவு)
+                            </div>
                             <div class="fw-bold text-success fs-6">₹{{ number_format($sevenDayIncome ?? 0) }}</div>
                         </div>
                         <div class="col-4">
-                            <div class="text-muted small" style="font-size: 0.75rem;">{{ $periodLabel ?? 'Period' }} Expense
-                                (செலவு)</div>
+                            <div class="text-muted small" style="font-size: 0.75rem;">
+                                {{ ($selectedPeriod ?? 'today') === 'today' ? '7-Day' : ($periodLabel ?? 'Period') }} Expense (செலவு)
+                            </div>
                             <div class="fw-bold text-danger fs-6">₹{{ number_format($sevenDayExpense ?? 0) }}</div>
                         </div>
                         <div class="col-4">
@@ -618,7 +626,7 @@
                                     </div>
                                 @empty
                                     <div class="list-group-item px-0 py-1 text-muted border-0 small">
-                                        No expense records found.
+                                        No expense records found for {{ strtolower($periodLabel ?? 'this period') }}.
                                     </div>
                                 @endforelse
                             </div>
@@ -679,11 +687,11 @@
                             <span class="badge bg-danger-subtle text-danger">Payables</span>
                         </div>
                         <h3 class="fw-bold text-danger mb-1">
-                            ₹{{ number_format($pendingSupplierPayables ?? 0) }}
+                            ₹{{ number_format(($selectedPeriod ?? 'today') === 'today' ? ($pendingSupplierPayables ?? 0) : ($periodPendingPayables ?? $pendingSupplierPayables ?? 0)) }}
                         </h3>
                         <div class="small text-muted d-flex justify-content-between pt-2 border-top mt-2">
                             <span>Suppliers: <strong>{{ $activeSuppliersCount ?? 0 }} Active</strong></span>
-                            <span>Period Purchases: <strong>₹{{ number_format($periodPurchasesTotal ?? 0) }}</strong></span>
+                            <span>{{ $periodLabel ?? 'Period' }} Purchases: <strong>₹{{ number_format($periodPurchasesTotal ?? 0) }}</strong></span>
                         </div>
                     </div>
                 </div>
@@ -692,14 +700,14 @@
                     <div class="card-custom p-3 p-md-4 h-100 bg-white border">
                         <div class="d-flex justify-content-between align-items-center mb-2">
                             <span class="small fw-semibold text-muted">Purchase Orders Overview (கொள்முதல் விவரம்)</span>
-                            <span class="badge bg-primary-subtle text-primary">{{ $totalPurchaseOrdersCount ?? 0 }}
-                                Orders</span>
+                            <span class="badge bg-primary-subtle text-primary">{{ $periodPurchaseOrdersCount ?? 0 }}
+                                {{ \Illuminate\Support\Str::plural('Order', $periodPurchaseOrdersCount ?? 0) }}</span>
                         </div>
                         <h3 class="fw-bold text-primary mb-1">
-                            ₹{{ number_format($totalSupplierPurchases ?? 0) }}
+                            ₹{{ number_format($periodPurchasesTotal ?? 0) }}
                         </h3>
                         <div class="small text-muted d-flex justify-content-between pt-2 border-top mt-2">
-                            <span>Total Orders: <strong>{{ $totalPurchaseOrdersCount ?? 0 }} POs</strong></span>
+                            <span>{{ $periodLabel ?? 'Period' }} Orders: <strong>{{ $periodPurchaseOrdersCount ?? 0 }} POs</strong></span>
                             <span>Materials Catalog: <strong>{{ $totalSupplierMaterialsCount ?? 0 }} Items</strong></span>
                         </div>
                     </div>
@@ -745,7 +753,12 @@
                                             <td><span class="badge bg-info-subtle text-info border">{{ $site->work_type }}</span>
                                             </td>
                                             <td class="fw-semibold">₹{{ number_format((float) $site->estimated_budget) }}</td>
-                                            <td class="text-danger fw-semibold">₹{{ number_format((float) $site->spent) }}</td>
+                                            <td class="text-danger fw-semibold">
+                                                ₹{{ number_format((float) (auth()->user()?->isAdmin() ? ($site->period_spent ?? 0) : $site->spent)) }}
+                                                @if (auth()->user()?->isAdmin() && ($selectedPeriod ?? 'today') !== 'today')
+                                                    <small class="text-muted d-block" style="font-size: 0.7rem;">in {{ $periodLabel ?? 'period' }}</small>
+                                                @endif
+                                            </td>
                                             <td>
                                                 @php
                                                     $statusBadgeClass = match ($site->status) {
@@ -779,7 +792,7 @@
                                     <div>
                                         <h6 class="fw-bold mb-0 text-dark">Recent Ledger Transactions (சமீபத்திய கணக்கு பதிவுகள்)
                                         </h6>
-                                        <small class="text-muted">Latest financial credit and debit vouchers</small>
+                                        <small class="text-muted">Financial vouchers for {{ $periodLabel ?? 'selected period' }}</small>
                                     </div>
                                     <a href="{{ route('ledger.index') }}" class="btn btn-outline-primary btn-sm">Daily Ledger</a>
                                 </div>
@@ -831,7 +844,7 @@
                                                 </tr>
                                             @empty
                                                 <tr>
-                                                    <td colspan="4" class="text-center text-muted py-3">No transactions recorded yet.
+                                                    <td colspan="4" class="text-center text-muted py-3">No transactions recorded for {{ strtolower($periodLabel ?? 'this period') }}.
                                                     </td>
                                                 </tr>
                                             @endforelse
