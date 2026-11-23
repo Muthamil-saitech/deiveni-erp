@@ -8,6 +8,7 @@ use App\Http\Controllers\BankController;
 use App\Http\Controllers\BranchController;
 use App\Http\Controllers\CashTransferController;
 use App\Http\Controllers\DailyAllocationController;
+use App\Http\Controllers\DailyExpensesReportController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\LedgerController;
 use App\Http\Controllers\MaterialController;
@@ -157,6 +158,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/daily-allocation/history', [DailyAllocationController::class, 'getHistory'])->name('daily-allocation.history');
         Route::post('/daily-allocation', [DailyAllocationController::class, 'store'])->name('daily-allocation.store');
         Route::post('/daily-allocation/quick-add-worker-category', [DailyAllocationController::class, 'quickAddWorkerCategory'])->name('daily-allocation.quick-add-worker-category');
+        Route::post('/daily-allocation/quick-add-material', [DailyAllocationController::class, 'quickAddMaterial'])->name('daily-allocation.quick-add-material');
 
         Route::get('/weekly-wages', [WeeklyWageController::class, 'index'])->name('weekly-wages.index');
         Route::get('/weekly-wages/data', [WeeklyWageController::class, 'getData'])->name('weekly-wages.data');
@@ -253,6 +255,8 @@ Route::middleware('auth')->group(function () {
     Route::middleware('role:site_manager')->group(function () {
         Route::get('/reports/site/labour-allocations', [SiteLabourAllocationReportController::class, 'index'])->name('reports.site.labour-allocations');
         Route::get('/reports/site/labour-allocations/export-excel', [SiteLabourAllocationReportController::class, 'exportExcel'])->name('reports.site.labour-allocations.export-excel');
+        Route::get('/reports/site/daily-expenses', [DailyExpensesReportController::class, 'index'])->name('reports.site.daily-expenses');
+        Route::get('/reports/site/daily-expenses/export-excel', [DailyExpensesReportController::class, 'exportExcel'])->name('reports.site.daily-expenses.export-excel');
         Route::get('/reports/site/cash-handling', [SiteCashHandlingReportController::class, 'index'])->name('reports.site.cash-handling');
         Route::get('/reports/site/cash-handling/export-excel', [SiteCashHandlingReportController::class, 'exportExcel'])->name('reports.site.cash-handling.export-excel');
         Route::get('/reports/site/purchases-inward', [SitePurchasesInwardReportController::class, 'index'])->name('reports.site.purchases-inward');

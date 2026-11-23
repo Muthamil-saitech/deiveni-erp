@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\Ledger;
+use App\Models\Material;
 use App\Models\SiteCash;
+use App\Models\Unit;
 use App\Models\WorkerCategory;
 use App\Services\Contracts\DailyAllocationServiceInterface;
 use App\Services\Contracts\MaterialServiceInterface;
@@ -266,9 +268,25 @@ class DailyAllocationController extends Controller
             }
         }
 
+        // Auto-create any new expense item in Materials Master if not existing
+        if (! empty($validated['expenses']) && is_array($validated['expenses'])) {
+            foreach ($validated['expenses'] as $exp) {
+                $rawTitle = trim((string) ($exp['item_name'] ?? ''));
+                if ($rawTitle === '') {
+                    continue;
+                }
+
+                $this->findOrCreateMaterial($rawTitle);
+            }
+        }
+
         $allocation = $this->dailyAllocationService->saveAllocation($validated);
 
         $refreshedCategories = $this->workerCategoryService->getAllCategories()
+            ->where('status', 'Active')
+            ->values();
+
+        $refreshedMaterials = $this->materialService->getAllMaterials()
             ->where('status', 'Active')
             ->values();
 
@@ -277,6 +295,110 @@ class DailyAllocationController extends Controller
             'message' => 'Daily allocation saved successfully! Weekly wages record synced automatically.',
             'data' => $allocation,
             'worker_categories' => $refreshedCategories,
+            'materials' => $refreshedMaterials,
+        ]);
+    }
+
+    /**
+     * Find existing material or create a new one in Materials Master.
+     */
+    public function findOrCreateMaterial(string $rawTitle, ?int $unitId = null, ?string $customNameTa = null): Material
+    {
+        $rawTitle = trim($rawTitle);
+        $nameEn = $rawTitle;
+        $nameTa = $customNameTa ? trim($customNameTa) : $rawTitle;
+
+        if (! $customNameTa) {
+            if (str_contains($rawTitle, ' - ')) {
+                $parts = explode(' - ', $rawTitle, 2);
+                $p0 = trim($parts[0]);
+                $p1 = trim($parts[1]);
+                if ($p0 !== '' && $p1 !== '') {
+                    $nameEn = $p0;
+                    $nameTa = $p1;
+                }
+            } elseif (preg_match('/^(.*?)\s*\((.*?)\)$/u', $rawTitle, $matches)) {
+                $p0 = trim($matches[1]);
+                $p1 = trim($matches[2]);
+                if ($p0 !== '' && $p1 !== '') {
+                    $nameEn = $p0;
+                    $nameTa = $p1;
+                }
+            }
+        }
+
+        // Check if existing material matches
+        $existing = Material::query()
+            ->with('unit')
+            ->where(function ($q) use ($rawTitle, $nameEn, $nameTa) {
+                $q->whereRaw('LOWER(name_en) = ?', [strtolower($rawTitle)])
+                    ->orWhereRaw('LOWER(name_ta) = ?', [strtolower($rawTitle)])
+                    ->orWhereRaw('LOWER(name_en) = ?', [strtolower($nameEn)])
+                    ->orWhereRaw('LOWER(name_ta) = ?', [strtolower($nameTa)]);
+            })
+            ->first();
+
+        if (! $existing) {
+            $lowerRaw = strtolower($rawTitle);
+            $existing = Material::all()->first(function ($m) use ($lowerRaw) {
+                $combinedDash = strtolower(trim("{$m->name_en} - {$m->name_ta}"));
+                $combinedParen = strtolower(trim("{$m->name_en} ({$m->name_ta})"));
+
+                return $combinedDash === $lowerRaw || $combinedParen === $lowerRaw;
+            });
+        }
+
+        if ($existing) {
+            return $existing;
+        }
+
+        if (! $unitId) {
+            $defaultUnit = Unit::where('code', 'NOS')->first()
+                ?? Unit::where('name_en', 'like', '%Nos%')->first()
+                ?? Unit::where('status', 'Active')->first()
+                ?? Unit::first();
+            $unitId = $defaultUnit?->id;
+        }
+
+        $finalEn = $nameEn;
+        $finalTa = $nameTa;
+
+        if (Material::where('name_en', $finalEn)->exists()) {
+            $finalEn = $finalEn.' (Custom)';
+        }
+        if (Material::where('name_ta', $finalTa)->exists()) {
+            $finalTa = $finalTa.' (புதியது)';
+        }
+
+        return Material::create([
+            'name_en' => $finalEn,
+            'name_ta' => $finalTa,
+            'unit_id' => $unitId,
+            'status' => 'Active',
+        ])->load('unit');
+    }
+
+    /**
+     * Quick-add a new material to Master directly from Daily Allocation.
+     */
+    public function quickAddMaterial(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'name_ta' => 'nullable|string|max:255',
+            'unit_id' => 'nullable|integer|exists:units,id',
+        ]);
+
+        $rawTitle = trim((string) $validated['name']);
+        $unitId = ! empty($validated['unit_id']) ? (int) $validated['unit_id'] : null;
+        $nameTa = ! empty($validated['name_ta']) ? trim((string) $validated['name_ta']) : null;
+
+        $material = $this->findOrCreateMaterial($rawTitle, $unitId, $nameTa);
+
+        return response()->json([
+            'success' => true,
+            'message' => "Material \"{$material->name_en}\" added to Materials Master successfully!",
+            'material' => $material,
         ]);
     }
 

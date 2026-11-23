@@ -290,3 +290,63 @@ test('daily allocation view retains selected worker categories across site and d
     expect($content)->toContain('persistRetainedWorkerCategories');
     expect($content)->toContain('deiveni_retained_worker_categories');
 });
+
+test('storing daily allocation with new expense item automatically creates it in Materials master', function () {
+    $date = Carbon::parse('2026-11-04')->toDateString();
+
+    $payload = [
+        'project_site_id' => $this->site->id,
+        'date' => $date,
+        'total_labour_count' => 1,
+        'total_labour_wage' => 1200.00,
+        'total_expenses' => 150.00,
+        'grand_total' => 1350.00,
+        'trade_summary' => '1 மேஸ்திரி',
+        'items' => [
+            [
+                'worker_category_id' => $this->category1->id,
+                'category_code' => 'CAT-001',
+                'name_ta' => 'மேஸ்திரி',
+                'name_en' => 'Head Mason',
+                'worker_count' => 1,
+                'daily_wage' => 1200.00,
+                'master_wage' => 1200.00,
+                'subtotal' => 1200.00,
+            ],
+        ],
+        'expenses' => [
+            [
+                'item_name' => 'Tea',
+                'quantity' => 10,
+                'unit_price' => 15.00,
+                'amount' => 150.00,
+            ],
+        ],
+    ];
+
+    $response = $this->actingAs($this->siteManager)->postJson('/daily-allocation', $payload);
+
+    $response->assertStatus(200);
+    $response->assertJsonPath('success', true);
+
+    // Verify it is created in Materials master table
+    $this->assertDatabaseHas('materials', [
+        'name_en' => 'Tea',
+        'status' => 'Active',
+    ]);
+});
+
+test('quick add material endpoint creates new material in master', function () {
+    $payload = [
+        'name' => 'Tea & Biscuits',
+    ];
+
+    $response = $this->actingAs($this->siteManager)->postJson('/daily-allocation/quick-add-material', $payload);
+
+    $response->assertStatus(200);
+    $response->assertJsonPath('success', true);
+    $this->assertDatabaseHas('materials', [
+        'name_en' => 'Tea & Biscuits',
+        'status' => 'Active',
+    ]);
+});

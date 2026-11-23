@@ -750,13 +750,14 @@
                     $u = auth()->user();
                     $canProfitLoss = ($u?->canAccess('reports_profit_loss') ?? false);
                     $canLabourAlloc = ($u?->canAccess('reports_labour_allocations') ?? false);
+                    $canDailyExpenses = ($u?->canAccess('reports_daily_expenses') ?? false);
                     $canCashHandling = ($u?->canAccess('reports_cash_handling') ?? false);
                     $canPurchasesInward = ($u?->canAccess('reports_purchases_inward') ?? false);
                     $canWarehouseStock = ($u?->canAccess('reports_warehouse_inventory') ?? false);
                     $canStockTransferReport = ($u?->canAccess('reports_stock_transfer') ?? false);
                     $canAccountLedger = ($u?->canAccess('reports_ledger') ?? false);
 
-                    $showReportsSection = $canProfitLoss || $canLabourAlloc || $canCashHandling || $canPurchasesInward || $canWarehouseStock || $canStockTransferReport || $canAccountLedger;
+                    $showReportsSection = $canProfitLoss || $canLabourAlloc || $canDailyExpenses || $canCashHandling || $canPurchasesInward || $canWarehouseStock || $canStockTransferReport || $canAccountLedger;
                 @endphp
 
                 @if ($showReportsSection)
@@ -779,6 +780,16 @@
                                     <i class="bi bi-people-fill"></i>
                                     <span>Labour Allocation <span class="ta-text text-white-50" style="font-size:0.75rem;">(கூலி
                                             பட்டியல்)</span></span>
+                                </a>
+                            </li>
+                        @endif
+                        @if ($canDailyExpenses)
+                            <li class="nav-item" data-menu="reports_daily_expenses">
+                                <a href="{{ route('reports.site.daily-expenses') }}"
+                                    class="nav-link {{ Request::is('reports/site/daily-expenses*') ? 'active' : '' }}">
+                                    <i class="bi bi-receipt-cutoff"></i>
+                                    <span>Daily Expenses <span class="ta-text text-white-50"
+                                            style="font-size:0.75rem;">(தினசரி செலவுகள்)</span></span>
                                 </a>
                             </li>
                         @endif

@@ -41,6 +41,10 @@ return new class extends Migration
                 $table->decimal('master_wage', 15, 2)->default(0.00);
                 $table->integer('worker_count')->default(0);
                 $table->decimal('subtotal', 15, 2)->default(0.00);
+                $table->string('paid_by', 50)->nullable();
+                $table->unsignedBigInteger('ledger_id')->nullable();
+                $table->timestamp('paid_at')->nullable();
+                $table->string('wage_cash_source', 30)->default('office_cash')->nullable();
                 $table->timestamps();
 
                 $table->index('daily_allocation_id');

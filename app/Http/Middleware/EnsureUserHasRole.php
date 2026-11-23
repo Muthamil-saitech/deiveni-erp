@@ -113,6 +113,9 @@ class EnsureUserHasRole
         if ($request->is('reports/site/labour-allocations*')) {
             return 'reports_labour_allocations';
         }
+        if ($request->is('reports/site/daily-expenses*')) {
+            return 'reports_daily_expenses';
+        }
         if ($request->is('reports/site/cash-handling*')) {
             return 'reports_cash_handling';
         }

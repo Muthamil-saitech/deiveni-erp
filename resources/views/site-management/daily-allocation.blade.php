@@ -459,7 +459,18 @@
             const ROUTE_GET_BY_DATE = "{{ route('daily-allocation.by-date') }}";
             const ROUTE_GET_HISTORY = "{{ route('daily-allocation.history') }}";
             const ROUTE_STORE_ALLOCATION = "{{ route('daily-allocation.store') }}";
-            const availableMaterials = @json($materials ?? []);
+            const ROUTE_QUICK_ADD_MATERIAL = "{{ route('daily-allocation.quick-add-material') }}";
+            let availableMaterials = @json($materials ?? []);
+
+            function escapeHtml(text) {
+                if (!text) return '';
+                return String(text)
+                    .replace(/&/g, '&amp;')
+                    .replace(/</g, '&lt;')
+                    .replace(/>/g, '&gt;')
+                    .replace(/"/g, '&quot;')
+                    .replace(/'/g, '&#039;');
+            }
 
             // Local Date String (YYYY-MM-DD) avoiding timezone shift
             function getLocalDateString(d = new Date()) {
@@ -1278,8 +1289,26 @@
                         });
                     }
 
+                    const trimmedQ = (q || '').trim();
+
                     if (!matches || matches.length === 0) {
-                        $dropdown.html('<div class="p-2 small text-muted text-center"><i class="bi bi-info-circle me-1"></i>No matching materials found. Custom description allowed.</div>').removeClass('d-none');
+                        let emptyHtml = `
+                            <div class="p-2 small text-muted text-center">
+                                <i class="bi bi-info-circle me-1"></i>No matching materials found in Master.
+                            </div>
+                        `;
+                        if (trimmedQ) {
+                            emptyHtml += `
+                                <div class="border-top p-1 bg-light">
+                                    <button type="button" class="btn btn-sm btn-outline-primary w-100 text-start quick-add-material-btn d-flex align-items-center justify-content-between py-1 px-2"
+                                            data-name="${escapeHtml(trimmedQ)}">
+                                        <span class="text-truncate small"><i class="bi bi-plus-circle-fill text-success me-1"></i>Add "<strong>${escapeHtml(trimmedQ)}</strong>" to Master</span>
+                                        <span class="badge bg-primary-subtle text-primary ms-1" style="font-size:0.65rem;">+ Add Master</span>
+                                    </button>
+                                </div>
+                            `;
+                        }
+                        $dropdown.html(emptyHtml).removeClass('d-none');
                         positionDropdown();
                         return;
                     }
@@ -1288,19 +1317,37 @@
                     html += '<div class="px-2 py-1 small fw-bold text-uppercase text-muted" style="font-size:0.7rem; background:#f8fafc;"><i class="bi bi-box-seam me-1"></i>Materials Master (பொருட்கள்)</div>';
                     matches.slice(0, 20).forEach(function (m) {
                         const unitName = (m.unit && typeof m.unit === 'object') ? (m.unit.name_en || m.unit.code || '') : (m.unit || '');
-                        const unitBadge = unitName ? `<span class="badge bg-light text-secondary border ms-1" style="font-size:0.7rem;">${unitName}</span>` : '';
-                        const taText = m.name_ta ? `<span class="text-muted ms-1">(${m.name_ta})</span>` : '';
+                        const unitBadge = unitName ? `<span class="badge bg-light text-secondary border ms-1" style="font-size:0.7rem;">${escapeHtml(unitName)}</span>` : '';
+                        const taText = m.name_ta ? `<span class="text-muted ms-1">(${escapeHtml(m.name_ta)})</span>` : '';
                         html += `
                             <a href="javascript:void(0)" class="dropdown-item py-1 px-2 d-flex justify-content-between align-items-center expense-sugg-item"
-                               data-en="${m.name_en}" data-ta="${m.name_ta || ''}" data-unit="${unitName}">
+                               data-en="${escapeHtml(m.name_en)}" data-ta="${escapeHtml(m.name_ta || '')}" data-unit="${escapeHtml(unitName)}">
                                 <div class="text-truncate me-2">
-                                    <span class="fw-semibold text-dark">${m.name_en}</span>
+                                    <span class="fw-semibold text-dark">${escapeHtml(m.name_en)}</span>
                                     ${taText}
                                 </div>
                                 ${unitBadge}
                             </a>
                         `;
                     });
+
+                    // If query doesn't exactly match any existing material, give option to quick-add
+                    const hasExactMatch = matches.some(function (m) {
+                        return (m.name_en || '').toLowerCase() === query || (m.name_ta || '').toLowerCase() === query;
+                    });
+
+                    if (trimmedQ && !hasExactMatch) {
+                        html += `
+                            <div class="border-top p-1 bg-light">
+                                <button type="button" class="btn btn-sm btn-link text-primary w-100 text-start text-decoration-none py-1 px-2 quick-add-material-btn d-flex align-items-center justify-content-between"
+                                        data-name="${escapeHtml(trimmedQ)}">
+                                    <span class="text-truncate small"><i class="bi bi-plus-circle text-success me-1"></i>Add "<strong>${escapeHtml(trimmedQ)}</strong>" to Materials Master</span>
+                                    <span class="badge bg-secondary-subtle text-secondary" style="font-size:0.65rem;">New</span>
+                                </button>
+                            </div>
+                        `;
+                    }
+
                     html += '</div>';
                     $dropdown.html(html).removeClass('d-none');
                     positionDropdown();
@@ -1332,6 +1379,50 @@
                         qtyInput.val(1);
                     }
                     recalculateDaily();
+                });
+
+                $dropdown.on('click', '.quick-add-material-btn', function (e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const name = $(this).data('name');
+                    if (!name) return;
+
+                    const $btn = $(this);
+                    $btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-1"></span> Adding to Master...');
+
+                    $.ajax({
+                        url: ROUTE_QUICK_ADD_MATERIAL,
+                        type: 'POST',
+                        contentType: 'application/json',
+                        data: JSON.stringify({ name: name }),
+                        success: function (res) {
+                            if (res.success && res.material) {
+                                const exists = availableMaterials.some(m => m.id === res.material.id);
+                                if (!exists) {
+                                    availableMaterials.unshift(res.material);
+                                }
+                                const display = res.material.name_ta && res.material.name_ta !== res.material.name_en
+                                    ? `${res.material.name_en} - ${res.material.name_ta}`
+                                    : res.material.name_en;
+                                $input.val(display);
+                                $dropdown.addClass('d-none');
+                                $(window).off('scroll.expenseAutoc resize.expenseAutoc');
+
+                                const row = $input.closest('.expense-row');
+                                const qtyInput = row.find('.expense-qty');
+                                if (!qtyInput.val()) {
+                                    qtyInput.val(1);
+                                }
+                                recalculateDaily();
+                                showToast(`Material "${res.material.name_en}" added into Materials Master!`, 'success');
+                            }
+                        },
+                        error: function (xhr) {
+                            $btn.prop('disabled', false).html('<i class="bi bi-plus-circle text-danger me-1"></i> Try Again');
+                            const msg = (xhr.responseJSON && xhr.responseJSON.message) ? xhr.responseJSON.message : 'Failed to add material.';
+                            showToast(msg, 'danger');
+                        }
+                    });
                 });
             }
 
@@ -1881,6 +1972,9 @@
                         renderHistoryTable();
                         if (res.worker_categories && res.worker_categories.length) {
                             updateDropdownCategories(res.worker_categories);
+                        }
+                        if (res.materials && res.materials.length) {
+                            availableMaterials = res.materials;
                         }
                         showToast(`Daily Allocation for "${siteName}" on ${date} saved successfully! Rolls into Weekly Wages.`, 'success');
                     },

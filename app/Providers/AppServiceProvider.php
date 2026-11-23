@@ -94,6 +94,7 @@ use App\Services\Contracts\BankServiceInterface;
 use App\Services\Contracts\BranchServiceInterface;
 use App\Services\Contracts\CashTransferServiceInterface;
 use App\Services\Contracts\DailyAllocationServiceInterface;
+use App\Services\Contracts\DailyExpensesReportServiceInterface;
 use App\Services\Contracts\DashboardServiceInterface;
 use App\Services\Contracts\LedgerServiceInterface;
 use App\Services\Contracts\MaterialServiceInterface;
@@ -120,6 +121,7 @@ use App\Services\Contracts\WarehouseServiceInterface;
 use App\Services\Contracts\WeeklyWageServiceInterface;
 use App\Services\Contracts\WorkerCategoryServiceInterface;
 use App\Services\DailyAllocationService;
+use App\Services\DailyExpensesReportService;
 use App\Services\DashboardService;
 use App\Services\LedgerService;
 use App\Services\MaterialService;
@@ -339,6 +341,11 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(
             SiteLabourAllocationReportServiceInterface::class,
             SiteLabourAllocationReportService::class
+        );
+
+        $this->app->bind(
+            DailyExpensesReportServiceInterface::class,
+            DailyExpensesReportService::class
         );
 
         $this->app->bind(

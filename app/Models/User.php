@@ -281,9 +281,11 @@ class User extends Authenticatable
                 return $role->hasMenu('reports')
                     || $role->hasMenu('reports_profit_loss')
                     || $role->hasMenu('reports_labour_allocations')
+                    || $role->hasMenu('reports_daily_expenses')
                     || $role->hasMenu('reports_cash_handling')
                     || $role->hasMenu('reports_purchases_inward')
                     || $role->hasMenu('reports_warehouse_inventory')
+                    || $role->hasMenu('reports_stock_transfer')
                     || $role->hasMenu('reports_ledger');
             }
 
@@ -295,6 +297,9 @@ class User extends Authenticatable
                 'stock-transfers' => 'stock_transfer',
                 'stock_transfers' => 'stock_transfer',
                 'reports-stock-transfers' => 'reports_stock_transfer',
+                'daily-expenses' => 'reports_daily_expenses',
+                'daily_expenses' => 'reports_daily_expenses',
+                'reports-daily-expenses' => 'reports_daily_expenses',
                 'rentals' => 'property_types',
                 'rental' => 'property_types',
                 'profit-loss' => 'reports_profit_loss',
@@ -317,13 +322,13 @@ class User extends Authenticatable
 
             // Backwards compatibility for legacy 'reports' permission
             if ($role->hasMenu('reports')) {
-                if ($this->isSiteManager() && in_array($menu, ['reports_labour_allocations', 'reports_cash_handling', 'reports_purchases_inward', 'reports_warehouse_inventory', 'reports_stock_transfer'], true)) {
+                if ($this->isSiteManager() && in_array($menu, ['reports_labour_allocations', 'reports_daily_expenses', 'reports_cash_handling', 'reports_purchases_inward', 'reports_warehouse_inventory', 'reports_stock_transfer'], true)) {
                     return true;
                 }
                 if ($this->isAccountManager() && $menu === 'reports_ledger') {
                     return true;
                 }
-                if ($this->isOwner() && in_array($menu, ['reports_profit_loss', 'reports_labour_allocations', 'reports_cash_handling', 'reports_purchases_inward', 'reports_warehouse_inventory', 'reports_stock_transfer', 'reports_ledger'], true)) {
+                if ($this->isOwner() && in_array($menu, ['reports_profit_loss', 'reports_labour_allocations', 'reports_daily_expenses', 'reports_cash_handling', 'reports_purchases_inward', 'reports_warehouse_inventory', 'reports_stock_transfer', 'reports_ledger'], true)) {
                     return true;
                 }
             }

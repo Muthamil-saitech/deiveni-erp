@@ -43,8 +43,8 @@ class UserSeeder extends Seeder
         $smMenus = [
             'dashboard', 'worker_categories', 'units', 'materials', 'suppliers', 'transaction_types',
             'sites', 'daily_allocation', 'weekly_wages', 'site_cash', 'purchases',
-            'warehouse', 'reports', 'reports_labour_allocations', 'reports_cash_handling',
-            'reports_purchases_inward', 'reports_warehouse_inventory', 'profile',
+            'warehouse', 'reports', 'reports_labour_allocations', 'reports_daily_expenses', 'reports_cash_handling',
+            'reports_purchases_inward', 'reports_warehouse_inventory', 'reports_stock_transfer', 'profile',
         ];
         foreach ($smMenus as $key) {
             RoleMenu::firstOrCreate(['role_id' => $smRole->id, 'menu_key' => $key]);

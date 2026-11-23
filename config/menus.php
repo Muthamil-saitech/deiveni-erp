@@ -206,6 +206,14 @@ return [
             'icon' => 'bi bi-people-fill',
             'url' => '/reports/site/labour-allocations',
         ],
+        'reports_daily_expenses' => [
+            'key' => 'reports_daily_expenses',
+            'name' => 'Daily Expenses',
+            'name_ta' => 'தினசரி செலவுகள்',
+            'section' => 'REPORTS',
+            'icon' => 'bi bi-receipt-cutoff',
+            'url' => '/reports/site/daily-expenses',
+        ],
         'reports_cash_handling' => [
             'key' => 'reports_cash_handling',
             'name' => 'Site Cash Handling',

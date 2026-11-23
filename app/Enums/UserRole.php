@@ -84,7 +84,7 @@ enum UserRole: string
             self::SiteManager => in_array($menu, [
                 'dashboard', 'worker_categories', 'units', 'materials', 'suppliers', 'transaction_types',
                 'sites', 'daily_allocation', 'weekly_wages', 'site_cash', 'purchases', 'cash_transfer', 'material_usage', 'stock_transfer',
-                'warehouse', 'reports', 'reports_labour_allocations', 'reports_cash_handling',
+                'warehouse', 'reports', 'reports_labour_allocations', 'reports_daily_expenses', 'reports_cash_handling',
                 'reports_purchases_inward', 'reports_warehouse_inventory', 'reports_stock_transfer', 'profile',
             ], true),
             self::AccountManager => in_array($menu, [
