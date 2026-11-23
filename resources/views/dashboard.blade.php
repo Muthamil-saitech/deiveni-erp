@@ -6,7 +6,7 @@
 @section('content')
     @php
         $dashUser = auth()->user();
-        $reportTargetUrl = match(true) {
+        $reportTargetUrl = match (true) {
             ($dashUser?->isSiteManager() && $dashUser?->canAccess('reports_labour_allocations')) => route('reports.site.labour-allocations'),
             ($dashUser?->isSiteManager() && $dashUser?->canAccess('reports_cash_handling')) => route('reports.site.cash-handling'),
             ($dashUser?->isSiteManager() && $dashUser?->canAccess('reports_purchases_inward')) => route('reports.site.purchases-inward'),
@@ -44,60 +44,62 @@
                                 மேஸ்திரி, கொத்தனார் தினக்கூலி மற்றும் வரவு-செலவு சுருக்கம்.
                             @endif
                         </span>
-                        <span class="d-none d-sm-inline">&bull; Today: <strong class="text-dark">{{ $todayFormatted ?? \Carbon\Carbon::now()->format('l, d M Y') }}</strong></span>
+                        @if (!Auth::user()?->isAdmin())
+                            <span class="d-none d-sm-inline">&bull; Today: <strong
+                                    class="text-dark">{{ $todayFormatted ?? \Carbon\Carbon::now()->format('l, d M Y') }}</strong></span>
+                        @endif
                     </p>
                 </div>
-                <div class="d-flex gap-2 flex-wrap">
-                    @if (auth()->user()?->canAccess('daily_allocation') ?? true)
-                        <a href="{{ url('/daily-allocation') }}" class="btn btn-deiveni btn-sm d-flex align-items-center gap-1">
-                            <i class="bi bi-calendar-check"></i>
-                            <span>Daily Allocation</span>
-                        </a>
-                    @endif
-                    @if (auth()->user()?->canAccess('weekly_wages') ?? true)
-                        <a href="{{ url('/weekly-wages') }}"
-                            class="btn btn-outline-primary btn-sm d-flex align-items-center gap-1">
-                            <i class="bi bi-journal-text"></i>
-                            <span>Weekly Wages</span>
-                        </a>
-                    @endif
-                    @if (auth()->user()?->canAccess('site_cash') ?? true)
-                        <a href="{{ url('/site-cash') }}"
-                            class="btn btn-outline-primary btn-sm d-flex align-items-center gap-1">
-                            <i class="bi bi-cash-stack"></i>
-                            <span>Site Cash</span>
-                        </a>
-                    @endif
-                    @if (auth()->user()?->canAccess('banks') ?? true)
-                        <a href="{{ url('/banks') }}" class="btn btn-outline-primary btn-sm d-flex align-items-center gap-1">
-                            <i class="bi bi-bank"></i>
-                            <span>Bank Master</span>
-                        </a>
-                    @endif
-                    @if (auth()->user()?->canAccess('ledger') ?? true)
-                        <a href="{{ url('/ledger') }}" class="btn btn-outline-secondary btn-sm d-flex align-items-center gap-1">
-                            <i class="bi bi-book"></i>
-                            <span>Daily Ledger</span>
-                        </a>
-                    @endif
-                    @if ($reportTargetUrl)
-                        <a href="{{ $reportTargetUrl }}" class="btn btn-outline-danger btn-sm d-flex align-items-center gap-1">
-                            <i class="bi bi-file-earmark-bar-graph"></i>
-                            <span>Reports & Export</span>
-                        </a>
-                    @endif
-                </div>
+                @if (!Auth::user()?->isAdmin())
+                    <div class="d-flex gap-2 flex-wrap">
+                        @if (auth()->user()?->canAccess('daily_allocation') ?? true)
+                            <a href="{{ url('/daily-allocation') }}" class="btn btn-deiveni btn-sm d-flex align-items-center gap-1">
+                                <i class="bi bi-calendar-check"></i>
+                                <span>Daily Allocation</span>
+                            </a>
+                        @endif
+                        @if (auth()->user()?->canAccess('weekly_wages') ?? true)
+                            <a href="{{ url('/weekly-wages') }}"
+                                class="btn btn-outline-primary btn-sm d-flex align-items-center gap-1">
+                                <i class="bi bi-journal-text"></i>
+                                <span>Weekly Wages</span>
+                            </a>
+                        @endif
+                        @if (auth()->user()?->canAccess('site_cash') ?? true)
+                            <a href="{{ url('/site-cash') }}"
+                                class="btn btn-outline-primary btn-sm d-flex align-items-center gap-1">
+                                <i class="bi bi-cash-stack"></i>
+                                <span>Site Cash</span>
+                            </a>
+                        @endif
+                        @if (auth()->user()?->canAccess('banks') ?? true)
+                            <a href="{{ url('/banks') }}" class="btn btn-outline-primary btn-sm d-flex align-items-center gap-1">
+                                <i class="bi bi-bank"></i>
+                                <span>Bank Master</span>
+                            </a>
+                        @endif
+                        @if (auth()->user()?->canAccess('ledger') ?? true)
+                            <a href="{{ url('/ledger') }}" class="btn btn-outline-secondary btn-sm d-flex align-items-center gap-1">
+                                <i class="bi bi-book"></i>
+                                <span>Daily Ledger</span>
+                            </a>
+                        @endif
+                        @if ($reportTargetUrl)
+                            <a href="{{ $reportTargetUrl }}" class="btn btn-outline-danger btn-sm d-flex align-items-center gap-1">
+                                <i class="bi bi-file-earmark-bar-graph"></i>
+                                <span>Reports & Export</span>
+                            </a>
+                        @endif
+                    </div>
+                @endif
             </div>
         </div>
 
         @if (auth()->user()?->isAdmin())
             <!-- Admin Period Filter Bar -->
             <div class="card-custom p-2 p-md-3 mb-3 bg-white border">
-                <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-2">
+                <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3">
                     <div class="d-flex align-items-center gap-2 flex-wrap">
-                        <span class="small text-muted fw-bold d-flex align-items-center gap-1">
-                            <i class="bi bi-funnel-fill text-primary"></i> கால வடிப்பான் (Filter):
-                        </span>
                         @php
                             $periodOptions = [
                                 'today' => ['en' => 'Today', 'ta' => 'இன்று', 'icon' => 'bi-calendar-day'],
@@ -109,15 +111,37 @@
                         <div class="btn-group btn-group-sm" role="group">
                             @foreach ($periodOptions as $pKey => $pMeta)
                                 <a href="{{ route('dashboard', ['period' => $pKey]) }}"
-                                   class="btn {{ ($selectedPeriod ?? 'today') === $pKey ? 'btn-primary active fw-bold' : 'btn-outline-secondary' }}">
+                                    class="btn {{ ($selectedPeriod ?? 'today') === $pKey ? 'btn-primary active fw-bold' : 'btn-outline-secondary' }}">
                                     <i class="bi {{ $pMeta['icon'] }} me-1"></i>{{ $pMeta['en'] }} ({{ $pMeta['ta'] }})
                                 </a>
                             @endforeach
                         </div>
+
+                        <!-- Custom Datepicker Form -->
+                        <form method="GET" action="{{ route('dashboard') }}"
+                            class="d-flex align-items-center gap-1 ms-sm-2 flex-wrap" id="customDateRangeForm">
+                            <input type="hidden" name="period" value="custom">
+                            <div class="input-group input-group-sm" style="width: auto;">
+                                <span class="input-group-text bg-white border-end-0 py-1">
+                                    <i class="bi bi-calendar-event text-primary"></i>
+                                </span>
+                                <input type="date" name="start_date" id="dashCustomStart"
+                                    class="form-control form-control-sm border-start-0"
+                                    value="{{ $customStartDate ?? $periodStart ?? '' }}" title="Start Date">
+                                <span class="input-group-text bg-light py-1">&sim;</span>
+                                <input type="date" name="end_date" id="dashCustomEnd" class="form-control form-control-sm"
+                                    value="{{ $customEndDate ?? $periodEnd ?? '' }}" title="End Date">
+                                <button type="submit" class="btn btn-sm btn-outline-primary py-1">
+                                    <i class="bi bi-filter"></i> Apply
+                                </button>
+                            </div>
+                        </form>
                     </div>
+
                     <div class="d-flex align-items-center gap-2">
                         <span class="badge bg-primary-subtle text-primary border border-primary-subtle py-2 px-3 small">
-                            <i class="bi bi-clock-history me-1"></i> {{ $periodLabel ?? 'Today' }} ({{ $periodLabelTa ?? 'இன்று' }}): 
+                            <i class="bi bi-clock-history me-1"></i> {{ $periodLabel ?? 'Today' }}
+                            ({{ $periodLabelTa ?? 'இன்று' }}):
                             <strong>{{ \Carbon\Carbon::parse($periodStart ?? now())->format('d M Y') }}</strong>
                             @if (($periodStart ?? '') !== ($periodEnd ?? ''))
                                 &sim; <strong>{{ \Carbon\Carbon::parse($periodEnd ?? now())->format('d M Y') }}</strong>
@@ -141,7 +165,8 @@
                                     <i class="bi bi-arrow-down-left-circle-fill"></i>
                                 </div>
                             </div>
-                            <h4 class="fw-bold text-success mb-1 fs-5 fs-md-4">₹{{ number_format($todayLedgerIncome ?? 0) }}</h4>
+                            <h4 class="fw-bold text-success mb-1 fs-5 fs-md-4">₹{{ number_format($todayLedgerIncome ?? 0) }}
+                            </h4>
                             <div class="d-flex align-items-center small text-muted">
                                 <span class="ta-text" style="font-size:0.75rem;">வரவு (Dr)</span>
                                 <span class="badge bg-success-subtle text-success ms-auto">
@@ -161,7 +186,8 @@
                                     <i class="bi bi-arrow-up-right-circle-fill"></i>
                                 </div>
                             </div>
-                            <h4 class="fw-bold text-danger mb-1 fs-5 fs-md-4">₹{{ number_format($todayLedgerExpense ?? 0) }}</h4>
+                            <h4 class="fw-bold text-danger mb-1 fs-5 fs-md-4">₹{{ number_format($todayLedgerExpense ?? 0) }}
+                            </h4>
                             <div class="d-flex align-items-center small text-muted">
                                 <span class="ta-text" style="font-size:0.75rem;">செலவு (Cr)</span>
                                 <span class="badge bg-danger-subtle text-danger ms-auto">
@@ -202,7 +228,9 @@
                                 </div>
                             </div>
                             <h4 class="fw-bold text-primary mb-1 fs-5 fs-md-4">
-                                {{ $activeBanksCount ?? 0 }} <small class="fs-6 text-muted fw-normal">{{ $activeBranchesCount ?? 0 }} {{ \Illuminate\Support\Str::plural('Branch', $activeBranchesCount ?? 0) }}</small>
+                                {{ $activeBanksCount ?? 0 }} <small
+                                    class="fs-6 text-muted fw-normal">{{ $activeBranchesCount ?? 0 }}
+                                    {{ \Illuminate\Support\Str::plural('Branch', $activeBranchesCount ?? 0) }}</small>
                             </h4>
                             <div class="d-flex align-items-center small text-muted">
                                 <span class="ta-text" style="font-size:0.75rem;">வங்கிகள்</span>
@@ -222,7 +250,9 @@
                                 </div>
                             </div>
                             <h4 class="fw-bold text-warning mb-1 fs-5 fs-md-4">
-                                {{ $activeRentalUnitsCount ?? 0 }} <small class="fs-6 text-muted fw-normal">{{ $activePropertiesCount ?? 0 }} {{ \Illuminate\Support\Str::plural('Property', $activePropertiesCount ?? 0) }}</small>
+                                {{ $activeRentalUnitsCount ?? 0 }} <small
+                                    class="fs-6 text-muted fw-normal">{{ $activePropertiesCount ?? 0 }}
+                                    {{ \Illuminate\Support\Str::plural('Property', $activePropertiesCount ?? 0) }}</small>
                             </h4>
                             <div class="d-flex align-items-center small text-muted">
                                 <span class="ta-text" style="font-size:0.75rem;">வாடகை</span>
@@ -268,7 +298,8 @@
                                     class="fs-6 text-muted fw-normal">Sites</small></h4>
                             <div class="d-flex align-items-center small text-muted">
                                 <span class="ta-text" style="font-size:0.75rem;">தளங்கள்</span>
-                                <span class="badge bg-warning-subtle text-dark ms-auto">{{ $completedSitesCount ?? 0 }} Done</span>
+                                <span class="badge bg-warning-subtle text-dark ms-auto">{{ $completedSitesCount ?? 0 }}
+                                    Done</span>
                             </div>
                         </div>
                     </a>
@@ -338,8 +369,8 @@
                                     <i class="bi bi-person-badge-fill"></i>
                                 </div>
                             </div>
-                            <h4 class="fw-bold mb-1 fs-5 fs-md-4" style="color: #7c3aed;">{{ $workerCategoriesCount ?? 0 }} <small
-                                    class="fs-6 text-muted fw-normal">Trades</small></h4>
+                            <h4 class="fw-bold mb-1 fs-5 fs-md-4" style="color: #7c3aed;">{{ $workerCategoriesCount ?? 0 }}
+                                <small class="fs-6 text-muted fw-normal">Trades</small></h4>
                             <div class="d-flex align-items-center small text-muted">
                                 <span class="ta-text" style="font-size:0.75rem;">பிரிவுகள்</span>
                                 <span class="badge bg-primary-subtle text-primary ms-auto">Wages set</span>
@@ -361,75 +392,61 @@
                                     class="fs-6 text-muted fw-normal">Items</small></h4>
                             <div class="d-flex align-items-center small text-muted">
                                 <span class="ta-text" style="font-size:0.75rem;">கிடங்கு</span>
-                                <span class="badge bg-info-subtle text-info ms-auto">{{ ($warehouseLowStockCount ?? 0) > 0 ? $warehouseLowStockCount . ' Low' : 'In stock' }}</span>
+                                <span
+                                    class="badge bg-info-subtle text-info ms-auto">{{ ($warehouseLowStockCount ?? 0) > 0 ? $warehouseLowStockCount . ' Low' : 'In stock' }}</span>
                             </div>
                         </div>
                     </a>
                 </div>
             @else
-                <!-- Admin Standard Cards (No hyperlinks) -->
-                <div class="col-6 col-lg-2">
+                <!-- Admin Standard Cards: Clean 4-card layout without hyperlinks -->
+                <div class="col-6 col-lg-3">
                     <div class="card-stat h-100">
                         <div class="d-flex justify-content-between align-items-start mb-2">
-                            <span class="text-muted small fw-semibold">Today's Income</span>
+                            <span
+                                class="text-muted small fw-semibold">{!! ($selectedPeriod ?? 'today') === 'today' ? "Today's Income" : ($periodLabel . " Income") !!}</span>
                             <div class="stat-icon-wrapper bg-income-subtle">
                                 <i class="bi bi-arrow-down-left-circle-fill"></i>
                             </div>
                         </div>
-                        <h4 class="fw-bold text-success mb-1 fs-5 fs-md-4">₹{{ number_format(($selectedPeriod ?? 'today') === 'today' ? ($todayLedgerIncome ?? 0) : ($periodIncome ?? 0)) }}</h4>
+                        <h4 class="fw-bold text-success mb-1 fs-5 fs-md-4">
+                            ₹{{ number_format(($selectedPeriod ?? 'today') === 'today' ? ($todayLedgerIncome ?? 0) : ($periodIncome ?? 0)) }}
+                        </h4>
                         <div class="d-flex align-items-center small text-muted">
-                            <span class="ta-text" style="font-size:0.75rem;">வரவு (Dr) &bull; {{ $periodLabelTa ?? 'இன்று' }}</span>
+                            <span class="ta-text" style="font-size:0.75rem;">வரவு (Dr) &bull;
+                                {{ $periodLabelTa ?? 'இன்று' }}</span>
                             <span class="badge bg-success-subtle text-success ms-auto">
-                                {{ (($selectedPeriod ?? 'today') === 'today' ? ($todayIncomeCount ?? 0) : ($periodIncomeCount ?? 0)) }} {{ \Illuminate\Support\Str::plural('entry', ($selectedPeriod ?? 'today') === 'today' ? ($todayIncomeCount ?? 0) : ($periodIncomeCount ?? 0)) }}
+                                {{ (($selectedPeriod ?? 'today') === 'today' ? ($todayIncomeCount ?? 0) : ($periodIncomeCount ?? 0)) }}
+                                {{ \Illuminate\Support\Str::plural('entry', ($selectedPeriod ?? 'today') === 'today' ? ($todayIncomeCount ?? 0) : ($periodIncomeCount ?? 0)) }}
                             </span>
                         </div>
                     </div>
                 </div>
 
-                <div class="col-6 col-lg-2">
+                <div class="col-6 col-lg-3">
                     <div class="card-stat h-100">
                         <div class="d-flex justify-content-between align-items-start mb-2">
-                            <span class="text-muted small fw-semibold">Today's Expense</span>
+                            <span
+                                class="text-muted small fw-semibold">{!! ($selectedPeriod ?? 'today') === 'today' ? "Today's Expense" : ($periodLabel . " Expense") !!}</span>
                             <div class="stat-icon-wrapper bg-expense-subtle">
                                 <i class="bi bi-arrow-up-right-circle-fill"></i>
                             </div>
                         </div>
-                        <h4 class="fw-bold text-danger mb-1 fs-5 fs-md-4">₹{{ number_format(($selectedPeriod ?? 'today') === 'today' ? ($todayLedgerExpense ?? 0) : ($periodExpense ?? 0)) }}</h4>
-                        <div class="d-flex align-items-center small text-muted">
-                            <span class="ta-text" style="font-size:0.75rem;">செலவு (Cr) &bull; {{ $periodLabelTa ?? 'இன்று' }}</span>
-                            <span class="badge bg-danger-subtle text-danger ms-auto">
-                                {{ (($selectedPeriod ?? 'today') === 'today' ? ($todayExpenseCount ?? 0) : ($periodExpenseCount ?? 0)) }} {{ \Illuminate\Support\Str::plural('bill', ($selectedPeriod ?? 'today') === 'today' ? ($todayExpenseCount ?? 0) : ($periodExpenseCount ?? 0)) }}
-                            </span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-6 col-lg-2">
-                    <div class="card-stat h-100">
-                        <div class="d-flex justify-content-between align-items-start mb-2">
-                            <span class="text-muted small fw-semibold">Labour on Site</span>
-                            <div class="stat-icon-wrapper bg-workers-subtle">
-                                <i class="bi bi-people-fill"></i>
-                            </div>
-                        </div>
-                        <h4 class="fw-bold text-primary mb-1 fs-5 fs-md-4">
-                            {{ ($selectedPeriod ?? 'today') === 'today' ? ($labourCount ?? 0) : ($periodLabourCount ?? 0) }} 
-                            <small class="fs-6 text-muted fw-normal">Present</small>
+                        <h4 class="fw-bold text-danger mb-1 fs-5 fs-md-4">
+                            ₹{{ number_format(($selectedPeriod ?? 'today') === 'today' ? ($todayLedgerExpense ?? 0) : ($periodExpense ?? 0)) }}
                         </h4>
                         <div class="d-flex align-items-center small text-muted">
-                            <span class="ta-text" style="font-size:0.75rem;">தொழிலாளர்கள்</span>
-                            <span class="text-primary fw-semibold ms-auto">
-                                @if (($selectedPeriod ?? 'today') === 'today')
-                                    {{ $labourSitesBadge ?? '0 Sites' }}
-                                @else
-                                    {{ $periodAllocationsCount ?? 0 }} {{ \Illuminate\Support\Str::plural('Day', $periodAllocationsCount ?? 0) }}
-                                @endif
+                            <span class="ta-text" style="font-size:0.75rem;">செலவு (Cr) &bull;
+                                {{ $periodLabelTa ?? 'இன்று' }}</span>
+                            <span class="badge bg-danger-subtle text-danger ms-auto">
+                                {{ (($selectedPeriod ?? 'today') === 'today' ? ($todayExpenseCount ?? 0) : ($periodExpenseCount ?? 0)) }}
+                                {{ \Illuminate\Support\Str::plural('bill', ($selectedPeriod ?? 'today') === 'today' ? ($todayExpenseCount ?? 0) : ($periodExpenseCount ?? 0)) }}
                             </span>
                         </div>
                     </div>
                 </div>
 
-                <div class="col-6 col-lg-2">
+                <div class="col-6 col-lg-3">
                     <div class="card-stat h-100">
                         <div class="d-flex justify-content-between align-items-start mb-2">
                             <span class="text-muted small fw-semibold">Active Sites</span>
@@ -446,7 +463,7 @@
                     </div>
                 </div>
 
-                <div class="col-6 col-lg-2">
+                <div class="col-6 col-lg-3">
                     <div class="card-stat h-100 border-success border-opacity-50">
                         <div class="d-flex justify-content-between align-items-start mb-2">
                             <span class="text-muted small fw-semibold">Cash in Hand</span>
@@ -458,23 +475,6 @@
                         <div class="d-flex align-items-center small text-muted">
                             <span class="ta-text" style="font-size:0.75rem;">ரொக்கம்</span>
                             <span class="text-success fw-bold ms-auto">Live</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-6 col-lg-2">
-                    <div class="card-stat h-100">
-                        <div class="d-flex justify-content-between align-items-start mb-2">
-                            <span class="text-muted small fw-semibold">Trade Categories</span>
-                            <div class="stat-icon-wrapper bg-warehouse-subtle">
-                                <i class="bi bi-person-badge-fill"></i>
-                            </div>
-                        </div>
-                        <h4 class="fw-bold mb-1 fs-5 fs-md-4" style="color: #7c3aed;">{{ $workerCategoriesCount ?? 0 }} <small
-                                class="fs-6 text-muted fw-normal">Trades</small></h4>
-                        <div class="d-flex align-items-center small text-muted">
-                            <span class="ta-text" style="font-size:0.75rem;">பிரிவுகள்</span>
-                            <span class="badge bg-primary-subtle text-primary ms-auto">Wages set</span>
                         </div>
                     </div>
                 </div>
@@ -510,16 +510,19 @@
                     </div>
                     <div class="row text-center mt-3 pt-3 border-top g-2">
                         <div class="col-4">
-                            <div class="text-muted small" style="font-size: 0.75rem;">{{ $periodLabel ?? 'Period' }} Income (வரவு)</div>
+                            <div class="text-muted small" style="font-size: 0.75rem;">{{ $periodLabel ?? 'Period' }} Income
+                                (வரவு)</div>
                             <div class="fw-bold text-success fs-6">₹{{ number_format($sevenDayIncome ?? 0) }}</div>
                         </div>
                         <div class="col-4">
-                            <div class="text-muted small" style="font-size: 0.75rem;">{{ $periodLabel ?? 'Period' }} Expense (செலவு)</div>
+                            <div class="text-muted small" style="font-size: 0.75rem;">{{ $periodLabel ?? 'Period' }} Expense
+                                (செலவு)</div>
                             <div class="fw-bold text-danger fs-6">₹{{ number_format($sevenDayExpense ?? 0) }}</div>
                         </div>
                         <div class="col-4">
                             <div class="text-muted small" style="font-size: 0.75rem;">Net Balance (மீதி)</div>
-                            <div class="fw-bold text-primary fs-6">{{ ($sevenDayNet ?? 0) >= 0 ? '+' : '' }}₹{{ number_format($sevenDayNet ?? 0) }}</div>
+                            <div class="fw-bold text-primary fs-6">
+                                {{ ($sevenDayNet ?? 0) >= 0 ? '+' : '' }}₹{{ number_format($sevenDayNet ?? 0) }}</div>
                         </div>
                     </div>
                 </div>
@@ -539,11 +542,13 @@
                             </div>
                             <div class="list-group list-group-flush small mb-3">
                                 @forelse ($activeBanksList ?? [] as $bank)
-                                    <div class="list-group-item px-0 py-2 d-flex justify-content-between align-items-center border-0">
+                                    <div
+                                        class="list-group-item px-0 py-2 d-flex justify-content-between align-items-center border-0">
                                         <div class="me-2 text-truncate">
                                             <span class="fw-semibold d-block text-dark text-truncate">{{ $bank->bank_name }}</span>
                                             <small class="text-muted">
-                                                {{ $bank->branches_count }} {{ \Illuminate\Support\Str::plural('Branch', $bank->branches_count) }}
+                                                {{ $bank->branches_count }}
+                                                {{ \Illuminate\Support\Str::plural('Branch', $bank->branches_count) }}
                                                 @if ($bank->branches && $bank->branches->isNotEmpty())
                                                     ({{ $bank->branches->pluck('branch_name')->take(2)->join(', ') }})
                                                 @endif
@@ -553,7 +558,8 @@
                                             </small>
                                         </div>
                                         <span class="badge bg-primary-subtle text-primary flex-shrink-0">
-                                            {{ $bank->branches_count }} {{ \Illuminate\Support\Str::plural('Branch', $bank->branches_count) }}
+                                            {{ $bank->branches_count }}
+                                            {{ \Illuminate\Support\Str::plural('Branch', $bank->branches_count) }}
                                         </span>
                                     </div>
                                 @empty
@@ -566,9 +572,56 @@
 
                         <div class="mt-auto pt-3 border-top d-flex justify-content-between align-items-center">
                             <span class="small text-muted">
-                                <i class="bi bi-bank me-1"></i> {{ $activeBanksCount ?? 0 }} Banks ({{ $activeBranchesCount ?? 0 }} Branches)
+                                <i class="bi bi-bank me-1"></i> {{ $activeBanksCount ?? 0 }} Banks
+                                ({{ $activeBranchesCount ?? 0 }} Branches)
                             </span>
                             <a href="{{ route('banks.index') }}" class="btn btn-sm btn-outline-primary py-1">View Banks</a>
+                        </div>
+                    </div>
+                </div>
+            @elseif (auth()->user()?->isAdmin())
+                <!-- Expense Distribution by Source for Admin -->
+                <div class="col-12 col-lg-4">
+                    <div class="card-custom p-3 p-md-4 h-100 d-flex flex-column justify-content-between">
+                        <div>
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <div>
+                                    <h6 class="fw-bold mb-0 text-dark">Expense Distribution (செலவு வகைப்பாடு)</h6>
+                                    <small class="text-muted">By Category & Source</small>
+                                </div>
+                                <span
+                                    class="badge bg-danger-subtle text-danger">₹{{ number_format($totalExpenseBreakdown ?? 0) }}</span>
+                            </div>
+                            <div style="height: 180px; position: relative;">
+                                <canvas id="expenseDonutChart"></canvas>
+                            </div>
+                        </div>
+
+                        <div class="mt-3 pt-3 border-top">
+                            <div class="d-flex align-items-center justify-content-between mb-2">
+                                <span class="small fw-bold text-dark"><i class="bi bi-pie-chart-fill text-primary me-1"></i> Top
+                                    Expense Sectors</span>
+                                <a href="{{ route('reports.admin.profit-loss') }}"
+                                    class="small text-primary text-decoration-none">P&L Report &rarr;</a>
+                            </div>
+                            <div class="list-group list-group-flush small">
+                                @forelse ($topExpenseItems ?? [] as $item)
+                                    <div
+                                        class="list-group-item px-0 py-1 d-flex justify-content-between align-items-center border-0">
+                                        <span class="fw-semibold text-truncate me-2" style="max-width: 190px;"
+                                            title="{{ $item['label'] }}">
+                                            {{ $item['label'] }}
+                                        </span>
+                                        <span class="badge bg-light text-dark border">
+                                            ₹{{ number_format((float) $item['value']) }} ({{ $item['percentage'] }}%)
+                                        </span>
+                                    </div>
+                                @empty
+                                    <div class="list-group-item px-0 py-1 text-muted border-0 small">
+                                        No expense records found.
+                                    </div>
+                                @endforelse
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -579,7 +632,8 @@
                         <div>
                             <div class="d-flex justify-content-between align-items-center mb-3">
                                 <h6 class="fw-bold mb-0 text-dark">Trade Category Breakdown</h6>
-                                <span class="badge bg-primary-subtle text-primary">{{ $totalTradeLabourers ?? 0 }} Labourers</span>
+                                <span class="badge bg-primary-subtle text-primary">{{ $totalTradeLabourers ?? 0 }}
+                                    Labourers</span>
                             </div>
                             <div style="height: 180px; position: relative;">
                                 <canvas id="workersPieChart"></canvas>
@@ -589,7 +643,7 @@
                         <div class="mt-3 pt-3 border-top">
                             <div class="d-flex align-items-center justify-content-between mb-2">
                                 <span class="small fw-bold text-dark"><i class="bi bi-tag-fill text-primary me-1"></i> Trade
-                                     Wage Rates</span>
+                                    Wage Rates</span>
                                 <a href="{{ url('/worker-categories') }}"
                                     class="small text-primary text-decoration-none">Manage</a>
                             </div>
@@ -598,7 +652,9 @@
                                     <div
                                         class="list-group-item px-0 py-1 d-flex justify-content-between align-items-center border-0">
                                         <span class="fw-semibold">{{ $trade->name_ta }} ({{ $trade->name_en }})</span>
-                                        <span class="badge bg-primary-subtle text-primary">₹{{ number_format((float) $trade->daily_wage) }} / day</span>
+                                        <span
+                                            class="badge bg-primary-subtle text-primary">₹{{ number_format((float) $trade->daily_wage) }}
+                                            / day</span>
                                     </div>
                                 @empty
                                     <div class="list-group-item px-0 py-1 text-muted border-0 small">
@@ -616,39 +672,7 @@
         @if (auth()->user()?->isAdmin())
             <!-- Admin Essential Details & Financial Summary -->
             <div class="row g-3 g-md-4 mb-3 mb-md-4">
-                <div class="col-12 col-md-4">
-                    <div class="card-custom p-3 p-md-4 h-100 bg-white border">
-                        <div class="d-flex justify-content-between align-items-center mb-2">
-                            <span class="small fw-semibold text-muted">All-Time Net Balance (ஒட்டுமொத்த மீதி)</span>
-                            <span class="badge bg-success-subtle text-success">Overall</span>
-                        </div>
-                        <h3 class="fw-bold {{ ($ledgerClosingBalance ?? 0) >= 0 ? 'text-success' : 'text-danger' }} mb-1">
-                            ₹{{ number_format($ledgerClosingBalance ?? 0) }}
-                        </h3>
-                        <div class="small text-muted d-flex justify-content-between pt-2 border-top mt-2">
-                            <span>Income: <strong class="text-success">₹{{ number_format($ledgerTotalIncome ?? 0) }}</strong></span>
-                            <span>Expense: <strong class="text-danger">₹{{ number_format($ledgerTotalExpense ?? 0) }}</strong></span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-12 col-md-4">
-                    <div class="card-custom p-3 p-md-4 h-100 bg-white border">
-                        <div class="d-flex justify-content-between align-items-center mb-2">
-                            <span class="small fw-semibold text-muted">{{ $periodLabel ?? 'Period' }} Labour & Wages (கூலி)</span>
-                            <span class="badge bg-primary-subtle text-primary">{{ $periodLabelTa ?? 'இன்று' }}</span>
-                        </div>
-                        <h3 class="fw-bold text-primary mb-1">
-                            ₹{{ number_format($periodWagesTotal ?? 0) }}
-                        </h3>
-                        <div class="small text-muted d-flex justify-content-between pt-2 border-top mt-2">
-                            <span>Days Logged: <strong>{{ $periodAllocationsCount ?? 0 }}</strong></span>
-                            <span>Total Labour: <strong>{{ $periodLabourCount ?? 0 }} Present</strong></span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-12 col-md-4">
+                <div class="col-12 col-md-6">
                     <div class="card-custom p-3 p-md-4 h-100 bg-white border">
                         <div class="d-flex justify-content-between align-items-center mb-2">
                             <span class="small fw-semibold text-muted">Supplier Payables (சப்ளையர் பாக்கி)</span>
@@ -660,6 +684,23 @@
                         <div class="small text-muted d-flex justify-content-between pt-2 border-top mt-2">
                             <span>Suppliers: <strong>{{ $activeSuppliersCount ?? 0 }} Active</strong></span>
                             <span>Period Purchases: <strong>₹{{ number_format($periodPurchasesTotal ?? 0) }}</strong></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-12 col-md-6">
+                    <div class="card-custom p-3 p-md-4 h-100 bg-white border">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="small fw-semibold text-muted">Purchase Orders Overview (கொள்முதல் விவரம்)</span>
+                            <span class="badge bg-primary-subtle text-primary">{{ $totalPurchaseOrdersCount ?? 0 }}
+                                Orders</span>
+                        </div>
+                        <h3 class="fw-bold text-primary mb-1">
+                            ₹{{ number_format($totalSupplierPurchases ?? 0) }}
+                        </h3>
+                        <div class="small text-muted d-flex justify-content-between pt-2 border-top mt-2">
+                            <span>Total Orders: <strong>{{ $totalPurchaseOrdersCount ?? 0 }} POs</strong></span>
+                            <span>Materials Catalog: <strong>{{ $totalSupplierMaterialsCount ?? 0 }} Items</strong></span>
                         </div>
                     </div>
                 </div>
@@ -694,17 +735,20 @@
                                     @forelse ($activeSites ?? [] as $site)
                                         <tr>
                                             <td>
-                                                <a href="{{ route('sites.show', $site->encrypted_id) }}" class="text-decoration-none text-dark fw-bold hover-primary">
+                                                <a href="{{ route('sites.show', $site->encrypted_id) }}"
+                                                    class="text-decoration-none text-dark fw-bold hover-primary">
                                                     {{ $site->name }}
                                                 </a>
-                                                <div class="text-muted small">{{ $site->location }} &bull; {{ $site->client?->name ?? 'N/A' }}</div>
+                                                <div class="text-muted small">{{ $site->location }} &bull;
+                                                    {{ $site->client?->name ?? 'N/A' }}</div>
                                             </td>
-                                            <td><span class="badge bg-info-subtle text-info border">{{ $site->work_type }}</span></td>
+                                            <td><span class="badge bg-info-subtle text-info border">{{ $site->work_type }}</span>
+                                            </td>
                                             <td class="fw-semibold">₹{{ number_format((float) $site->estimated_budget) }}</td>
                                             <td class="text-danger fw-semibold">₹{{ number_format((float) $site->spent) }}</td>
                                             <td>
                                                 @php
-                                                    $statusBadgeClass = match($site->status) {
+                                                    $statusBadgeClass = match ($site->status) {
                                                         'Completed' => 'bg-success-subtle text-success',
                                                         'Planning' => 'bg-info-subtle text-info',
                                                         'On Hold' => 'bg-secondary-subtle text-dark',
@@ -725,65 +769,152 @@
                     </div>
                 </div>
 
-                <!-- Today's Notebook Daily Wage Calculation Snapshot -->
+                <!-- Today's Site Daily Entry or Recent Activity for Admin -->
                 <div class="col-12 col-lg-6">
-                    <div class="card-custom p-3 p-md-4 h-100 d-flex flex-column justify-content-between">
-                        <div>
-                            <div class="d-flex justify-content-between align-items-center mb-3">
-                                <div>
-                                    <h6 class="fw-bold mb-0 text-dark">Today's Site Daily Entry (நோட்புக் கூலி)</h6>
-                                    <small class="text-muted">
-                                        @if (!empty($latestAllocation))
-                                            {{ $latestAllocation->projectSite?->name ?? 'Site' }} (Formula: {{ $latestAllocation->trade_summary ?? 'Wage Entry' }})
-                                        @else
-                                            No daily allocation recorded yet
-                                        @endif
-                                    </small>
+                    @if (auth()->user()?->isAdmin())
+                        <!-- Recent Financial Activity Log for Admin -->
+                        <div class="card-custom p-3 p-md-4 h-100 d-flex flex-column justify-content-between">
+                            <div>
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <div>
+                                        <h6 class="fw-bold mb-0 text-dark">Recent Ledger Transactions (சமீபத்திய கணக்கு பதிவுகள்)
+                                        </h6>
+                                        <small class="text-muted">Latest financial credit and debit vouchers</small>
+                                    </div>
+                                    <a href="{{ route('ledger.index') }}" class="btn btn-outline-primary btn-sm">Daily Ledger</a>
                                 </div>
-                                <a href="{{ url('/weekly-wages') }}" class="btn btn-outline-secondary btn-sm">Full Sheet</a>
+
+                                <div class="table-responsive">
+                                    <table class="table table-custom table-hover mb-0">
+                                        <thead>
+                                            <tr>
+                                                <th>Date</th>
+                                                <th>Party / Description</th>
+                                                <th>Type</th>
+                                                <th>Amount</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @forelse ($recentLedgers ?? [] as $entry)
+                                                <tr>
+                                                    <td>
+                                                        <span class="text-muted small">
+                                                            @if ($entry->entry_date?->isToday())
+                                                                <span class="badge bg-primary-subtle text-primary">Today</span>
+                                                            @else
+                                                                {{ $entry->entry_date?->format('d M') }}
+                                                            @endif
+                                                        </span>
+                                                    </td>
+                                                    <td>
+                                                        <div class="fw-bold text-dark text-truncate" style="max-width: 180px;"
+                                                            title="{{ $entry->description ?: ($entry->transaction_type_name ?: $entry->source) }}">
+                                                            {{ $entry->description ?: ($entry->transaction_type_name ?: $entry->source) }}
+                                                        </div>
+                                                        <small class="text-muted d-block text-truncate" style="max-width: 180px;">
+                                                            {{ $entry->source }}
+                                                        </small>
+                                                    </td>
+                                                    <td>
+                                                        @if ($entry->flow === 'income')
+                                                            <span class="badge bg-success-subtle text-success">வரவு</span>
+                                                        @else
+                                                            <span class="badge bg-danger-subtle text-danger">செலவு</span>
+                                                        @endif
+                                                    </td>
+                                                    <td>
+                                                        <span
+                                                            class="{{ $entry->flow === 'income' ? 'text-success' : 'text-danger' }} fw-bold small">
+                                                            {{ $entry->flow === 'income' ? '+' : '-' }}₹{{ number_format((float) $entry->amount) }}
+                                                        </span>
+                                                    </td>
+                                                </tr>
+                                            @empty
+                                                <tr>
+                                                    <td colspan="4" class="text-center text-muted py-3">No transactions recorded yet.
+                                                    </td>
+                                                </tr>
+                                            @endforelse
+                                        </tbody>
+                                    </table>
+                                </div>
                             </div>
 
-                            @if (!empty($latestAllocation))
-                                <!-- Notebook Formula Card -->
-                                <div class="p-3 mb-3 rounded-3" style="background: #f8fafc; border: 1px dashed #cbd5e1;">
-                                    <div class="d-flex justify-content-between align-items-center mb-2">
-                                        <span class="fw-bold small text-primary"><i class="bi bi-calculator me-1"></i> Wage Calculation Breakdown:</span>
-                                        <span class="badge bg-success">
-                                            {{ $latestAllocation->date?->isToday() ? 'Today' : $latestAllocation->date?->format('d M') }}: ₹{{ number_format((float) $latestAllocation->grand_total) }}
-                                        </span>
-                                    </div>
-                                    <div class="font-monospace text-dark small bg-white p-2 rounded border mb-2">
-                                        {!! $latestAllocationFormulaString !!}
-                                    </div>
-                                    <div class="row text-center g-2 small">
-                                        @foreach ($latestAllocationPreviewItems ?? [] as $previewItem)
-                                            <div class="col-4 {{ ! $loop->last ? 'border-end' : '' }}">
-                                                <span class="text-muted d-block text-truncate" style="font-size: 0.72rem;">{{ $previewItem['label'] }}</span>
-                                                <span class="fw-bold">{{ $previewItem['value'] }}</span>
-                                            </div>
-                                        @endforeach
-                                    </div>
-                                </div>
-                            @else
-                                <div class="p-4 text-center my-auto rounded-3 border border-dashed mb-3">
-                                    <i class="bi bi-journal-plus text-primary fs-2 mb-2 d-block"></i>
-                                    <p class="text-muted small mb-0">No daily allocation logged for today yet. Record daily attendance to generate wages automatically.</p>
-                                </div>
-                            @endif
+                            <div class="d-flex justify-content-between align-items-center bg-light p-2 rounded mt-3">
+                                <span class="small text-muted">
+                                    <i class="bi bi-book-half me-1"></i> Running Ledger Records
+                                </span>
+                                <a href="{{ route('ledger.index') }}" class="btn btn-sm btn-outline-secondary py-1">View Full
+                                    Ledger</a>
+                            </div>
                         </div>
+                    @else
+                        <!-- Today's Notebook Daily Wage Calculation Snapshot for Site Manager -->
+                        <div class="card-custom p-3 p-md-4 h-100 d-flex flex-column justify-content-between">
+                            <div>
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <div>
+                                        <h6 class="fw-bold mb-0 text-dark">Today's Site Daily Entry (நோட்புக் கூலி)</h6>
+                                        <small class="text-muted">
+                                            @if (!empty($latestAllocation))
+                                                {{ $latestAllocation->projectSite?->name ?? 'Site' }} (Formula:
+                                                {{ $latestAllocation->trade_summary ?? 'Wage Entry' }})
+                                            @else
+                                                No daily allocation recorded yet
+                                            @endif
+                                        </small>
+                                    </div>
+                                    <a href="{{ url('/weekly-wages') }}" class="btn btn-outline-secondary btn-sm">Full Sheet</a>
+                                </div>
 
-                        <div class="d-flex justify-content-between align-items-center bg-light p-2 rounded mt-auto">
-                            <span class="small text-muted">
-                                <i class="bi bi-clock-history me-1"></i>
                                 @if (!empty($latestAllocation))
-                                    Recorded {{ $latestAllocation->created_at?->diffForHumans() ?? $latestAllocation->date?->format('d M Y') }}
+                                    <!-- Notebook Formula Card -->
+                                    <div class="p-3 mb-3 rounded-3" style="background: #f8fafc; border: 1px dashed #cbd5e1;">
+                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                            <span class="fw-bold small text-primary"><i class="bi bi-calculator me-1"></i> Wage
+                                                Calculation Breakdown:</span>
+                                            <span class="badge bg-success">
+                                                {{ $latestAllocation->date?->isToday() ? 'Today' : $latestAllocation->date?->format('d M') }}:
+                                                ₹{{ number_format((float) $latestAllocation->grand_total) }}
+                                            </span>
+                                        </div>
+                                        <div class="font-monospace text-dark small bg-white p-2 rounded border mb-2">
+                                            {!! $latestAllocationFormulaString !!}
+                                        </div>
+                                        <div class="row text-center g-2 small">
+                                            @foreach ($latestAllocationPreviewItems ?? [] as $previewItem)
+                                                <div class="col-4 {{ !$loop->last ? 'border-end' : '' }}">
+                                                    <span class="text-muted d-block text-truncate"
+                                                        style="font-size: 0.72rem;">{{ $previewItem['label'] }}</span>
+                                                    <span class="fw-bold">{{ $previewItem['value'] }}</span>
+                                                </div>
+                                            @endforeach
+                                        </div>
+                                    </div>
                                 @else
-                                    Ready for today's entry
+                                    <div class="p-4 text-center my-auto rounded-3 border border-dashed mb-3">
+                                        <i class="bi bi-journal-plus text-primary fs-2 mb-2 d-block"></i>
+                                        <p class="text-muted small mb-0">No daily allocation logged for today yet. Record daily
+                                            attendance to generate wages automatically.</p>
+                                    </div>
                                 @endif
-                            </span>
-                            <a href="{{ url('/daily-allocation') }}" class="btn btn-sm btn-deiveni py-1">Record Daily Allocation</a>
+                            </div>
+
+                            <div class="d-flex justify-content-between align-items-center bg-light p-2 rounded mt-auto">
+                                <span class="small text-muted">
+                                    <i class="bi bi-clock-history me-1"></i>
+                                    @if (!empty($latestAllocation))
+                                        Recorded
+                                        {{ $latestAllocation->created_at?->diffForHumans() ?? $latestAllocation->date?->format('d M Y') }}
+                                    @else
+                                        Ready for today's entry
+                                    @endif
+                                </span>
+                                <a href="{{ url('/daily-allocation') }}" class="btn btn-sm btn-deiveni py-1">Record Daily
+                                    Allocation</a>
+                            </div>
                         </div>
-                    </div>
+                    @endif
                 </div>
             </div>
         @elseif (auth()->user()?->isAccountManager())
@@ -825,12 +956,14 @@
                                                 </span>
                                             </td>
                                             <td>
-                                                <div class="fw-bold text-dark text-truncate" style="max-width: 240px;" title="{{ $entry->description ?: ($entry->transaction_type_name ?: $entry->source) }}">
+                                                <div class="fw-bold text-dark text-truncate" style="max-width: 240px;"
+                                                    title="{{ $entry->description ?: ($entry->transaction_type_name ?: $entry->source) }}">
                                                     {{ $entry->description ?: ($entry->transaction_type_name ?: $entry->source) }}
                                                 </div>
                                                 <small class="text-muted d-block text-truncate" style="max-width: 240px;">
                                                     @if ($entry->source === 'Construction')
-                                                        {{ $entry->site_name ?? $entry->projectSite?->name ?? 'Site' }} &bull; {{ $entry->client_name ?? $entry->projectSite?->client?->name ?? 'Client' }}
+                                                        {{ $entry->site_name ?? $entry->projectSite?->name ?? 'Site' }} &bull;
+                                                        {{ $entry->client_name ?? $entry->projectSite?->client?->name ?? 'Client' }}
                                                     @elseif ($entry->source === 'Supplier')
                                                         {{ $entry->supplier_name ?? $entry->supplier?->name ?? 'Supplier' }}
                                                     @elseif ($entry->source === 'Bank Valuation' || $entry->source === 'Bank')
@@ -852,7 +985,8 @@
                                                 @endif
                                             </td>
                                             <td>
-                                                <span class="{{ $entry->flow === 'income' ? 'text-success' : 'text-danger' }} fw-bold">
+                                                <span
+                                                    class="{{ $entry->flow === 'income' ? 'text-success' : 'text-danger' }} fw-bold">
                                                     {{ $entry->flow === 'income' ? '+' : '-' }}₹{{ number_format((float) $entry->amount) }}
                                                 </span>
                                             </td>
@@ -860,7 +994,9 @@
                                                 <div class="d-flex align-items-center gap-1">
                                                     <span class="badge bg-light text-dark border">{{ $entry->source }}</span>
                                                     @if (!empty($entry->receipt_image))
-                                                        <a href="{{ asset($entry->receipt_image) }}" target="_blank" class="badge bg-info-subtle text-info text-decoration-none" title="View Receipt">
+                                                        <a href="{{ asset($entry->receipt_image) }}" target="_blank"
+                                                            class="badge bg-info-subtle text-info text-decoration-none"
+                                                            title="View Receipt">
                                                             <i class="bi bi-paperclip"></i>
                                                         </a>
                                                     @endif
@@ -873,7 +1009,8 @@
                                                 <i class="bi bi-journal-x fs-3 d-block mb-1 text-secondary"></i>
                                                 No ledger transactions recorded yet.
                                                 <div class="mt-2">
-                                                    <a href="{{ route('ledger.index') }}" class="btn btn-sm btn-outline-primary">Record Ledger Entry</a>
+                                                    <a href="{{ route('ledger.index') }}"
+                                                        class="btn btn-sm btn-outline-primary">Record Ledger Entry</a>
                                                 </div>
                                             </td>
                                         </tr>
@@ -899,7 +1036,8 @@
                             <div class="p-3 mb-3 rounded-3" style="background: #f8fafc; border: 1px dashed #cbd5e1;">
                                 <div class="d-flex justify-content-between align-items-center mb-1">
                                     <span class="small fw-semibold text-muted">Rental Master Summary</span>
-                                    <span class="badge bg-warning-subtle text-dark">{{ $activeRentalUnitsCount ?? 0 }} Units</span>
+                                    <span class="badge bg-warning-subtle text-dark">{{ $activeRentalUnitsCount ?? 0 }}
+                                        Units</span>
                                 </div>
                                 <div class="fw-bold text-dark fs-5 mb-2">
                                     ₹{{ number_format($totalMonthlyRent ?? 0) }}
@@ -907,9 +1045,12 @@
                                 </div>
                                 <div class="d-flex justify-content-between align-items-center">
                                     <span class="small text-muted">
-                                        {{ $activePropertiesCount ?? 0 }} {{ \Illuminate\Support\Str::plural('Property', $activePropertiesCount ?? 0) }} &bull; {{ $occupiedRentalUnitsCount ?? 0 }} Occupied
+                                        {{ $activePropertiesCount ?? 0 }}
+                                        {{ \Illuminate\Support\Str::plural('Property', $activePropertiesCount ?? 0) }} &bull;
+                                        {{ $occupiedRentalUnitsCount ?? 0 }} Occupied
                                     </span>
-                                    <a href="{{ route('property-types.index') }}" class="small text-primary text-decoration-none">
+                                    <a href="{{ route('property-types.index') }}"
+                                        class="small text-primary text-decoration-none">
                                         Manage Rentals &rarr;
                                     </a>
                                 </div>
@@ -918,15 +1059,19 @@
                             <div class="p-3 rounded-3" style="background: #f8fafc; border: 1px dashed #cbd5e1;">
                                 <div class="d-flex justify-content-between align-items-center mb-1">
                                     <span class="small fw-semibold text-muted">Supplier & Purchase Payables</span>
-                                    <span class="badge bg-secondary-subtle text-dark">{{ $activeSuppliersCount ?? 0 }} Suppliers</span>
+                                    <span class="badge bg-secondary-subtle text-dark">{{ $activeSuppliersCount ?? 0 }}
+                                        Suppliers</span>
                                 </div>
                                 <div class="fw-bold text-danger fs-5 mb-2">
                                     ₹{{ number_format(($pendingSupplierPayables ?? 0) > 0 ? $pendingSupplierPayables : ($totalSupplierPurchases ?? 0)) }}
-                                    <small class="text-muted fs-6 fw-normal">{{ ($pendingSupplierPayables ?? 0) > 0 ? 'Pending' : 'Total' }}</small>
+                                    <small
+                                        class="text-muted fs-6 fw-normal">{{ ($pendingSupplierPayables ?? 0) > 0 ? 'Pending' : 'Total' }}</small>
                                 </div>
                                 <div class="d-flex justify-content-between align-items-center">
                                     <span class="small text-muted">
-                                        {{ $totalPurchaseOrdersCount ?? 0 }} {{ \Illuminate\Support\Str::plural('Purchase Order', $totalPurchaseOrdersCount ?? 0) }} &bull; {{ $activeSuppliersCount ?? 0 }} Active
+                                        {{ $totalPurchaseOrdersCount ?? 0 }}
+                                        {{ \Illuminate\Support\Str::plural('Purchase Order', $totalPurchaseOrdersCount ?? 0) }}
+                                        &bull; {{ $activeSuppliersCount ?? 0 }} Active
                                     </span>
                                     <a href="{{ route('suppliers.index') }}" class="small text-primary text-decoration-none">
                                         Manage Suppliers &rarr;
@@ -945,115 +1090,8 @@
                 </div>
             </div>
         @endif
-
-        <!-- Quick Navigation Modules Grid -->
-        <div class="card-custom p-3 p-md-4 mb-4">
-            <h6 class="fw-bold mb-3 text-dark">Quick Navigation (முதன்மை மெனுக்கள்)</h6>
-            <div class="row g-2 g-md-3">
-                @if (auth()->user()?->canAccess('worker_categories') ?? true)
-                    <div class="col-6 col-md-4 col-lg-2">
-                        <a href="{{ url('/worker-categories') }}"
-                            class="btn btn-outline-light text-dark border p-3 w-100 text-center h-100 d-flex flex-column align-items-center justify-content-center">
-                            <i class="bi bi-person-badge-fill text-primary fs-4 mb-1"></i>
-                            <span class="fw-semibold small">Worker Categories</span>
-                            <small class="ta-text text-muted" style="font-size:0.7rem;">தொழிலாளர் பிரிவுகள்</small>
-                        </a>
-                    </div>
-                @endif
-
-                @if (auth()->user()?->canAccess('banks') ?? true)
-                    <div class="col-6 col-md-4 col-lg-2">
-                        <a href="{{ url('/banks') }}"
-                            class="btn btn-outline-light text-dark border p-3 w-100 text-center h-100 d-flex flex-column align-items-center justify-content-center">
-                            <i class="bi bi-bank text-primary fs-4 mb-1"></i>
-                            <span class="fw-semibold small">Bank Master</span>
-                            <small class="ta-text text-muted" style="font-size:0.7rem;">வங்கி தகவல்</small>
-                        </a>
-                    </div>
-                @endif
-
-                @if (auth()->user()?->canAccess('rentals') ?? true)
-                    <div class="col-6 col-md-4 col-lg-2">
-                        <a href="{{ url('/rentals') }}"
-                            class="btn btn-outline-light text-dark border p-3 w-100 text-center h-100 d-flex flex-column align-items-center justify-content-center">
-                            <i class="bi bi-buildings text-warning fs-4 mb-1"></i>
-                            <span class="fw-semibold small">Rental Master</span>
-                            <small class="ta-text text-muted" style="font-size:0.7rem;">வாடகை தகவல்</small>
-                        </a>
-                    </div>
-                @endif
-
-                @if (auth()->user()?->canAccess('suppliers') ?? true)
-                    <div class="col-6 col-md-4 col-lg-2">
-                        <a href="{{ url('/suppliers') }}"
-                            class="btn btn-outline-light text-dark border p-3 w-100 text-center h-100 d-flex flex-column align-items-center justify-content-center">
-                            <i class="bi bi-truck text-secondary fs-4 mb-1"></i>
-                            <span class="fw-semibold small">Suppliers</span>
-                            <small class="ta-text text-muted" style="font-size:0.7rem;">சப்ளையர்கள்</small>
-                        </a>
-                    </div>
-                @endif
-
-                @if (auth()->user()?->canAccess('daily_allocation') ?? true)
-                    <div class="col-6 col-md-4 col-lg-2">
-                        <a href="{{ url('/daily-allocation') }}"
-                            class="btn btn-outline-light text-dark border p-3 w-100 text-center h-100 d-flex flex-column align-items-center justify-content-center">
-                            <i class="bi bi-calendar-check-fill text-primary fs-4 mb-1"></i>
-                            <span class="fw-semibold small">Daily Allocation</span>
-                            <small class="ta-text text-muted" style="font-size:0.7rem;">தினசரி ஒதுக்கீடு</small>
-                        </a>
-                    </div>
-                @endif
-
-                @if (auth()->user()?->canAccess('weekly_wages') ?? true)
-                    <div class="col-6 col-md-4 col-lg-2">
-                        <a href="{{ url('/weekly-wages') }}"
-                            class="btn btn-outline-light text-dark border p-3 w-100 text-center h-100 d-flex flex-column align-items-center justify-content-center">
-                            <i class="bi bi-journal-text text-success fs-4 mb-1"></i>
-                            <span class="fw-semibold small">Weekly Wages</span>
-                            <small class="ta-text text-muted" style="font-size:0.7rem;">வார கூலி</small>
-                        </a>
-                    </div>
-                @endif
-
-                @if (auth()->user()?->canAccess('site_cash') ?? true)
-                    <div class="col-6 col-md-4 col-lg-2">
-                        <a href="{{ url('/site-cash') }}"
-                            class="btn btn-outline-light text-dark border p-3 w-100 text-center h-100 d-flex flex-column align-items-center justify-content-center">
-                            <i class="bi bi-cash-coin text-success fs-4 mb-1"></i>
-                            <span class="fw-semibold small">Site Cash</span>
-                            <small class="ta-text text-muted" style="font-size:0.7rem;">தள ரொக்கம்</small>
-                        </a>
-                    </div>
-                @endif
-
-                @if (auth()->user()?->canAccess('ledger') ?? true)
-                    <div class="col-6 col-md-4 col-lg-2">
-                        <a href="{{ url('/ledger') }}"
-                            class="btn btn-outline-light text-dark border p-3 w-100 text-center h-100 d-flex flex-column align-items-center justify-content-center">
-                            <i class="bi bi-book-half text-info fs-4 mb-1"></i>
-                            <span class="fw-semibold small">Daily Ledger</span>
-                            <small class="ta-text text-muted" style="font-size:0.7rem;">தினசரி பேரேடு</small>
-                        </a>
-                    </div>
-                @endif
-
-                @if ($reportTargetUrl)
-                    <div class="col-6 col-md-4 col-lg-2">
-                        <a href="{{ $reportTargetUrl }}"
-                            class="btn btn-outline-light text-dark border p-3 w-100 text-center h-100 d-flex flex-column align-items-center justify-content-center">
-                            <i class="bi bi-file-earmark-bar-graph-fill text-danger fs-4 mb-1"></i>
-                            <span class="fw-semibold small">Reports & Export</span>
-                            <small class="ta-text text-muted" style="font-size:0.7rem;">அறிக்கைகள்</small>
-                        </a>
-                    </div>
-                @endif
-            </div>
-        </div>
-
     </div>
 @endsection
-
 @push('scripts')
     <script>
         $(document).ready(function () {
@@ -1103,6 +1141,29 @@
                         datasets: [{
                             data: {!! json_encode(!empty($tradeChartData) ? $tradeChartData : [4, 6, 10, 2, 2]) !!},
                             backgroundColor: ['#2563eb', '#0284c7', '#f59e0b', '#8b5cf6', '#10b981', '#ec4899', '#f97316'],
+                            borderWidth: 2,
+                            borderColor: '#ffffff'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { position: 'bottom' } },
+                        cutout: '65%'
+                    }
+                });
+            }
+
+            const expenseDonutCanvas = document.getElementById('expenseDonutChart');
+            if (expenseDonutCanvas) {
+                const ctxExpenseDonut = expenseDonutCanvas.getContext('2d');
+                new Chart(ctxExpenseDonut, {
+                    type: 'doughnut',
+                    data: {
+                        labels: {!! json_encode(!empty($expenseBreakdownLabels) ? $expenseBreakdownLabels : ['Construction Sites', 'Supplier Purchases', 'Office & Admin']) !!},
+                        datasets: [{
+                            data: {!! json_encode(!empty($expenseBreakdownData) ? $expenseBreakdownData : [100, 50, 25]) !!},
+                            backgroundColor: ['#dc2626', '#f59e0b', '#2563eb', '#8b5cf6', '#10b981', '#06b6d4'],
                             borderWidth: 2,
                             borderColor: '#ffffff'
                         }]

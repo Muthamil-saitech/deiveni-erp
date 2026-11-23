@@ -9,9 +9,10 @@ interface DashboardServiceInterface
     /**
      * Get aggregated dashboard data for the authenticated user based on role.
      *
+     * @param  array{start_date?: ?string, end_date?: ?string}  $customDates
      * @return array<string, mixed>
      */
-    public function getDashboardData(?User $user = null, string $period = 'today'): array;
+    public function getDashboardData(?User $user = null, string $period = 'today', array $customDates = []): array;
 
     /**
      * Get dynamic site manager dashboard metrics, chart datasets, and tables.

@@ -84,8 +84,8 @@ test('admin user with owner role slug sees the admin dashboard', function () {
     $response->assertStatus(200);
     $response->assertSee("Today's Income", false);
     $response->assertSee("Today's Expense", false);
-    $response->assertSee('Labour on Site', false);
     $response->assertSee('Active Sites', false);
     $response->assertSee('Cash in Hand', false);
-    $response->assertSee('Trade Categories', false);
+    $response->assertSee('Expense Distribution', false);
+    $response->assertSee('Supplier Payables', false);
 });

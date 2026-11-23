@@ -346,11 +346,13 @@ test('admin user with owner role slug sees admin dashboard', function () {
     $response->assertStatus(200);
     $response->assertSee("Today's Income", false);
     $response->assertSee("Today's Expense", false);
+    $response->assertSee('Active Sites', false);
     $response->assertSee('Cash in Hand', false);
-    $response->assertSee('Trade Categories', false);
+    $response->assertSee('Expense Distribution', false);
+    $response->assertSee('Supplier Payables', false);
 });
 
-test('admin can filter dashboard data by period tabs', function (string $period) {
+test('admin can filter dashboard data by period tabs and custom dates', function (string $period) {
     $admin = User::where('role', 'owner')->first() ?? User::factory()->create([
         'name' => 'Owner Admin',
         'role' => 'owner',
@@ -359,7 +361,6 @@ test('admin can filter dashboard data by period tabs', function (string $period)
     $response = $this->actingAs($admin)->get('/dashboard?period='.$period);
 
     $response->assertStatus(200);
-    $response->assertSee('கால வடிப்பான்', false);
     $response->assertSee(match ($period) {
         'this_week' => 'This Week',
         'this_month' => 'This Month',
@@ -367,3 +368,15 @@ test('admin can filter dashboard data by period tabs', function (string $period)
         default => 'Today',
     }, false);
 })->with(['today', 'this_week', 'this_month', 'this_year']);
+
+test('admin can filter dashboard by custom date range', function () {
+    $admin = User::where('role', 'owner')->first() ?? User::factory()->create([
+        'name' => 'Owner Admin',
+        'role' => 'owner',
+    ]);
+
+    $response = $this->actingAs($admin)->get('/dashboard?period=custom&start_date=2026-11-01&end_date=2026-11-20');
+
+    $response->assertStatus(200);
+    $response->assertSee('01 Nov - 20 Nov 2026', false);
+});

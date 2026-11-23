@@ -24,6 +24,7 @@ use App\Services\Contracts\WarehouseServiceInterface;
 use App\Services\Contracts\WeeklyWageServiceInterface;
 use App\Services\Contracts\WorkerCategoryServiceInterface;
 use Carbon\Carbon;
+use Carbon\CarbonPeriod;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
@@ -64,11 +65,30 @@ class DashboardService implements DashboardServiceInterface
     /**
      * Get start date, end date, and label for a given period filter.
      *
+     * @param  array{start_date?: ?string, end_date?: ?string}  $customDates
      * @return array{start: string, end: string, label: string, ta_label: string}
      */
-    public function getDateRangeForPeriod(string $period): array
+    public function getDateRangeForPeriod(string $period, array $customDates = []): array
     {
         $now = Carbon::now();
+
+        if ($period === 'custom' && ! empty($customDates['start_date'])) {
+            $startDate = Carbon::parse($customDates['start_date'])->toDateString();
+            $endDate = ! empty($customDates['end_date'])
+                ? Carbon::parse($customDates['end_date'])->toDateString()
+                : $startDate;
+
+            if ($startDate > $endDate) {
+                [$startDate, $endDate] = [$endDate, $startDate];
+            }
+
+            return [
+                'start' => $startDate,
+                'end' => $endDate,
+                'label' => Carbon::parse($startDate)->format('d M').' - '.Carbon::parse($endDate)->format('d M Y'),
+                'ta_label' => 'குறிப்பிட்ட தேதி',
+            ];
+        }
 
         return match ($period) {
             'this_week' => [
@@ -101,9 +121,10 @@ class DashboardService implements DashboardServiceInterface
     /**
      * Get aggregated dashboard data for the authenticated user based on role.
      *
+     * @param  array{start_date?: ?string, end_date?: ?string}  $customDates
      * @return array<string, mixed>
      */
-    public function getDashboardData(?User $user = null, string $period = 'today'): array
+    public function getDashboardData(?User $user = null, string $period = 'today', array $customDates = []): array
     {
         $user = $user ?? Auth::user();
 
@@ -111,15 +132,21 @@ class DashboardService implements DashboardServiceInterface
         $siteManagerData = $this->getSiteManagerDashboardData($user);
 
         // 2. Full dynamic account manager / admin metrics
-        $accountManagerData = $this->getAccountManagerDashboardData($user, $period);
+        $accountManagerData = $this->getAccountManagerDashboardData($user, $period, $customDates);
 
         // Period cashflow chart tailored to Ledger table for Admin and Account Manager
         if ($user && ($user->isAdmin() || $user->isAccountManager())) {
-            $ledgerChartData = $this->getLedger7DayChartData($user, $period);
+            $ledgerChartData = $this->getLedger7DayChartData($user, $period, $customDates);
             $accountManagerData = array_merge($accountManagerData, $ledgerChartData);
         }
 
-        $periodInfo = $this->getDateRangeForPeriod($period);
+        $periodInfo = $this->getDateRangeForPeriod($period, $customDates);
+
+        // Admin-specific Expense Distribution by Source
+        $adminExpenseBreakdown = [];
+        if ($user && $user->isAdmin()) {
+            $adminExpenseBreakdown = $this->getAdminExpenseBreakdown($user, $periodInfo['start'], $periodInfo['end']);
+        }
 
         return array_merge([
             'currentUser' => $user,
@@ -129,7 +156,9 @@ class DashboardService implements DashboardServiceInterface
             'periodLabelTa' => $periodInfo['ta_label'],
             'periodStart' => $periodInfo['start'],
             'periodEnd' => $periodInfo['end'],
-        ], $siteManagerData, $accountManagerData);
+            'customStartDate' => $customDates['start_date'] ?? '',
+            'customEndDate' => $customDates['end_date'] ?? '',
+        ], $siteManagerData, $accountManagerData, $adminExpenseBreakdown);
     }
 
     /**
@@ -357,12 +386,13 @@ class DashboardService implements DashboardServiceInterface
     /**
      * Get dynamic account manager dashboard metrics, master summaries, and recent ledgers.
      *
+     * @param  array{start_date?: ?string, end_date?: ?string}  $customDates
      * @return array<string, mixed>
      */
-    public function getAccountManagerDashboardData(?User $user = null, string $period = 'today'): array
+    public function getAccountManagerDashboardData(?User $user = null, string $period = 'today', array $customDates = []): array
     {
         $today = Carbon::today()->toDateString();
-        $dateRange = $this->getDateRangeForPeriod($period);
+        $dateRange = $this->getDateRangeForPeriod($period, $customDates);
         $startDate = $dateRange['start'];
         $endDate = $dateRange['end'];
 
@@ -496,9 +526,10 @@ class DashboardService implements DashboardServiceInterface
     /**
      * Get income, expense and net cashflow data from the Ledger table for a period.
      *
+     * @param  array{start_date?: ?string, end_date?: ?string}  $customDates
      * @return array<string, mixed>
      */
-    public function getLedger7DayChartData(?User $user = null, string $period = 'today'): array
+    public function getLedger7DayChartData(?User $user = null, string $period = 'today', array $customDates = []): array
     {
         $chartLabels = [];
         $incomeData = [];
@@ -506,7 +537,54 @@ class DashboardService implements DashboardServiceInterface
         $totalPeriodIncome = 0.0;
         $totalPeriodExpense = 0.0;
 
-        if ($period === 'this_year') {
+        if ($period === 'custom') {
+            $dateRange = $this->getDateRangeForPeriod($period, $customDates);
+            $start = Carbon::parse($dateRange['start']);
+            $end = Carbon::parse($dateRange['end']);
+            $daysDiff = $start->diffInDays($end);
+
+            if ($daysDiff <= 31) {
+                for ($d = 0; $d <= $daysDiff; $d++) {
+                    $date = $start->copy()->addDays($d);
+                    $dateStr = $date->toDateString();
+                    $chartLabels[] = $date->format('d M');
+
+                    $dayInflow = (float) $this->scopeForUser(Ledger::income(), $user)
+                        ->whereDate('entry_date', $dateStr)
+                        ->sum('amount');
+
+                    $dayOutflow = (float) $this->scopeForUser(Ledger::expense(), $user)
+                        ->whereDate('entry_date', $dateStr)
+                        ->sum('amount');
+
+                    $incomeData[] = $dayInflow;
+                    $expenseData[] = $dayOutflow;
+                    $totalPeriodIncome += $dayInflow;
+                    $totalPeriodExpense += $dayOutflow;
+                }
+            } else {
+                // Group by month
+                $periodMonths = CarbonPeriod::create($start->startOfMonth(), '1 month', $end->endOfMonth());
+                foreach ($periodMonths as $m) {
+                    $mStart = $m->copy()->startOfMonth()->toDateString();
+                    $mEnd = $m->copy()->endOfMonth()->toDateString();
+                    $chartLabels[] = $m->format('M y');
+
+                    $mInflow = (float) $this->scopeForUser(Ledger::income(), $user)
+                        ->whereBetween('entry_date', [$mStart, $mEnd])
+                        ->sum('amount');
+
+                    $mOutflow = (float) $this->scopeForUser(Ledger::expense(), $user)
+                        ->whereBetween('entry_date', [$mStart, $mEnd])
+                        ->sum('amount');
+
+                    $incomeData[] = $mInflow;
+                    $expenseData[] = $mOutflow;
+                    $totalPeriodIncome += $mInflow;
+                    $totalPeriodExpense += $mOutflow;
+                }
+            }
+        } elseif ($period === 'this_year') {
             // Group by 12 months of the year
             $year = Carbon::now()->year;
             for ($month = 1; $month <= 12; $month++) {
@@ -603,6 +681,91 @@ class DashboardService implements DashboardServiceInterface
             'sevenDayIncome' => $period === 'today' ? ($todayIncome ?? $totalPeriodIncome) : $totalPeriodIncome,
             'sevenDayExpense' => $period === 'today' ? ($todayExpense ?? $totalPeriodExpense) : $totalPeriodExpense,
             'sevenDayNet' => $period === 'today' ? (($todayIncome ?? $totalPeriodIncome) - ($todayExpense ?? $totalPeriodExpense)) : $periodNet,
+        ];
+    }
+
+    /**
+     * Get expense breakdown by category/source for Admin dashboard.
+     *
+     * @return array{expenseBreakdownLabels: array<string>, expenseBreakdownData: array<float>, totalExpenseBreakdown: float, topExpenseItems: array<array{label: string, value: float, percentage: float}>}
+     */
+    public function getAdminExpenseBreakdown(?User $user, string $startDate, string $endDate): array
+    {
+        $expensesBySource = $this->scopeForUser(Ledger::expense(), $user)
+            ->whereBetween('entry_date', [$startDate, $endDate])
+            ->selectRaw('source, SUM(amount) as total_amount')
+            ->groupBy('source')
+            ->having('total_amount', '>', 0)
+            ->orderByDesc('total_amount')
+            ->get();
+
+        $labels = [];
+        $data = [];
+        $total = 0.0;
+        $items = [];
+
+        foreach ($expensesBySource as $row) {
+            $sourceLabel = match ($row->source) {
+                'Construction' => 'Construction Sites (தள செலவுகள்)',
+                'Supplier' => 'Supplier Purchases (சப்ளையர்)',
+                'Office and other expenses' => 'Office & Admin (அலுவலக செலவு)',
+                'Rental' => 'Rental Properties (வாடகை)',
+                'Bank', 'Bank Valuation' => 'Bank / Financial (வங்கி)',
+                default => $row->source ?: 'General Expense',
+            };
+
+            $amount = (float) $row->total_amount;
+            $labels[] = $sourceLabel;
+            $data[] = $amount;
+            $total += $amount;
+        }
+
+        // If no expenses in the selected date range, check all-time expenses for meaningful donut chart
+        if ($total <= 0) {
+            $allTimeExpenses = $this->scopeForUser(Ledger::expense(), $user)
+                ->selectRaw('source, SUM(amount) as total_amount')
+                ->groupBy('source')
+                ->having('total_amount', '>', 0)
+                ->orderByDesc('total_amount')
+                ->get();
+
+            foreach ($allTimeExpenses as $row) {
+                $sourceLabel = match ($row->source) {
+                    'Construction' => 'Construction Sites (தள செலவுகள்)',
+                    'Supplier' => 'Supplier Purchases (சப்ளையர்)',
+                    'Office and other expenses' => 'Office & Admin (அலுவலக செலவு)',
+                    'Rental' => 'Rental Properties (வாடகை)',
+                    'Bank', 'Bank Valuation' => 'Bank / Financial (வங்கி)',
+                    default => $row->source ?: 'General Expense',
+                };
+
+                $amount = (float) $row->total_amount;
+                $labels[] = $sourceLabel;
+                $data[] = $amount;
+                $total += $amount;
+            }
+        }
+
+        // Fallback placeholder categories if database has no expenses at all
+        if (empty($labels)) {
+            $labels = ['Construction Sites (தள செலவுகள்)', 'Supplier Purchases (சப்ளையர்)', 'Office & Admin (அலுவலக செலவு)'];
+            $data = [0, 0, 0];
+        }
+
+        foreach ($labels as $index => $label) {
+            $val = $data[$index] ?? 0.0;
+            $items[] = [
+                'label' => $label,
+                'value' => $val,
+                'percentage' => $total > 0 ? round(($val / $total) * 100, 1) : 0,
+            ];
+        }
+
+        return [
+            'expenseBreakdownLabels' => $labels,
+            'expenseBreakdownData' => $data,
+            'totalExpenseBreakdown' => $total,
+            'topExpenseItems' => $items,
         ];
     }
 }

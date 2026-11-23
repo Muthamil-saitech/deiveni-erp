@@ -17,11 +17,16 @@ class DashboardController extends Controller
      */
     public function index(Request $request): View
     {
-        $period = in_array($request->input('period'), ['today', 'this_week', 'this_month', 'this_year'])
+        $period = in_array($request->input('period'), ['today', 'this_week', 'this_month', 'this_year', 'custom'])
             ? $request->input('period')
             : 'today';
 
-        $data = $this->dashboardService->getDashboardData($request->user(), $period);
+        $customDates = [
+            'start_date' => $request->input('start_date'),
+            'end_date' => $request->input('end_date'),
+        ];
+
+        $data = $this->dashboardService->getDashboardData($request->user(), $period, $customDates);
 
         return view('dashboard', $data);
     }
