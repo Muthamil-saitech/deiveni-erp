@@ -441,15 +441,6 @@
                         <span class="badge bg-info-subtle text-info border border-info-subtle" style="font-size:0.68rem;">{{ isset($balanceStockList) ? $balanceStockList->count() : 0 }}</span>
                     </button>
                 </li>
-                <li class="nav-item" role="presentation">
-                    <button class="nav-link d-flex align-items-center gap-2 px-3 py-2" id="tab-suppliers"
-                        data-bs-toggle="tab" data-bs-target="#panel-suppliers" type="button" role="tab"
-                        aria-controls="panel-suppliers" aria-selected="false" style="font-size:0.83rem;">
-                        <i class="bi bi-cart-check-fill text-primary"></i>
-                        <span class="fw-semibold">Supplier Purchases <span class="ta-text" style="font-size:0.75rem;">(சப்ளையர் கொள்முதல்)</span></span>
-                        <span class="badge bg-primary-subtle text-primary border border-primary-subtle" style="font-size:0.68rem;">{{ isset($supplierPurchases) ? $supplierPurchases->count() : 0 }}</span>
-                    </button>
-                </li>
             </ul>
 
             <div class="tab-content border border-top-0 rounded-bottom" id="siteExpTabsContent">
@@ -849,157 +840,177 @@
                     @endif
                 </div>
 
-                {{-- TAB 5: Supplier Purchases (சப்ளையர் கொள்முதல் & விலை விவரம்) --}}
-                <div class="tab-pane fade" id="panel-suppliers" role="tabpanel" aria-labelledby="tab-suppliers">
-                    @if (empty($supplierPurchases) || count($supplierPurchases) === 0)
-                        <div class="text-center py-5 text-muted">
-                            <i class="bi bi-cart-x fs-1 d-block mb-2 text-secondary opacity-50"></i>
-                            <div class="fw-semibold">No Supplier Purchases Recorded</div>
-                            <small class="ta-text text-muted">இந்த தளத்திற்கு சப்ளையர் கொள்முதல் ஆணை எதுவும் இதுவரை பதிவு செய்யப்படவில்லை.</small>
-                        </div>
-                    @else
-                        <!-- Summary KPIs for Supplier Purchases -->
-                        <div class="row g-2 mb-3">
-                            <div class="col-6 col-md-3">
-                                <div class="p-2 rounded bg-light border text-center">
-                                    <div class="text-muted small" style="font-size:0.75rem;">Total Suppliers (சப்ளையர்கள்)</div>
-                                    <div class="fw-bold text-dark fs-5">{{ $supplierStats['total_suppliers_count'] ?? count($supplierPurchases) }}</div>
-                                </div>
-                            </div>
-                            <div class="col-6 col-md-3">
-                                <div class="p-2 rounded bg-light border text-center">
-                                    <div class="text-muted small" style="font-size:0.75rem;">Purchase Orders (ஆணைகள்)</div>
-                                    <div class="fw-bold text-primary fs-5">{{ $supplierStats['total_purchase_orders_count'] ?? 0 }}</div>
-                                </div>
-                            </div>
-                            <div class="col-6 col-md-3">
-                                <div class="p-2 rounded bg-light border text-center">
-                                    <div class="text-muted small" style="font-size:0.75rem;">Materials (பொருட்கள் வகைகள்)</div>
-                                    <div class="fw-bold text-warning fs-5">{{ $supplierStats['total_materials_purchased_count'] ?? 0 }}</div>
-                                </div>
-                            </div>
-                            <div class="col-6 col-md-3">
-                                <div class="p-2 rounded bg-light border text-center">
-                                    <div class="text-muted small" style="font-size:0.75rem;">Total Purchased Value (மொத்த கொள்முதல்)</div>
-                                    <div class="fw-bold text-success fs-5">₹{{ number_format($supplierStats['total_purchased_value'] ?? 0, 2) }}</div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Live Search Bar -->
-                        <div class="d-flex align-items-center mb-3">
-                            <div class="input-group input-group-sm" style="max-width: 380px;">
-                                <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted"></i></span>
-                                <input type="text" id="supplierSearchInput" class="form-control border-start-0" placeholder="Search supplier, contact, phone, material... (தேடுக)">
-                            </div>
-                            <span class="text-muted ms-auto small" id="supplierFilterSummary">Showing all {{ count($supplierPurchases) }} suppliers</span>
-                        </div>
-
-                        <!-- Single Clean Supplier Purchases Table -->
-                        <div class="table-responsive rounded border">
-                            <table class="table table-hover align-middle mb-0" id="supplierSummaryTable" style="font-size:0.82rem;">
-                                <thead class="table-light">
-                                    <tr>
-                                        <th class="ps-3 py-2 text-muted" style="width:35px; font-size:0.7rem;">#</th>
-                                        <th class="py-2 text-muted text-uppercase" style="font-size:0.7rem;">Supplier (சப்ளையர்)</th>
-                                        <th class="py-2 text-muted text-uppercase" style="font-size:0.7rem;">Contact & Phone (தொடர்பு)</th>
-                                        <th class="py-2 text-center text-muted text-uppercase" style="font-size:0.7rem;">Orders (ஆணைகள்)</th>
-                                        <th class="py-2 text-end text-muted text-uppercase" style="font-size:0.7rem;">Total Value (மொத்த கொள்முதல்)</th>
-                                        <th class="pe-3 py-2 text-end text-muted text-uppercase" style="width:140px; font-size:0.7rem;">Action (செயல்)</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="supplierTabBody">
-                                    @foreach ($supplierPurchases as $supIndex => $sup)
-                                        @php
-                                            $searchPayload = strtolower($sup['supplier_name'] . ' ' . ($sup['contact_person'] ?? '') . ' ' . ($sup['phone'] ?? '') . ' ' . implode(' ', $sup['po_numbers'] ?? []));
-                                            $detailUrl = route('sites.supplier-purchases', ['encryptedId' => $site->encrypted_id, 'supplierKey' => $sup['supplier_key'] ?? ($sup['supplier_id'] ? 'sup_'.$sup['supplier_id'] : 'ext_'.urlencode(strtolower(trim($sup['supplier_name']))))]);
-                                        @endphp
-                                        <tr class="supplier-row" data-search="{{ $searchPayload }}">
-                                            <td class="ps-3 text-muted text-center font-monospace">{{ str_pad($supIndex + 1, 2, '0', STR_PAD_LEFT) }}</td>
-                                            <td>
-                                                <div class="fw-bold text-dark d-flex align-items-center gap-2">
-                                                    <a href="{{ $detailUrl }}" class="text-decoration-none text-dark hover-primary">
-                                                        {{ $sup['supplier_name'] }}
-                                                    </a>
-                                                    @if(!empty($sup['gst_number']))
-                                                        <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle fw-normal" style="font-size:0.65rem;">
-                                                            GST: {{ $sup['gst_number'] }}
-                                                        </span>
-                                                    @endif
-                                                </div>
-                                                @if(!empty($sup['address']))
-                                                    <div class="text-muted small text-truncate" style="max-width:280px; font-size:0.72rem;">
-                                                        <i class="bi bi-geo-alt me-1"></i>{{ $sup['address'] }}
-                                                    </div>
-                                                @endif
-                                            </td>
-                                            <td>
-                                                @if(!empty($sup['contact_person']))
-                                                    <div class="fw-medium text-dark" style="font-size:0.78rem;">
-                                                        <i class="bi bi-person me-1 text-muted"></i>{{ $sup['contact_person'] }}
-                                                    </div>
-                                                @endif
-                                                @if(!empty($sup['phone']))
-                                                    <div>
-                                                        <a href="tel:{{ $sup['phone'] }}" class="text-decoration-none text-muted small" style="font-size:0.75rem;">
-                                                            <i class="bi bi-telephone me-1"></i>{{ $sup['phone'] }}
-                                                        </a>
-                                                    </div>
-                                                @else
-                                                    <span class="text-muted small">&mdash;</span>
-                                                @endif
-                                            </td>
-                                            <td class="text-center">
-                                                <span class="badge bg-light text-dark border px-2 py-1">
-                                                    <i class="bi bi-file-earmark-text text-primary me-1"></i>{{ $sup['pos_count'] }} {{ Str::plural('PO', $sup['pos_count']) }}
-                                                </span>
-                                            </td>
-                                            <td class="text-end fw-bold text-success fs-6">
-                                                ₹{{ number_format($sup['total_amount'], 2) }}
-                                            </td>
-                                            <td class="pe-3 text-end">
-                                                <a href="{{ $detailUrl }}" class="btn btn-sm btn-primary d-inline-flex align-items-center gap-1 shadow-sm px-2 py-1" style="font-size:0.75rem;">
-                                                    <i class="bi bi-eye"></i> View (விவரங்கள்)
-                                                </a>
-                                            </td>
-                                        </tr>
-                                    @endforeach
-                                </tbody>
-                                <tfoot class="table-light border-top">
-                                    <tr>
-                                        <td colspan="3" class="ps-3 fw-bold text-dark">
-                                            Total Suppliers: {{ count($supplierPurchases) }}
-                                        </td>
-                                        <td class="text-center fw-bold text-dark">
-                                            {{ $supplierStats['total_purchase_orders_count'] ?? 0 }} POs
-                                        </td>
-                                        <td class="text-end fw-bold text-success fs-6">
-                                            ₹{{ number_format($supplierStats['total_purchased_value'] ?? 0, 2) }}
-                                        </td>
-                                        <td></td>
-                                    </tr>
-                                </tfoot>
-                            </table>
-                        </div>
-
-                        <!-- Table Pagination -->
-                        <div class="d-flex flex-column flex-md-row justify-content-between align-items-center gap-2 px-3 py-2 bg-light border-top rounded-bottom" id="supplierPagination">
-                            <div class="d-flex align-items-center gap-2">
-                                <span class="small text-muted">Rows per page:</span>
-                                <select class="form-select form-select-sm" style="width:65px;" id="supplierPerPage">
-                                    <option value="5" selected>5</option>
-                                    <option value="10">10</option>
-                                    <option value="25">25</option>
-                                </select>
-                                <span class="small text-muted ms-2" id="supplierTabSummary"></span>
-                            </div>
-                            <nav><ul class="pagination pagination-sm mb-0 gap-1" id="supplierTabNav"></ul></nav>
-                        </div>
-                    @endif
-                </div>
-
             </div>{{-- end tab-content --}}
         </div>{{-- end tabs card --}}
+
+        <!-- Supplier Purchases Section (சப்ளையர் கொள்முதல் & விலை விவரங்கள்) -->
+        <div class="card-custom p-4 bg-white mb-4">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-3 border-bottom pb-3">
+                <div class="d-flex align-items-center gap-2">
+                    <div class="bg-primary-subtle text-primary p-2 rounded-3">
+                        <i class="bi bi-cart-check-fill fs-5"></i>
+                    </div>
+                    <div>
+                        <h5 class="fw-bold mb-0 text-dark">
+                            Supplier Purchases <span class="ta-text small text-muted">(சப்ளையர் கொள்முதல் & விலை விவரங்கள்)</span>
+                        </h5>
+                        <small class="text-muted">Breakdown of purchases from third-party suppliers for this site.</small>
+                    </div>
+                </div>
+                <div>
+                    <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-3 py-2">
+                        <i class="bi bi-truck-front me-1"></i>
+                        {{ isset($supplierPurchases) ? count($supplierPurchases) : 0 }} Suppliers &bull; {{ $supplierStats['total_purchase_orders_count'] ?? 0 }} Purchase Orders
+                    </span>
+                </div>
+            </div>
+
+            @if (empty($supplierPurchases) || count($supplierPurchases) === 0)
+                <div class="text-center py-5 text-muted">
+                    <i class="bi bi-cart-x fs-1 d-block mb-2 text-secondary opacity-50"></i>
+                    <div class="fw-semibold">No Supplier Purchases Recorded</div>
+                    <small class="ta-text text-muted">இந்த தளத்திற்கு சப்ளையர் கொள்முதல் ஆணை எதுவும் இதுவரை பதிவு செய்யப்படவில்லை.</small>
+                </div>
+            @else
+                <!-- Summary KPIs for Supplier Purchases -->
+                <div class="row g-2 mb-3">
+                    <div class="col-6 col-md-3">
+                        <div class="p-2 rounded bg-light border text-center">
+                            <div class="text-muted small" style="font-size:0.75rem;">Total Suppliers (சப்ளையர்கள்)</div>
+                            <div class="fw-bold text-dark fs-5">{{ $supplierStats['total_suppliers_count'] ?? count($supplierPurchases) }}</div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <div class="p-2 rounded bg-light border text-center">
+                            <div class="text-muted small" style="font-size:0.75rem;">Purchase Orders (ஆணைகள்)</div>
+                            <div class="fw-bold text-primary fs-5">{{ $supplierStats['total_purchase_orders_count'] ?? 0 }}</div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <div class="p-2 rounded bg-light border text-center">
+                            <div class="text-muted small" style="font-size:0.75rem;">Materials (பொருட்கள் வகைகள்)</div>
+                            <div class="fw-bold text-warning fs-5">{{ $supplierStats['total_materials_purchased_count'] ?? 0 }}</div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <div class="p-2 rounded bg-light border text-center">
+                            <div class="text-muted small" style="font-size:0.75rem;">Total Purchased Value (மொத்த கொள்முதல்)</div>
+                            <div class="fw-bold text-success fs-5">₹{{ number_format($supplierStats['total_purchased_value'] ?? 0, 2) }}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Live Search Bar -->
+                <div class="d-flex align-items-center mb-3">
+                    <div class="input-group input-group-sm" style="max-width: 380px;">
+                        <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted"></i></span>
+                        <input type="text" id="supplierSearchInput" class="form-control border-start-0" placeholder="Search supplier, contact, phone, material... (தேடுக)">
+                    </div>
+                    <span class="text-muted ms-auto small" id="supplierFilterSummary">Showing all {{ count($supplierPurchases) }} suppliers</span>
+                </div>
+
+                <!-- Single Clean Supplier Purchases Table -->
+                <div class="table-responsive rounded border">
+                    <table class="table table-hover align-middle mb-0" id="supplierSummaryTable" style="font-size:0.82rem;">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="ps-3 py-2 text-muted" style="width:35px; font-size:0.7rem;">#</th>
+                                <th class="py-2 text-muted text-uppercase" style="font-size:0.7rem;">Supplier (சப்ளையர்)</th>
+                                <th class="py-2 text-muted text-uppercase" style="font-size:0.7rem;">Contact & Phone (தொடர்பு)</th>
+                                <th class="py-2 text-center text-muted text-uppercase" style="font-size:0.7rem;">Orders (ஆணைகள்)</th>
+                                <th class="py-2 text-end text-muted text-uppercase" style="font-size:0.7rem;">Total Value (மொத்த கொள்முதல்)</th>
+                                <th class="pe-3 py-2 text-end text-muted text-uppercase" style="width:140px; font-size:0.7rem;">Action (செயல்)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="supplierTabBody">
+                            @foreach ($supplierPurchases as $supIndex => $sup)
+                                @php
+                                    $searchPayload = strtolower($sup['supplier_name'] . ' ' . ($sup['contact_person'] ?? '') . ' ' . ($sup['phone'] ?? '') . ' ' . implode(' ', $sup['po_numbers'] ?? []));
+                                    $detailUrl = route('sites.supplier-purchases', ['encryptedId' => $site->encrypted_id, 'supplierKey' => $sup['supplier_key'] ?? ($sup['supplier_id'] ? 'sup_'.$sup['supplier_id'] : 'ext_'.urlencode(strtolower(trim($sup['supplier_name']))))]);
+                                @endphp
+                                <tr class="supplier-row" data-search="{{ $searchPayload }}">
+                                    <td class="ps-3 text-muted text-center font-monospace">{{ str_pad($supIndex + 1, 2, '0', STR_PAD_LEFT) }}</td>
+                                    <td>
+                                        <div class="fw-bold text-dark d-flex align-items-center gap-2">
+                                            <a href="{{ $detailUrl }}" class="text-decoration-none text-dark hover-primary">
+                                                {{ $sup['supplier_name'] }}
+                                            </a>
+                                            @if(!empty($sup['gst_number']))
+                                                <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle fw-normal" style="font-size:0.65rem;">
+                                                    GST: {{ $sup['gst_number'] }}
+                                                </span>
+                                            @endif
+                                        </div>
+                                        @if(!empty($sup['address']))
+                                            <div class="text-muted small text-truncate" style="max-width:280px; font-size:0.72rem;">
+                                                <i class="bi bi-geo-alt me-1"></i>{{ $sup['address'] }}
+                                            </div>
+                                        @endif
+                                    </td>
+                                    <td>
+                                        @if(!empty($sup['contact_person']))
+                                            <div class="fw-medium text-dark" style="font-size:0.78rem;">
+                                                <i class="bi bi-person me-1 text-muted"></i>{{ $sup['contact_person'] }}
+                                            </div>
+                                        @endif
+                                        @if(!empty($sup['phone']))
+                                            <div>
+                                                <a href="tel:{{ $sup['phone'] }}" class="text-decoration-none text-muted small" style="font-size:0.75rem;">
+                                                    <i class="bi bi-telephone me-1"></i>{{ $sup['phone'] }}
+                                                </a>
+                                            </div>
+                                        @else
+                                            <span class="text-muted small">&mdash;</span>
+                                        @endif
+                                    </td>
+                                    <td class="text-center">
+                                        <span class="badge bg-light text-dark border px-2 py-1">
+                                            <i class="bi bi-file-earmark-text text-primary me-1"></i>{{ $sup['pos_count'] }} {{ Str::plural('PO', $sup['pos_count']) }}
+                                        </span>
+                                    </td>
+                                    <td class="text-end fw-bold text-success fs-6">
+                                        ₹{{ number_format($sup['total_amount'], 2) }}
+                                    </td>
+                                    <td class="pe-3 text-end">
+                                        <a href="{{ $detailUrl }}" class="btn btn-sm btn-primary d-inline-flex align-items-center gap-1 shadow-sm px-2 py-1" style="font-size:0.75rem;">
+                                            <i class="bi bi-eye"></i> View (விவரங்கள்)
+                                        </a>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                        <tfoot class="table-light border-top">
+                            <tr>
+                                <td colspan="3" class="ps-3 fw-bold text-dark">
+                                    Total Suppliers: {{ count($supplierPurchases) }}
+                                </td>
+                                <td class="text-center fw-bold text-dark">
+                                    {{ $supplierStats['total_purchase_orders_count'] ?? 0 }} POs
+                                </td>
+                                <td class="text-end fw-bold text-success fs-6">
+                                    ₹{{ number_format($supplierStats['total_purchased_value'] ?? 0, 2) }}
+                                </td>
+                                <td></td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+
+                <!-- Table Pagination -->
+                <div class="d-flex flex-column flex-md-row justify-content-between align-items-center gap-2 px-3 py-2 bg-light border-top rounded-bottom" id="supplierPagination">
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="small text-muted">Rows per page:</span>
+                        <select class="form-select form-select-sm" style="width:65px;" id="supplierPerPage">
+                            <option value="5" selected>5</option>
+                            <option value="10">10</option>
+                            <option value="25">25</option>
+                        </select>
+                        <span class="small text-muted ms-2" id="supplierTabSummary"></span>
+                    </div>
+                    <nav><ul class="pagination pagination-sm mb-0 gap-1" id="supplierTabNav"></ul></nav>
+                </div>
+            @endif
+        </div>
 
         <!-- Site Cash & Project Transactions Section (தள ரொக்கம் மற்றும் திட்ட நிதிப் பரிவர்த்தனைகள்) -->
         <div class="card-custom p-4 bg-white mt-4">
