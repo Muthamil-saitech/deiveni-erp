@@ -608,6 +608,11 @@ class StockTransferService implements StockTransferServiceInterface
                     continue;
                 }
 
+                // If source is Site Transfer, it is handled in Step 2 with usage deduction
+                if ($uItem->source_type === 'Site Transfer') {
+                    continue;
+                }
+
                 $isWarehouse = ($uItem->source_type === 'Own Warehouse'
                     || $uItem->source_type === 'Warehouse'
                     || $uItem->purchaseOrderItem?->purchaseOrder?->source_type === 'Own Warehouse'
@@ -622,8 +627,15 @@ class StockTransferService implements StockTransferServiceInterface
                     : "Supplier PO: {$sourceRef}".($supplierName ? " ({$supplierName})" : '');
 
                 $key = "USAGE_{$sourceType}_{$sourceRef}_{$matId}";
-                $qty = (float) $uItem->used_quantity;
                 $unitPrice = (float) $uItem->unit_price;
+
+                $inward = (float) ($uItem->purchaseOrderItem?->quantity ?? $uItem->inward_quantity);
+                $used = (float) $uItem->used_quantity;
+                $rem = (float) $uItem->remaining_quantity;
+
+                if ($inward <= 0) {
+                    $inward = ($rem > 0) ? ($rem + $used) : $used;
+                }
 
                 if (! isset($items[$key])) {
                     $items[$key] = [
@@ -640,15 +652,76 @@ class StockTransferService implements StockTransferServiceInterface
                         'unit_price' => $unitPrice,
                         'inward_qty' => 0.0,
                         'available_qty' => 0.0,
+                        '_total_used' => 0.0,
+                        '_latest_remaining' => null,
                     ];
                 }
 
-                $items[$key]['inward_qty'] = round($items[$key]['inward_qty'] + $qty, 2);
-                $items[$key]['available_qty'] = round($items[$key]['available_qty'] + $qty, 2);
+                $items[$key]['inward_qty'] = max($items[$key]['inward_qty'], round($inward, 2));
+                $items[$key]['_total_used'] += $used;
+                if ($rem > 0) {
+                    $items[$key]['_latest_remaining'] = $rem;
+                }
                 if ($items[$key]['unit_price'] <= 0 && $unitPrice > 0) {
                     $items[$key]['unit_price'] = $unitPrice;
                 }
             }
+
+            // Calculate remaining balance stock available for transfer
+            foreach ($items as &$it) {
+                if (isset($it['_total_used'])) {
+                    if ($it['_latest_remaining'] !== null && $it['_latest_remaining'] > 0) {
+                        $it['available_qty'] = (float) $it['_latest_remaining'];
+                    } elseif ($it['inward_qty'] > $it['_total_used']) {
+                        $it['available_qty'] = round($it['inward_qty'] - $it['_total_used'], 2);
+                    } else {
+                        $it['available_qty'] = 0.0;
+                    }
+                    unset($it['_total_used'], $it['_latest_remaining']);
+                }
+            }
+            unset($it);
+        }
+
+        // Also check Purchase Orders directly ordered for this site that haven't had usage recorded yet
+        $sitePoItems = PurchaseOrderItem::whereHas('purchaseOrder', function ($q) use ($siteId) {
+            $q->where('project_site_id', $siteId)
+                ->where('status', '!=', 'Cancelled');
+        })->with(['purchaseOrder', 'material.unit'])->get();
+
+        foreach ($sitePoItems as $poItem) {
+            $matId = (int) $poItem->material_id;
+            if ($matId <= 0) {
+                continue;
+            }
+            $poNum = $poItem->purchaseOrder?->po_number ?? 'PO';
+            $key = "USAGE_PO_{$poNum}_{$matId}";
+
+            if (isset($items[$key])) {
+                continue;
+            }
+
+            $inwardQty = (float) $poItem->quantity;
+            if ($inwardQty <= 0) {
+                continue;
+            }
+
+            $supplierName = $poItem->purchaseOrder?->supplier_name;
+            $items[$key] = [
+                'key' => $key,
+                'material_id' => $matId,
+                'material_name' => $poItem->material_name ?: ($poItem->material?->name_en ?? 'Material'),
+                'material_name_ta' => $poItem->material?->name_ta ?? '',
+                'source_type' => 'PO',
+                'source_label' => "Supplier PO: {$poNum}".($supplierName ? " ({$supplierName})" : ''),
+                'reference_no' => $poNum,
+                'supplier_name' => $supplierName,
+                'unit' => $poItem->unit ?: ($poItem->material?->unit?->name_en ?? 'Units'),
+                'unit_id' => $poItem->unit_id ?: $poItem->material?->unit_id,
+                'unit_price' => (float) $poItem->unit_price,
+                'inward_qty' => $inwardQty,
+                'available_qty' => $inwardQty,
+            ];
         }
 
         // 2. Fetch materials inwarded via inter-site stock transfers received at this site
@@ -668,9 +741,25 @@ class StockTransferService implements StockTransferServiceInterface
                 continue;
             }
 
-            $key = "TR_IN_{$trIn->id}_{$matId}";
             $fromSiteName = $trIn->stockTransfer?->fromSite?->name ?? 'Site';
             $transferNo = $trIn->stockTransfer?->transfer_no ?? 'TRANSFER';
+
+            // Deduct any quantity consumed in Material Usage at this site from this transfer
+            $usedAtSite = (float) MaterialUsageItem::whereHas('materialUsage', function ($q) use ($siteId) {
+                $q->where('project_site_id', $siteId)
+                    ->where('status', '!=', 'Cancelled');
+            })
+                ->where('material_id', $matId)
+                ->where('source_type', 'Site Transfer')
+                ->where('source_reference', $transferNo)
+                ->sum('used_quantity');
+
+            $availRecv = max(0.0, round($netRecv - $usedAtSite, 2));
+            if ($availRecv <= 0) {
+                continue;
+            }
+
+            $key = "TR_IN_{$trIn->id}_{$matId}";
 
             $items[$key] = [
                 'key' => $key,
@@ -685,7 +774,7 @@ class StockTransferService implements StockTransferServiceInterface
                 'unit_id' => $trIn->unit_id ?: $trIn->material?->unit_id,
                 'unit_price' => (float) $trIn->unit_price,
                 'inward_qty' => $netRecv,
-                'available_qty' => $netRecv,
+                'available_qty' => $availRecv,
             ];
         }
 

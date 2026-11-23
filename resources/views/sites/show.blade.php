@@ -432,6 +432,15 @@
                         <span class="badge bg-success-subtle text-success border border-success-subtle" style="font-size:0.68rem;">{{ $stockTransferRecords->count() }}</span>
                     </button>
                 </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link d-flex align-items-center gap-2 px-3 py-2" id="tab-balance-stock"
+                        data-bs-toggle="tab" data-bs-target="#panel-balance-stock" type="button" role="tab"
+                        aria-controls="panel-balance-stock" aria-selected="false" style="font-size:0.83rem;">
+                        <i class="bi bi-stack text-info"></i>
+                        <span class="fw-semibold">Balance Stock <span class="ta-text" style="font-size:0.75rem;">(மீதமுள்ள இருப்பு)</span></span>
+                        <span class="badge bg-info-subtle text-info border border-info-subtle" style="font-size:0.68rem;">{{ isset($balanceStockList) ? $balanceStockList->count() : 0 }}</span>
+                    </button>
+                </li>
             </ul>
 
             <div class="tab-content border border-top-0 rounded-bottom" id="siteExpTabsContent">
@@ -577,6 +586,9 @@
                                                         </div>
                                                         <div class="text-end" style="white-space:nowrap;">
                                                             <span class="fw-semibold text-primary">{{ number_format((float) $item->used_quantity, 2) }} {{ $item->unit }}</span>
+                                                            <span class="badge bg-success-subtle text-success border border-success-subtle ms-1" style="font-size:0.68rem;" title="Remaining stock after usage">
+                                                                Bal: {{ number_format((float) $item->remaining_quantity, 2) }} {{ $item->unit }}
+                                                            </span>
                                                             <span class="text-muted ms-1" style="font-size:0.72rem;">@ ₹{{ number_format((float) $item->unit_price, 2) }}</span>
                                                         </div>
                                                     </div>
@@ -619,7 +631,7 @@
                                 <thead class="table-light">
                                     <tr class="text-muted small text-uppercase fw-bold" style="font-size:0.74rem;">
                                         <th class="ps-3">TRANSFER NO & DATE <span class="ta-text fw-normal text-lowercase" style="font-size:0.68rem;">(பரிமாற்ற எண் & தேதி)</span></th>
-                                        <th>DESTINATION SITE <span class="ta-text fw-normal text-lowercase" style="font-size:0.68rem;">(பெறும் தளம்)</span></th>
+                                        <th>TYPE & SITE <span class="ta-text fw-normal text-lowercase" style="font-size:0.68rem;">(வகை & தளம்)</span></th>
                                         <th style="min-width:200px;">MATERIALS <span class="ta-text fw-normal text-lowercase" style="font-size:0.68rem;">(பொருட்கள்)</span></th>
                                         <th class="text-center">QTY <span class="ta-text fw-normal text-lowercase" style="font-size:0.68rem;">(அளவு)</span></th>
                                         <th class="text-end">VALUE (₹) <span class="ta-text fw-normal text-lowercase" style="font-size:0.68rem;">(மதிப்பு)</span></th>
@@ -629,18 +641,33 @@
                                 </thead>
                                 <tbody id="transfersTabBody">
                                     @foreach ($stockTransferRecords as $st)
+                                        @php
+                                            $isOutward = (int) $st->from_project_site_id === (int) $site->id;
+                                        @endphp
                                         <tr>
                                             <td class="ps-3">
                                                 <div class="fw-bold font-monospace text-dark" style="font-size:0.85rem;">{{ $st->transfer_no }}</div>
                                                 <div class="text-muted" style="font-size:0.72rem;"><i class="bi bi-calendar3 me-1"></i>{{ $st->transfer_date?->format('d M Y') }}</div>
-                                                <span class="badge bg-primary-subtle text-primary border border-primary-subtle mt-1" style="font-size:0.65rem;">
-                                                    <i class="bi bi-box-arrow-right me-1"></i>TRANSFER
-                                                </span>
+                                                @if ($isOutward)
+                                                    <span class="badge bg-danger-subtle text-danger border border-danger-subtle mt-1" style="font-size:0.65rem;">
+                                                        <i class="bi bi-arrow-up-right me-1"></i>OUTWARD (அனுப்பியது)
+                                                    </span>
+                                                @else
+                                                    <span class="badge bg-success-subtle text-success border border-success-subtle mt-1" style="font-size:0.65rem;">
+                                                        <i class="bi bi-arrow-down-left me-1"></i>INWARD (பெற்றது)
+                                                    </span>
+                                                @endif
                                             </td>
                                             <td>
-                                                <span class="badge border" style="background:#dcfce7;color:#166534;border-color:#bbf7d0!important;font-size:0.72rem;">
-                                                    <i class="bi bi-geo-alt me-1"></i>{{ $st->toSite?->site_name ?? 'Site #'.$st->to_project_site_id }}
-                                                </span>
+                                                @if ($isOutward)
+                                                    <span class="badge border" style="background:#fee2e2;color:#991b1b;border-color:#fecaca!important;font-size:0.72rem;">
+                                                        <i class="bi bi-geo-alt me-1"></i>To: {{ $st->toSite?->name ?? 'Site #'.$st->to_project_site_id }}
+                                                    </span>
+                                                @else
+                                                    <span class="badge border" style="background:#dcfce7;color:#166534;border-color:#bbf7d0!important;font-size:0.72rem;">
+                                                        <i class="bi bi-geo-alt me-1"></i>From: {{ $st->fromSite?->name ?? 'Site #'.$st->from_project_site_id }}
+                                                    </span>
+                                                @endif
                                             </td>
                                             <td>
                                                 @if ($st->items->count() > 1)
@@ -720,6 +747,118 @@
                                 <span class="small text-muted ms-2" id="transfersTabSummary"></span>
                             </div>
                             <nav><ul class="pagination pagination-sm mb-0 gap-1" id="transfersTabNav"></ul></nav>
+                        </div>
+                    @endif
+                </div>
+
+                {{-- ===== BALANCE STOCK TAB ===== --}}
+                <div class="tab-pane fade" id="panel-balance-stock" role="tabpanel">
+                    @if (empty($balanceStockList) || $balanceStockList->isEmpty())
+                        <div class="text-center py-5 text-muted">
+                            <i class="bi bi-stack fs-1 d-block mb-2 text-secondary opacity-25"></i>
+                            <div class="fw-semibold">No Stock Balance Records (இருப்பு விவரங்கள் இல்லை)</div>
+                            <small>No materials have been received or recorded for this site yet.</small>
+                        </div>
+                    @else
+                        {{-- Stock Mini KPIs --}}
+                        <div class="row g-2 p-3 bg-light border-bottom">
+                            <div class="col-6 col-md-3">
+                                <div class="bg-white p-2 rounded border">
+                                    <span class="text-muted small d-block">Materials Tracked</span>
+                                    <strong class="text-dark fs-6">{{ $stockStats['total_items'] ?? $balanceStockList->count() }}</strong>
+                                </div>
+                            </div>
+                            <div class="col-6 col-md-3">
+                                <div class="bg-white p-2 rounded border">
+                                    <span class="text-muted small d-block">Items In Stock</span>
+                                    <strong class="text-success fs-6">{{ $stockStats['in_stock_items'] ?? $balanceStockList->where('current_balance', '>', 0)->count() }}</strong>
+                                </div>
+                            </div>
+                            <div class="col-6 col-md-3">
+                                <div class="bg-white p-2 rounded border">
+                                    <span class="text-muted small d-block">Total Balance Qty</span>
+                                    <strong class="text-primary fs-6">{{ number_format((float) ($stockStats['total_quantity'] ?? $balanceStockList->sum('current_balance')), 2) }}</strong>
+                                </div>
+                            </div>
+                            <div class="col-6 col-md-3">
+                                <div class="bg-white p-2 rounded border">
+                                    <span class="text-muted small d-block">Approx Stock Value</span>
+                                    <strong class="text-success fs-6">₹{{ number_format((float) ($stockStats['total_stock_value'] ?? $balanceStockList->sum('total_value')), 2) }}</strong>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="table-responsive">
+                            <table class="table table-custom table-hover align-middle mb-0" id="stockTabTable">
+                                <thead class="table-light">
+                                    <tr class="text-muted small text-uppercase fw-bold" style="font-size:0.74rem;">
+                                        <th class="ps-3">#</th>
+                                        <th>MATERIAL <span class="ta-text fw-normal text-lowercase" style="font-size:0.68rem;">(பொருள்)</span></th>
+                                        <th class="text-center">UNIT <span class="ta-text fw-normal text-lowercase" style="font-size:0.68rem;">(அலகு)</span></th>
+                                        <th class="text-end">TOTAL RECEIVED <span class="ta-text fw-normal text-lowercase" style="font-size:0.68rem;">(வந்தது)</span></th>
+                                        <th class="text-end">USED AT SITE <span class="ta-text fw-normal text-lowercase" style="font-size:0.68rem;">(பயன்பாடு)</span></th>
+                                        <th class="text-end">TRANSFERRED OUT <span class="ta-text fw-normal text-lowercase" style="font-size:0.68rem;">(அனுப்பியது)</span></th>
+                                        <th class="text-end">TRANSFERRED IN <span class="ta-text fw-normal text-lowercase" style="font-size:0.68rem;">(பெற்றது)</span></th>
+                                        <th class="text-end bg-success-subtle bg-opacity-25">BALANCE STOCK <span class="ta-text fw-normal text-lowercase" style="font-size:0.68rem;">(மீதமுள்ள இருப்பு)</span></th>
+                                        <th class="text-end">APPROX VALUE (₹)</th>
+                                        <th class="text-center pe-3">STATUS <span class="ta-text fw-normal text-lowercase" style="font-size:0.68rem;">(நிலை)</span></th>
+                                    </tr>
+                                </thead>
+                                <tbody id="stockTabBody">
+                                    @foreach ($balanceStockList as $stk)
+                                        @php
+                                            $bal = (float) $stk['current_balance'];
+                                            $badgeClass = $bal > 5 ? 'bg-success-subtle text-success border border-success-subtle' : ($bal > 0 ? 'bg-warning-subtle text-dark border border-warning-subtle' : 'bg-danger-subtle text-danger border border-danger-subtle');
+                                            $statusText = $bal > 5 ? 'In Stock (இருப்பில் உள்ளது)' : ($bal > 0 ? 'Low Stock (குறைந்த இருப்பு)' : 'Depleted (தீர்ந்துவிட்டது)');
+                                        @endphp
+                                        <tr>
+                                            <td class="ps-3 text-muted small">{{ $loop->iteration }}</td>
+                                            <td>
+                                                <div class="fw-bold text-dark" style="font-size:0.85rem;">{{ $stk['name'] }}</div>
+                                                @if(!empty($stk['name_ta']))
+                                                    <div class="text-muted small" style="font-size:0.72rem;">{{ $stk['name_ta'] }}</div>
+                                                @endif
+                                            </td>
+                                            <td class="text-center text-muted small">{{ $stk['unit'] }}</td>
+                                            <td class="text-end text-dark">
+                                                <div class="fw-semibold">{{ number_format((float) $stk['total_received'], 2) }}</div>
+                                                @if ((float) $stk['transferred_in'] > 0)
+                                                    <div class="text-muted" style="font-size:0.68rem;">incl. {{ number_format((float) $stk['transferred_in'], 2) }} XFR</div>
+                                                @endif
+                                            </td>
+                                            <td class="text-end fw-semibold text-danger">{{ number_format((float) $stk['total_used'], 2) }}</td>
+                                            <td class="text-end text-muted">{{ (float) $stk['transferred_out'] > 0 ? number_format((float) $stk['transferred_out'], 2) : '—' }}</td>
+                                            <td class="text-end text-muted">{{ (float) $stk['transferred_in'] > 0 ? number_format((float) $stk['transferred_in'], 2) : '—' }}</td>
+                                            <td class="text-end bg-success-subtle bg-opacity-25">
+                                                <span class="fw-bold fs-6 {{ $bal > 0 ? 'text-success' : 'text-danger' }} font-monospace">
+                                                    {{ number_format($bal, 2) }}
+                                                </span>
+                                                <span class="text-muted small ms-1">{{ $stk['unit'] }}</span>
+                                            </td>
+                                            <td class="text-end fw-semibold text-dark">
+                                                {{ (float) $stk['total_value'] > 0 ? '₹' . number_format((float) $stk['total_value'], 2) : '—' }}
+                                            </td>
+                                            <td class="text-center pe-3">
+                                                <span class="badge {{ $badgeClass }}" style="font-size:0.7rem;">
+                                                    {{ $statusText }}
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="d-flex flex-column flex-md-row justify-content-between align-items-center gap-2 px-3 py-2 bg-light border-top rounded-bottom" id="stockPagination">
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="small text-muted">Rows per page:</span>
+                                <select class="form-select form-select-sm" style="width:65px;" id="stockPerPage">
+                                    <option value="5" selected>5</option>
+                                    <option value="10">10</option>
+                                    <option value="25">25</option>
+                                </select>
+                                <span class="small text-muted ms-2" id="stockTabSummary"></span>
+                            </div>
+                            <nav><ul class="pagination pagination-sm mb-0 gap-1" id="stockTabNav"></ul></nav>
                         </div>
                     @endif
                 </div>
@@ -1308,6 +1447,11 @@
             // Transfers tab
             if ($('#transfersTabBody tr').length > 0) {
                 makeTabPaginator('transfersTabBody', 'transfersTabNav', 'transfersTabSummary', 'transfersPerPage');
+            }
+
+            // Stock balance tab
+            if ($('#stockTabBody tr').length > 0) {
+                makeTabPaginator('stockTabBody', 'stockTabNav', 'stockTabSummary', 'stockPerPage');
             }
         });
     </script>

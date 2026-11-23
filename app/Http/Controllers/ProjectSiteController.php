@@ -5,7 +5,12 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreProjectSiteRequest;
 use App\Http\Requests\UpdateProjectSiteRequest;
 use App\Models\Ledger;
+use App\Models\Material;
+use App\Models\MaterialUsageItem;
+use App\Models\PurchaseOrderItem;
+use App\Models\SiteMaterialStock;
 use App\Models\StockTransfer;
+use App\Models\StockTransferItem;
 use App\Services\Contracts\ProjectSiteServiceInterface;
 use App\Services\IdCipherService;
 use Carbon\Carbon;
@@ -117,13 +122,137 @@ class ProjectSiteController extends Controller
             ->orderBy('id', 'desc')
             ->get();
 
-        // Stock Transferred tab: outward stock transfers from this site
-        $stockTransferRecords = StockTransfer::with(['toSite', 'items', 'creator'])
-            ->where('from_project_site_id', $id)
+        // Stock Transferred tab: both outward and inward stock transfers for this site
+        $stockTransferRecords = StockTransfer::with(['fromSite', 'toSite', 'items.material.unit', 'creator'])
+            ->where(function ($q) use ($id) {
+                $q->where('from_project_site_id', $id)
+                    ->orWhere('to_project_site_id', $id);
+            })
             ->where('transfer_type', 'TRANSFER')
             ->orderBy('transfer_date', 'desc')
             ->orderBy('id', 'desc')
             ->get();
+
+        // Balance Stock calculation for this project site
+        $siteStocks = SiteMaterialStock::with('material.unit')
+            ->where('project_site_id', $id)
+            ->get()
+            ->keyBy('material_id');
+
+        $poInward = PurchaseOrderItem::whereHas('purchaseOrder', function ($q) use ($id) {
+            $q->where('project_site_id', $id)->where('status', '!=', 'Cancelled');
+        })->get()->groupBy('material_id');
+
+        $usageQuantities = MaterialUsageItem::whereHas('materialUsage', function ($q) use ($id) {
+            $q->where('project_site_id', $id)->where('status', '!=', 'Cancelled');
+        })->get()->groupBy('material_id');
+
+        $transferredOut = StockTransferItem::whereHas('stockTransfer', function ($q) use ($id) {
+            $q->where('from_project_site_id', $id)->where('transfer_type', 'TRANSFER')->where('status', 'Completed');
+        })->get()->groupBy('material_id');
+
+        $transferredIn = StockTransferItem::whereHas('stockTransfer', function ($q) use ($id) {
+            $q->where('to_project_site_id', $id)->where('transfer_type', 'TRANSFER')->where('status', 'Completed');
+        })->get()->groupBy('material_id');
+
+        $allMaterialIds = collect()
+            ->merge($siteStocks->keys())
+            ->merge($poInward->keys())
+            ->merge($usageQuantities->keys())
+            ->merge($transferredOut->keys())
+            ->merge($transferredIn->keys())
+            ->filter(fn ($mId) => (int) $mId > 0)
+            ->unique()
+            ->values();
+
+        $materialsMap = Material::with('unit')->whereIn('id', $allMaterialIds)->get()->keyBy('id');
+
+        $balanceStockList = $allMaterialIds->map(function ($matId) use (
+            $id,
+            $siteStocks,
+            $poInward,
+            $usageQuantities,
+            $transferredOut,
+            $transferredIn,
+            $materialsMap
+        ) {
+            $material = $materialsMap->get($matId);
+            $matPoItems = $poInward->get($matId, collect());
+            $matUsageItems = $usageQuantities->get($matId, collect());
+            $matOutItems = $transferredOut->get($matId, collect());
+            $matInItems = $transferredIn->get($matId, collect());
+
+            $poQty = (float) $matPoItems->sum('quantity');
+            $whUsageQty = (float) $matUsageItems->where('source_type', 'Own Warehouse')->sum('used_quantity');
+            $xferInQty = (float) $matInItems->sum('quantity');
+            $totalReceived = $poQty + $whUsageQty + $xferInQty;
+
+            $totalUsed = (float) $matUsageItems->sum('used_quantity');
+            $totalTransferredOut = (float) $matOutItems->sum('quantity');
+
+            // Ground truth calculation from site ledger
+            $ledgerBalance = round($totalReceived - $totalUsed - $totalTransferredOut, 2);
+            $liveStock = $siteStocks->get($matId);
+
+            if ($totalReceived > 0 || $totalUsed > 0 || $totalTransferredOut > 0) {
+                $currentBalance = max(0.0, $ledgerBalance);
+                // Keep SiteMaterialStock in sync with ground truth
+                if ($liveStock) {
+                    if ((float) $liveStock->current_stock !== $currentBalance) {
+                        $liveStock->current_stock = $currentBalance;
+                        $liveStock->save();
+                    }
+                } else {
+                    SiteMaterialStock::create([
+                        'project_site_id' => $id,
+                        'material_id' => $matId,
+                        'unit' => $material?->unit?->name_en ?? 'Units',
+                        'unit_id' => $material?->unit_id,
+                        'current_stock' => $currentBalance,
+                        'last_updated_at' => now(),
+                    ]);
+                }
+            } else {
+                $currentBalance = $liveStock ? max(0.0, (float) $liveStock->current_stock) : 0.0;
+            }
+
+            $latestPrice = (float) ($matPoItems->sortByDesc('id')->first()?->unit_price
+                ?: ($matInItems->sortByDesc('id')->first()?->unit_price
+                ?: ($matUsageItems->sortByDesc('id')->first()?->unit_price ?: 0)));
+
+            $unitName = $liveStock?->unit
+                ?: ($material?->unit?->name_en
+                ?: ($matPoItems->first()?->unit
+                ?: ($matUsageItems->first()?->unit ?: 'Units')));
+
+            $matName = $material?->name_en
+                ?: ($matUsageItems->first()?->material_name
+                ?: ($matPoItems->first()?->material_name ?: 'Material'));
+
+            return [
+                'material_id' => $matId,
+                'name' => $matName,
+                'name_ta' => $material?->name_ta ?? '',
+                'unit' => $unitName,
+                'total_received' => $totalReceived,
+                'po_received' => $poQty,
+                'warehouse_received' => $whUsageQty,
+                'transferred_in' => $xferInQty,
+                'total_used' => $totalUsed,
+                'transferred_out' => $totalTransferredOut,
+                'current_balance' => $currentBalance,
+                'unit_price' => $latestPrice,
+                'total_value' => round($currentBalance * $latestPrice, 2),
+                'status' => $currentBalance > 5 ? 'In Stock' : ($currentBalance > 0 ? 'Low Stock' : 'Depleted'),
+            ];
+        })->sortByDesc('current_balance')->values();
+
+        $stockStats = [
+            'total_items' => $balanceStockList->count(),
+            'in_stock_items' => $balanceStockList->where('current_balance', '>', 0)->count(),
+            'total_stock_value' => (float) $balanceStockList->sum('total_value'),
+            'total_quantity' => (float) $balanceStockList->sum('current_balance'),
+        ];
 
         // Site Ledgers: records managed by Account Manager for this project site
         $siteLedgers = Ledger::with(['supplier', 'creator', 'cashTransfer'])
@@ -239,6 +368,8 @@ class ProjectSiteController extends Controller
             'labourRecords' => $labourRecords,
             'materialUsageRecords' => $materialUsageRecords,
             'stockTransferRecords' => $stockTransferRecords,
+            'balanceStockList' => $balanceStockList,
+            'stockStats' => $stockStats,
             'combinedCashTransactions' => $sortedCashTransactions,
             'projectCashKpis' => $projectCashKpis,
         ]);

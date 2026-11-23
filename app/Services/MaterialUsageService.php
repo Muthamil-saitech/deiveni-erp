@@ -9,6 +9,7 @@ use App\Models\ProjectSite;
 use App\Models\PurchaseOrder;
 use App\Models\PurchaseOrderItem;
 use App\Models\SiteMaterialStock;
+use App\Models\StockTransfer;
 use App\Models\WarehouseItem;
 use App\Models\WarehouseMovement;
 use App\Services\Contracts\MaterialUsageServiceInterface;
@@ -130,6 +131,10 @@ class MaterialUsageService implements MaterialUsageServiceInterface
                     || ! empty($item['warehouse_item_id'])
                     || (($data['material_source'] ?? '') === 'own_warehouse');
 
+                $isTransferItem = ($item['source_type'] ?? '') === 'Stock Transfer'
+                    || (($data['material_source'] ?? '') === 'stock_transfer')
+                    || str_starts_with((string) ($item['source_reference'] ?? ''), 'XFR');
+
                 if ($isWarehouseItem) {
                     // Scenario 2: Own Warehouse stock (without PO)
                     $whItemId = ! empty($item['warehouse_item_id']) ? (int) $item['warehouse_item_id'] : null;
@@ -211,6 +216,80 @@ class MaterialUsageService implements MaterialUsageServiceInterface
                             'created_by' => $userId,
                         ];
                     }
+                } elseif ($isTransferItem) {
+                    // Scenario 3: Stock Transferred from another site
+                    $materialName = (string) ($item['material_name'] ?? 'Transferred Material');
+                    $materialId = (int) ($item['material_id'] ?? 0);
+                    $sourceRef = (string) ($item['source_reference'] ?? ($item['po_number'] ?? 'Stock Transfer'));
+                    $sourceType = 'Stock Transfer';
+                    $unitPrice = (float) ($item['unit_price'] ?? 0);
+                    $unitName = (string) ($item['unit'] ?? 'Units');
+                    $unitId = ! empty($item['unit_id']) ? (int) $item['unit_id'] : null;
+                    $inwardQty = (float) ($item['inward_quantity'] ?? $usedQty);
+
+                    // Match or find material if id missing
+                    if ($materialId <= 0 && $materialName) {
+                        $foundMat = Material::where('name_en', $materialName)->first();
+                        if ($foundMat) {
+                            $materialId = $foundMat->id;
+                        } else {
+                            $createdMat = Material::create([
+                                'name_en' => $materialName,
+                                'unit_id' => $unitId,
+                                'status' => 'Active',
+                            ]);
+                            $materialId = $createdMat->id;
+                        }
+                    }
+
+                    // Deduct already-used quantity from previous usages for this transfer reference and material
+                    $alreadyUsed = (float) MaterialUsageItem::whereHas('materialUsage', function ($q) use ($projectSiteId) {
+                        $q->where('project_site_id', $projectSiteId)->where('status', '!=', 'Cancelled');
+                    })
+                        ->where('source_type', 'Stock Transfer')
+                        ->where('source_reference', $sourceRef)
+                        ->where('material_id', $materialId)
+                        ->sum('used_quantity');
+
+                    $availableQty = max(0, $inwardQty - $alreadyUsed);
+
+                    // Also check live site stock
+                    $siteStock = SiteMaterialStock::where('project_site_id', $projectSiteId)
+                        ->where('material_id', $materialId)
+                        ->first();
+
+                    if ($availableQty > 0 && $usedQty > ($availableQty + 0.001)) {
+                        throw new InvalidArgumentException(
+                            "Used quantity ({$usedQty}) for \"{$materialName}\" exceeds available transferred stock ({$availableQty})."
+                        );
+                    }
+
+                    if ($siteStock && $usedQty > ((float) $siteStock->current_stock + 0.001)) {
+                        throw new InvalidArgumentException(
+                            "Used quantity ({$usedQty}) for \"{$materialName}\" exceeds available site balance stock ({$siteStock->current_stock})."
+                        );
+                    }
+
+                    $remainingQty = max(0, $inwardQty - $alreadyUsed - $usedQty);
+                    $totalPrice = round($usedQty * $unitPrice, 2);
+
+                    $totalUsedQty += $usedQty;
+                    $totalCost += $totalPrice;
+
+                    $preparedItems[] = [
+                        'purchase_order_item_id' => null,
+                        'material_id' => $materialId,
+                        'material_name' => $materialName,
+                        'source_type' => $sourceType,
+                        'source_reference' => $sourceRef,
+                        'inward_quantity' => $inwardQty,
+                        'used_quantity' => $usedQty,
+                        'remaining_quantity' => $remainingQty,
+                        'unit' => $unitName,
+                        'unit_id' => $unitId ? (int) $unitId : null,
+                        'unit_price' => $unitPrice,
+                        'total_price' => $totalPrice,
+                    ];
                 } else {
                     // Scenario 1: PO-based materials (Third-party supplier)
                     $poItemId = ! empty($item['purchase_order_item_id']) ? (int) $item['purchase_order_item_id'] : null;
@@ -781,11 +860,90 @@ class MaterialUsageService implements MaterialUsageServiceInterface
             }
         }
 
+        // Fetch Inward Stock Transfers to this site
+        $transfers = StockTransfer::where('to_project_site_id', $siteId)
+            ->where('transfer_type', 'TRANSFER')
+            ->where('status', 'Completed')
+            ->with(['items.material.unit', 'fromSite'])
+            ->orderByDesc('transfer_date')
+            ->orderByDesc('id')
+            ->get();
+
+        $transferOptions = [];
+
+        foreach ($transfers as $xfer) {
+            $fromName = $xfer->fromSite?->name ?? 'Site #'.$xfer->from_project_site_id;
+            $transferOptions[] = [
+                'id' => $xfer->id,
+                'transfer_id' => $xfer->id,
+                'transfer_no' => $xfer->transfer_no,
+                'po_number' => $xfer->transfer_no,
+                'source_site_name' => $fromName,
+                'label' => "{$xfer->transfer_no} — Transferred from {$fromName} (".($xfer->transfer_date?->format('d-m-Y') ?? '').')',
+                'source_type' => 'Stock Transfer',
+                'supplier_name' => "Transferred from {$fromName}",
+                'order_date' => $xfer->transfer_date?->format('d-m-Y'),
+                'items_count' => $xfer->items->count(),
+                'is_transfer' => true,
+            ];
+
+            foreach ($xfer->items as $xferItem) {
+                $inwardQty = (float) $xferItem->quantity;
+
+                $alreadyUsed = (float) MaterialUsageItem::whereHas('materialUsage', function ($q) use ($siteId) {
+                    $q->where('project_site_id', $siteId)->where('status', '!=', 'Cancelled');
+                })
+                    ->where('source_type', 'Stock Transfer')
+                    ->where('source_reference', $xfer->transfer_no)
+                    ->where('material_id', $xferItem->material_id)
+                    ->sum('used_quantity');
+
+                $availableQty = max(0, $inwardQty - $alreadyUsed);
+
+                $items[] = [
+                    'purchase_order_id' => 'xfer_'.$xfer->id,
+                    'purchase_order_item_id' => null,
+                    'stock_transfer_id' => $xfer->id,
+                    'stock_transfer_item_id' => $xferItem->id,
+                    'po_number' => $xfer->transfer_no,
+                    'supplier_name' => "Transferred from {$fromName}",
+                    'source_type' => 'Stock Transfer',
+                    'material_id' => $xferItem->material_id,
+                    'material_name' => $xferItem->material_name ?: ($xferItem->material?->name_en ?? 'Material'),
+                    'material_name_ta' => $xferItem->material?->name_ta ?? '',
+                    'source_reference' => $xfer->transfer_no,
+                    'inward_quantity' => $inwardQty,
+                    'already_used' => $alreadyUsed,
+                    'available_quantity' => $availableQty,
+                    'unit' => $xferItem->unit ?: ($xferItem->material?->unit?->name_en ?? 'Units'),
+                    'unit_id' => $xferItem->unit_id ?? $xferItem->material?->unit_id,
+                    'unit_price' => (float) ($xferItem->unit_price ?? 0),
+                    'is_transfer' => true,
+                ];
+            }
+        }
+
+        $siteStocks = SiteMaterialStock::with('material.unit')
+            ->where('project_site_id', $siteId)
+            ->where('current_stock', '>', 0)
+            ->get()
+            ->map(function ($stk) {
+                return [
+                    'material_id' => $stk->material_id,
+                    'material_name' => $stk->material?->name_en ?? 'Material',
+                    'material_name_ta' => $stk->material?->name_ta ?? '',
+                    'current_stock' => max(0.0, (float) $stk->current_stock),
+                    'unit' => $stk->unit ?: ($stk->material?->unit?->name_en ?? 'Units'),
+                ];
+            });
+
         return [
             'site_id' => $site->id,
             'site_name' => $site->name,
             'pos' => $poOptions,
+            'transfers' => $transferOptions,
             'items' => $items,
+            'site_stocks' => $siteStocks,
         ];
     }
 

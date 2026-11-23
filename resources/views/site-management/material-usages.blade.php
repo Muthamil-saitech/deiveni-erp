@@ -287,6 +287,36 @@
         </div>
     </div>
 
+    {{-- Active Site Balance Stock Banner (if site filter selected) --}}
+    @if (!empty($siteStocks) && $siteStocks->isNotEmpty())
+        @php
+            $currentSite = $sites->firstWhere('id', (int) ($filters['site_id'] ?? 0));
+        @endphp
+        <div class="card shadow-sm border-0 mb-3 border-start border-4 border-info">
+            <div class="card-body py-2 px-3">
+                <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="bi bi-stack fs-5 text-info"></i>
+                        <div>
+                            <strong class="text-dark">{{ $currentSite?->name ?? 'Project Site' }}</strong>
+                            <span class="text-muted small ms-1">— Current Site Balance Stock (தற்போது தளத்தில் உள்ள மீதமுள்ள இருப்பு)</span>
+                        </div>
+                    </div>
+                    <div class="d-flex flex-wrap gap-2">
+                        @foreach ($siteStocks as $sStock)
+                            <span class="badge bg-light text-dark border px-2 py-1">
+                                {{ $sStock->material?->name_en ?? 'Material' }}:
+                                <strong class="{{ (float) $sStock->current_stock > 0 ? 'text-success' : 'text-danger' }}">
+                                    {{ number_format((float) $sStock->current_stock, 2) }} {{ $sStock->unit ?: ($sStock->material?->unit?->name_en ?? 'Nos') }}
+                                </strong>
+                            </span>
+                        @endforeach
+                    </div>
+                </div>
+            </div>
+        </div>
+    @endif
+
     {{-- List table --}}
     <div class="card shadow-sm border-0">
         <div class="card-body p-0">
@@ -336,18 +366,25 @@
                                 <td>
                                     @php
                                         $hasWarehouse = $usage->items->where('source_type', 'Own Warehouse')->count() > 0;
-                                        $poNumbers = $usage->items->where('source_type', '!=', 'Own Warehouse')->pluck('source_reference')->filter()->unique();
+                                        $hasTransfer = $usage->items->filter(fn($it) => $it->source_type === 'Stock Transfer' || str_starts_with($it->source_reference ?? '', 'XFR'))->count() > 0;
+                                        $poNumbers = $usage->items->where('source_type', '!=', 'Own Warehouse')->where('source_type', '!=', 'Stock Transfer')->filter(fn($it) => !str_starts_with($it->source_reference ?? '', 'XFR'))->pluck('source_reference')->filter()->unique();
+                                        $transferNumbers = $usage->items->filter(fn($it) => $it->source_type === 'Stock Transfer' || str_starts_with($it->source_reference ?? '', 'XFR'))->pluck('source_reference')->filter()->unique();
                                     @endphp
                                     @if ($hasWarehouse)
-                                        <span class="badge bg-info-subtle text-info border border-info-subtle mb-1"><i class="bi bi-boxes me-1"></i>Own Warehouse</span>
+                                        <span class="badge bg-info-subtle text-info border border-info-subtle mb-1"><i class="bi bi-boxes me-1"></i>Own Warehouse</span><br>
+                                    @endif
+                                    @if ($hasTransfer)
+                                        @foreach ($transferNumbers as $xferNum)
+                                            <span class="badge border mb-1" style="background:#f3e8ff;color:#7e22ce;border-color:#e9d5ff!important;"><i class="bi bi-arrow-left-right me-1"></i>{{ $xferNum }}</span><br>
+                                        @endforeach
                                     @endif
                                     @if ($poNumbers->count() > 0)
                                         @foreach ($poNumbers as $poNum)
                                             <span class="po-badge source-po me-1 mb-1">{{ $poNum }}</span>
                                         @endforeach
-                                    @elseif (!$hasWarehouse && $usage->purchaseOrder)
+                                    @elseif (!$hasWarehouse && !$hasTransfer && $usage->purchaseOrder)
                                         <span class="po-badge source-po">{{ $usage->purchaseOrder->po_number }}</span>
-                                    @elseif (!$hasWarehouse)
+                                    @elseif (!$hasWarehouse && !$hasTransfer)
                                         <span class="text-muted small">—</span>
                                     @endif
                                 </td>
@@ -358,12 +395,17 @@
                                                 <span class="mat-item-name">{{ $item->material_name }}</span>
                                                 @if ($item->source_type === 'Own Warehouse')
                                                     <span class="badge bg-info-subtle text-info border border-info-subtle ms-1" style="font-size:0.68rem;"><i class="bi bi-boxes me-1"></i>Own Warehouse</span>
+                                                @elseif ($item->source_type === 'Stock Transfer' || str_starts_with($item->source_reference ?? '', 'XFR'))
+                                                    <span class="badge border ms-1" style="background:#f3e8ff;color:#7e22ce;border-color:#e9d5ff!important;font-size:0.68rem;"><i class="bi bi-arrow-left-right me-1"></i>{{ $item->source_reference ?: 'Transfer' }}</span>
                                                 @else
                                                     <span class="mat-item-po badge bg-light text-secondary border ms-1">{{ $item->source_reference ?: 'PO' }}</span>
                                                 @endif
                                             </div>
                                             <div class="text-end">
                                                 <span class="mat-item-qty">{{ number_format((float) $item->used_quantity, 2) }} {{ $item->unit }}</span>
+                                                <span class="badge bg-success-subtle text-success border border-success-subtle ms-1" style="font-size:0.68rem;" title="Balance stock remaining after this usage">
+                                                    Bal: {{ number_format((float) $item->remaining_quantity, 2) }} {{ $item->unit }}
+                                                </span>
                                                 <span class="mat-item-price ms-1 text-muted">@ ₹{{ number_format((float) $item->unit_price, 2) }}</span>
                                             </div>
                                         </div>
@@ -496,16 +538,33 @@
                         </div>
                     </div>
 
+                    {{-- Site Live Balance Stock Bar --}}
+                    <div id="siteLiveStockBar" class="p-2 mb-3 bg-white border rounded shadow-sm d-none">
+                        <div class="d-flex align-items-center justify-content-between mb-1">
+                            <span class="small fw-bold text-dark">
+                                <i class="bi bi-stack text-info me-1"></i>Site Live Balance Stock (தளத்தில் உள்ள மீதமுள்ள இருப்பு):
+                            </span>
+                            <span class="badge bg-light text-secondary border small" id="siteLiveStockCount">0 materials</span>
+                        </div>
+                        <div id="siteLiveStockChips" class="d-flex flex-wrap gap-1"></div>
+                    </div>
+
                     {{-- Material / Supplier Source Selection (Image 2 style) --}}
                     <div class="p-3 rounded-3 bg-light border mb-3" id="materialSourceContainer" style="display: none;">
                         <label class="form-label small fw-semibold text-dark mb-1">
                             <i class="bi bi-box-arrow-in-down text-primary me-1"></i>Material / Supplier Source (பொருள் பெறும் ஆதாரம்) <span class="text-danger">*</span>
                         </label>
-                        <div class="d-flex gap-4 align-items-center mt-1">
+                        <div class="d-flex flex-wrap gap-4 align-items-center mt-1">
                             <div class="form-check mb-0">
                                 <input class="form-check-input" type="radio" name="material_source" id="sourceThirdParty" value="third_party" checked>
                                 <label class="form-check-label small fw-semibold text-dark" for="sourceThirdParty">
-                                    Third-Party Supplier (வெளி சப்ளையர்)
+                                    Third-Party Supplier (வெளி சப்ளையர் - PO)
+                                </label>
+                            </div>
+                            <div class="form-check mb-0">
+                                <input class="form-check-input" type="radio" name="material_source" id="sourceStockTransfer" value="stock_transfer">
+                                <label class="form-check-label small fw-semibold text-purple" for="sourceStockTransfer" style="color:#7e22ce;">
+                                    <i class="bi bi-arrow-left-right me-1"></i>Transferred from Other Site (தள பரிமாற்றம்)
                                 </label>
                             </div>
                             <div class="form-check mb-0">
@@ -635,6 +694,9 @@
                                         <th class="text-center" style="width:130px">
                                             Used Qty (அளவு) <span class="text-danger">*</span>
                                         </th>
+                                        <th class="text-center" style="width:130px">
+                                            Balance Stock (மீதமுள்ள இருப்பு)
+                                        </th>
                                         <th class="text-center">Unit</th>
                                         <th class="text-end">Unit Price (விலை ₹)</th>
                                         <th class="text-end">Total (தொகை ₹)</th>
@@ -648,6 +710,7 @@
                                     <tr class="table-secondary fw-semibold">
                                         <td colspan="6" class="text-end small pe-3">Grand Total:</td>
                                         <td class="text-center text-primary fw-bold" id="grandTotalQty">0.00</td>
+                                        <td></td>
                                         <td></td>
                                         <td></td>
                                         <td class="text-end text-success fw-bold" id="grandTotalPrice">₹0.00</td>
@@ -789,11 +852,12 @@
                                         <th style="width:34px" class="text-center">#</th>
                                         <th>Material (பொருள்)</th>
                                         <th>Source / PO (ஆதாரம்)</th>
-                                        <th class="text-center" style="width:110px">Inward Stock</th>
-                                        <th class="text-center" style="width:140px">Used Qty (அளவு) <span class="text-danger">*</span></th>
-                                        <th class="text-center" style="width:90px">Unit</th>
-                                        <th class="text-end" style="width:140px">Unit Price (₹) <span class="text-danger">*</span></th>
-                                        <th class="text-end" style="width:140px">Line Total (₹)</th>
+                                        <th class="text-center" style="width:105px">Inward Stock</th>
+                                        <th class="text-center" style="width:130px">Used Qty (அளவு) <span class="text-danger">*</span></th>
+                                        <th class="text-center" style="width:115px">Balance Stock (மீதமுள்ள இருப்பு)</th>
+                                        <th class="text-center" style="width:80px">Unit</th>
+                                        <th class="text-end" style="width:130px">Unit Price (₹) <span class="text-danger">*</span></th>
+                                        <th class="text-end" style="width:130px">Line Total (₹)</th>
                                         <th class="text-center" style="width:40px">Action</th>
                                     </tr>
                                 </thead>
@@ -804,6 +868,7 @@
                                     <tr>
                                         <td colspan="4" class="text-end">Total:</td>
                                         <td class="text-center text-primary fw-bold" id="editMuTotalQty">0.00</td>
+                                        <td></td>
                                         <td></td>
                                         <td></td>
                                         <td class="text-end text-success fw-bold" id="editMuTotalCost">₹0.00</td>
@@ -840,10 +905,13 @@
     const viewModal = new bootstrap.Modal(document.getElementById('viewUsageModal'));
     const editModal = new bootstrap.Modal(document.getElementById('editUsageModal'));
 
-    // Cache of site POs and their materials
+    // Cache of site POs, transfers, stocks and their materials
     let sitePOs = [];
+    let siteTransfers = [];
+    let siteStocks = [];
     let siteAllMaterials = [];
     let selectedPOIds = new Set();
+    let selectedTransferIds = new Set();
     let displayedItems = [];
 
     // ── Open modal ────────────────────────────────────────────
@@ -858,14 +926,24 @@
         document.getElementById('siteSelect').value = '';
         
         sitePOs = [];
+        siteTransfers = [];
+        siteStocks = [];
         siteAllMaterials = [];
         selectedPOIds.clear();
+        selectedTransferIds.clear();
         displayedItems = [];
 
         document.getElementById('sourceThirdParty').checked = true;
         document.getElementById('materialSourceContainer').style.display = 'none';
         document.getElementById('supplierPoSection').style.display = 'none';
         document.getElementById('ownWarehouseSection').style.display = 'none';
+
+        const stockBar = document.getElementById('siteLiveStockBar');
+        if (stockBar) {
+            stockBar.classList.add('d-none');
+            document.getElementById('siteLiveStockChips').innerHTML = '';
+            document.getElementById('siteLiveStockCount').textContent = '0 materials';
+        }
 
         document.getElementById('poDropdownBtn').disabled = true;
         document.getElementById('poDropdownText').textContent = '— Select Site First —';
@@ -896,6 +974,7 @@
         
         // Reset selections and table state
         selectedPOIds.clear();
+        selectedTransferIds.clear();
         displayedItems = [];
         document.getElementById('selectedPOChipsRow').style.display = 'none';
         document.getElementById('poChipsContainer').innerHTML = '';
@@ -907,61 +986,31 @@
             document.getElementById('materialSourceContainer').style.display = 'none';
             document.getElementById('supplierPoSection').style.display = 'none';
             document.getElementById('ownWarehouseSection').style.display = 'none';
+            const stockBar = document.getElementById('siteLiveStockBar');
+            if (stockBar) stockBar.classList.add('d-none');
             document.getElementById('materialsEmptyState').style.display = 'block';
             document.getElementById('emptyStateMessage').textContent = 'Please select a Project Site above to get started.';
             return;
         }
 
-        // Show Material / Supplier Source Box
+        // Show Material / Supplier Source Box and load site data
         document.getElementById('materialSourceContainer').style.display = 'block';
-        const currentSource = document.querySelector('input[name="material_source"]:checked')?.value || 'third_party';
-
-        if (currentSource === 'own_warehouse') {
-            document.getElementById('supplierPoSection').style.display = 'none';
-            document.getElementById('ownWarehouseSection').style.display = 'block';
-            document.getElementById('materialsEmptyState').style.display = 'block';
-            document.getElementById('emptyStateMessage').textContent = 'Please choose an in-stock material from Central Warehouse above and click "Add Material".';
-        } else {
-            document.getElementById('ownWarehouseSection').style.display = 'none';
-            document.getElementById('supplierPoSection').style.display = 'block';
-            loadSitePurchaseOrders(siteId);
-        }
+        loadSiteMaterialsData(siteId);
     });
 
     // ── When Material Source Radio changes (Image 2 style) ─────
     document.querySelectorAll('input[name="material_source"]').forEach(radio => {
         radio.addEventListener('change', function () {
             const siteId = document.getElementById('siteSelect').value;
-            selectedPOIds.clear();
-            displayedItems = [];
-            document.getElementById('selectedPOChipsRow').style.display = 'none';
-            document.getElementById('poChipsContainer').innerHTML = '';
-            document.getElementById('materialsSection').style.display = 'none';
-            document.getElementById('muMaterialsBody').innerHTML = '';
-            document.getElementById('poValidationFeedback').style.display = 'none';
-            updateGrandTotals();
-
-            if (!siteId) {
-                return;
-            }
-
-            if (this.value === 'own_warehouse') {
-                document.getElementById('supplierPoSection').style.display = 'none';
-                document.getElementById('ownWarehouseSection').style.display = 'block';
-                document.getElementById('materialsEmptyState').style.display = 'block';
-                document.getElementById('emptyStateMessage').textContent = 'Please choose an in-stock material from Central Warehouse above and click "Add Material".';
-            } else {
-                document.getElementById('ownWarehouseSection').style.display = 'none';
-                document.getElementById('supplierPoSection').style.display = 'block';
-                loadSitePurchaseOrders(siteId);
-            }
+            if (!siteId) return;
+            syncSourceView();
         });
     });
 
-    // ── Load POs for Site ─────────────────────────────────────
-    function loadSitePurchaseOrders(siteId) {
+    // ── Load POs & Transfers for Site ─────────────────────────
+    function loadSiteMaterialsData(siteId) {
         document.getElementById('poDropdownBtn').disabled = true;
-        document.getElementById('poDropdownText').textContent = 'Loading POs…';
+        document.getElementById('poDropdownText').textContent = 'Loading site data…';
         document.getElementById('poDropdownText').className = 'text-truncate small text-muted';
         document.getElementById('poLoadingSpinner').style.display = 'block';
         document.getElementById('materialsEmptyState').style.display = 'none';
@@ -974,24 +1023,526 @@
             document.getElementById('poLoadingSpinner').style.display = 'none';
 
             if (!data.success || !data.data) {
-                showToast('Failed to load POs for this site.', 'danger');
+                showToast('Failed to load materials for this site.', 'danger');
                 return;
             }
 
             sitePOs = data.data.pos || [];
+            siteTransfers = data.data.transfers || [];
+            siteStocks = data.data.site_stocks || [];
             siteAllMaterials = data.data.items || [];
 
-            renderPOCheckboxes();
+            // Populate Site Live Stock Bar
+            const stockBar = document.getElementById('siteLiveStockBar');
+            const stockChips = document.getElementById('siteLiveStockChips');
+            const stockCount = document.getElementById('siteLiveStockCount');
+            if (stockBar && stockChips) {
+                stockBar.classList.remove('d-none');
+                if (siteStocks.length > 0) {
+                    stockCount.textContent = `${siteStocks.length} materials in stock`;
+                    stockChips.innerHTML = siteStocks.map(s => `
+                        <span class="badge border" style="background:#f8fafc;color:#1e293b;border-color:#cbd5e1!important;font-size:0.75rem;padding:4px 8px;">
+                            <strong>${esc(s.material_name)}</strong>: <span class="text-success fw-bold">${parseFloat(s.current_stock || 0).toFixed(2)}</span> ${esc(s.unit || '')}
+                        </span>
+                    `).join('');
+                } else {
+                    stockCount.textContent = '0 materials';
+                    stockChips.innerHTML = '<span class="text-muted small">No live balance stock currently recorded for this site.</span>';
+                }
+            }
 
-            document.getElementById('materialsEmptyState').style.display = 'block';
-            document.getElementById('emptyStateMessage').textContent = sitePOs.length > 0 
-                ? `Found ${sitePOs.length} Purchase Order(s). Please click "Select Purchase Order(s)" above to pick.`
-                : 'No active Purchase Orders found for this site.';
+            syncSourceView();
         })
-        .catch(() => {
+        .catch((err) => {
+            console.error('loadSiteMaterialsData error:', err);
             document.getElementById('poLoadingSpinner').style.display = 'none';
             showToast('Network error while loading site data.', 'danger');
         });
+    }
+
+    function syncSourceView() {
+        const currentSource = document.querySelector('input[name="material_source"]:checked')?.value || 'third_party';
+        selectedPOIds.clear();
+        selectedTransferIds.clear();
+        displayedItems = [];
+        document.getElementById('selectedPOChipsRow').style.display = 'none';
+        document.getElementById('poChipsContainer').innerHTML = '';
+        document.getElementById('materialsSection').style.display = 'none';
+        document.getElementById('muMaterialsBody').innerHTML = '';
+        document.getElementById('poValidationFeedback').style.display = 'none';
+        updateGrandTotals();
+
+        if (currentSource === 'own_warehouse') {
+            document.getElementById('supplierPoSection').style.display = 'none';
+            document.getElementById('ownWarehouseSection').style.display = 'block';
+            document.getElementById('materialsEmptyState').style.display = 'block';
+            document.getElementById('emptyStateMessage').textContent = 'Please choose an in-stock material from Central Warehouse above and click "Add Material".';
+        } else if (currentSource === 'stock_transfer') {
+            document.getElementById('ownWarehouseSection').style.display = 'none';
+            document.getElementById('supplierPoSection').style.display = 'block';
+            renderTransferCheckboxes();
+        } else {
+            document.getElementById('ownWarehouseSection').style.display = 'none';
+            document.getElementById('supplierPoSection').style.display = 'block';
+            renderPOCheckboxes();
+        }
+    }
+
+    // ── Render PO Items inside Dropdown ───────────────────────
+    function renderPOCheckboxes() {
+        const poBtn = document.getElementById('poDropdownBtn');
+        const emptyDiv = document.getElementById('poDropdownEmpty');
+        const container = document.getElementById('poCheckboxContainer');
+        const listDiv = document.getElementById('poCheckboxList');
+
+        listDiv.innerHTML = '';
+
+        if (!sitePOs.length) {
+            poBtn.disabled = true;
+            document.getElementById('poDropdownText').textContent = 'No POs Available for Site';
+            document.getElementById('poDropdownText').className = 'text-truncate small text-muted';
+            emptyDiv.textContent = 'No active Purchase Orders found for this site.';
+            emptyDiv.style.display = 'block';
+            container.style.display = 'none';
+            document.getElementById('materialsEmptyState').style.display = 'block';
+            document.getElementById('emptyStateMessage').textContent = 'No active Purchase Orders found for this site.';
+            return;
+        }
+
+        poBtn.disabled = false;
+        emptyDiv.style.display = 'none';
+        container.style.display = 'block';
+        updatePODropdownLabel();
+
+        sitePOs.forEach(po => {
+            const label = document.createElement('label');
+            label.className = 'po-dropdown-item';
+            label.htmlFor = `po_chk_${po.id}`;
+            label.id = `po_item_wrap_${po.id}`;
+            
+            const sourceBadge = po.source_type === 'Own Warehouse'
+                ? '<span class="badge bg-warning-subtle text-dark border" style="font-size:0.65rem;">Warehouse</span>'
+                : '<span class="badge bg-primary-subtle text-primary border" style="font-size:0.65rem;">Supplier PO</span>';
+
+            label.innerHTML = `
+                <input type="checkbox" class="po-checkbox" value="${po.id}" id="po_chk_${po.id}">
+                <div class="flex-grow-1 min-w-0">
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <strong class="text-primary small">${esc(po.po_number)}</strong>
+                        ${sourceBadge}
+                    </div>
+                    <div class="small text-dark fw-semibold text-truncate mb-1" style="max-width: 280px;" title="${esc(po.supplier_name || 'Central Warehouse')}">
+                        ${esc(po.supplier_name || 'Central Warehouse')}
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center text-muted" style="font-size:0.7rem;">
+                        <span><i class="bi bi-calendar3 me-1"></i>${esc(po.order_date || '—')}</span>
+                        <span class="badge bg-light text-secondary border">${po.items_count || 1} material(s)</span>
+                    </div>
+                </div>
+            `;
+            listDiv.appendChild(label);
+        });
+
+        listDiv.querySelectorAll('.po-checkbox').forEach(chk => {
+            chk.addEventListener('change', function () {
+                const poId = parseInt(this.value, 10);
+                const wrap = document.getElementById(`po_item_wrap_${poId}`);
+                if (this.checked) {
+                    selectedPOIds.add(poId);
+                    if (wrap) wrap.classList.add('checked');
+                } else {
+                    selectedPOIds.delete(poId);
+                    if (wrap) wrap.classList.remove('checked');
+                }
+                syncPOSelections();
+            });
+        });
+
+        document.getElementById('materialsEmptyState').style.display = 'block';
+        document.getElementById('emptyStateMessage').textContent = `Found ${sitePOs.length} Purchase Order(s). Please click "Select Purchase Order(s)" above to pick.`;
+    }
+
+    // ── Render Stock Transfer Items inside Dropdown ───────────
+    function renderTransferCheckboxes() {
+        const poBtn = document.getElementById('poDropdownBtn');
+        const emptyDiv = document.getElementById('poDropdownEmpty');
+        const container = document.getElementById('poCheckboxContainer');
+        const listDiv = document.getElementById('poCheckboxList');
+
+        listDiv.innerHTML = '';
+
+        if (!siteTransfers.length) {
+            poBtn.disabled = true;
+            document.getElementById('poDropdownText').textContent = 'No Transferred Stock Available';
+            document.getElementById('poDropdownText').className = 'text-truncate small text-muted';
+            emptyDiv.textContent = 'No stock transfers received for this site from other project sites.';
+            emptyDiv.style.display = 'block';
+            container.style.display = 'none';
+            document.getElementById('materialsEmptyState').style.display = 'block';
+            document.getElementById('emptyStateMessage').textContent = 'No stock transfers received for this site from other project sites.';
+            return;
+        }
+
+        poBtn.disabled = false;
+        emptyDiv.style.display = 'none';
+        container.style.display = 'block';
+        updatePODropdownLabel();
+
+        siteTransfers.forEach(xfr => {
+            const label = document.createElement('label');
+            label.className = 'po-dropdown-item';
+            label.htmlFor = `xfr_chk_${xfr.id}`;
+            label.id = `xfr_item_wrap_${xfr.id}`;
+            
+            const sourceBadge = '<span class="badge border" style="background:#f3e8ff;color:#7e22ce;border-color:#e9d5ff!important;font-size:0.65rem;"><i class="bi bi-arrow-left-right me-1"></i>Stock Transfer</span>';
+
+            label.innerHTML = `
+                <input type="checkbox" class="transfer-checkbox" value="${xfr.id}" id="xfr_chk_${xfr.id}">
+                <div class="flex-grow-1 min-w-0">
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <strong class="small" style="color:#7e22ce;">${esc(xfr.transfer_no)}</strong>
+                        ${sourceBadge}
+                    </div>
+                    <div class="small text-dark fw-semibold text-truncate mb-1" style="max-width: 280px;" title="From ${esc(xfr.source_site_name || 'Other Site')}">
+                        From: ${esc(xfr.source_site_name || 'Other Site')}
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center text-muted" style="font-size:0.7rem;">
+                        <span><i class="bi bi-calendar3 me-1"></i>${esc(xfr.transfer_date || '—')}</span>
+                        <span class="badge bg-light text-secondary border">${xfr.items_count || 1} material(s)</span>
+                    </div>
+                </div>
+            `;
+            listDiv.appendChild(label);
+        });
+
+        listDiv.querySelectorAll('.transfer-checkbox').forEach(chk => {
+            chk.addEventListener('change', function () {
+                const xfrId = parseInt(this.value, 10);
+                const wrap = document.getElementById(`xfr_item_wrap_${xfrId}`);
+                if (this.checked) {
+                    selectedTransferIds.add(xfrId);
+                    if (wrap) wrap.classList.add('checked');
+                } else {
+                    selectedTransferIds.delete(xfrId);
+                    if (wrap) wrap.classList.remove('checked');
+                }
+                syncPOSelections();
+            });
+        });
+
+        document.getElementById('materialsEmptyState').style.display = 'block';
+        document.getElementById('emptyStateMessage').textContent = `Found ${siteTransfers.length} Stock Transfer(s). Please click "Select Purchase Order(s)" above to pick transferred materials.`;
+    }
+
+    // ── Select All / Clear All POs / Transfers ────────────────
+    document.getElementById('selectAllPOsBtn').addEventListener('click', function (e) {
+        e.stopPropagation();
+        const currentSource = document.querySelector('input[name="material_source"]:checked')?.value || 'third_party';
+        if (currentSource === 'stock_transfer') {
+            document.querySelectorAll('.transfer-checkbox').forEach(chk => {
+                chk.checked = true;
+                const xfrId = parseInt(chk.value, 10);
+                selectedTransferIds.add(xfrId);
+                const wrap = document.getElementById(`xfr_item_wrap_${xfrId}`);
+                if (wrap) wrap.classList.add('checked');
+            });
+        } else {
+            document.querySelectorAll('.po-checkbox').forEach(chk => {
+                chk.checked = true;
+                const poId = parseInt(chk.value, 10);
+                selectedPOIds.add(poId);
+                const wrap = document.getElementById(`po_item_wrap_${poId}`);
+                if (wrap) wrap.classList.add('checked');
+            });
+        }
+        syncPOSelections();
+    });
+
+    document.getElementById('clearAllPOsBtn').addEventListener('click', function (e) {
+        e.stopPropagation();
+        const currentSource = document.querySelector('input[name="material_source"]:checked')?.value || 'third_party';
+        if (currentSource === 'stock_transfer') {
+            document.querySelectorAll('.transfer-checkbox').forEach(chk => {
+                chk.checked = false;
+                const xfrId = parseInt(chk.value, 10);
+                const wrap = document.getElementById(`xfr_item_wrap_${xfrId}`);
+                if (wrap) wrap.classList.remove('checked');
+            });
+            selectedTransferIds.clear();
+        } else {
+            document.querySelectorAll('.po-checkbox').forEach(chk => {
+                chk.checked = false;
+                const poId = parseInt(chk.value, 10);
+                const wrap = document.getElementById(`po_item_wrap_${poId}`);
+                if (wrap) wrap.classList.remove('checked');
+            });
+            selectedPOIds.clear();
+        }
+        syncPOSelections();
+    });
+
+    // ── Synchronize PO / Transfer selections & update Table ──
+    function syncPOSelections() {
+        updatePODropdownLabel();
+        renderPOChips();
+        rebuildMaterialsTableFromSelectedPOs();
+    }
+
+    // ── Update Dropdown Button Text ──────────────────────────
+    function updatePODropdownLabel() {
+        const textSpan = document.getElementById('poDropdownText');
+        const currentSource = document.querySelector('input[name="material_source"]:checked')?.value || 'third_party';
+
+        if (currentSource === 'stock_transfer') {
+            const count = selectedTransferIds.size;
+            if (count === 0) {
+                textSpan.textContent = '— Select Stock Transfer(s) —';
+                textSpan.className = 'text-truncate small text-muted';
+                document.getElementById('poValidationFeedback').style.display = 'none';
+            } else if (count === 1) {
+                const firstId = Array.from(selectedTransferIds)[0];
+                const xfr = siteTransfers.find(x => x.id === firstId);
+                textSpan.textContent = xfr ? `${xfr.transfer_no} (1 selected)` : '1 Transfer selected';
+                textSpan.className = 'text-truncate small fw-bold text-purple';
+                textSpan.style.color = '#7e22ce';
+                document.getElementById('poValidationFeedback').style.display = 'none';
+            } else {
+                textSpan.textContent = `${count} Transfers Selected`;
+                textSpan.className = 'text-truncate small fw-bold text-purple';
+                textSpan.style.color = '#7e22ce';
+                document.getElementById('poValidationFeedback').style.display = 'none';
+            }
+        } else {
+            const count = selectedPOIds.size;
+            if (count === 0) {
+                textSpan.textContent = '— Select Purchase Order(s) —';
+                textSpan.className = 'text-truncate small text-muted';
+                document.getElementById('poValidationFeedback').style.display = 'none';
+            } else if (count === 1) {
+                const firstId = Array.from(selectedPOIds)[0];
+                const po = sitePOs.find(p => p.id === firstId);
+                textSpan.textContent = po ? `${po.po_number} (1 selected)` : '1 PO selected';
+                textSpan.className = 'text-truncate small fw-bold text-primary';
+                document.getElementById('poValidationFeedback').style.display = 'none';
+            } else {
+                textSpan.textContent = `${count} POs Selected`;
+                textSpan.className = 'text-truncate small fw-bold text-primary';
+                document.getElementById('poValidationFeedback').style.display = 'none';
+            }
+        }
+    }
+
+    // ── Render Selected Chips ────────────────────────────────
+    function renderPOChips() {
+        const chipsContainer = document.getElementById('poChipsContainer');
+        const chipsRow = document.getElementById('selectedPOChipsRow');
+        const currentSource = document.querySelector('input[name="material_source"]:checked')?.value || 'third_party';
+        chipsContainer.innerHTML = '';
+
+        if (currentSource === 'stock_transfer') {
+            if (selectedTransferIds.size === 0) {
+                chipsRow.style.display = 'none';
+                return;
+            }
+            chipsRow.style.display = 'block';
+            selectedTransferIds.forEach(xfrId => {
+                const xfr = siteTransfers.find(x => x.id === xfrId);
+                if (!xfr) return;
+                const chip = document.createElement('span');
+                chip.className = 'po-chip';
+                chip.style.borderColor = '#c084fc';
+                chip.style.backgroundColor = '#faf5ff';
+                chip.innerHTML = `
+                    <i class="bi bi-arrow-left-right text-purple" style="color:#7e22ce;"></i> <span style="color:#7e22ce;">${esc(xfr.transfer_no)}</span>
+                    <span class="btn-close-chip" title="Remove ${esc(xfr.transfer_no)}" data-id="${xfr.id}">&times;</span>
+                `;
+                chip.querySelector('.btn-close-chip').addEventListener('click', function () {
+                    const removeId = parseInt(this.dataset.id, 10);
+                    selectedTransferIds.delete(removeId);
+                    const chk = document.getElementById(`xfr_chk_${removeId}`);
+                    if (chk) chk.checked = false;
+                    const wrap = document.getElementById(`xfr_item_wrap_${removeId}`);
+                    if (wrap) wrap.classList.remove('checked');
+                    syncPOSelections();
+                });
+                chipsContainer.appendChild(chip);
+            });
+        } else {
+            if (selectedPOIds.size === 0) {
+                chipsRow.style.display = 'none';
+                return;
+            }
+            chipsRow.style.display = 'block';
+            selectedPOIds.forEach(poId => {
+                const po = sitePOs.find(p => p.id === poId);
+                if (!po) return;
+                const chip = document.createElement('span');
+                chip.className = 'po-chip';
+                chip.innerHTML = `
+                    <i class="bi bi-file-earmark-check"></i> ${esc(po.po_number)}
+                    <span class="btn-close-chip" title="Remove ${esc(po.po_number)}" data-id="${po.id}">&times;</span>
+                `;
+                chip.querySelector('.btn-close-chip').addEventListener('click', function () {
+                    const removeId = parseInt(this.dataset.id, 10);
+                    selectedPOIds.delete(removeId);
+                    const chk = document.getElementById(`po_chk_${removeId}`);
+                    if (chk) chk.checked = false;
+                    const wrap = document.getElementById(`po_item_wrap_${removeId}`);
+                    if (wrap) wrap.classList.remove('checked');
+                    syncPOSelections();
+                });
+                chipsContainer.appendChild(chip);
+            });
+        }
+    }
+
+    // ── Rebuild Materials Table for all Selected POs / Transfers
+    function rebuildMaterialsTableFromSelectedPOs() {
+        const tbody = document.getElementById('muMaterialsBody');
+        const emptyState = document.getElementById('materialsEmptyState');
+        const section = document.getElementById('materialsSection');
+        const currentSource = document.querySelector('input[name="material_source"]:checked')?.value || 'third_party';
+
+        if (currentSource === 'stock_transfer') {
+            if (selectedTransferIds.size === 0) {
+                section.style.display = 'none';
+                emptyState.style.display = 'block';
+                emptyState.querySelector('#emptyStateMessage').textContent = 'Please check one or more Stock Transfers above to load transferred materials.';
+                tbody.innerHTML = '';
+                updateGrandTotals();
+                document.getElementById('modalFooterHint').textContent = '';
+                return;
+            }
+            displayedItems = siteAllMaterials.filter(item => (item.source_type === 'Stock Transfer' || item.stock_transfer_id) && selectedTransferIds.has(parseInt(item.stock_transfer_id, 10)));
+        } else {
+            if (selectedPOIds.size === 0) {
+                section.style.display = 'none';
+                emptyState.style.display = 'block';
+                emptyState.querySelector('#emptyStateMessage').textContent = 'Please check one or more Purchase Orders above to add materials.';
+                tbody.innerHTML = '';
+                updateGrandTotals();
+                document.getElementById('modalFooterHint').textContent = '';
+                return;
+            }
+            displayedItems = siteAllMaterials.filter(item => item.source_type !== 'Stock Transfer' && selectedPOIds.has(parseInt(item.purchase_order_id, 10)));
+        }
+
+        emptyState.style.display = 'none';
+        section.style.display = 'block';
+        tbody.innerHTML = '';
+
+        if (!displayedItems.length) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="12" class="text-center text-muted small py-4">
+                        <i class="bi bi-box-seam d-block fs-3 mb-1 opacity-50"></i>
+                        No materials found with available stock in the selected selection.
+                    </td>
+                </tr>`;
+            updateGrandTotals();
+            return;
+        }
+
+        displayedItems.forEach((item, idx) => {
+            const inward    = parseFloat(item.inward_quantity    || 0);
+            const used      = parseFloat(item.already_used       || 0);
+            const avail     = parseFloat(item.available_quantity || 0);
+            const unitPrice = parseFloat(item.unit_price         || 0);
+
+            const availClass = avail <= 0 ? 'avail-nil' : 'avail-ok';
+            const defaultQty = avail > 0 ? avail : 0;
+            const defaultBal = Math.max(0, avail - defaultQty);
+
+            let sourceBadgeHtml = '';
+            if (item.source_type === 'Stock Transfer' || item.stock_transfer_id) {
+                sourceBadgeHtml = `
+                    <span class="badge border" style="background:#f3e8ff;color:#7e22ce;border-color:#e9d5ff!important;font-size:0.75rem;">
+                        <i class="bi bi-arrow-left-right me-1"></i>${esc(item.source_reference || item.po_number || 'Transfer')}
+                    </span>
+                    ${item.source_site_name ? `<div class="text-muted" style="font-size:0.7rem;">From: ${esc(item.source_site_name)}</div>` : ''}
+                `;
+            } else if (item.source_type === 'Own Warehouse') {
+                sourceBadgeHtml = `<span class="po-badge source-wh">${esc(item.po_number || 'WH')}</span>`;
+            } else {
+                sourceBadgeHtml = `
+                    <span class="po-badge source-po">${esc(item.po_number || 'PO')}</span>
+                    ${item.supplier_name ? `<div class="text-muted" style="font-size:0.7rem;">${esc(item.supplier_name)}</div>` : ''}
+                `;
+            }
+
+            const tr = document.createElement('tr');
+            tr.dataset.rowId = idx;
+            tr.innerHTML = `
+                <td class="text-muted text-center row-num">${idx + 1}
+                    <input type="hidden" name="items[${idx}][material_id]"            value="${item.material_id}">
+                    <input type="hidden" name="items[${idx}][material_name]"           value="${esc(item.material_name)}">
+                    <input type="hidden" name="items[${idx}][purchase_order_id]"       value="${item.purchase_order_id || ''}">
+                    <input type="hidden" name="items[${idx}][purchase_order_item_id]"  value="${item.purchase_order_item_id || ''}">
+                    <input type="hidden" name="items[${idx}][stock_transfer_id]"       value="${item.stock_transfer_id || ''}">
+                    <input type="hidden" name="items[${idx}][stock_transfer_item_id]"  value="${item.stock_transfer_item_id || ''}">
+                    <input type="hidden" name="items[${idx}][po_number]"               value="${esc(item.po_number || '')}">
+                    <input type="hidden" name="items[${idx}][source_reference]"        value="${esc(item.source_reference || item.po_number || '')}">
+                    <input type="hidden" name="items[${idx}][source_type]"             value="${esc(item.source_type || 'PO')}">
+                    <input type="hidden" name="items[${idx}][inward_quantity]"         value="${inward}">
+                    <input type="hidden" name="items[${idx}][unit]"                    value="${esc(item.unit || '')}">
+                    <input type="hidden" name="items[${idx}][unit_id]"                 value="${item.unit_id || ''}">
+                    <input type="hidden" name="items[${idx}][unit_price]"              value="${unitPrice}">
+                </td>
+                <td>
+                    <div class="fw-semibold text-dark">${esc(item.material_name)}</div>
+                    ${item.material_name_ta ? `<div class="text-muted small">${esc(item.material_name_ta)}</div>` : ''}
+                </td>
+                <td>${sourceBadgeHtml}</td>
+                <td class="text-center font-monospace">${inward.toFixed(2)}</td>
+                <td class="text-center text-muted font-monospace">${used > 0 ? used.toFixed(2) : '—'}</td>
+                <td class="text-center">
+                    <span class="avail-badge ${availClass}">${avail.toFixed(2)}</span>
+                </td>
+                <td class="text-center">
+                    <input type="number"
+                        class="form-control form-control-sm mu-qty-input text-center fw-bold"
+                        name="items[${idx}][used_quantity]"
+                        value="${defaultQty}"
+                        min="0" max="${avail}" step="0.01"
+                        data-max="${avail}"
+                        data-unit-price="${unitPrice}"
+                        data-row="${idx}"
+                        ${avail <= 0 ? 'disabled title="Stock fully consumed"' : ''}>
+                </td>
+                <td class="text-center font-monospace" id="rowBalance_${idx}">
+                    <span class="badge ${defaultBal > 0 ? 'bg-success-subtle text-success border border-success-subtle' : 'bg-secondary-subtle text-secondary border'}">
+                        ${defaultBal.toFixed(2)}
+                    </span>
+                </td>
+                <td class="text-center text-muted">${esc(item.unit || '—')}</td>
+                <td class="text-end fw-semibold">₹${unitPrice.toFixed(2)}</td>
+                <td class="text-end fw-bold text-success" id="rowTotal_${idx}">₹${(defaultQty * unitPrice).toFixed(2)}</td>
+                <td class="text-center">
+                    <button type="button" class="btn btn-outline-danger btn-sm p-0 px-1 remove-mat-row-btn" title="Remove this material" data-row="${idx}">
+                        <i class="bi bi-x"></i>
+                    </button>
+                </td>
+            `;
+            tbody.appendChild(tr);
+        });
+
+        tbody.querySelectorAll('.mu-qty-input').forEach(inp => inp.addEventListener('input', onQtyChange));
+        
+        tbody.querySelectorAll('.remove-mat-row-btn').forEach(btn => {
+            btn.addEventListener('click', function () {
+                const tr = this.closest('tr');
+                if (tr) {
+                    tr.remove();
+                    updateRowNumbersAndTotals();
+                }
+            });
+        });
+
+        const selectionCount = currentSource === 'stock_transfer' ? selectedTransferIds.size : selectedPOIds.size;
+        const selectionTypeLabel = currentSource === 'stock_transfer' ? 'Transfer(s)' : 'PO(s)';
+        document.getElementById('itemCountBadge').textContent = `${displayedItems.length} materials from ${selectionCount} ${selectionTypeLabel}`;
+        document.getElementById('modalFooterHint').textContent = `${displayedItems.length} materials loaded across ${selectionCount} selected ${selectionTypeLabel}`;
+        updateGrandTotals();
     }
 
     // ── Add Material from Own Warehouse ───────────────────────
@@ -1012,7 +1563,6 @@
         const unitId = selectedOpt.dataset.unitId || '';
         const rate = parseFloat(selectedOpt.dataset.rate) || 0;
 
-        // Check if already in table (by whId or material name)
         let existingRow = document.querySelector(`#muMaterialsBody tr[data-wh-id="${whId}"]`);
         if (!existingRow) {
             existingRow = Array.from(document.querySelectorAll('#muMaterialsBody tr')).find(r => {
@@ -1035,6 +1585,7 @@
         const tbody = document.getElementById('muMaterialsBody');
         const rowIdx = tbody.querySelectorAll('tr').length;
         const defaultQty = stock > 0 ? (stock >= 1 ? 1 : stock) : 0;
+        const defaultBal = Math.max(0, stock - defaultQty);
 
         const tr = document.createElement('tr');
         tr.dataset.type = 'own_warehouse';
@@ -1075,6 +1626,11 @@
                     data-unit-price="${rate}"
                     data-row="${rowIdx}">
             </td>
+            <td class="text-center font-monospace" id="rowBalance_${rowIdx}">
+                <span class="badge ${defaultBal > 0 ? 'bg-success-subtle text-success border border-success-subtle' : 'bg-secondary-subtle text-secondary border'}">
+                    ${defaultBal.toFixed(2)}
+                </span>
+            </td>
             <td class="text-center text-muted">${esc(unit)}</td>
             <td class="text-end fw-semibold">₹${rate.toFixed(2)}</td>
             <td class="text-end fw-bold text-success" id="rowTotal_${rowIdx}">₹${(defaultQty * rate).toFixed(2)}</td>
@@ -1086,7 +1642,6 @@
         `;
         tbody.appendChild(tr);
 
-        // Attach listeners
         tr.querySelector('.mu-qty-input').addEventListener('input', onQtyChange);
         tr.querySelector('.remove-mat-row-btn').addEventListener('click', function () {
             tr.remove();
@@ -1098,282 +1653,6 @@
         showToast(`Added ${name} from Central Warehouse.`, 'success');
     });
 
-    // ── Render PO Items inside Dropdown (Clean, unclipped layout) ──
-    function renderPOCheckboxes() {
-        const poBtn = document.getElementById('poDropdownBtn');
-        const emptyDiv = document.getElementById('poDropdownEmpty');
-        const container = document.getElementById('poCheckboxContainer');
-        const listDiv = document.getElementById('poCheckboxList');
-
-        listDiv.innerHTML = '';
-
-        if (!sitePOs.length) {
-            poBtn.disabled = true;
-            document.getElementById('poDropdownText').textContent = 'No POs Available for Site';
-            document.getElementById('poDropdownText').className = 'text-truncate small text-muted';
-            emptyDiv.textContent = 'No active Purchase Orders found for this site.';
-            emptyDiv.style.display = 'block';
-            container.style.display = 'none';
-            return;
-        }
-
-        poBtn.disabled = false;
-        emptyDiv.style.display = 'none';
-        container.style.display = 'block';
-        updatePODropdownLabel();
-
-        sitePOs.forEach(po => {
-            const label = document.createElement('label');
-            label.className = 'po-dropdown-item';
-            label.htmlFor = `po_chk_${po.id}`;
-            label.id = `po_item_wrap_${po.id}`;
-            
-            const sourceBadge = po.source_type === 'Own Warehouse'
-                ? '<span class="badge bg-warning-subtle text-dark border" style="font-size:0.65rem;">Warehouse</span>'
-                : '<span class="badge bg-primary-subtle text-primary border" style="font-size:0.65rem;">Supplier PO</span>';
-
-            label.innerHTML = `
-                <input type="checkbox" class="po-checkbox" value="${po.id}" id="po_chk_${po.id}">
-                <div class="flex-grow-1 min-w-0">
-                    <div class="d-flex justify-content-between align-items-center mb-1">
-                        <strong class="text-primary small">${esc(po.po_number)}</strong>
-                        ${sourceBadge}
-                    </div>
-                    <div class="small text-dark fw-semibold text-truncate mb-1" style="max-width: 280px;" title="${esc(po.supplier_name || 'Central Warehouse')}">
-                        ${esc(po.supplier_name || 'Central Warehouse')}
-                    </div>
-                    <div class="d-flex justify-content-between align-items-center text-muted" style="font-size:0.7rem;">
-                        <span><i class="bi bi-calendar3 me-1"></i>${esc(po.order_date || '—')}</span>
-                        <span class="badge bg-light text-secondary border">${po.items_count || 1} material(s)</span>
-                    </div>
-                </div>
-            `;
-            listDiv.appendChild(label);
-        });
-
-        // Add event listeners to checkboxes
-        listDiv.querySelectorAll('.po-checkbox').forEach(chk => {
-            chk.addEventListener('change', function () {
-                const poId = parseInt(this.value, 10);
-                const wrap = document.getElementById(`po_item_wrap_${poId}`);
-                if (this.checked) {
-                    selectedPOIds.add(poId);
-                    if (wrap) wrap.classList.add('checked');
-                } else {
-                    selectedPOIds.delete(poId);
-                    if (wrap) wrap.classList.remove('checked');
-                }
-                syncPOSelections();
-            });
-        });
-    }
-
-    // ── Select All / Clear All POs ───────────────────────────
-    document.getElementById('selectAllPOsBtn').addEventListener('click', function (e) {
-        e.stopPropagation();
-        document.querySelectorAll('.po-checkbox').forEach(chk => {
-            chk.checked = true;
-            const poId = parseInt(chk.value, 10);
-            selectedPOIds.add(poId);
-            const wrap = document.getElementById(`po_item_wrap_${poId}`);
-            if (wrap) wrap.classList.add('checked');
-        });
-        syncPOSelections();
-    });
-
-    document.getElementById('clearAllPOsBtn').addEventListener('click', function (e) {
-        e.stopPropagation();
-        document.querySelectorAll('.po-checkbox').forEach(chk => {
-            chk.checked = false;
-            const poId = parseInt(chk.value, 10);
-            const wrap = document.getElementById(`po_item_wrap_${poId}`);
-            if (wrap) wrap.classList.remove('checked');
-        });
-        selectedPOIds.clear();
-        syncPOSelections();
-    });
-
-    // ── Synchronize PO selections & update Table ─────────────
-    function syncPOSelections() {
-        updatePODropdownLabel();
-        renderPOChips();
-        rebuildMaterialsTableFromSelectedPOs();
-    }
-
-    // ── Update Dropdown Button Text ──────────────────────────
-    function updatePODropdownLabel() {
-        const textSpan = document.getElementById('poDropdownText');
-        const count = selectedPOIds.size;
-
-        if (count === 0) {
-            textSpan.textContent = '— Select Purchase Order(s) —';
-            textSpan.className = 'text-truncate small text-muted';
-            document.getElementById('poValidationFeedback').style.display = 'none';
-        } else if (count === 1) {
-            const firstId = Array.from(selectedPOIds)[0];
-            const po = sitePOs.find(p => p.id === firstId);
-            textSpan.textContent = po ? `${po.po_number} (1 selected)` : '1 PO selected';
-            textSpan.className = 'text-truncate small fw-bold text-primary';
-            document.getElementById('poValidationFeedback').style.display = 'none';
-        } else {
-            textSpan.textContent = `${count} POs Selected`;
-            textSpan.className = 'text-truncate small fw-bold text-primary';
-            document.getElementById('poValidationFeedback').style.display = 'none';
-        }
-    }
-
-    // ── Render Selected PO Chips ─────────────────────────────
-    function renderPOChips() {
-        const chipsContainer = document.getElementById('poChipsContainer');
-        const chipsRow = document.getElementById('selectedPOChipsRow');
-        chipsContainer.innerHTML = '';
-
-        if (selectedPOIds.size === 0) {
-            chipsRow.style.display = 'none';
-            return;
-        }
-
-        chipsRow.style.display = 'block';
-
-        selectedPOIds.forEach(poId => {
-            const po = sitePOs.find(p => p.id === poId);
-            if (!po) return;
-
-            const chip = document.createElement('span');
-            chip.className = 'po-chip';
-            chip.innerHTML = `
-                <i class="bi bi-file-earmark-check"></i> ${esc(po.po_number)}
-                <span class="btn-close-chip" title="Remove ${esc(po.po_number)}" data-id="${po.id}">&times;</span>
-            `;
-            chip.querySelector('.btn-close-chip').addEventListener('click', function () {
-                const removeId = parseInt(this.dataset.id, 10);
-                selectedPOIds.delete(removeId);
-                const chk = document.getElementById(`po_chk_${removeId}`);
-                if (chk) chk.checked = false;
-                const wrap = document.getElementById(`po_item_wrap_${removeId}`);
-                if (wrap) wrap.classList.remove('checked');
-                syncPOSelections();
-            });
-            chipsContainer.appendChild(chip);
-        });
-    }
-
-    // ── Rebuild Materials Table for all Selected POs ─────────
-    function rebuildMaterialsTableFromSelectedPOs() {
-        const tbody = document.getElementById('muMaterialsBody');
-        const emptyState = document.getElementById('materialsEmptyState');
-        const section = document.getElementById('materialsSection');
-
-        if (selectedPOIds.size === 0) {
-            section.style.display = 'none';
-            emptyState.style.display = 'block';
-            emptyState.querySelector('#emptyStateMessage').textContent = 'Please check one or more Purchase Orders above to add materials.';
-            tbody.innerHTML = '';
-            updateGrandTotals();
-            document.getElementById('modalFooterHint').textContent = '';
-            return;
-        }
-
-        // Filter materials that belong to ANY of the selected POs
-        displayedItems = siteAllMaterials.filter(item => selectedPOIds.has(parseInt(item.purchase_order_id, 10)));
-
-        emptyState.style.display = 'none';
-        section.style.display = 'block';
-        tbody.innerHTML = '';
-
-        if (!displayedItems.length) {
-            tbody.innerHTML = `
-                <tr>
-                    <td colspan="11" class="text-center text-muted small py-4">
-                        <i class="bi bi-box-seam d-block fs-3 mb-1 opacity-50"></i>
-                        No materials found with available stock in the selected Purchase Order(s).
-                    </td>
-                </tr>`;
-            updateGrandTotals();
-            return;
-        }
-
-        displayedItems.forEach((item, idx) => {
-            const inward    = parseFloat(item.inward_quantity    || 0);
-            const used      = parseFloat(item.already_used       || 0);
-            const avail     = parseFloat(item.available_quantity || 0);
-            const unitPrice = parseFloat(item.unit_price         || 0);
-
-            const availClass = avail <= 0 ? 'avail-nil' : 'avail-ok';
-            const poBadgeClass = item.source_type === 'Own Warehouse' ? 'source-wh' : 'source-po';
-            const defaultQty = avail > 0 ? avail : 0;
-
-            const tr = document.createElement('tr');
-            tr.dataset.rowId = idx;
-            tr.innerHTML = `
-                <td class="text-muted text-center row-num">${idx + 1}
-                    <input type="hidden" name="items[${idx}][material_id]"            value="${item.material_id}">
-                    <input type="hidden" name="items[${idx}][material_name]"           value="${esc(item.material_name)}">
-                    <input type="hidden" name="items[${idx}][purchase_order_id]"       value="${item.purchase_order_id || ''}">
-                    <input type="hidden" name="items[${idx}][purchase_order_item_id]"  value="${item.purchase_order_item_id || ''}">
-                    <input type="hidden" name="items[${idx}][po_number]"               value="${esc(item.po_number || '')}">
-                    <input type="hidden" name="items[${idx}][source_reference]"        value="${esc(item.source_reference || item.po_number || '')}">
-                    <input type="hidden" name="items[${idx}][source_type]"             value="${esc(item.source_type || 'PO')}">
-                    <input type="hidden" name="items[${idx}][inward_quantity]"         value="${inward}">
-                    <input type="hidden" name="items[${idx}][unit]"                    value="${esc(item.unit || '')}">
-                    <input type="hidden" name="items[${idx}][unit_id]"                 value="${item.unit_id || ''}">
-                    <input type="hidden" name="items[${idx}][unit_price]"              value="${unitPrice}">
-                </td>
-                <td>
-                    <div class="fw-semibold text-dark">${esc(item.material_name)}</div>
-                    ${item.material_name_ta ? `<div class="text-muted small">${esc(item.material_name_ta)}</div>` : ''}
-                </td>
-                <td>
-                    <span class="po-badge ${poBadgeClass}">${esc(item.po_number || 'PO')}</span>
-                    ${item.supplier_name ? `<div class="text-muted" style="font-size:0.7rem;">${esc(item.supplier_name)}</div>` : ''}
-                </td>
-                <td class="text-center">${inward.toFixed(2)}</td>
-                <td class="text-center text-muted">${used > 0 ? used.toFixed(2) : '—'}</td>
-                <td class="text-center">
-                    <span class="avail-badge ${availClass}">${avail.toFixed(2)}</span>
-                </td>
-                <td class="text-center">
-                    <input type="number"
-                        class="form-control form-control-sm mu-qty-input text-center"
-                        name="items[${idx}][used_quantity]"
-                        value="${defaultQty}"
-                        min="0" max="${avail}" step="0.01"
-                        data-max="${avail}"
-                        data-unit-price="${unitPrice}"
-                        data-row="${idx}"
-                        ${avail <= 0 ? 'disabled title="Stock fully consumed"' : ''}>
-                </td>
-                <td class="text-center text-muted">${esc(item.unit || '—')}</td>
-                <td class="text-end fw-semibold">₹${unitPrice.toFixed(2)}</td>
-                <td class="text-end fw-bold text-success" id="rowTotal_${idx}">₹${(defaultQty * unitPrice).toFixed(2)}</td>
-                <td class="text-center">
-                    <button type="button" class="btn btn-outline-danger btn-sm p-0 px-1 remove-mat-row-btn" title="Remove this material" data-row="${idx}">
-                        <i class="bi bi-x"></i>
-                    </button>
-                </td>
-            `;
-            tbody.appendChild(tr);
-        });
-
-        // Attach input listeners
-        tbody.querySelectorAll('.mu-qty-input').forEach(inp => inp.addEventListener('input', onQtyChange));
-        
-        // Attach row remove buttons
-        tbody.querySelectorAll('.remove-mat-row-btn').forEach(btn => {
-            btn.addEventListener('click', function () {
-                const tr = this.closest('tr');
-                if (tr) {
-                    tr.remove();
-                    updateRowNumbersAndTotals();
-                }
-            });
-        });
-
-        document.getElementById('itemCountBadge').textContent = `${displayedItems.length} materials from ${selectedPOIds.size} PO(s)`;
-        document.getElementById('modalFooterHint').textContent = `${displayedItems.length} materials loaded across ${selectedPOIds.size} selected PO(s)`;
-        updateGrandTotals();
-    }
-
     // ── Qty change handler ────────────────────────────────────
     function onQtyChange(e) {
         const inp   = e.target;
@@ -1383,12 +1662,18 @@
         const idx   = inp.dataset.row;
 
         if (val < 0) { val = 0; inp.value = 0; }
-        if (val > max) {
+        if (max > 0 && val > max) {
             inp.classList.add('is-invalid');
             inp.value = max;
             val = max;
         } else {
             inp.classList.remove('is-invalid');
+        }
+
+        const bal = Math.max(0, max - val);
+        const balCell = document.getElementById(`rowBalance_${idx}`);
+        if (balCell) {
+            balCell.innerHTML = `<span class="badge ${bal > 0 ? 'bg-success-subtle text-success border border-success-subtle' : 'bg-secondary-subtle text-secondary border'}">${bal.toFixed(2)}</span>`;
         }
 
         const cell = document.getElementById(`rowTotal_${idx}`);
@@ -1404,7 +1689,8 @@
             const numCell = tr.querySelector('.row-num');
             if (numCell) numCell.childNodes[0].nodeValue = (i + 1) + ' ';
         });
-        document.getElementById('itemCountBadge').textContent = `${rows.length} materials remaining`;
+        const badge = document.getElementById('itemCountBadge');
+        if (badge) badge.textContent = `${rows.length} materials remaining`;
         updateGrandTotals();
     }
 
@@ -1416,8 +1702,10 @@
             qty   += v;
             price += v * p;
         });
-        document.getElementById('grandTotalQty').textContent   = qty.toFixed(2);
-        document.getElementById('grandTotalPrice').textContent = `₹${price.toFixed(2)}`;
+        const qtyEl = document.getElementById('grandTotalQty');
+        const priceEl = document.getElementById('grandTotalPrice');
+        if (qtyEl) qtyEl.textContent   = qty.toFixed(2);
+        if (priceEl) priceEl.textContent = `₹${price.toFixed(2)}`;
     }
 
     // ── Save Material Usage ───────────────────────────────────
@@ -1435,7 +1723,12 @@
 
         const source = document.querySelector('input[name="material_source"]:checked')?.value || 'third_party';
 
-        if (source === 'third_party' && selectedPOIds.size === 0) {
+        if (source === 'stock_transfer' && selectedTransferIds.size === 0) {
+            document.getElementById('poValidationFeedback').textContent = 'Please select at least one Stock Transfer.';
+            document.getElementById('poValidationFeedback').style.display = 'block';
+            valid = false;
+        } else if (source === 'third_party' && selectedPOIds.size === 0) {
+            document.getElementById('poValidationFeedback').textContent = 'Please select at least one Purchase Order.';
             document.getElementById('poValidationFeedback').style.display = 'block';
             valid = false;
         }
@@ -1444,12 +1737,14 @@
         if (rows.length === 0) {
             showToast(source === 'own_warehouse' 
                 ? 'Please add at least one material from Central Warehouse.' 
-                : 'Please select at least one Purchase Order to load materials.', 'danger');
+                : (source === 'stock_transfer' ? 'Please select at least one Stock Transfer to load materials.' : 'Please select at least one Purchase Order to load materials.'), 'danger');
             valid = false;
         }
 
         if (!valid) {
-            if (source === 'third_party' && selectedPOIds.size === 0) {
+            if (source === 'stock_transfer' && selectedTransferIds.size === 0) {
+                showToast('Please select at least one Stock Transfer.', 'danger');
+            } else if (source === 'third_party' && selectedPOIds.size === 0) {
                 showToast('Please select at least one Purchase Order.', 'danger');
             } else if (!siteSelect.value || !dateFld.value) {
                 showToast('Please select Project Site and Usage Date.', 'danger');
@@ -1467,14 +1762,20 @@
 
         const formData = new FormData(form);
 
-        // Add selected PO ids for reference
-        Array.from(selectedPOIds).forEach(poId => {
-            formData.append('purchase_order_ids[]', poId);
-        });
-
-        // Set primary purchase_order_id if at least one selected
-        if (selectedPOIds.size > 0) {
-            formData.set('purchase_order_id', Array.from(selectedPOIds)[0]);
+        if (source === 'stock_transfer') {
+            Array.from(selectedTransferIds).forEach(xfrId => {
+                formData.append('stock_transfer_ids[]', xfrId);
+            });
+            if (selectedTransferIds.size > 0) {
+                formData.set('stock_transfer_id', Array.from(selectedTransferIds)[0]);
+            }
+        } else {
+            Array.from(selectedPOIds).forEach(poId => {
+                formData.append('purchase_order_ids[]', poId);
+            });
+            if (selectedPOIds.size > 0) {
+                formData.set('purchase_order_id', Array.from(selectedPOIds)[0]);
+            }
         }
 
         const btn = this;
@@ -1532,17 +1833,25 @@
                 let rowsHtml = '';
                 (u.items || []).forEach((it, idx) => {
                     const isWh = it.source_type === 'Own Warehouse';
+                    const isXfr = it.source_type === 'Stock Transfer' || (it.source_reference && String(it.source_reference).startsWith('XFR'));
                     const srcBadge = isWh
                         ? `<span class="badge bg-info-subtle text-info border border-info-subtle"><i class="bi bi-boxes me-1"></i>Own Warehouse (${esc(it.source_reference || 'WH')})</span>`
-                        : `<span class="badge bg-primary-subtle text-primary border border-primary-subtle"><i class="bi bi-file-earmark-text me-1"></i>${esc(it.source_reference || 'PO')}</span>`;
+                        : (isXfr
+                            ? `<span class="badge border" style="background:#f3e8ff;color:#7e22ce;border-color:#e9d5ff!important;"><i class="bi bi-arrow-left-right me-1"></i>${esc(it.source_reference || 'Transfer')}</span>`
+                            : `<span class="badge bg-primary-subtle text-primary border border-primary-subtle"><i class="bi bi-file-earmark-text me-1"></i>${esc(it.source_reference || 'PO')}</span>`);
 
                     rowsHtml += `
                         <tr>
                             <td class="text-center">${idx + 1}</td>
                             <td class="fw-semibold">${esc(it.material_name)}</td>
                             <td>${srcBadge}</td>
-                            <td class="text-center">${parseFloat(it.inward_quantity || 0).toFixed(2)}</td>
-                            <td class="text-center fw-bold text-primary">${parseFloat(it.used_quantity || 0).toFixed(2)}</td>
+                            <td class="text-center font-monospace">${parseFloat(it.inward_quantity || 0).toFixed(2)}</td>
+                            <td class="text-center fw-bold text-primary font-monospace">${parseFloat(it.used_quantity || 0).toFixed(2)}</td>
+                            <td class="text-center font-monospace">
+                                <span class="badge bg-success-subtle text-success border border-success-subtle">
+                                    ${parseFloat(it.remaining_quantity || 0).toFixed(2)}
+                                </span>
+                            </td>
                             <td class="text-center text-muted">${esc(it.unit || '—')}</td>
                             <td class="text-end">₹${parseFloat(it.unit_price || 0).toFixed(2)}</td>
                             <td class="text-end fw-bold text-success">₹${parseFloat(it.total_price || 0).toFixed(2)}</td>
@@ -1577,9 +1886,10 @@
                                 <tr>
                                     <th class="text-center">#</th>
                                     <th>Material</th>
-                                    <th>Source / PO Reference</th>
+                                    <th>Source / Reference</th>
                                     <th class="text-center">Inward / Stock</th>
                                     <th class="text-center">Used Qty</th>
+                                    <th class="text-center">Balance Stock (மீதமுள்ள இருப்பு)</th>
                                     <th class="text-center">Unit</th>
                                     <th class="text-end">Price (₹)</th>
                                     <th class="text-end">Total (₹)</th>
@@ -1590,6 +1900,7 @@
                                 <tr>
                                     <td colspan="4" class="text-end">Total:</td>
                                     <td class="text-center text-primary fw-bold">${parseFloat(u.total_used_quantity || 0).toFixed(2)}</td>
+                                    <td></td>
                                     <td></td>
                                     <td></td>
                                     <td class="text-end text-success fw-bold">₹${parseFloat(u.total_cost || 0).toFixed(2)}</td>
@@ -1615,6 +1926,8 @@
             const qtyInput = row.querySelector('.edit-item-qty');
             const priceInput = row.querySelector('.edit-item-price');
             const totalSpan = row.querySelector('.edit-item-total');
+            const balSpan = row.querySelector('.edit-row-bal');
+            const inward = parseFloat(row.dataset.inward || 0);
             const qty = parseFloat(qtyInput ? qtyInput.value : 0) || 0;
             const price = parseFloat(priceInput ? priceInput.value : 0) || 0;
             const lineTotal = qty * price;
@@ -1622,6 +1935,10 @@
             totalCost += lineTotal;
             if (totalSpan) {
                 totalSpan.textContent = '₹' + lineTotal.toFixed(2);
+            }
+            if (balSpan) {
+                const bal = Math.max(0, inward - qty);
+                balSpan.textContent = bal.toFixed(2);
             }
         });
         const totalQtyEl = document.getElementById('editMuTotalQty');
@@ -1673,7 +1990,9 @@
                 headers: { 'X-Requested-With': 'XMLHttpRequest', Accept: 'application/json' }
             }).then(r => r.json()).catch(() => ({ materials: [] }))
         ]).then(([siteRes, whRes]) => {
-            const poItems = (siteRes && siteRes.data && siteRes.data.items) ? siteRes.data.items : [];
+            const allItems = (siteRes && siteRes.data && siteRes.data.items) ? siteRes.data.items : [];
+            const poItems = allItems.filter(it => it.source_type !== 'Stock Transfer' && !String(it.source_reference || '').startsWith('XFR'));
+            const transferItems = allItems.filter(it => it.source_type === 'Stock Transfer' || it.stock_transfer_id || String(it.source_reference || '').startsWith('XFR'));
             const whItems = (whRes && whRes.materials) ? whRes.materials : [];
 
             let html = '<option value="">-- Choose Material to Add --</option>';
@@ -1697,6 +2016,31 @@
                             data-unit-id="${it.unit_id || ''}"
                             data-price="${price}">
                             [${esc(it.po_number || 'PO')}] ${esc(it.material_name)} · Avail: ${avail.toFixed(2)} ${esc(it.unit || '')} @ ₹${price.toFixed(2)}
+                        </option>
+                    `;
+                });
+                html += '</optgroup>';
+            }
+
+            if (transferItems.length > 0) {
+                html += '<optgroup label="Stock Transferred from Other Sites (தள பரிமாற்றம்)">';
+                transferItems.forEach(it => {
+                    const avail = parseFloat(it.available_quantity || 0);
+                    const price = parseFloat(it.unit_price || 0);
+                    const optKey = `XFR_${it.stock_transfer_item_id || it.material_id}`;
+                    html += `
+                        <option value="${optKey}"
+                            data-source-type="Stock Transfer"
+                            data-source-ref="${esc(it.source_reference || it.po_number || 'Transfer')}"
+                            data-transfer-item-id="${it.stock_transfer_item_id || ''}"
+                            data-mat-id="${it.material_id || ''}"
+                            data-mat-name="${esc(it.material_name)}"
+                            data-inward="${parseFloat(it.inward_quantity || 0)}"
+                            data-avail="${avail}"
+                            data-unit="${esc(it.unit || 'Nos')}"
+                            data-unit-id="${it.unit_id || ''}"
+                            data-price="${price}">
+                            [${esc(it.source_reference || 'Transfer')}] ${esc(it.material_name)} · Avail: ${avail.toFixed(2)} ${esc(it.unit || '')} @ ₹${price.toFixed(2)}
                         </option>
                     `;
                 });
@@ -1767,6 +2111,7 @@
             const srcType = opt.dataset.sourceType;
             const srcRef = opt.dataset.sourceRef || '';
             const poItemId = opt.dataset.poItemId || '';
+            const transferItemId = opt.dataset.transferItemId || '';
             const whId = opt.dataset.whId || '';
             const matId = opt.dataset.matId || '';
             const matName = opt.dataset.matName;
@@ -1778,6 +2123,7 @@
             // ── DUPLICATE CHECK: Verify same material is not added multiple times ──
             const existingRow = Array.from(document.querySelectorAll('#editMuMaterialsBody tr')).find(r => {
                 if (poItemId && r.dataset.poItemId && r.dataset.poItemId === String(poItemId)) return true;
+                if (transferItemId && r.dataset.transferItemId && r.dataset.transferItemId === String(transferItemId)) return true;
                 if (whId && r.dataset.whId && r.dataset.whId === String(whId)) return true;
                 if (matId && r.dataset.matId && String(r.dataset.matId) === String(matId) && r.dataset.sourceRef === srcRef) return true;
                 if (r.dataset.matName && r.dataset.matName.trim().toLowerCase() === matName.trim().toLowerCase() && r.dataset.sourceType === srcType) return true;
@@ -1796,14 +2142,21 @@
             // Append new row
             const tbody = document.getElementById('editMuMaterialsBody');
             const rowCount = tbody.querySelectorAll('tr').length;
-            const sourceBadge = srcType === 'Own Warehouse'
+            const isWh = srcType === 'Own Warehouse';
+            const isXfr = srcType === 'Stock Transfer' || String(srcRef).startsWith('XFR');
+            const sourceBadge = isWh
                 ? '<span class="badge bg-info-subtle text-info border">Own Warehouse</span>'
-                : `<span class="badge bg-light text-secondary border">${esc(srcRef || 'PO')}</span>`;
+                : (isXfr
+                    ? `<span class="badge border" style="background:#f3e8ff;color:#7e22ce;border-color:#e9d5ff!important;"><i class="bi bi-arrow-left-right me-1"></i>${esc(srcRef || 'Transfer')}</span>`
+                    : `<span class="badge bg-light text-secondary border">${esc(srcRef || 'PO')}</span>`);
+
+            const bal = Math.max(0, inward - qty);
 
             const tr = document.createElement('tr');
             tr.setAttribute('data-item-id', '');
             tr.setAttribute('data-mat-id', matId);
             tr.setAttribute('data-po-item-id', poItemId);
+            tr.setAttribute('data-transfer-item-id', transferItemId);
             tr.setAttribute('data-wh-id', whId);
             tr.setAttribute('data-mat-name', matName);
             tr.setAttribute('data-source-type', srcType);
@@ -1818,9 +2171,12 @@
                     <div class="fw-semibold text-dark">${esc(matName)}</div>
                 </td>
                 <td>${sourceBadge}</td>
-                <td class="text-center text-muted small">${inward.toFixed(2)}</td>
+                <td class="text-center text-muted small font-monospace">${inward.toFixed(2)}</td>
                 <td>
                     <input type="number" step="0.01" min="0.01" class="form-control form-control-sm text-center fw-semibold edit-item-qty" value="${qty}" required>
+                </td>
+                <td class="text-center font-monospace small">
+                    <span class="badge bg-success-subtle text-success border border-success-subtle edit-row-bal">${bal.toFixed(2)}</span>
                 </td>
                 <td class="text-center text-muted small">${esc(unit)}</td>
                 <td>
@@ -1878,7 +2234,7 @@
         btn.addEventListener('click', function () {
             const id = this.dataset.id;
             const tbody = document.getElementById('editMuMaterialsBody');
-            tbody.innerHTML = '<tr><td colspan="9" class="text-center py-3 text-muted"><div class="spinner-border spinner-border-sm text-primary me-2"></div>Loading usage details...</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="10" class="text-center py-3 text-muted"><div class="spinner-border spinner-border-sm text-primary me-2"></div>Loading usage details...</td></tr>';
             
             if (editUsageAddBox) editUsageAddBox.style.display = 'none';
             editModal.show();
@@ -1892,7 +2248,7 @@
             .then(r => r.json())
             .then(res => {
                 if (!res.success || !res.usage) {
-                    tbody.innerHTML = '<tr><td colspan="9" class="text-center py-3 text-danger">Failed to load material usage details.</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="10" class="text-center py-3 text-danger">Failed to load material usage details.</td></tr>';
                     return;
                 }
                 const u = res.usage;
@@ -1911,9 +2267,17 @@
 
                 let rowsHtml = '';
                 (u.items || []).forEach((it, idx) => {
-                    const sourceLabel = it.source_type === 'Own Warehouse' 
+                    const isWh = it.source_type === 'Own Warehouse';
+                    const isXfr = it.source_type === 'Stock Transfer' || (it.source_reference && String(it.source_reference).startsWith('XFR'));
+                    const sourceLabel = isWh 
                         ? '<span class="badge bg-info-subtle text-info border">Own Warehouse</span>' 
-                        : `<span class="badge bg-light text-secondary border">${esc(it.source_reference || 'PO')}</span>`;
+                        : (isXfr 
+                            ? `<span class="badge border" style="background:#f3e8ff;color:#7e22ce;border-color:#e9d5ff!important;"><i class="bi bi-arrow-left-right me-1"></i>${esc(it.source_reference || 'Transfer')}</span>`
+                            : `<span class="badge bg-light text-secondary border">${esc(it.source_reference || 'PO')}</span>`);
+
+                    const inQty = parseFloat(it.inward_quantity || 0);
+                    const uQty = parseFloat(it.used_quantity || 0);
+                    const bal = Math.max(0, inQty - uQty);
 
                     rowsHtml += `
                         <tr data-item-id="${it.id}"
@@ -1923,7 +2287,7 @@
                             data-mat-name="${esc(it.material_name)}"
                             data-source-type="${esc(it.source_type)}"
                             data-source-ref="${esc(it.source_reference || '')}"
-                            data-inward="${parseFloat(it.inward_quantity || 0)}"
+                            data-inward="${inQty}"
                             data-unit="${esc(it.unit || '')}"
                             data-unit-id="${it.unit_id || ''}">
                             <td class="text-center text-muted small edit-row-num">${idx + 1}</td>
@@ -1931,9 +2295,12 @@
                                 <div class="fw-semibold text-dark">${esc(it.material_name)}</div>
                             </td>
                             <td>${sourceLabel}</td>
-                            <td class="text-center text-muted small">${parseFloat(it.inward_quantity || 0).toFixed(2)}</td>
+                            <td class="text-center text-muted small font-monospace">${inQty.toFixed(2)}</td>
                             <td>
-                                <input type="number" step="0.01" min="0.01" class="form-control form-control-sm text-center fw-semibold edit-item-qty" value="${parseFloat(it.used_quantity || 0)}" required>
+                                <input type="number" step="0.01" min="0.01" class="form-control form-control-sm text-center fw-semibold edit-item-qty" value="${uQty}" required>
+                            </td>
+                            <td class="text-center font-monospace small">
+                                <span class="badge bg-success-subtle text-success border border-success-subtle edit-row-bal">${bal.toFixed(2)}</span>
                             </td>
                             <td class="text-center text-muted small">${esc(it.unit || '')}</td>
                             <td>
@@ -1964,7 +2331,7 @@
                 recalcEditTotals();
             })
             .catch(() => {
-                tbody.innerHTML = '<tr><td colspan="9" class="text-center py-3 text-danger">Network error loading details.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="10" class="text-center py-3 text-danger">Network error loading details.</td></tr>';
             });
         });
     });
@@ -2014,6 +2381,7 @@
                 } else {
                     itemPayload.material_id = row.dataset.matId ? parseInt(row.dataset.matId) : null;
                     itemPayload.purchase_order_item_id = row.dataset.poItemId ? parseInt(row.dataset.poItemId) : null;
+                    itemPayload.stock_transfer_item_id = row.dataset.transferItemId ? parseInt(row.dataset.transferItemId) : null;
                     itemPayload.warehouse_item_id = row.dataset.whId ? parseInt(row.dataset.whId) : null;
                     itemPayload.material_name = row.dataset.matName;
                     itemPayload.source_type = row.dataset.sourceType;

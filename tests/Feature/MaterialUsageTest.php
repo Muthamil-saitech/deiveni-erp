@@ -9,6 +9,8 @@ use App\Models\ProjectSite;
 use App\Models\PurchaseOrder;
 use App\Models\PurchaseOrderItem;
 use App\Models\SiteMaterialStock;
+use App\Models\StockTransfer;
+use App\Models\StockTransferItem;
 use App\Models\Unit;
 use App\Models\User;
 use App\Models\WarehouseItem;
@@ -307,10 +309,10 @@ test('stock transfer available materials fetches materials from material usage f
     $transferService = app(StockTransferServiceInterface::class);
     $available = $transferService->getAvailableMaterialsForSite($this->site->id);
 
-    // Cement should have available_qty = 30 from the Material Usage entry
+    // Cement should have available_qty = 70.0 from the balance stock (inward 100 - used 30)
     $cementItem = collect($available)->firstWhere('material_id', $this->cement->id);
     expect($cementItem)->not->toBeNull()
-        ->and((float) $cementItem['available_qty'])->toBe(30.0);
+        ->and((float) $cementItem['available_qty'])->toBe(70.0);
 });
 
 test('cannot use more than available quantity', function () {
@@ -763,4 +765,199 @@ test('can add warehouse material without material_id when editing material usage
     // Verify warehouse stock deduction: 35 - 1 = 34
     $shovelWh->refresh();
     expect((float) $shovelWh->current_stock)->toBe(34.0);
+});
+
+test('transferred stock to another site is loaded into site materials for usage and can be consumed', function () {
+    $siteB = ProjectSite::create([
+        'client_id' => $this->client->id,
+        'name' => 'Site Beta',
+        'location' => 'Madurai South',
+        'work_type' => 'Commercial',
+        'start_date' => '2026-01-01',
+        'end_date' => '2027-01-01',
+        'estimated_budget' => 600000,
+        'spent' => 0,
+        'status' => 'In Progress',
+        'created_by' => $this->user->id,
+    ]);
+
+    // Set stock at Site Alpha: 50 bags cement
+    SiteMaterialStock::updateOrCreate(
+        ['project_site_id' => $this->site->id, 'material_id' => $this->cement->id],
+        ['unit_id' => $this->unitBags->id, 'unit' => 'Bags', 'current_stock' => 50.00, 'last_updated_at' => now()]
+    );
+
+    // Inter-site transfer from Site Alpha to Site Beta: 20 bags cement
+    $transfer = StockTransfer::create([
+        'transfer_no' => 'XFR-2026-0001',
+        'transfer_type' => 'TRANSFER',
+        'from_project_site_id' => $this->site->id,
+        'to_project_site_id' => $siteB->id,
+        'transfer_date' => '2026-11-20',
+        'status' => 'Completed',
+        'created_by' => $this->user->id,
+    ]);
+
+    $transferItem = StockTransferItem::create([
+        'stock_transfer_id' => $transfer->id,
+        'material_id' => $this->cement->id,
+        'material_name' => 'Cement (UltraTech)',
+        'source_type' => 'PO',
+        'source_reference' => 'PO-2026-TEST',
+        'quantity' => 20.00,
+        'unit' => 'Bags',
+        'unit_id' => $this->unitBags->id,
+        'unit_price' => 500.00,
+        'total_price' => 10000.00,
+    ]);
+
+    // Site Beta stock updated by transfer service (or directly here)
+    SiteMaterialStock::create([
+        'project_site_id' => $siteB->id,
+        'material_id' => $this->cement->id,
+        'unit_id' => $this->unitBags->id,
+        'unit' => 'Bags',
+        'current_stock' => 20.00,
+        'last_updated_at' => now(),
+    ]);
+
+    // 1. Verify Site Beta site-materials endpoint returns transferred stock
+    $response = $this->actingAs($this->user)->getJson(route('material-usages.site-materials', $siteB->id));
+    $response->assertOk();
+    $data = $response->json('data');
+
+    expect($data['transfers'])->toHaveCount(1);
+    expect($data['transfers'][0]['transfer_no'])->toBe('XFR-2026-0001');
+
+    $transferMat = collect($data['items'])->firstWhere('source_type', 'Stock Transfer');
+    expect($transferMat)->not->toBeNull()
+        ->and($transferMat['material_name'])->toBe('Cement (UltraTech)')
+        ->and((float) $transferMat['inward_quantity'])->toBe(20.0)
+        ->and((float) $transferMat['available_quantity'])->toBe(20.0);
+
+    // 2. Consume 15 bags from transferred stock at Site Beta
+    $storeResponse = $this->actingAs($this->user)->postJson(route('material-usages.store'), [
+        'usage_date' => '2026-11-21',
+        'project_site_id' => $siteB->id,
+        'material_source' => 'stock_transfer',
+        'stock_transfer_id' => $transfer->id,
+        'remarks' => 'Consuming transferred cement at Site Beta',
+        'items' => [
+            [
+                'material_id' => $this->cement->id,
+                'stock_transfer_id' => $transfer->id,
+                'stock_transfer_item_id' => $transferItem->id,
+                'material_name' => 'Cement (UltraTech)',
+                'source_type' => 'Stock Transfer',
+                'source_reference' => 'XFR-2026-0001',
+                'inward_quantity' => 20.00,
+                'used_quantity' => 15.00,
+                'unit' => 'Bags',
+                'unit_id' => $this->unitBags->id,
+                'unit_price' => 500.00,
+            ],
+        ],
+    ]);
+
+    $storeResponse->assertOk()->assertJsonPath('success', true);
+
+    // Check SiteMaterialStock at Site Beta is decremented to 5 bags
+    $siteBStock = SiteMaterialStock::where('project_site_id', $siteB->id)
+        ->where('material_id', $this->cement->id)
+        ->first();
+    expect((float) $siteBStock->current_stock)->toBe(5.0);
+
+    // Check MaterialUsageItem remaining quantity is 5 bags
+    $usageItem = MaterialUsageItem::where('source_reference', 'XFR-2026-0001')->first();
+    expect($usageItem)->not->toBeNull()
+        ->and((float) $usageItem->used_quantity)->toBe(15.0)
+        ->and((float) $usageItem->remaining_quantity)->toBe(5.0);
+
+    // 3. Query site-materials again and verify available transferred quantity is now 5
+    $secondResponse = $this->actingAs($this->user)->getJson(route('material-usages.site-materials', $siteB->id));
+    $secondData = $secondResponse->json('data');
+    $updatedTransferMat = collect($secondData['items'])->firstWhere('source_type', 'Stock Transfer');
+    expect((float) $updatedTransferMat['available_quantity'])->toBe(5.0)
+        ->and((float) $updatedTransferMat['already_used'])->toBe(15.0);
+});
+
+test('project site detail page displays balance stock tab, materials used balance, and inward/outward transfers', function () {
+    $siteB = ProjectSite::create([
+        'client_id' => $this->client->id,
+        'name' => 'Site Gamma',
+        'location' => 'Madurai East',
+        'work_type' => 'Commercial',
+        'start_date' => '2026-01-01',
+        'end_date' => '2027-01-01',
+        'estimated_budget' => 600000,
+        'spent' => 0,
+        'status' => 'In Progress',
+        'created_by' => $this->user->id,
+    ]);
+
+    // Set stock at site: 50 bags cement
+    SiteMaterialStock::updateOrCreate(
+        ['project_site_id' => $this->site->id, 'material_id' => $this->cement->id],
+        ['unit_id' => $this->unitBags->id, 'unit' => 'Bags', 'current_stock' => 50.00, 'last_updated_at' => now()]
+    );
+
+    // Material usage record
+    $usage = MaterialUsage::create([
+        'usage_no' => 'MU-TEST-001',
+        'usage_date' => '2026-11-19',
+        'project_site_id' => $this->site->id,
+        'purchase_order_id' => $this->po->id,
+        'material_source' => 'third_party',
+        'total_items_count' => 1,
+        'total_used_quantity' => 20.00,
+        'total_cost' => 10000.00,
+        'status' => 'Recorded',
+        'created_by' => $this->user->id,
+    ]);
+
+    MaterialUsageItem::create([
+        'material_usage_id' => $usage->id,
+        'purchase_order_item_id' => $this->poItemCement->id,
+        'material_id' => $this->cement->id,
+        'material_name' => 'Cement (UltraTech)',
+        'source_type' => 'Third-Party Supplier',
+        'source_reference' => $this->po->po_number,
+        'inward_quantity' => 100.00,
+        'used_quantity' => 20.00,
+        'remaining_quantity' => 80.00,
+        'unit' => 'Bags',
+        'unit_id' => $this->unitBags->id,
+        'unit_price' => 500.00,
+        'total_price' => 10000.00,
+    ]);
+
+    // Outward transfer: 10 bags to Site Gamma
+    $outTransfer = StockTransfer::create([
+        'transfer_no' => 'XFR-OUT-001',
+        'transfer_type' => 'TRANSFER',
+        'from_project_site_id' => $this->site->id,
+        'to_project_site_id' => $siteB->id,
+        'transfer_date' => '2026-11-20',
+        'status' => 'Completed',
+        'created_by' => $this->user->id,
+    ]);
+
+    StockTransferItem::create([
+        'stock_transfer_id' => $outTransfer->id,
+        'material_id' => $this->cement->id,
+        'material_name' => 'Cement (UltraTech)',
+        'quantity' => 10.00,
+        'unit' => 'Bags',
+        'unit_price' => 500.00,
+        'total_price' => 5000.00,
+    ]);
+
+    $response = $this->actingAs($this->user)->get(route('sites.show', $this->site->id));
+
+    $response->assertOk();
+    $response->assertSee('Balance Stock');
+    $response->assertSee('மீதமுள்ள இருப்பு');
+    $response->assertSee('OUTWARD');
+    $response->assertSee('XFR-OUT-001');
+    $response->assertSee('Cement (UltraTech)');
 });

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\ProjectSite;
+use App\Models\SiteMaterialStock;
 use App\Models\WarehouseItem;
 use App\Services\Contracts\MaterialUsageServiceInterface;
 use Illuminate\Http\JsonResponse;
@@ -37,12 +38,19 @@ class MaterialUsageController extends Controller
             ->orderBy('name_en')
             ->get();
         $nextUsageNo = $this->materialUsageService->getNextUsageNumber();
+        $siteStocks = null;
+        if (! empty($filters['site_id'])) {
+            $siteStocks = SiteMaterialStock::with('material.unit')
+                ->where('project_site_id', (int) $filters['site_id'])
+                ->get();
+        }
 
         if ($request->ajax() || $request->wantsJson()) {
             return response()->json([
                 'success' => true,
                 'usages' => $usages,
                 'stats' => $stats,
+                'site_stocks' => $siteStocks,
             ]);
         }
 
@@ -54,6 +62,7 @@ class MaterialUsageController extends Controller
             'warehouseItems' => $warehouseItems,
             'nextUsageNo' => $nextUsageNo,
             'filters' => $filters,
+            'siteStocks' => $siteStocks,
         ]);
     }
 
@@ -65,11 +74,13 @@ class MaterialUsageController extends Controller
         $validated = $request->validate([
             'project_site_id' => ['nullable', 'integer', 'exists:project_sites,id'],
             'purchase_order_id' => ['nullable', 'integer', 'exists:purchase_orders,id'],
-            'material_source' => ['nullable', 'string', 'in:third_party,own_warehouse,supplier'],
+            'material_source' => ['nullable', 'string', 'in:third_party,own_warehouse,supplier,stock_transfer'],
             'usage_date' => ['required', 'date', 'before_or_equal:today'],
             'remarks' => ['nullable', 'string', 'max:1000'],
             'items' => ['required', 'array', 'min:1'],
             'items.*.purchase_order_item_id' => ['nullable', 'integer'],
+            'items.*.stock_transfer_id' => ['nullable', 'integer'],
+            'items.*.stock_transfer_item_id' => ['nullable', 'integer'],
             'items.*.warehouse_item_id' => ['nullable', 'integer'],
             'items.*.material_id' => ['nullable', 'integer'],
             'items.*.material_name' => ['nullable', 'string', 'max:255'],
@@ -138,6 +149,8 @@ class MaterialUsageController extends Controller
             'items' => ['required', 'array', 'min:1'],
             'items.*.id' => ['nullable', 'integer'],
             'items.*.purchase_order_item_id' => ['nullable', 'integer'],
+            'items.*.stock_transfer_id' => ['nullable', 'integer'],
+            'items.*.stock_transfer_item_id' => ['nullable', 'integer'],
             'items.*.warehouse_item_id' => ['nullable', 'integer'],
             'items.*.material_id' => ['nullable', 'integer'],
             'items.*.material_name' => ['nullable', 'string', 'max:255'],
