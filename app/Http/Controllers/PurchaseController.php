@@ -241,6 +241,25 @@ class PurchaseController extends Controller
     }
 
     /**
+     * Update only the status of an existing purchase order.
+     */
+    public function updateStatus(Request $request, int $id): JsonResponse
+    {
+        $validated = $request->validate([
+            'status' => ['required', 'string', 'in:Ordered,Order Received,Partial Received,Order Completed,Order Return,Order Canceled'],
+            'status_reason' => ['nullable', 'string', 'max:255'],
+        ]);
+
+        $purchase = $this->purchaseService->updateStatus($id, $validated['status'], $validated['status_reason'] ?? null);
+
+        return response()->json([
+            'success' => true,
+            'message' => "Purchase order {$purchase->po_number} status updated to \"{$purchase->status}\".",
+            'purchase' => $purchase,
+        ]);
+    }
+
+    /**
      * Delete a purchase order.
      */
     public function destroy(Request $request, int $id): JsonResponse|RedirectResponse

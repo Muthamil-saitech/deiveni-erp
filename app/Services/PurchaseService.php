@@ -74,6 +74,33 @@ class PurchaseService implements PurchaseServiceInterface
     }
 
     /**
+     * Update only the status of a purchase order.
+     */
+    public function updateStatus(int $id, string $status, ?string $reason = null): PurchaseOrder
+    {
+        $order = $this->purchaseRepo->findById($id);
+        if (! $order) {
+            throw new \InvalidArgumentException("Purchase order #{$id} not found.");
+        }
+
+        $deliveryStatus = in_array($status, ['Delivered & Inwarded', 'Order Completed', 'Order Received'], true)
+            ? 'Delivered & Inwarded'
+            : 'Inward Pending';
+
+        $updateData = [
+            'status' => $status,
+            'status_reason' => $reason,
+            'delivery_status' => $deliveryStatus,
+        ];
+
+        if ($deliveryStatus === 'Delivered & Inwarded' && empty($order->delivery_date)) {
+            $updateData['delivery_date'] = Carbon::today()->format('Y-m-d');
+        }
+
+        return $this->purchaseRepo->update($order, $updateData);
+    }
+
+    /**
      * Delete a purchase order.
      */
     public function delete(int $id): bool
@@ -168,7 +195,7 @@ class PurchaseService implements PurchaseServiceInterface
             : ($existing?->order_date ? Carbon::parse($existing->order_date)->format('Y-m-d') : Carbon::today()->format('Y-m-d'));
 
         $status = $data['status'] ?? ($existing?->status ?? 'Ordered');
-        $deliveryStatus = in_array($status, ['Delivered & Inwarded', 'Order Completed'], true)
+        $deliveryStatus = in_array($status, ['Delivered & Inwarded', 'Order Completed', 'Order Received'], true)
             ? 'Delivered & Inwarded'
             : 'Inward Pending';
 

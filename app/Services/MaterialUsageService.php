@@ -807,7 +807,7 @@ class MaterialUsageService implements MaterialUsageServiceInterface
         }
 
         $poQuery = PurchaseOrder::where('project_site_id', $siteId)
-            ->where('status', '!=', 'Cancelled')
+            ->whereIn('status', ['Order Received', 'Order Completed'])
             ->with(['items.material.unit'])
             ->orderByDesc('order_date')
             ->orderByDesc('id');
@@ -956,7 +956,7 @@ class MaterialUsageService implements MaterialUsageServiceInterface
     public function getActivePurchaseOrders(array $filters = []): array
     {
         $query = PurchaseOrder::with('projectSite')
-            ->where('status', '!=', 'Cancelled')
+            ->whereIn('status', ['Order Received', 'Order Completed'])
             ->orderByDesc('order_date')
             ->orderByDesc('id');
 

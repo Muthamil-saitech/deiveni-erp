@@ -40,6 +40,11 @@ interface PurchaseServiceInterface
     public function update(int $id, array $data): PurchaseOrder;
 
     /**
+     * Update only the status of a purchase order.
+     */
+    public function updateStatus(int $id, string $status, ?string $reason = null): PurchaseOrder;
+
+    /**
      * Delete a purchase order.
      */
     public function delete(int $id): bool;

@@ -686,7 +686,7 @@ class StockTransferService implements StockTransferServiceInterface
         // Also check Purchase Orders directly ordered for this site that haven't had usage recorded yet
         $sitePoItems = PurchaseOrderItem::whereHas('purchaseOrder', function ($q) use ($siteId) {
             $q->where('project_site_id', $siteId)
-                ->where('status', '!=', 'Cancelled');
+                ->whereIn('status', ['Order Received', 'Order Completed']);
         })->with(['purchaseOrder', 'material.unit'])->get();
 
         foreach ($sitePoItems as $poItem) {

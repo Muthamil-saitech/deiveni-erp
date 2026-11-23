@@ -44,7 +44,8 @@ class SiteCashController extends Controller
             ->get();
         $warehouseItems = $this->warehouseService->getInStockItems();
         $user = $request->user();
-        $purchaseOrdersQuery = PurchaseOrder::with(['items', 'projectSite', 'supplier']);
+        $purchaseOrdersQuery = PurchaseOrder::with(['items', 'projectSite', 'supplier'])
+            ->whereIn('status', ['Order Received', 'Order Completed']);
         if ($user && ! $user->isAdmin()) {
             $purchaseOrdersQuery->where('created_by', $user->id);
         }
@@ -417,7 +418,8 @@ class SiteCashController extends Controller
         $supplierName = $request->query('supplier_name');
 
         $user = $request->user();
-        $query = PurchaseOrder::with(['items', 'projectSite', 'supplier']);
+        $query = PurchaseOrder::with(['items', 'projectSite', 'supplier'])
+            ->whereIn('status', ['Order Received', 'Order Completed']);
         if ($user && ! $user->isAdmin()) {
             $query->where('created_by', $user->id);
         }

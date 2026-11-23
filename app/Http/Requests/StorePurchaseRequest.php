@@ -146,7 +146,7 @@ class StorePurchaseRequest extends FormRequest
             'supplier_id' => ['nullable', 'integer', 'exists:suppliers,id'],
             'supplier_name' => ['required', 'string', 'max:255'],
             'source_type' => ['nullable', 'string', 'max:50'],
-            'status' => ['required', 'string', 'in:Ordered,Partial Received,Order Completed,Order Return,Order Canceled'],
+            'status' => ['required', 'string', 'in:Ordered,Order Received,Partial Received,Order Completed,Order Return,Order Canceled'],
             'status_reason' => [
                 'nullable',
                 'string',

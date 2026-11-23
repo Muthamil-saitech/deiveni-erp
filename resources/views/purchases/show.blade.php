@@ -825,6 +825,8 @@
                 switch (status) {
                     case 'Ordered':
                         return '<span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle px-2 py-1"><i class="bi bi-clock me-1"></i>Ordered (ஆர்டர் செய்யப்பட்டது)</span>';
+                    case 'Order Received':
+                        return '<span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1"><i class="bi bi-check2-circle me-1"></i>Order Received (ஆர்டர் பெறப்பட்டது)</span>';
                     case 'Partial Received':
                         return '<span class="badge bg-info-subtle text-info-emphasis border border-info-subtle px-2 py-1"><i class="bi bi-pie-chart me-1"></i>Partial Received (பகுதி பெறப்பட்டது)</span>';
                     case 'Order Return':

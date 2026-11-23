@@ -454,7 +454,7 @@
                 const s = String(status || 'Ordered').trim();
                 let badgeClass = 'bg-secondary';
 
-                if (s === 'Order Completed' || s === 'Delivered & Inwarded') {
+                if (s === 'Order Received' || s === 'Order Completed' || s === 'Delivered & Inwarded') {
                     badgeClass = 'bg-success';
                 } else if (s === 'Partial Received') {
                     badgeClass = 'bg-warning text-dark';

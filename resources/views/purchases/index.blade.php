@@ -230,7 +230,7 @@
                                 })->values()->toJson();
 
                                 $badgeClass = match ($po->status) {
-                                    'Order Completed' => 'bg-success-subtle text-success border border-success-subtle',
+                                    'Order Received', 'Order Completed' => 'bg-success-subtle text-success border border-success-subtle',
                                     'Partial Received' => 'bg-info-subtle text-info-emphasis border border-info-subtle',
                                     'Ordered' => 'bg-warning-subtle text-warning-emphasis border border-warning-subtle',
                                     'Order Return' => 'bg-danger-subtle text-danger-emphasis border border-danger-subtle',
@@ -278,9 +278,36 @@
                                     <span class="fw-bold text-dark fs-6">₹{{ number_format((float) $po->total_amount, 2) }}</span>
                                 </td>
                                 <td>
-                                    <span class="badge {{ $badgeClass }}">{{ $po->status }}</span>
-                                    @if($po->status_reason)
-                                        <div class="small text-muted mt-1 text-truncate" style="max-width: 140px;" title="{{ $po->status_reason }}"><i class="bi bi-info-circle me-1 text-danger"></i>{{ $po->status_reason }}</div>
+                                    @if($po->status === 'Order Received')
+                                        <span class="badge bg-success-subtle text-success border border-success-subtle py-1 px-2 d-inline-flex align-items-center gap-1"
+                                              id="statusBadge_{{ $po->id }}" title="Order Confirmed (ஆர்டர் உறுதி செய்யப்பட்டது)">
+                                            <i class="bi bi-check-circle-fill text-success"></i>
+                                            <span class="status-text fw-semibold">Order Received</span>
+                                        </span>
+                                    @else
+                                        <div class="dropdown po-status-dropdown d-inline-block">
+                                            <button class="btn btn-sm py-1 px-2 rounded-2 dropdown-toggle d-inline-flex align-items-center gap-1 bg-warning-subtle text-warning-emphasis border border-warning-subtle"
+                                                    type="button" data-bs-toggle="dropdown" data-bs-popper-config='{"strategy":"fixed"}' aria-expanded="false"
+                                                    id="statusBtn_{{ $po->id }}" title="Click to change status (நிலை மாற்ற கிளிக் செய்க)">
+                                                <i class="bi bi-clock-history text-warning"></i>
+                                                <span class="status-text fw-semibold">Ordered</span>
+                                            </button>
+                                            <ul class="dropdown-menu shadow-sm">
+                                                <li><h6 class="dropdown-header text-uppercase" style="font-size: 0.68rem;">Change Status (நிலை மாற்றம்)</h6></li>
+                                                <li>
+                                                    <button class="dropdown-item py-1 d-flex align-items-center gap-2 po-change-status-btn active"
+                                                            type="button" data-id="{{ $po->id }}" data-status="Ordered">
+                                                        <i class="bi bi-clock-history text-warning"></i> Ordered (ஆர்டர் செய்யப்பட்டது)
+                                                    </button>
+                                                </li>
+                                                <li>
+                                                    <button class="dropdown-item py-1 d-flex align-items-center gap-2 po-change-status-btn text-success fw-bold"
+                                                            type="button" data-id="{{ $po->id }}" data-status="Order Received">
+                                                        <i class="bi bi-check2-circle text-success"></i> Order Received (உறுதி / பெறப்பட்டது)
+                                                    </button>
+                                                </li>
+                                            </ul>
+                                        </div>
                                     @endif
                                 </td>
                                 <td class="text-end">
@@ -291,6 +318,13 @@
                                         <ul class="dropdown-menu dropdown-menu-end shadow-sm">
                                             <li><a class="dropdown-item" href="{{ route('purchases.show', $po->encrypted_id) }}"><i class="bi bi-eye text-info me-2"></i>View Details</a></li>
                                             <li><button class="dropdown-item edit-purchase-btn" type="button"><i class="bi bi-pencil text-primary me-2"></i>Edit</button></li>
+                                            @if($po->status !== 'Order Received')
+                                                <li class="action-confirm-po-item">
+                                                    <button class="dropdown-item text-success po-change-status-btn" type="button" data-id="{{ $po->id }}" data-status="Order Received">
+                                                        <i class="bi bi-check2-circle text-success me-2"></i>Confirm as Order Received
+                                                    </button>
+                                                </li>
+                                            @endif
                                             <li><hr class="dropdown-divider my-1"></li>
                                             <li><button class="dropdown-item text-danger delete-purchase-btn" type="button"><i class="bi bi-trash3 text-danger me-2"></i>Delete</button></li>
                                         </ul>
@@ -392,18 +426,15 @@
                             </div>
 
                             <!-- Purchase Order Status & Reason Input -->
-                            <!-- <div class="col-12 col-md-6">
+                            <div class="col-12 col-md-6">
                                 <label class="form-label small fw-semibold" for="purStatus">Purchase Order Status (ஆர்டர் நிலை) <span
                                         class="text-danger">*</span></label>
                                 <select class="form-select fw-semibold" id="purStatus">
-                                    <option value="Ordered">Ordered (ஆர்டர் செய்யப்பட்டது)</option>
-                                    <option value="Partial Received">Partial Received (பகுதி பெறப்பட்டது)</option>
-                                    <option value="Order Completed" selected>Order Completed (முழுவதும் பெறப்பட்டது)</option>
-                                    <option value="Order Return">Order Return (பொருட்கள் திருப்பப்பட்டது)</option>
-                                    <option value="Order Canceled">Order Canceled (ஆர்டர் ரத்து செய்யப்பட்டது)</option>
+                                    <option value="Ordered" selected>Ordered (ஆர்டர் செய்யப்பட்டது)</option>
+                                    <option value="Order Received">Order Received (உறுதி / பெறப்பட்டது)</option>
                                 </select>
                                 <div class="invalid-feedback" id="errStatus"></div>
-                            </div> -->
+                            </div>
                             <div class="col-12 col-md-6" id="purReasonContainer" style="display: none;">
                                 <label class="form-label small fw-semibold text-danger" id="purReasonLabel" for="purReason">
                                     <i class="bi bi-exclamation-triangle-fill me-1"></i>Reason (காரணம்) <span class="text-danger">*</span>
@@ -998,7 +1029,7 @@
 
             // Reason visibility during return / cancel
             function updateStatusReasonVisibility() {
-                const status = 'Ordered';
+                const status = $('#purStatus').val() || 'Ordered';
                 const reasonContainer = $('#purReasonContainer');
                 const reasonInput = $('#purReason');
                 const reasonLabel = $('#purReasonLabel');
@@ -1019,6 +1050,117 @@
             }
 
             $('#purStatus').on('change', updateStatusReasonVisibility);
+
+            // Instant status change from table dropdown or action menu
+            $(document).on('click', '.po-change-status-btn', function (e) {
+                e.preventDefault();
+                const btn = $(this);
+                const poId = btn.data('id');
+                const newStatus = btn.data('status');
+                let reason = '';
+
+                if (newStatus === 'Order Return' || newStatus === 'Order Canceled') {
+                    const promptMsg = newStatus === 'Order Return'
+                        ? 'Please enter return reason (பொருட்கள் திருப்பியதற்கான காரணம்):'
+                        : 'Please enter cancellation reason (ஆர்டர் ரத்து செய்ததற்கான காரணம்):';
+                    reason = prompt(promptMsg);
+                    if (reason === null) {
+                        return; // User cancelled prompt
+                    }
+                    reason = reason.trim();
+                    if (!reason) {
+                        showToast('Status reason is required for ' + newStatus, 'warning');
+                        return;
+                    }
+                }
+
+                btn.prop('disabled', true);
+
+                $.ajax({
+                    url: '/purchases/' + poId + '/status',
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
+                        'Accept': 'application/json'
+                    },
+                    data: {
+                        status: newStatus,
+                        status_reason: reason || null
+                    },
+                    success: function (res) {
+                        showToast(res.message || 'Status updated to ' + newStatus, 'success');
+
+                        // Update row data attributes and UI elements
+                        const row = $(`tr.purchase-row[data-id="${poId}"]`);
+                        if (row.length) {
+                            row.attr('data-status', newStatus);
+                            row.data('status', newStatus);
+                            if (reason) {
+                                row.attr('data-status-reason', reason);
+                                row.data('status-reason', reason);
+                            }
+
+                            if (newStatus === 'Order Received') {
+                                // 1. Automatically remove "Confirm as Order Received" from Actions menu in this row
+                                row.find('.action-confirm-po-item').remove();
+
+                                // 2. Disable dropdown by replacing it with the static confirmed badge
+                                const confirmedBadgeHtml = `
+                                    <span class="badge bg-success-subtle text-success border border-success-subtle py-1 px-2 d-inline-flex align-items-center gap-1"
+                                          id="statusBadge_${poId}" title="Order Confirmed (ஆர்டர் உறுதி செய்யப்பட்டது)">
+                                        <i class="bi bi-check-circle-fill text-success"></i>
+                                        <span class="status-text fw-semibold">Order Received</span>
+                                    </span>
+                                `;
+                                const dropdown = row.find('.po-status-dropdown');
+                                if (dropdown.length) {
+                                    dropdown.replaceWith(confirmedBadgeHtml);
+                                } else {
+                                    const statusBtn = $(`#statusBtn_${poId}`);
+                                    if (statusBtn.length) {
+                                        statusBtn.replaceWith(confirmedBadgeHtml);
+                                    }
+                                }
+                            } else {
+                                const statusBtn = $(`#statusBtn_${poId}`);
+                                if (statusBtn.length) {
+                                    statusBtn.removeClass('bg-success-subtle text-success border-success-subtle bg-info-subtle text-info-emphasis border-info-subtle bg-warning-subtle text-warning-emphasis border-warning-subtle bg-danger-subtle text-danger-emphasis border-danger-subtle bg-secondary-subtle text-secondary border-secondary-subtle');
+
+                                    let iconHtml = '<i class="bi bi-clock-history text-warning"></i>';
+                                    let badgeCls = 'bg-warning-subtle text-warning-emphasis border border-warning-subtle';
+
+                                    statusBtn.addClass(badgeCls);
+                                    statusBtn.html(`${iconHtml} <span class="status-text fw-semibold">${newStatus}</span>`);
+                                }
+
+                                // Update active state in row's status menu
+                                row.find('.po-change-status-btn').removeClass('active');
+                                row.find(`.po-change-status-btn[data-status="${newStatus}"]`).addClass('active');
+                            }
+
+                            // Update status reason display if present
+                            let reasonElem = row.find('.po-reason-display');
+                            if (reason) {
+                                if (reasonElem.length) {
+                                    reasonElem.attr('title', reason).html(`<i class="bi bi-info-circle me-1 text-danger"></i>${reason}`);
+                                } else {
+                                    const targetElem = row.find(`#statusBadge_${poId}, #statusBtn_${poId}`);
+                                    targetElem.parent().after(`<div class="small text-muted mt-1 text-truncate po-reason-display" style="max-width: 140px;" title="${reason}"><i class="bi bi-info-circle me-1 text-danger"></i>${reason}</div>`);
+                                }
+                            } else if (reasonElem.length && newStatus !== 'Order Return' && newStatus !== 'Order Canceled') {
+                                reasonElem.remove();
+                            }
+                        }
+                    },
+                    error: function (xhr) {
+                        const err = xhr.responseJSON && xhr.responseJSON.message ? xhr.responseJSON.message : 'Failed to update status.';
+                        showToast(err, 'danger');
+                    },
+                    complete: function () {
+                        btn.prop('disabled', false);
+                    }
+                });
+            });
 
             // Recalculate summary stats: ONLY count actual purchase rows with class .purchase-row
             function recalculateSummaryStats(rowsToCount) {
