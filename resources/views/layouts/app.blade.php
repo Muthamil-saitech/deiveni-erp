@@ -50,8 +50,98 @@
         }
 
         @media (min-width: 992px) {
+            html, body {
+                height: 100vh;
+                overflow: hidden;
+            }
+
             body {
                 padding-bottom: 0;
+            }
+
+            .app-wrapper {
+                height: 100vh;
+                max-height: 100vh;
+                overflow: hidden;
+            }
+
+            #sidebar {
+                height: 100vh;
+                max-height: 100vh;
+                overflow: hidden;
+                position: sticky;
+                top: 0;
+            }
+
+            #sidebar .sidebar-nav {
+                overflow-y: auto;
+                overflow-x: hidden;
+                flex: 1 1 auto;
+            }
+
+            #main-wrapper {
+                height: 100vh;
+                max-height: 100vh;
+                overflow: hidden;
+            }
+
+            #main-content-scroll {
+                height: calc(100vh - 60px);
+                overflow-y: auto;
+                overflow-x: hidden;
+                display: flex;
+                flex-direction: column;
+            }
+
+            #main-content {
+                min-height: auto;
+                flex: 1 0 auto;
+            }
+        }
+
+        /* Custom scrollbars for separate scrolling */
+        #sidebar .sidebar-nav::-webkit-scrollbar {
+            width: 5px;
+        }
+
+        #sidebar .sidebar-nav::-webkit-scrollbar-track {
+            background: rgba(15, 23, 42, 0.5);
+        }
+
+        #sidebar .sidebar-nav::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.18);
+            border-radius: 4px;
+        }
+
+        #sidebar .sidebar-nav::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.35);
+        }
+
+        #main-content-scroll::-webkit-scrollbar {
+            width: 7px;
+        }
+
+        #main-content-scroll::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+
+        #main-content-scroll::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+
+        #main-content-scroll::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        @media print {
+            html, body, .app-wrapper, #main-wrapper, #main-content-scroll, #main-content {
+                height: auto !important;
+                overflow: visible !important;
+            }
+
+            #sidebar, #top-navbar, .mobile-bottom-nav, footer {
+                display: none !important;
             }
         }
 
@@ -473,7 +563,7 @@
     <!-- Sidebar Backdrop for Mobile -->
     <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
 
-    <div class="d-flex">
+    <div class="d-flex app-wrapper" id="appWrapper">
         <!-- Sidebar -->
         <aside id="sidebar" class="d-flex flex-column flex-shrink-0">
             <!-- Brand -->
@@ -912,10 +1002,10 @@
         </aside>
 
         <!-- Main Wrapper -->
-        <div class="d-flex flex-column flex-grow-1 overflow-hidden" style="min-width: 0;">
+        <div class="d-flex flex-column flex-grow-1 overflow-hidden" id="main-wrapper" style="min-width: 0;">
 
             <!-- Top Navbar -->
-            <header id="top-navbar" class="d-flex align-items-center justify-content-between">
+            <header id="top-navbar" class="d-flex align-items-center justify-content-between flex-shrink-0">
                 <div class="d-flex align-items-center">
                     <button class="btn btn-light btn-sm d-lg-none me-2 border" id="openSidebarBtn"
                         aria-label="Open menu">
@@ -974,34 +1064,36 @@
                 </div>
             </header>
 
-            <!-- Main Content Area -->
-            <main id="main-content">
-                @if (session('error'))
-                    <div class="alert alert-danger alert-dismissible fade show mb-3" role="alert">
-                        <i class="bi bi-shield-exclamation me-2"></i>{{ session('error') }}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                    </div>
-                @endif
-                @if (session('success'))
-                    <div class="alert alert-success alert-dismissible fade show mb-3" role="alert">
-                        <i class="bi bi-check-circle-fill me-2"></i>{{ session('success') }}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                    </div>
-                @endif
-                @yield('content')
-            </main>
+            <!-- Main Content Area with Independent Scroll -->
+            <div id="main-content-scroll" class="flex-grow-1 overflow-y-auto">
+                <main id="main-content">
+                    @if (session('error'))
+                        <div class="alert alert-danger alert-dismissible fade show mb-3" role="alert">
+                            <i class="bi bi-shield-exclamation me-2"></i>{{ session('error') }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    @endif
+                    @if (session('success'))
+                        <div class="alert alert-success alert-dismissible fade show mb-3" role="alert">
+                            <i class="bi bi-check-circle-fill me-2"></i>{{ session('success') }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    @endif
+                    @yield('content')
+                </main>
 
-            <!-- Desktop Footer -->
-            <footer class="bg-white border-top py-2 px-4 text-center text-muted small mt-auto d-none d-md-block">
-                <div class="d-flex flex-column flex-sm-row justify-content-between align-items-center">
-                    <div>
-                        <strong>Deiveni Construction Management System</strong> &bull; Phase 1 Prototype
+                <!-- Desktop Footer -->
+                <footer class="bg-white border-top py-2 px-4 text-center text-muted small mt-auto d-none d-md-block">
+                    <div class="d-flex flex-column flex-sm-row justify-content-between align-items-center">
+                        <div>
+                            <strong>Deiveni Construction Management System</strong> &bull; Phase 1 Prototype
+                        </div>
+                        <!-- <div class="ta-text text-muted" style="font-size: 0.8rem;">
+                            மேஸ்திரி, கொத்தனார் & சித்தாள் தினசரி கூலி மற்றும் கணக்கு நிர்வாக மென்பொருள்
+                        </div> -->
                     </div>
-                    <!-- <div class="ta-text text-muted" style="font-size: 0.8rem;">
-                        மேஸ்திரி, கொத்தனார் & சித்தாள் தினசரி கூலி மற்றும் கணக்கு நிர்வாக மென்பொருள்
-                    </div> -->
-                </div>
-            </footer>
+                </footer>
+            </div>
         </div>
     </div>
 
