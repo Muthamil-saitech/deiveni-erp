@@ -150,6 +150,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/sites', [ProjectSiteController::class, 'index'])->name('sites.index');
         Route::post('/sites', [ProjectSiteController::class, 'store'])->name('sites.store');
         Route::get('/sites/{encryptedId}', [ProjectSiteController::class, 'show'])->name('sites.show');
+        Route::get('/sites/{encryptedId}/suppliers/{supplierKey}', [ProjectSiteController::class, 'supplierPurchasesDetail'])->name('sites.supplier-purchases');
         Route::match(['put', 'patch', 'post'], '/sites/{id}', [ProjectSiteController::class, 'update']);
         Route::post('/sites/{id}/update', [ProjectSiteController::class, 'update'])->name('sites.update');
 

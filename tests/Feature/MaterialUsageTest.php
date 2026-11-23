@@ -961,3 +961,36 @@ test('project site detail page displays balance stock tab, materials used balanc
     $response->assertSee('XFR-OUT-001');
     $response->assertSee('Cement (UltraTech)');
 });
+
+test('project site detail page displays supplier purchases tab with clean summary table and view button', function () {
+    $response = $this->actingAs($this->user)->get(route('sites.show', $this->site->id));
+
+    $response->assertOk();
+    $response->assertSee('Supplier Purchases');
+    $response->assertSee('சப்ளையர் கொள்முதல்');
+    $response->assertSee($this->po->supplier_name);
+    $response->assertSee('View (விவரங்கள்)');
+    $response->assertSee('₹'.number_format($this->poItemCement->total_price + $this->poItemSand->total_price, 2));
+});
+
+test('supplier purchases detail page displays date-wise breakdown of materials and prices for the site', function () {
+    $supKey = 'ext_'.urlencode(strtolower(trim($this->po->supplier_name)));
+    $url = route('sites.supplier-purchases', [
+        'encryptedId' => $this->site->id,
+        'supplierKey' => $supKey,
+    ]);
+
+    $response = $this->actingAs($this->user)->get($url);
+
+    $response->assertOk();
+    $response->assertSee($this->po->supplier_name);
+    $response->assertSee($this->po->po_number);
+    $response->assertSee('Cement (UltraTech)');
+    $response->assertSee('M-Sand');
+    $response->assertSee('₹'.number_format($this->poItemCement->unit_price, 2));
+    $response->assertSee('₹'.number_format($this->poItemCement->total_price, 2));
+    $response->assertSee('₹'.number_format($this->poItemSand->unit_price, 2));
+    $response->assertSee('Date Filter');
+    $response->assertSee('Date-wise Purchase Breakdown');
+    $response->assertSee('Back to Site');
+});

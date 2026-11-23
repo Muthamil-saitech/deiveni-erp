@@ -7,6 +7,7 @@ use App\Http\Requests\UpdateProjectSiteRequest;
 use App\Models\Ledger;
 use App\Models\Material;
 use App\Models\MaterialUsageItem;
+use App\Models\PurchaseOrder;
 use App\Models\PurchaseOrderItem;
 use App\Models\SiteMaterialStock;
 use App\Models\StockTransfer;
@@ -254,6 +255,90 @@ class ProjectSiteController extends Controller
             'total_quantity' => (float) $balanceStockList->sum('current_balance'),
         ];
 
+        // Supplier purchases for this site, broken down by supplier & material price-wise
+        $sitePurchaseOrders = PurchaseOrder::with(['items.material.unit', 'supplier'])
+            ->where('project_site_id', $id)
+            ->where('status', '!=', 'Cancelled')
+            ->orderBy('order_date', 'desc')
+            ->orderBy('id', 'desc')
+            ->get();
+
+        $supplierPurchases = $sitePurchaseOrders->groupBy(function ($po) {
+            return $po->supplier_id ? ('SUP_'.$po->supplier_id) : ('SUP_NAME_'.($po->supplier_name ?: 'Other'));
+        })->map(function ($orders) {
+            $firstPo = $orders->first();
+            $supplier = $firstPo->supplier;
+            $supplierName = $supplier?->name ?: ($firstPo->supplier_name ?: 'Other Supplier');
+
+            $allPoItems = $orders->flatMap(function ($po) {
+                return $po->items->map(function ($item) use ($po) {
+                    return [
+                        'item_id' => $item->id,
+                        'po_id' => $po->id,
+                        'po_number' => $po->po_number,
+                        'po_encrypted_id' => $po->encrypted_id,
+                        'po_date' => $po->order_date ? $po->order_date->format('d M Y') : 'N/A',
+                        'po_status' => $po->status,
+                        'delivery_status' => $po->delivery_status,
+                        'material_id' => $item->material_id,
+                        'material_name' => $item->material_name ?: ($item->material?->name_en ?? 'Material'),
+                        'material_name_ta' => $item->material?->name_ta ?? '',
+                        'quantity' => (float) $item->quantity,
+                        'unit' => $item->unit ?: ($item->material?->unit?->name_en ?? 'Units'),
+                        'unit_price' => (float) $item->unit_price,
+                        'total_price' => (float) $item->total_price,
+                    ];
+                });
+            });
+
+            // Material-wise summary for this supplier
+            $materialSummary = $allPoItems->groupBy('material_name')->map(function ($items, $matName) {
+                $totalQty = (float) $items->sum('quantity');
+                $totalAmt = (float) $items->sum('total_price');
+                $unit = $items->first()['unit'];
+                $matTa = $items->first()['material_name_ta'];
+                $avgPrice = $totalQty > 0 ? round($totalAmt / $totalQty, 2) : 0.0;
+
+                return [
+                    'material_name' => $matName,
+                    'material_name_ta' => $matTa,
+                    'total_quantity' => $totalQty,
+                    'unit' => $unit,
+                    'average_price' => $avgPrice,
+                    'total_amount' => $totalAmt,
+                    'orders_count' => $items->pluck('po_number')->unique()->count(),
+                ];
+            })->values();
+
+            $totalSupplierAmount = (float) $allPoItems->sum('total_price');
+            $totalSupplierQty = (float) $allPoItems->sum('quantity');
+
+            $supKey = $supplier?->id ? ('sup_'.$supplier->id) : ('ext_'.urlencode(strtolower(trim($supplierName))));
+
+            return [
+                'supplier_id' => $supplier?->id,
+                'supplier_key' => $supKey,
+                'supplier_name' => $supplierName,
+                'contact_person' => $supplier?->contact_person,
+                'phone' => $supplier?->phone,
+                'address' => $supplier?->address,
+                'gst_number' => $supplier?->gst_number,
+                'pos_count' => $orders->count(),
+                'po_numbers' => $orders->pluck('po_number')->all(),
+                'total_amount' => $totalSupplierAmount,
+                'total_quantity' => $totalSupplierQty,
+                'items' => $allPoItems->values()->all(),
+                'material_summary' => $materialSummary->all(),
+            ];
+        })->sortByDesc('total_amount')->values();
+
+        $supplierStats = [
+            'total_suppliers_count' => $supplierPurchases->count(),
+            'total_purchase_orders_count' => $sitePurchaseOrders->count(),
+            'total_purchased_value' => (float) $supplierPurchases->sum('total_amount'),
+            'total_materials_purchased_count' => (int) $supplierPurchases->sum(fn ($sp) => count($sp['material_summary'])),
+        ];
+
         // Site Ledgers: records managed by Account Manager for this project site
         $siteLedgers = Ledger::with(['supplier', 'creator', 'cashTransfer'])
             ->where('project_site_id', $id)
@@ -370,6 +455,8 @@ class ProjectSiteController extends Controller
             'stockTransferRecords' => $stockTransferRecords,
             'balanceStockList' => $balanceStockList,
             'stockStats' => $stockStats,
+            'supplierPurchases' => $supplierPurchases,
+            'supplierStats' => $supplierStats,
             'combinedCashTransactions' => $sortedCashTransactions,
             'projectCashKpis' => $projectCashKpis,
         ]);
@@ -395,5 +482,162 @@ class ProjectSiteController extends Controller
 
         return redirect()->route('sites.index')
             ->with('success', "Project site \"{$site->name}\" updated successfully!");
+    }
+
+    /**
+     * Display detailed supplier purchases for a specific project site.
+     */
+    public function supplierPurchasesDetail(Request $request, string $encryptedId, string $supplierKey): View
+    {
+        $id = IdCipherService::decrypt($encryptedId);
+
+        if (! $id) {
+            abort(404, 'Project site record not found.');
+        }
+
+        $site = $this->projectSiteService->getSiteById($id);
+
+        if (! $site) {
+            abort(404, 'Project site record not found.');
+        }
+
+        $sitePurchaseOrders = PurchaseOrder::with(['items.material.unit', 'supplier'])
+            ->where('project_site_id', $id)
+            ->where('status', '!=', 'Cancelled')
+            ->orderBy('order_date', 'desc')
+            ->orderBy('id', 'desc')
+            ->get();
+
+        // Match supplier orders
+        $matchedOrders = $sitePurchaseOrders->filter(function ($po) use ($supplierKey) {
+            $key = $po->supplier_id ? ('sup_'.$po->supplier_id) : ('ext_'.urlencode(strtolower(trim($po->supplier_name ?: 'other'))));
+            if (strtolower($key) === strtolower($supplierKey)) {
+                return true;
+            }
+            if ($po->supplier_id && ($supplierKey == $po->supplier_id || $supplierKey == 'sup_'.$po->supplier_id || $supplierKey == 'SUP_'.$po->supplier_id)) {
+                return true;
+            }
+            if (! $po->supplier_id && (strtolower(urlencode(trim($po->supplier_name ?? ''))) === strtolower($supplierKey) || strtolower($po->supplier_name ?? '') === strtolower(urldecode($supplierKey)))) {
+                return true;
+            }
+
+            return false;
+        });
+
+        if ($matchedOrders->isEmpty()) {
+            abort(404, 'Supplier purchase records not found for this site.');
+        }
+
+        $firstPo = $matchedOrders->first();
+        $supplier = $firstPo->supplier;
+        $supplierName = $supplier?->name ?: ($firstPo->supplier_name ?: 'Other Supplier');
+
+        $fromDate = $request->input('from_date');
+        $toDate = $request->input('to_date');
+
+        $filteredOrders = $matchedOrders;
+        if ($fromDate) {
+            $filteredOrders = $filteredOrders->filter(function ($po) use ($fromDate) {
+                return $po->order_date && $po->order_date->format('Y-m-d') >= $fromDate;
+            });
+        }
+        if ($toDate) {
+            $filteredOrders = $filteredOrders->filter(function ($po) use ($toDate) {
+                return $po->order_date && $po->order_date->format('Y-m-d') <= $toDate;
+            });
+        }
+
+        $allPoItems = $filteredOrders->flatMap(function ($po) {
+            return $po->items->map(function ($item) use ($po) {
+                return [
+                    'item_id' => $item->id,
+                    'po_id' => $po->id,
+                    'po_number' => $po->po_number,
+                    'po_encrypted_id' => $po->encrypted_id,
+                    'po_date' => $po->order_date ? $po->order_date->format('d M Y') : 'N/A',
+                    'po_date_raw' => $po->order_date ? $po->order_date->format('Y-m-d') : '',
+                    'po_status' => $po->status,
+                    'delivery_status' => $po->delivery_status,
+                    'material_id' => $item->material_id,
+                    'material_name' => $item->material_name ?: ($item->material?->name_en ?? 'Material'),
+                    'material_name_ta' => $item->material?->name_ta ?? '',
+                    'quantity' => (float) $item->quantity,
+                    'unit' => $item->unit ?: ($item->material?->unit?->name_en ?? 'Units'),
+                    'unit_price' => (float) $item->unit_price,
+                    'total_price' => (float) $item->total_price,
+                ];
+            });
+        });
+
+        // Group by Date & PO for the chronological timeline/breakdown
+        $dateGroupedPurchases = $filteredOrders->map(function ($po) {
+            $items = $po->items->map(function ($item) {
+                return [
+                    'item_id' => $item->id,
+                    'material_name' => $item->material_name ?: ($item->material?->name_en ?? 'Material'),
+                    'material_name_ta' => $item->material?->name_ta ?? '',
+                    'quantity' => (float) $item->quantity,
+                    'unit' => $item->unit ?: ($item->material?->unit?->name_en ?? 'Units'),
+                    'unit_price' => (float) $item->unit_price,
+                    'total_price' => (float) $item->total_price,
+                ];
+            });
+
+            return [
+                'po_id' => $po->id,
+                'po_number' => $po->po_number,
+                'po_encrypted_id' => $po->encrypted_id,
+                'order_date' => $po->order_date ? $po->order_date->format('d M Y') : 'N/A',
+                'order_date_raw' => $po->order_date ? $po->order_date->format('Y-m-d') : '',
+                'status' => $po->status,
+                'delivery_status' => $po->delivery_status,
+                'total_amount' => (float) $po->total_amount,
+                'items_count' => $items->count(),
+                'total_quantity' => (float) $items->sum('quantity'),
+                'items' => $items->all(),
+            ];
+        })->values();
+
+        // Material-wise summary for this supplier
+        $materialSummary = $allPoItems->groupBy('material_name')->map(function ($items, $matName) {
+            $totalQty = (float) $items->sum('quantity');
+            $totalAmt = (float) $items->sum('total_price');
+            $unit = $items->first()['unit'];
+            $matTa = $items->first()['material_name_ta'];
+            $avgPrice = $totalQty > 0 ? round($totalAmt / $totalQty, 2) : 0.0;
+
+            return [
+                'material_name' => $matName,
+                'material_name_ta' => $matTa,
+                'total_quantity' => $totalQty,
+                'unit' => $unit,
+                'average_price' => $avgPrice,
+                'total_amount' => $totalAmt,
+                'orders_count' => $items->pluck('po_number')->unique()->count(),
+            ];
+        })->values();
+
+        $supplierStats = [
+            'total_amount' => (float) $allPoItems->sum('total_price'),
+            'total_quantity' => (float) $allPoItems->sum('quantity'),
+            'total_pos' => $filteredOrders->count(),
+            'total_all_pos' => $matchedOrders->count(),
+            'materials_count' => $materialSummary->count(),
+            'first_purchase_date' => $filteredOrders->min('order_date')?->format('d M Y') ?? 'N/A',
+            'last_purchase_date' => $filteredOrders->max('order_date')?->format('d M Y') ?? 'N/A',
+        ];
+
+        return view('sites.supplier-purchases', compact(
+            'site',
+            'supplier',
+            'supplierName',
+            'supplierKey',
+            'materialSummary',
+            'dateGroupedPurchases',
+            'allPoItems',
+            'supplierStats',
+            'fromDate',
+            'toDate'
+        ));
     }
 }
