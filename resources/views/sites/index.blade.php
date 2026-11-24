@@ -98,6 +98,7 @@
                             <div class="d-flex justify-content-between align-items-start mb-2">
                                 <span class="badge {{ $badgeTypeClass }} fw-semibold">{{ $site->work_type }}</span>
                                 <span class="badge {{ $statusBadgeClass }}">{{ $site->status }}</span>
+                        
                             </div>
                             <h5 class="fw-bold text-dark mb-1 site-card-title">
                                 <a href="{{ route('sites.show', $site->encrypted_id) }}"
@@ -114,7 +115,6 @@
                                 <div class="text-muted" style="font-size: 0.75rem;"><i class="bi bi-house me-1"></i><span
                                         class="site-card-address">{{ $site->client?->address ?: $site->location }}</span></div>
                             </div>
-
                             <div class="mb-3">
                                 <div class="d-flex justify-content-between small mb-1">
                                     <span class="text-muted">Budget Spent: <strong>₹{{ $spentInLakhs }} L</strong></span>
@@ -127,7 +127,6 @@
                                 <div class="text-end small text-muted mt-1" style="font-size: 0.72rem;">{{ number_format($pct, 2) }}% of estimate utilised</div>
                             </div>
                         </div>
-
                         <div class="pt-3 border-top d-flex justify-content-between align-items-center">
                             <span class="small text-muted"><i class="bi bi-calendar-event me-1"></i>Start:
                                 {{ $displayStart }}</span>
@@ -162,7 +161,6 @@
                 </button>
             </div>
         </div>
-
     </div>
 
     <!-- Site Add / Edit Modal -->

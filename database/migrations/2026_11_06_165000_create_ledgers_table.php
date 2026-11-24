@@ -22,6 +22,7 @@ return new class extends Migration
             $table->foreignId('project_site_id')->nullable()->constrained('project_sites')->nullOnDelete();
             $table->string('site_name')->nullable();
             $table->string('client_name')->nullable();
+            $table->string('cash_received_from')->nullable();
 
             // Supplier specifics (Task 4)
             $table->foreignId('supplier_id')->nullable()->constrained('suppliers')->nullOnDelete();
@@ -52,6 +53,11 @@ return new class extends Migration
             // Common / Narrative
             $table->text('description')->nullable();
             $table->string('receipt_image')->nullable();
+            $table->unsignedBigInteger('daily_allocation_id')->nullable();
+            $table->unsignedBigInteger('cash_transfer_id')->nullable();
+            $table->json('wage_item_ids')->nullable();
+            $table->json('extra_workers')->nullable();
+            $table->string('wage_cash_source')->nullable();
             $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();
 
             $table->timestamps();

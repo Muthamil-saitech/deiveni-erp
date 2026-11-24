@@ -89,7 +89,7 @@ enum UserRole: string
             ], true),
             self::AccountManager => in_array($menu, [
                 'dashboard', 'banks', 'branches', 'properties', 'property_types', 'rentals',
-                'transaction_types', 'suppliers', 'ledger', 'cash_transfer', 'cash_transfer_settle', 'reports', 'reports_ledger', 'profile',
+                'transaction_types', 'suppliers', 'ledger', 'admin_ledger', 'cash_transfer', 'cash_transfer_settle', 'reports', 'reports_ledger', 'profile',
             ], true),
             default => false,
         };

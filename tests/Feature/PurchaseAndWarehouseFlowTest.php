@@ -135,7 +135,7 @@ test('task 1 & 2: purchases page renders dynamically with database records', fun
 test('task 1: creating a purchase order from third party supplier works', function () {
     $payload = [
         'po_number' => 'PO-NEW-101',
-        'order_date' => '2026-11-05',
+        'order_date' => now()->toDateString(),
         'project_site_id' => $this->site->id,
         'supplier_id' => $this->supplier->id,
         'supplier_name' => $this->supplier->name,
@@ -174,7 +174,7 @@ test('task 1: purchase order from own warehouse auto-deducts warehouse inventory
 
     $payload = [
         'po_number' => 'WH-TRANS-001',
-        'order_date' => '2026-11-05',
+        'order_date' => now()->toDateString(),
         'project_site_id' => $this->site->id,
         'supplier_name' => 'Central Warehouse',
         'source_type' => 'Own Warehouse',
@@ -380,7 +380,7 @@ test('purchase order creates items with material_id foreign key and excludes cen
     // Creating PO saves material_id in purchase_order_items table
     $poPayload = [
         'po_number' => 'PO-DYN-999',
-        'order_date' => '2026-11-05',
+        'order_date' => now()->toDateString(),
         'project_site_id' => $this->site->id,
         'supplier_id' => $this->supplier->id,
         'supplier_name' => $this->supplier->name,

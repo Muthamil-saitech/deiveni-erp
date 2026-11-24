@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Models\AdminLedger;
 use App\Models\Bank;
 use App\Models\Branch;
 use App\Models\Client;
@@ -24,6 +25,7 @@ use App\Models\WeeklyWage;
 use App\Models\WorkerCategory;
 use App\Observers\AuditObserver;
 use App\Repositories\Contracts\AccountLedgerReportRepositoryInterface;
+use App\Repositories\Contracts\AdminLedgerRepositoryInterface;
 use App\Repositories\Contracts\AdminProfitLossReportRepositoryInterface;
 use App\Repositories\Contracts\AuditLogRepositoryInterface;
 use App\Repositories\Contracts\BankRepositoryInterface;
@@ -52,6 +54,7 @@ use App\Repositories\Contracts\WarehouseRepositoryInterface;
 use App\Repositories\Contracts\WeeklyWageRepositoryInterface;
 use App\Repositories\Contracts\WorkerCategoryRepositoryInterface;
 use App\Repositories\Eloquent\AccountLedgerReportRepository;
+use App\Repositories\Eloquent\AdminLedgerRepository;
 use App\Repositories\Eloquent\AdminProfitLossReportRepository;
 use App\Repositories\Eloquent\AuditLogRepository;
 use App\Repositories\Eloquent\BankRepository;
@@ -80,6 +83,7 @@ use App\Repositories\Eloquent\WarehouseRepository;
 use App\Repositories\Eloquent\WeeklyWageRepository;
 use App\Repositories\Eloquent\WorkerCategoryRepository;
 use App\Services\AccountLedgerReportService;
+use App\Services\AdminLedgerService;
 use App\Services\AdminProfitLossReportService;
 use App\Services\AuditLogService;
 use App\Services\AuthService;
@@ -87,6 +91,7 @@ use App\Services\BankService;
 use App\Services\BranchService;
 use App\Services\CashTransferService;
 use App\Services\Contracts\AccountLedgerReportServiceInterface;
+use App\Services\Contracts\AdminLedgerServiceInterface;
 use App\Services\Contracts\AdminProfitLossReportServiceInterface;
 use App\Services\Contracts\AuditLogServiceInterface;
 use App\Services\Contracts\AuthServiceInterface;
@@ -429,6 +434,16 @@ class AppServiceProvider extends ServiceProvider
         );
 
         $this->app->bind(
+            AdminLedgerRepositoryInterface::class,
+            AdminLedgerRepository::class
+        );
+
+        $this->app->bind(
+            AdminLedgerServiceInterface::class,
+            AdminLedgerService::class
+        );
+
+        $this->app->bind(
             AccountLedgerReportRepositoryInterface::class,
             AccountLedgerReportRepository::class
         );
@@ -515,6 +530,7 @@ class AppServiceProvider extends ServiceProvider
             WarehouseItem::class,
             WarehouseMovement::class,
             Ledger::class,
+            AdminLedger::class,
             WorkerCategory::class,
             Unit::class,
             Material::class,

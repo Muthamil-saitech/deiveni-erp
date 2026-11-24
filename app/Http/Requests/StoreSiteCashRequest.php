@@ -45,6 +45,12 @@ class StoreSiteCashRequest extends FormRequest
         if (! $this->filled('supplier_name') && $this->filled('supplier')) {
             $this->merge(['supplier_name' => $this->input('supplier')]);
         }
+
+        if ($this->has('supplier_payment_scope')) {
+            $this->merge([
+                'is_site_based' => $this->input('supplier_payment_scope') === 'site_based',
+            ]);
+        }
     }
 
     /**
@@ -55,7 +61,12 @@ class StoreSiteCashRequest extends FormRequest
     public function rules(): array
     {
         $rules = [
-            'project_site_id' => ['required', 'exists:project_sites,id'],
+            'project_site_id' => [
+                Rule::requiredIf(fn () => $this->input('transaction_type') !== 'Supplier Payment'
+                    || $this->input('supplier_payment_scope') !== 'total'),
+                'nullable',
+                'exists:project_sites,id',
+            ],
             'transaction_type' => ['required', 'string', 'max:100'],
             'amount' => ['required', 'numeric', 'min:0.01'],
             'payment_mode' => ['nullable', 'string', 'in:Cash,Cheque,UPI'],
@@ -82,6 +93,8 @@ class StoreSiteCashRequest extends FormRequest
                 'exists:suppliers,id',
             ],
             'supplier_name' => ['nullable', 'string', 'max:255'],
+            'is_site_based' => ['nullable', 'boolean'],
+            'supplier_payment_scope' => ['nullable', 'string', 'in:site_based,total'],
             'purchase_order_no' => ['nullable', 'string', 'max:255'],
             'bill_no' => ['nullable', 'string', 'max:255'],
             'payment_date' => ['nullable', 'date'],

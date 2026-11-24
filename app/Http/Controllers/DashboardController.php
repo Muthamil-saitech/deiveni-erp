@@ -17,7 +17,7 @@ class DashboardController extends Controller
      */
     public function index(Request $request): View
     {
-        $period = in_array($request->input('period'), ['today', 'this_week', 'this_month', 'this_year', 'custom'])
+        $period = in_array($request->input('period'), ['today', 'this_week', 'this_month', 'this_year', 'all', 'custom'])
             ? $request->input('period')
             : 'today';
 

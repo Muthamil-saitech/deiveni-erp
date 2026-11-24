@@ -113,9 +113,12 @@ class MaterialUsageService implements MaterialUsageServiceInterface
             }
 
             $usageDate = ! empty($data['usage_date']) ? Carbon::parse($data['usage_date'])->format('Y-m-d') : now()->toDateString();
+            if ($usageDate > now()->toDateString()) {
+                throw new InvalidArgumentException('Usage date cannot be in the future (எதிர்கால தேதி அனுமதிக்கப்படாது).');
+            }
             if ($po && $po->order_date && $po->order_date->format('Y-m-d') > $usageDate) {
                 throw new InvalidArgumentException(
-                    "Purchase Order {$po->po_number} was ordered on {$po->order_date->format('d-m-Y')}, which is after the Usage Date (".Carbon::parse($usageDate)->format('d-m-Y').'). Materials cannot be used before their purchase date.'
+                    "Purchase Order {$po->po_number} was ordered on {$po->order_date->format('d-m-Y')}, which is after the Usage Date (".Carbon::parse($usageDate)->format('d-m-Y').'). Materials cannot be used before their purchase date (PO தேதிக்கு முந்தைய தேதி அனுமதிக்கப்படாது).'
                 );
             }
 
@@ -425,7 +428,17 @@ class MaterialUsageService implements MaterialUsageServiceInterface
                 ->findOrFail($id);
 
             if (! empty($data['usage_date'])) {
-                $usage->usage_date = $data['usage_date'];
+                $newUsageDate = Carbon::parse($data['usage_date'])->format('Y-m-d');
+                if ($newUsageDate > now()->toDateString()) {
+                    throw new InvalidArgumentException('Usage date cannot be in the future (எதிர்கால தேதி அனுமதிக்கப்படாது).');
+                }
+                $linkedPo = $usage->purchaseOrder;
+                if ($linkedPo && $linkedPo->order_date && $linkedPo->order_date->format('Y-m-d') > $newUsageDate) {
+                    throw new InvalidArgumentException(
+                        "Purchase Order {$linkedPo->po_number} was ordered on {$linkedPo->order_date->format('d-m-Y')}, which is after the Usage Date (".Carbon::parse($newUsageDate)->format('d-m-Y').'). Materials cannot be used before their purchase date (PO தேதிக்கு முந்தைய தேதி அனுமதிக்கப்படாது).'
+                    );
+                }
+                $usage->usage_date = $newUsageDate;
             }
             if (array_key_exists('remarks', $data)) {
                 $usage->remarks = $data['remarks'];

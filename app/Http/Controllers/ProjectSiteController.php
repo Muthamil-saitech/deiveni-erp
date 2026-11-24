@@ -459,6 +459,7 @@ class ProjectSiteController extends Controller
             'supplierStats' => $supplierStats,
             'combinedCashTransactions' => $sortedCashTransactions,
             'projectCashKpis' => $projectCashKpis,
+            'clientStatements' => $site->clientStatements()->with('creator')->get(),
         ]);
     }
 

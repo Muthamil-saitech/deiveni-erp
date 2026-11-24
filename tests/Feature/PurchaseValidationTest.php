@@ -74,7 +74,7 @@ test('store purchase validation fails with bilingual error messages when empty',
 
 test('store purchase validates item fields with bilingual error messages', function () {
     $payload = [
-        'order_date' => '2026-11-10',
+        'order_date' => now()->toDateString(),
         'project_site_id' => $this->site->id,
         'supplier_id' => $this->supplier->id,
         'status' => 'Ordered',
@@ -100,7 +100,7 @@ test('store purchase validates item fields with bilingual error messages', funct
 
 test('status_reason is required when status is Order Return or Order Canceled', function () {
     $payload = [
-        'order_date' => '2026-11-10',
+        'order_date' => now()->toDateString(),
         'project_site_id' => $this->site->id,
         'supplier_id' => $this->supplier->id,
         'status' => 'Order Return',
@@ -124,9 +124,11 @@ test('status_reason is required when status is Order Return or Order Canceled', 
 });
 
 test('update purchase order validation validates unique po_number ignoring current record', function () {
+    $today = now()->toDateString();
+
     $order1 = PurchaseOrder::create([
         'po_number' => 'PO-TEST-100',
-        'order_date' => '2026-11-01',
+        'order_date' => $today,
         'project_site_id' => $this->site->id,
         'supplier_id' => $this->supplier->id,
         'supplier_name' => $this->supplier->name,
@@ -137,7 +139,7 @@ test('update purchase order validation validates unique po_number ignoring curre
 
     $order2 = PurchaseOrder::create([
         'po_number' => 'PO-TEST-200',
-        'order_date' => '2026-11-01',
+        'order_date' => $today,
         'project_site_id' => $this->site->id,
         'supplier_id' => $this->supplier->id,
         'supplier_name' => $this->supplier->name,
@@ -149,7 +151,7 @@ test('update purchase order validation validates unique po_number ignoring curre
     // Updating order2 with its own po_number should succeed
     $responseSame = $this->actingAs($this->user)->putJson("/purchases/{$order2->id}", [
         'po_number' => 'PO-TEST-200',
-        'order_date' => '2026-11-02',
+        'order_date' => $today,
         'project_site_id' => $this->site->id,
         'supplier_id' => $this->supplier->id,
         'status' => 'Ordered',
@@ -166,7 +168,7 @@ test('update purchase order validation validates unique po_number ignoring curre
     // Updating order2 with order1's po_number should fail validation with bilingual message
     $responseConflict = $this->actingAs($this->user)->putJson("/purchases/{$order2->id}", [
         'po_number' => 'PO-TEST-100',
-        'order_date' => '2026-11-02',
+        'order_date' => $today,
         'project_site_id' => $this->site->id,
         'supplier_id' => $this->supplier->id,
         'status' => 'Ordered',
@@ -218,7 +220,7 @@ test('quick create material saves globally to materials table without supplier r
 test('store purchase auto-creates material in Material Master when new material name is provided', function () {
     $response = $this->actingAs($this->user)->postJson('/purchases', [
         'po_number' => 'PO-AUTO-MAT-001',
-        'order_date' => '2026-11-20',
+        'order_date' => now()->toDateString(),
         'project_site_id' => $this->site->id,
         'supplier_id' => $this->supplier->id,
         'status' => 'Ordered',
@@ -238,4 +240,58 @@ test('store purchase auto-creates material in Material Master when new material 
         'name_en' => 'Brand New Auto Created Material',
         'status' => 'Active',
     ]);
+});
+
+test('purchase date can only be today or yesterday', function () {
+    $today = now()->toDateString();
+    $yesterday = now()->subDay()->toDateString();
+    $twoDaysAgo = now()->subDays(2)->toDateString();
+    $tomorrow = now()->addDay()->toDateString();
+
+    $basePayload = [
+        'project_site_id' => $this->site->id,
+        'supplier_id' => $this->supplier->id,
+        'status' => 'Ordered',
+        'items' => [
+            [
+                'material_id' => $this->material->id,
+                'quantity' => 10,
+                'unit' => 'NOS',
+                'unit_price' => 100,
+            ],
+        ],
+    ];
+
+    // 1. Today is valid
+    $resToday = $this->actingAs($this->user)->postJson('/purchases', array_merge($basePayload, [
+        'po_number' => 'PO-DATE-TODAY',
+        'order_date' => $today,
+    ]));
+    $resToday->assertStatus(200);
+
+    // 2. Yesterday is valid
+    $resYesterday = $this->actingAs($this->user)->postJson('/purchases', array_merge($basePayload, [
+        'po_number' => 'PO-DATE-YDAY',
+        'order_date' => $yesterday,
+    ]));
+    $resYesterday->assertStatus(200);
+
+    // 3. 2 days ago is rejected (422)
+    $resPast = $this->actingAs($this->user)->postJson('/purchases', array_merge($basePayload, [
+        'po_number' => 'PO-DATE-PAST',
+        'order_date' => $twoDaysAgo,
+    ]));
+    $resPast->assertStatus(422);
+    $resPast->assertJsonValidationErrors(['order_date']);
+    expect($resPast->json('errors.order_date.0'))
+        ->toContain('Purchase date can only be today or yesterday')
+        ->toContain('கொள்முதல் தேதி நேற்று அல்லது இன்று மட்டுமே இருக்க வேண்டும்');
+
+    // 4. Future date (tomorrow) is rejected (422)
+    $resFuture = $this->actingAs($this->user)->postJson('/purchases', array_merge($basePayload, [
+        'po_number' => 'PO-DATE-FUTURE',
+        'order_date' => $tomorrow,
+    ]));
+    $resFuture->assertStatus(422);
+    $resFuture->assertJsonValidationErrors(['order_date']);
 });

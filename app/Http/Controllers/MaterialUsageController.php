@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\MaterialUsage;
 use App\Models\ProjectSite;
+use App\Models\PurchaseOrder;
 use App\Models\SiteMaterialStock;
 use App\Models\WarehouseItem;
 use App\Services\Contracts\MaterialUsageServiceInterface;
@@ -101,6 +103,16 @@ class MaterialUsageController extends Controller
             'items.*.used_quantity.min' => 'Used quantity must be greater than zero.',
         ]);
 
+        if (! empty($validated['purchase_order_id'])) {
+            $po = PurchaseOrder::find($validated['purchase_order_id']);
+            if ($po && $po->order_date && $validated['usage_date'] < $po->order_date->format('Y-m-d')) {
+                return response()->json([
+                    'success' => false,
+                    'message' => "Usage date cannot be before PO order date ({$po->order_date->format('d-m-Y')}). (PO தேதிக்கு முந்தைய தேதி அனுமதிக்கப்படாது).",
+                ], 422);
+            }
+        }
+
         try {
             $userId = Auth::id() ?? 1;
             $usage = $this->materialUsageService->createUsage($validated, $userId);
@@ -168,6 +180,14 @@ class MaterialUsageController extends Controller
             'items.*.used_quantity.required' => 'Used quantity is required for each material.',
             'items.*.used_quantity.min' => 'Used quantity must be greater than zero.',
         ]);
+
+        $usageRecord = MaterialUsage::with('purchaseOrder')->find($id);
+        if ($usageRecord && $usageRecord->purchaseOrder && $usageRecord->purchaseOrder->order_date && $validated['usage_date'] < $usageRecord->purchaseOrder->order_date->format('Y-m-d')) {
+            return response()->json([
+                'success' => false,
+                'message' => "Usage date cannot be before PO order date ({$usageRecord->purchaseOrder->order_date->format('d-m-Y')}). (PO தேதிக்கு முந்தைய தேதி அனுமதிக்கப்படாது).",
+            ], 422);
+        }
 
         try {
             $userId = Auth::id() ?? 1;

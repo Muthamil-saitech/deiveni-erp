@@ -25,6 +25,7 @@ class EnsureUserHasRole
         'material-usages*' => 'material_usage',
         'material-usage*' => 'material_usage',
         'stock-transfers*' => 'stock_transfer',
+        'admin-ledger*' => 'admin_ledger',
     ];
 
     /**

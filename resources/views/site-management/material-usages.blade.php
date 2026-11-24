@@ -522,6 +522,7 @@
                                 id="usageDateField" name="usage_date"
                                 max="{{ date('Y-m-d') }}" value="{{ date('Y-m-d') }}" required>
                             <div class="invalid-feedback">Select a valid date.</div>
+                            <div id="usageDateRangeHint" class="form-text small mt-1 text-primary fw-semibold" style="display:none; font-size: 0.75rem;"></div>
                         </div>
 
                         <div class="col-12 col-md-4">
@@ -800,6 +801,7 @@
                             <label class="form-label small fw-semibold mb-1">Usage Date (தேதி) <span class="text-danger">*</span></label>
                             <input type="date" class="form-control form-control-sm" id="editUsageDateField" name="usage_date" max="{{ date('Y-m-d') }}" required>
                             <div class="invalid-feedback">Select a valid date.</div>
+                            <div id="editUsageDateRangeHint" class="form-text small mt-1 text-primary fw-semibold" style="display:none; font-size: 0.75rem;"></div>
                         </div>
                         <div class="col-12 col-md-4">
                             <label class="form-label small fw-semibold mb-1">Project Site (தளம்)</label>
@@ -923,7 +925,15 @@
 
     function resetForm() {
         document.getElementById('usageForm').reset();
-        document.getElementById('usageDateField').value = '{{ date('Y-m-d') }}';
+        const dateInput = document.getElementById('usageDateField');
+        dateInput.value = '{{ date('Y-m-d') }}';
+        dateInput.removeAttribute('min');
+        dateInput.setAttribute('max', '{{ date('Y-m-d') }}');
+        const hintDiv = document.getElementById('usageDateRangeHint');
+        if (hintDiv) {
+            hintDiv.style.display = 'none';
+            hintDiv.innerHTML = '';
+        }
         document.getElementById('siteSelect').value = '';
         
         sitePOs = [];
@@ -1145,28 +1155,23 @@
             return;
         }
 
-        // Filter: For the past Usage Date, Current date / future POs should NOT show and NOT selectable
+        // All POs ordered on or before today
+        const todayStr = '{{ date('Y-m-d') }}';
         const eligiblePOs = sitePOs.filter(po => {
             const poYmd = getPoDateYmd(po);
-            return !poYmd || !usageDate || poYmd <= usageDate;
+            return !poYmd || poYmd <= todayStr;
         });
-        const futureCount = sitePOs.length - eligiblePOs.length;
 
         if (!eligiblePOs.length) {
             poBtn.disabled = true;
-            document.getElementById('poDropdownText').textContent = 'No POs Available on or before ' + formatDmy(usageDate);
+            document.getElementById('poDropdownText').textContent = 'No POs Available on or before Today';
             document.getElementById('poDropdownText').className = 'text-truncate small text-danger fw-semibold';
-            emptyDiv.innerHTML = `<span class="text-danger fw-semibold"><i class="bi bi-x-circle me-1"></i>No Purchase Orders available on or before ${formatDmy(usageDate)}.</span>`;
+            emptyDiv.innerHTML = `<span class="text-danger fw-semibold"><i class="bi bi-x-circle me-1"></i>No Purchase Orders available on or before Today (${formatDmy(todayStr)}).</span>`;
             emptyDiv.style.display = 'block';
             container.style.display = 'none';
 
-            if (feedbackDiv) {
-                feedbackDiv.style.display = 'block';
-                feedbackDiv.innerHTML = `<i class="bi bi-exclamation-triangle-fill me-1"></i>No POs available on or before ${formatDmy(usageDate)}. (பயன்பாட்டு தேதிக்கு பிந்தைய கொள்முதல் ஆணைகளை பயன்படுத்த முடியாது.)`;
-            }
-
             document.getElementById('materialsEmptyState').style.display = 'block';
-            document.getElementById('emptyStateMessage').textContent = `No active Purchase Orders found on or before ${formatDmy(usageDate)}.`;
+            document.getElementById('emptyStateMessage').textContent = `No active Purchase Orders found on or before Today (${formatDmy(todayStr)}).`;
             return;
         }
 
@@ -1174,12 +1179,6 @@
         emptyDiv.style.display = 'none';
         container.style.display = 'block';
         updatePODropdownLabel();
-
-        // Show error / warning notice below PO select if some POs are excluded due to past usage date
-        if (futureCount > 0 && feedbackDiv) {
-            feedbackDiv.style.display = 'block';
-            feedbackDiv.innerHTML = `<i class="bi bi-exclamation-circle text-danger me-1"></i><span class="text-danger fw-semibold">POs dated after usage date are hidden. (பயன்பாட்டு தேதிக்கு பிந்தைய கொள்முதல் ஆணைகள் மறைக்கப்பட்டுள்ளன.)</span>`;
-        }
 
         eligiblePOs.forEach(po => {
             const isChecked = selectedPOIds.has(po.id);
@@ -1257,28 +1256,23 @@
             return;
         }
 
-        // Filter: Transferred stock strictly on or before the selected Usage Date
+        // Transferred stock received on or before today
+        const todayStr = '{{ date('Y-m-d') }}';
         const eligibleTransfers = siteTransfers.filter(xfr => {
             const xfrYmd = getPoDateYmd(xfr);
-            return !xfrYmd || !usageDate || xfrYmd <= usageDate;
+            return !xfrYmd || xfrYmd <= todayStr;
         });
-        const futureCount = siteTransfers.length - eligibleTransfers.length;
 
         if (!eligibleTransfers.length) {
             poBtn.disabled = true;
-            document.getElementById('poDropdownText').textContent = 'No Transferred Stock on or before ' + formatDmy(usageDate);
+            document.getElementById('poDropdownText').textContent = 'No Transferred Stock on or before Today';
             document.getElementById('poDropdownText').className = 'text-truncate small text-danger fw-semibold';
-            emptyDiv.innerHTML = `<span class="text-danger fw-semibold"><i class="bi bi-x-circle me-1"></i>No stock transfers available on or before ${formatDmy(usageDate)}.</span>`;
+            emptyDiv.innerHTML = `<span class="text-danger fw-semibold"><i class="bi bi-x-circle me-1"></i>No stock transfers available on or before Today (${formatDmy(todayStr)}).</span>`;
             emptyDiv.style.display = 'block';
             container.style.display = 'none';
 
-            if (feedbackDiv) {
-                feedbackDiv.style.display = 'block';
-                feedbackDiv.innerHTML = `<i class="bi bi-exclamation-triangle-fill me-1"></i>No stock transfers available on or before ${formatDmy(usageDate)}. (பயன்பாட்டு தேதிக்கு பிந்தைய பரிமாற்றங்களை பயன்படுத்த முடியாது.)`;
-            }
-
             document.getElementById('materialsEmptyState').style.display = 'block';
-            document.getElementById('emptyStateMessage').textContent = `No stock transfers received on or before ${formatDmy(usageDate)}.`;
+            document.getElementById('emptyStateMessage').textContent = `No stock transfers received on or before Today (${formatDmy(todayStr)}).`;
             return;
         }
 
@@ -1286,11 +1280,6 @@
         emptyDiv.style.display = 'none';
         container.style.display = 'block';
         updatePODropdownLabel();
-
-        if (futureCount > 0 && feedbackDiv) {
-            feedbackDiv.style.display = 'block';
-            feedbackDiv.innerHTML = `<i class="bi bi-exclamation-circle text-danger me-1"></i><span class="text-danger fw-semibold">Transfers dated after usage date are hidden. (பயன்பாட்டு தேதிக்கு பிந்தைய பரிமாற்றங்கள் மறைக்கப்பட்டுள்ளன.)</span>`;
-        }
 
         eligibleTransfers.forEach(xfr => {
             const isChecked = selectedTransferIds.has(xfr.id);
@@ -1386,43 +1375,83 @@
         syncPOSelections();
     });
 
-    // ── When Usage Date Changes: auto-filter and deselect future POs ───
-    document.getElementById('usageDateField').addEventListener('change', function () {
-        const newUsageDate = this.value;
+    // ── Dynamically update Usage Date Min & Max constraints ─────────
+    function updateUsageDateConstraints() {
+        const usageDateInput = document.getElementById('usageDateField');
+        if (!usageDateInput) return;
+        const hintDiv = document.getElementById('usageDateRangeHint');
+        const todayStr = '{{ date('Y-m-d') }}';
         const currentSource = document.querySelector('input[name="material_source"]:checked')?.value || 'third_party';
-        let deselectedCount = 0;
+
+        let minDate = '';
 
         if (currentSource === 'stock_transfer') {
-            Array.from(selectedTransferIds).forEach(xfrId => {
+            const dates = [];
+            selectedTransferIds.forEach(xfrId => {
                 const xfr = siteTransfers.find(x => x.id === xfrId);
-                const xfrYmd = xfr ? getPoDateYmd(xfr) : '';
-                if (xfrYmd && newUsageDate && xfrYmd > newUsageDate) {
-                    selectedTransferIds.delete(xfrId);
-                    deselectedCount++;
-                }
+                const ymd = xfr ? getPoDateYmd(xfr) : '';
+                if (ymd) dates.push(ymd);
             });
-            renderTransferCheckboxes();
+            if (dates.length > 0) {
+                dates.sort();
+                minDate = dates[dates.length - 1]; // latest transfer date
+            }
         } else if (currentSource === 'third_party') {
-            Array.from(selectedPOIds).forEach(poId => {
+            const dates = [];
+            selectedPOIds.forEach(poId => {
                 const po = sitePOs.find(p => p.id === poId);
-                const poYmd = po ? getPoDateYmd(po) : '';
-                if (poYmd && newUsageDate && poYmd > newUsageDate) {
-                    selectedPOIds.delete(poId);
-                    deselectedCount++;
-                }
+                const ymd = po ? getPoDateYmd(po) : '';
+                if (ymd) dates.push(ymd);
             });
-            renderPOCheckboxes();
+            if (dates.length > 0) {
+                dates.sort();
+                minDate = dates[dates.length - 1]; // latest PO date
+            }
         }
 
-        syncPOSelections();
+        usageDateInput.setAttribute('max', todayStr);
 
-        if (deselectedCount > 0) {
-            showToast('Items dated after the usage date were deselected.', 'warning');
+        if (minDate) {
+            usageDateInput.setAttribute('min', minDate);
+            if (hintDiv) {
+                hintDiv.style.display = 'block';
+                hintDiv.innerHTML = `<i class="bi bi-calendar-check text-primary me-1"></i>Allowed: <strong>${formatDmy(minDate)}</strong> to <strong>Today (${formatDmy(todayStr)})</strong> <span class="text-muted" style="font-size:0.75rem;">(PO ஆணை தேதி முதல் இன்று வரை)</span>`;
+            }
+
+            // If current date is before PO date or empty, adjust to today or minDate
+            if (!usageDateInput.value || usageDateInput.value < minDate) {
+                usageDateInput.value = (todayStr >= minDate) ? todayStr : minDate;
+            }
+        } else {
+            usageDateInput.removeAttribute('min');
+            if (hintDiv) {
+                hintDiv.style.display = 'none';
+                hintDiv.innerHTML = '';
+            }
+        }
+
+        if (usageDateInput.value && usageDateInput.value > todayStr) {
+            usageDateInput.value = todayStr;
+        }
+    }
+
+    // ── When Usage Date Changes: enforce min (PO date) and max (Today) ───
+    document.getElementById('usageDateField').addEventListener('change', function () {
+        const todayStr = '{{ date('Y-m-d') }}';
+        const minAllowed = this.getAttribute('min');
+
+        if (this.value > todayStr) {
+            this.value = todayStr;
+            showToast('Usage date cannot be in the future (எதிர்கால தேதி அனுமதிக்கப்படாது).', 'danger');
+        } else if (minAllowed && this.value < minAllowed) {
+            this.value = minAllowed;
+            showToast(`Usage date cannot be before PO date (${formatDmy(minAllowed)}) (PO தேதிக்கு முந்தைய தேதி அனுமதிக்கப்படாது).`, 'danger');
         }
     });
 
     // ── Synchronize PO / Transfer selections & update Table ──
     function syncPOSelections() {
+        updateUsageDateConstraints();
         updatePODropdownLabel();
         renderPOChips();
         rebuildMaterialsTableFromSelectedPOs();
@@ -2428,6 +2457,41 @@
                 document.getElementById('editUsageSiteField').value = u.project_site ? u.project_site.name : '—';
                 document.getElementById('editUsageRemarks').value = u.remarks || '';
 
+                // Enforce PO date constraints on Edit modal
+                const editDateInput = document.getElementById('editUsageDateField');
+                const editHintDiv = document.getElementById('editUsageDateRangeHint');
+                const todayStr = '{{ date('Y-m-d') }}';
+                editDateInput.setAttribute('max', todayStr);
+
+                let editMinDate = '';
+                if (u.purchase_order && u.purchase_order.order_date) {
+                    editMinDate = getPoDateYmd(u.purchase_order);
+                } else if (u.items && u.items.length) {
+                    const itemDates = [];
+                    u.items.forEach(it => {
+                        const d = getPoDateYmd(it);
+                        if (d) itemDates.push(d);
+                    });
+                    if (itemDates.length) {
+                        itemDates.sort();
+                        editMinDate = itemDates[itemDates.length - 1];
+                    }
+                }
+
+                if (editMinDate) {
+                    editDateInput.setAttribute('min', editMinDate);
+                    if (editHintDiv) {
+                        editHintDiv.style.display = 'block';
+                        editHintDiv.innerHTML = `<i class="bi bi-calendar-check text-primary me-1"></i>Allowed: <strong>${formatDmy(editMinDate)}</strong> to <strong>Today (${formatDmy(todayStr)})</strong> <span class="text-muted" style="font-size:0.75rem;">(PO ஆணை தேதி முதல் இன்று வரை)</span>`;
+                    }
+                } else {
+                    editDateInput.removeAttribute('min');
+                    if (editHintDiv) {
+                        editHintDiv.style.display = 'none';
+                        editHintDiv.innerHTML = '';
+                    }
+                }
+
                 // Load available materials for this site in the Add picker
                 if (u.project_site_id) {
                     window._editUsageSiteId = u.project_site_id;
@@ -2506,6 +2570,17 @@
     });
 
     document.getElementById('editUsageDateField')?.addEventListener('change', function () {
+        const todayStr = '{{ date('Y-m-d') }}';
+        const minAllowed = this.getAttribute('min');
+
+        if (this.value > todayStr) {
+            this.value = todayStr;
+            showToast('Usage date cannot be in the future (எதிர்கால தேதி அனுமதிக்கப்படாது).', 'danger');
+        } else if (minAllowed && this.value < minAllowed) {
+            this.value = minAllowed;
+            showToast(`Usage date cannot be before PO date (${formatDmy(minAllowed)}) (PO தேதிக்கு முந்தைய தேதி அனுமதிக்கப்படாது).`, 'danger');
+        }
+
         if (window._editUsageSiteId) {
             loadEditUsageMaterialsPicker(window._editUsageSiteId);
         }
@@ -2515,11 +2590,22 @@
     if (saveEditUsageBtn) {
         saveEditUsageBtn.addEventListener('click', function () {
             const usageId = document.getElementById('editUsageId').value;
-            const usageDate = document.getElementById('editUsageDateField').value;
+            const editDateInput = document.getElementById('editUsageDateField');
+            const usageDate = editDateInput ? editDateInput.value : '';
             const remarks = document.getElementById('editUsageRemarks').value;
+            const todayStr = '{{ date('Y-m-d') }}';
+            const minAllowed = editDateInput ? editDateInput.getAttribute('min') : null;
 
             if (!usageDate) {
                 showToast('Please select a valid date.', 'danger');
+                return;
+            }
+            if (usageDate > todayStr) {
+                showToast('Usage date cannot be in the future (எதிர்கால தேதி அனுமதிக்கப்படாது).', 'danger');
+                return;
+            }
+            if (minAllowed && usageDate < minAllowed) {
+                showToast(`Usage date cannot be before PO date (${formatDmy(minAllowed)}) (PO தேதிக்கு முந்தைய தேதி அனுமதிக்கப்படாது).`, 'danger');
                 return;
             }
 

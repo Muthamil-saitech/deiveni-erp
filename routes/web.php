@@ -1,12 +1,14 @@
 <?php
 
 use App\Http\Controllers\AccountLedgerReportController;
+use App\Http\Controllers\AdminLedgerController;
 use App\Http\Controllers\AdminProfitLossReportController;
 use App\Http\Controllers\AuditLogController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\BankController;
 use App\Http\Controllers\BranchController;
 use App\Http\Controllers\CashTransferController;
+use App\Http\Controllers\ClientStatementController;
 use App\Http\Controllers\DailyAllocationController;
 use App\Http\Controllers\DailyExpensesReportController;
 use App\Http\Controllers\DashboardController;
@@ -151,6 +153,11 @@ Route::middleware('auth')->group(function () {
         Route::post('/sites', [ProjectSiteController::class, 'store'])->name('sites.store');
         Route::get('/sites/{encryptedId}', [ProjectSiteController::class, 'show'])->name('sites.show');
         Route::get('/sites/{encryptedId}/suppliers/{supplierKey}', [ProjectSiteController::class, 'supplierPurchasesDetail'])->name('sites.supplier-purchases');
+        Route::get('/sites/{encryptedId}/client-statement', [ClientStatementController::class, 'create'])->name('sites.client-statement');
+        Route::post('/sites/{encryptedId}/client-statement', [ClientStatementController::class, 'store'])->name('sites.client-statement.store');
+        Route::get('/sites/client-statements/{encryptedId}/print', [ClientStatementController::class, 'print'])->name('sites.client-statements.print');
+        Route::delete('/sites/client-statements/{encryptedId}', [ClientStatementController::class, 'destroy'])->name('sites.client-statements.destroy');
+        Route::post('/sites/client-statements/{encryptedId}/delete', [ClientStatementController::class, 'destroy'])->name('sites.client-statements.delete');
         Route::match(['put', 'patch', 'post'], '/sites/{id}', [ProjectSiteController::class, 'update']);
         Route::post('/sites/{id}/update', [ProjectSiteController::class, 'update'])->name('sites.update');
 
@@ -222,6 +229,16 @@ Route::middleware('auth')->group(function () {
         Route::get('/ledger/transaction-types/{category}', [LedgerController::class, 'transactionTypesByCategory'])->name('ledger.transaction-types');
         Route::get('/ledger/{encryptedId}', [LedgerController::class, 'show'])->name('ledger.show');
         Route::post('/ledger/{id}/delete', [LedgerController::class, 'destroy'])->name('ledger.destroy');
+
+        // Admin Ledger
+        Route::get('/admin-ledger', [AdminLedgerController::class, 'index'])->name('admin-ledger.index');
+        Route::post('/admin-ledger', [AdminLedgerController::class, 'store'])->name('admin-ledger.store');
+        Route::get('/admin-ledger/purchase-orders', [AdminLedgerController::class, 'getPurchaseOrders'])->name('admin-ledger.purchase-orders');
+        Route::get('/admin-ledger/client-projects', [AdminLedgerController::class, 'getClientProjects'])->name('admin-ledger.client-projects');
+        Route::get('/admin-ledger/{encryptedId}', [AdminLedgerController::class, 'show'])->name('admin-ledger.show');
+        Route::put('/admin-ledger/{id}', [AdminLedgerController::class, 'update']);
+        Route::post('/admin-ledger/{id}/update', [AdminLedgerController::class, 'update'])->name('admin-ledger.update');
+        Route::post('/admin-ledger/{id}/delete', [AdminLedgerController::class, 'destroy'])->name('admin-ledger.destroy');
     });
 
     // 4.8 Warehouse & Store / Inventory (Accessible by Admin and Site Manager)

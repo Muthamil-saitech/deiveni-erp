@@ -55,7 +55,9 @@ class SiteCashService implements SiteCashServiceInterface
     {
         return DB::transaction(function () use ($data) {
             $formattedData = $this->prepareTransactionData($data);
-            $this->ensureSiteManagerOwnsSite((int) $formattedData['project_site_id']);
+            if (! empty($formattedData['project_site_id'])) {
+                $this->ensureSiteManagerOwnsSite((int) $formattedData['project_site_id']);
+            }
 
             $siteCash = $this->siteCashRepository->create($formattedData);
 
@@ -220,7 +222,9 @@ class SiteCashService implements SiteCashServiceInterface
 
             $oldSiteId = (int) $siteCash->project_site_id;
             $formattedData = $this->prepareTransactionData($data, $siteCash);
-            $this->ensureSiteManagerOwnsSite((int) $formattedData['project_site_id']);
+            if (! empty($formattedData['project_site_id'])) {
+                $this->ensureSiteManagerOwnsSite((int) $formattedData['project_site_id']);
+            }
 
             $updated = $this->siteCashRepository->update($siteCash, $formattedData);
 
@@ -375,8 +379,8 @@ class SiteCashService implements SiteCashServiceInterface
         }
 
         // Project site resolution
-        $siteId = (int) ($data['project_site_id'] ?? 0);
-        if ($siteId <= 0 && ! empty($data['site_name'])) {
+        $siteId = ! empty($data['project_site_id']) ? (int) $data['project_site_id'] : null;
+        if (! $siteId && ! empty($data['site_name'])) {
             $site = ProjectSite::query()->where('name', trim((string) $data['site_name']))->first();
             if ($site) {
                 $siteId = $site->id;
@@ -501,6 +505,7 @@ class SiteCashService implements SiteCashServiceInterface
             'is_expense' => $isExpense,
             'supplier_id' => $supplierId,
             'supplier_name' => $supplierName,
+            'is_site_based' => array_key_exists('is_site_based', $data) ? (bool) $data['is_site_based'] : ($existing ? (bool) $existing->is_site_based : true),
             'purchase_order_no' => ! empty($data['purchase_order_no']) ? trim((string) $data['purchase_order_no']) : null,
             'bill_no' => ! empty($data['bill_no']) ? trim((string) $data['bill_no']) : null,
             'payment_date' => $paymentDate,

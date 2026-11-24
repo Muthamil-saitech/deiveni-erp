@@ -140,7 +140,7 @@ class StorePurchaseRequest extends FormRequest
     {
         return [
             'po_number' => ['nullable', 'string', 'max:100', Rule::unique('purchase_orders', 'po_number')],
-            'order_date' => ['required', 'date', 'before_or_equal:today'],
+            'order_date' => ['required', 'date', 'after_or_equal:'.now()->subDay()->toDateString(), 'before_or_equal:today'],
             'project_site_id' => ['required_without:site_name', 'nullable', 'integer', 'exists:project_sites,id'],
             'site_name' => ['nullable', 'string', 'max:255'],
             'supplier_id' => ['nullable', 'integer', 'exists:suppliers,id'],
@@ -178,6 +178,7 @@ class StorePurchaseRequest extends FormRequest
             'po_number.unique' => 'This PO / Invoice number already exists (இந்த கொள்முதல் ஆணை எண் ஏற்கனவே உள்ளது).',
             'po_number.max' => 'PO number cannot exceed 100 characters (கொள்முதல் ஆணை எண் 100 எழுத்துகளுக்குள் இருக்க வேண்டும்).',
             'order_date.required' => 'Please select a purchase date (கொள்முதல் தேதியை தேர்வு செய்க).',
+            'order_date.after_or_equal' => 'Purchase date can only be today or yesterday (கொள்முதல் தேதி நேற்று அல்லது இன்று மட்டுமே இருக்க வேண்டும்).',
             'order_date.before_or_equal' => 'Purchase date cannot be a future date (தேதி எதிர்காலமாக இருக்க முடியாது).',
             'order_date.date' => 'Please enter a valid purchase date (சரியான கொள்முதல் தேதியை உள்ளிடவும்).',
             'project_site_id.required_without' => 'Please select a project site (திட்ட தளத்தை தேர்வு செய்க).',

@@ -365,9 +365,10 @@ test('admin can filter dashboard data by period tabs and custom dates', function
         'this_week' => 'This Week',
         'this_month' => 'This Month',
         'this_year' => 'This Year',
+        'all' => 'All Time',
         default => 'Today',
     }, false);
-})->with(['today', 'this_week', 'this_month', 'this_year']);
+})->with(['today', 'this_week', 'this_month', 'this_year', 'all']);
 
 test('admin can filter dashboard by custom date range', function () {
     $admin = User::where('role', 'owner')->first() ?? User::factory()->create([
@@ -448,4 +449,44 @@ test('admin dashboard metrics, po orders, and ledgers strictly filter according 
     $customRes->assertViewHas('periodPurchasesTotal', 8500.0);
     $customRes->assertSee('Past Payment Received');
     $customRes->assertDontSee('Today Payment Received');
+
+    // 3. When filtering by 'all' (all-time covering past, present, all years)
+    $allRes = $this->actingAs($admin)->get('/dashboard?period=all');
+    $allRes->assertStatus(200);
+    $allRes->assertViewHas('periodIncome', 20000.0);
+    $allRes->assertViewHas('periodPurchasesTotal', 8500.0);
+    $allRes->assertSee('Today Payment Received');
+    $allRes->assertSee('Past Payment Received');
+});
+
+test('admin dashboard all period captures multi-year entries and displays years in chart', function () {
+    $admin = User::where('role', 'owner')->first() ?? User::factory()->create([
+        'name' => 'Owner Admin',
+        'role' => 'owner',
+    ]);
+
+    // Create entry in 2021
+    Ledger::create([
+        'entry_date' => '2021-05-10',
+        'flow' => 'income',
+        'source' => 'Construction',
+        'amount' => 75000.00,
+        'description' => '2021 Old Payment',
+        'created_by' => $admin->id,
+    ]);
+
+    // Create entry in 2026
+    Ledger::create([
+        'entry_date' => '2026-03-15',
+        'flow' => 'income',
+        'source' => 'Construction',
+        'amount' => 25000.00,
+        'description' => '2026 Current Payment',
+        'created_by' => $admin->id,
+    ]);
+
+    $response = $this->actingAs($admin)->get('/dashboard?period=all');
+    $response->assertStatus(200);
+    $response->assertViewHas('periodIncome', fn ($amount) => $amount >= 100000.0);
+    $response->assertViewHas('chartLabels', fn ($labels) => in_array('2021', $labels) && in_array('2026', $labels) && ! in_array('Jan', $labels));
 });

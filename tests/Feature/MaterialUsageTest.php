@@ -994,3 +994,97 @@ test('supplier purchases detail page displays date-wise breakdown of materials a
     $response->assertSee('Date-wise Purchase Breakdown');
     $response->assertSee('Back to Site');
 });
+
+test('cannot record material usage before PO order date', function () {
+    $this->actingAs($this->user);
+
+    // PO order date is 5 days ago
+    $poDate = now()->subDays(5)->toDateString();
+    $this->po->update(['order_date' => $poDate]);
+
+    // Attempt usage 6 days ago (before PO date)
+    $beforePoDate = now()->subDays(6)->toDateString();
+
+    $response = $this->postJson(route('material-usages.store'), [
+        'project_site_id' => $this->site->id,
+        'purchase_order_id' => $this->po->id,
+        'usage_date' => $beforePoDate,
+        'remarks' => 'Trying usage before PO date',
+        'items' => [
+            [
+                'purchase_order_item_id' => $this->poItemCement->id,
+                'material_id' => $this->cement->id,
+                'material_name' => 'Cement (UltraTech)',
+                'inward_quantity' => 100,
+                'used_quantity' => 5,
+                'unit' => 'Bags',
+                'unit_price' => 500,
+            ],
+        ],
+    ]);
+
+    $response->assertStatus(422)
+        ->assertJsonPath('success', false);
+});
+
+test('cannot record material usage in the future', function () {
+    $this->actingAs($this->user);
+
+    $futureDate = now()->addDays(2)->toDateString();
+
+    $response = $this->postJson(route('material-usages.store'), [
+        'project_site_id' => $this->site->id,
+        'purchase_order_id' => $this->po->id,
+        'usage_date' => $futureDate,
+        'remarks' => 'Trying future usage date',
+        'items' => [
+            [
+                'purchase_order_item_id' => $this->poItemCement->id,
+                'material_id' => $this->cement->id,
+                'material_name' => 'Cement (UltraTech)',
+                'inward_quantity' => 100,
+                'used_quantity' => 5,
+                'unit' => 'Bags',
+                'unit_price' => 500,
+            ],
+        ],
+    ]);
+
+    $response->assertStatus(422);
+});
+
+test('can record material usage on any date between PO order date and today', function () {
+    $this->actingAs($this->user);
+
+    // PO order date is 4 days ago
+    $poDate = now()->subDays(4)->toDateString();
+    $this->po->update(['order_date' => $poDate]);
+
+    // Usage date is 2 days ago (between PO date and today)
+    $validBetweenDate = now()->subDays(2)->toDateString();
+
+    $response = $this->postJson(route('material-usages.store'), [
+        'project_site_id' => $this->site->id,
+        'purchase_order_id' => $this->po->id,
+        'usage_date' => $validBetweenDate,
+        'remarks' => 'Valid date between PO and today',
+        'items' => [
+            [
+                'purchase_order_item_id' => $this->poItemCement->id,
+                'material_id' => $this->cement->id,
+                'material_name' => 'Cement (UltraTech)',
+                'inward_quantity' => 100,
+                'used_quantity' => 10,
+                'unit' => 'Bags',
+                'unit_price' => 500,
+            ],
+        ],
+    ]);
+
+    $response->assertOk()->assertJsonPath('success', true);
+
+    $this->assertDatabaseHas('material_usages', [
+        'project_site_id' => $this->site->id,
+        'usage_date' => $validBetweenDate,
+    ]);
+});

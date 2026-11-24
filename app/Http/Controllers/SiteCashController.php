@@ -48,7 +48,9 @@ class SiteCashController extends Controller
         $purchaseOrdersQuery = PurchaseOrder::with(['items', 'projectSite', 'supplier'])
             ->whereIn('status', ['Order Received', 'Order Completed']);
         if ($user && ! $user->isAdmin()) {
-            $purchaseOrdersQuery->where('created_by', $user->id);
+            $purchaseOrdersQuery->whereHas('projectSite', function ($sq) use ($user) {
+                $sq->where('created_by', $user->id);
+            });
         }
         $rawPurchaseOrders = $purchaseOrdersQuery
             ->orderByDesc('order_date')
@@ -56,7 +58,9 @@ class SiteCashController extends Controller
         $purchaseOrders = $this->filterUnrecordedOrUpdatedPurchaseOrders($rawPurchaseOrders);
         $dailyAllocationsQuery = DailyAllocation::with(['items', 'projectSite', 'expenses']);
         if ($user && ! $user->isAdmin()) {
-            $dailyAllocationsQuery->where('created_by', $user->id);
+            $dailyAllocationsQuery->whereHas('projectSite', function ($sq) use ($user) {
+                $sq->where('created_by', $user->id);
+            });
         }
         $rawDailyAllocations = $dailyAllocationsQuery
             ->orderByDesc('date')
@@ -417,15 +421,21 @@ class SiteCashController extends Controller
         $siteId = $request->query('project_site_id');
         $supplierId = $request->query('supplier_id');
         $supplierName = $request->query('supplier_name');
+        $scope = $request->query('scope', 'site_based');
+        $isSiteBased = $request->has('is_site_based')
+            ? filter_var($request->query('is_site_based'), FILTER_VALIDATE_BOOLEAN)
+            : ($scope !== 'total');
 
         $user = $request->user();
         $query = PurchaseOrder::with(['items', 'projectSite', 'supplier'])
             ->whereIn('status', ['Order Received', 'Order Completed']);
         if ($user && ! $user->isAdmin()) {
-            $query->where('created_by', $user->id);
+            $query->whereHas('projectSite', function ($sq) use ($user) {
+                $sq->where('created_by', $user->id);
+            });
         }
 
-        if ($siteId) {
+        if ($isSiteBased && $siteId) {
             $query->where('project_site_id', $siteId);
         }
 
@@ -441,11 +451,17 @@ class SiteCashController extends Controller
         }
 
         $orders = $query->orderByDesc('order_date')->get();
-        $filtered = $this->filterUnrecordedOrUpdatedPurchaseOrders($orders, $siteId ? (int) $siteId : null);
+        $filtered = $this->filterUnrecordedOrUpdatedPurchaseOrders($orders, ($isSiteBased && $siteId) ? (int) $siteId : null);
+
+        $totalPendingAmount = (float) $filtered->sum(function ($po) {
+            return (float) $po->total_amount;
+        });
 
         return response()->json([
             'success' => true,
             'orders' => $filtered,
+            'total_pending_amount' => round($totalPendingAmount, 2),
+            'pending_count' => $filtered->count(),
         ]);
     }
 
@@ -606,7 +622,7 @@ class SiteCashController extends Controller
         $transaction = $this->siteCashService->createTransaction($payload);
 
         if ($request->wantsJson() || $request->ajax()) {
-            $site = ProjectSite::find($transaction->project_site_id);
+            $site = $transaction->project_site_id ? ProjectSite::find($transaction->project_site_id) : null;
 
             return response()->json([
                 'success' => true,
@@ -642,7 +658,7 @@ class SiteCashController extends Controller
 
         $siteId = $transaction->project_site_id;
         $this->siteCashService->deleteTransaction($id);
-        $site = ProjectSite::find($siteId);
+        $site = $siteId ? ProjectSite::find($siteId) : null;
 
         if ($request->wantsJson() || $request->ajax()) {
             return response()->json([

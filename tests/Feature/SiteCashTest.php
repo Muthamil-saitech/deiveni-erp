@@ -499,7 +499,7 @@ test('purchase orders endpoint excludes POs already recorded in site cash', func
         'supplier_id' => $this->supplier->id,
         'supplier_name' => $this->supplier->name,
         'source_type' => 'Third-Party Supplier',
-        'status' => 'Ordered',
+        'status' => 'Order Received',
         'subtotal' => 20000.00,
         'tax_amount' => 0.00,
         'total_amount' => 20000.00,
@@ -513,7 +513,7 @@ test('purchase orders endpoint excludes POs already recorded in site cash', func
         'supplier_id' => $this->supplier->id,
         'supplier_name' => $this->supplier->name,
         'source_type' => 'Third-Party Supplier',
-        'status' => 'Ordered',
+        'status' => 'Order Received',
         'subtotal' => 35000.00,
         'tax_amount' => 0.00,
         'total_amount' => 35000.00,
@@ -561,7 +561,7 @@ test('purchase orders endpoint includes previously recorded PO if it was subsequ
         'supplier_id' => $this->supplier->id,
         'supplier_name' => $this->supplier->name,
         'source_type' => 'Third-Party Supplier',
-        'status' => 'Ordered',
+        'status' => 'Order Received',
         'subtotal' => 25000.00,
         'tax_amount' => 0.00,
         'total_amount' => 25000.00,
@@ -685,4 +685,149 @@ test('office cash wages endpoint returns only office cash wages with trade break
         'payments' => [],
     ]);
     expect($responseAfterReturn->json('returned_payments'))->not->toBeEmpty();
+});
+
+test('supplier payment purchase orders endpoint supports site_based and total scope', function () {
+    $secondSite = ProjectSite::create([
+        'client_id' => $this->client->id,
+        'name' => 'Coimbatore Project Site',
+        'location' => 'Coimbatore',
+        'work_type' => 'Commercial',
+        'start_date' => '2026-11-01',
+        'end_date' => '2027-04-30',
+        'status' => 'Ongoing',
+        'created_by' => $this->siteManager->id,
+    ]);
+
+    // PO for Site 1
+    $poSite1 = PurchaseOrder::create([
+        'po_number' => 'PO-SITE1-001',
+        'order_date' => '2026-11-20',
+        'project_site_id' => $this->site->id,
+        'supplier_id' => $this->supplier->id,
+        'supplier_name' => $this->supplier->name,
+        'source_type' => 'Third-Party Supplier',
+        'status' => 'Order Received',
+        'subtotal' => 12000.00,
+        'tax_amount' => 0.00,
+        'total_amount' => 12000.00,
+        'created_by' => $this->siteManager->id,
+    ]);
+
+    // PO for Site 2
+    $poSite2 = PurchaseOrder::create([
+        'po_number' => 'PO-SITE2-002',
+        'order_date' => '2026-11-21',
+        'project_site_id' => $secondSite->id,
+        'supplier_id' => $this->supplier->id,
+        'supplier_name' => $this->supplier->name,
+        'source_type' => 'Third-Party Supplier',
+        'status' => 'Order Received',
+        'subtotal' => 18000.00,
+        'tax_amount' => 0.00,
+        'total_amount' => 18000.00,
+        'created_by' => $this->siteManager->id,
+    ]);
+
+    // Create a different site manager with their own site and PO
+    $otherSiteManager = User::factory()->create([
+        'role' => UserRole::SiteManager,
+    ]);
+    $thirdSite = ProjectSite::create([
+        'client_id' => $this->client->id,
+        'name' => 'Madurai Project Site',
+        'location' => 'Madurai',
+        'work_type' => 'Commercial',
+        'start_date' => '2026-11-01',
+        'end_date' => '2027-04-30',
+        'status' => 'Ongoing',
+        'created_by' => $otherSiteManager->id,
+    ]);
+    PurchaseOrder::create([
+        'po_number' => 'PO-SITE3-003',
+        'order_date' => '2026-11-22',
+        'project_site_id' => $thirdSite->id,
+        'supplier_id' => $this->supplier->id,
+        'supplier_name' => $this->supplier->name,
+        'source_type' => 'Third-Party Supplier',
+        'status' => 'Order Received',
+        'subtotal' => 45000.00,
+        'tax_amount' => 0.00,
+        'total_amount' => 45000.00,
+        'created_by' => $otherSiteManager->id,
+    ]);
+
+    // 1. Query with Site Based scope for Site 1 -> only PO for Site 1
+    $responseSiteBased = $this->actingAs($this->siteManager)
+        ->getJson("/site-cash/purchase-orders?project_site_id={$this->site->id}&supplier_id={$this->supplier->id}&scope=site_based");
+
+    $responseSiteBased->assertStatus(200);
+    $ordersSiteBased = collect($responseSiteBased->json('orders'));
+    expect($ordersSiteBased->pluck('po_number'))->toContain('PO-SITE1-001');
+    expect($ordersSiteBased->pluck('po_number'))->not->toContain('PO-SITE2-002');
+    expect($ordersSiteBased->pluck('po_number'))->not->toContain('PO-SITE3-003');
+
+    // 2. Query with Total scope by siteManager -> only includes POs from Site 1 and Site 2 (assigned to siteManager)
+    $responseTotal = $this->actingAs($this->siteManager)
+        ->getJson("/site-cash/purchase-orders?supplier_id={$this->supplier->id}&scope=total");
+
+    $responseTotal->assertStatus(200);
+    $ordersTotal = collect($responseTotal->json('orders'));
+    expect($ordersTotal->pluck('po_number'))->toContain('PO-SITE1-001');
+    expect($ordersTotal->pluck('po_number'))->toContain('PO-SITE2-002');
+    expect($ordersTotal->pluck('po_number'))->not->toContain('PO-SITE3-003');
+    expect($responseTotal->json('total_pending_amount'))->toEqual(30000.00);
+    expect($responseTotal->json('pending_count'))->toBe(2);
+
+    // 3. Query with Total scope by otherSiteManager -> only includes PO from Site 3 (assigned to otherSiteManager)
+    $responseOther = $this->actingAs($otherSiteManager)
+        ->getJson("/site-cash/purchase-orders?supplier_id={$this->supplier->id}&scope=total");
+
+    $responseOther->assertStatus(200);
+    $ordersOther = collect($responseOther->json('orders'));
+    expect($ordersOther->pluck('po_number'))->toContain('PO-SITE3-003');
+    expect($ordersOther->pluck('po_number'))->not->toContain('PO-SITE1-001');
+    expect($ordersOther->pluck('po_number'))->not->toContain('PO-SITE2-002');
+    expect($responseOther->json('total_pending_amount'))->toEqual(45000.00);
+    expect($responseOther->json('pending_count'))->toBe(1);
+});
+
+test('recording supplier payment persists is_site_based flag based on scope', function () {
+    // 1. Site Based supplier payment
+    $siteBasedResponse = $this->actingAs($this->siteManager)
+        ->postJson('/site-cash', [
+            'project_site_id' => $this->site->id,
+            'transaction_type' => 'Supplier Payment',
+            'amount' => 15000.00,
+            'payment_mode' => 'Cash',
+            'paid_to' => 'Direct to Supplier',
+            'supplier_id' => $this->supplier->id,
+            'supplier_name' => $this->supplier->name,
+            'supplier_payment_scope' => 'site_based',
+            'purchase_order_no' => 'PO-SITE-TEST',
+            'payment_date' => '2026-11-20',
+        ]);
+
+    $siteBasedResponse->assertStatus(201);
+    $siteBasedTxn = SiteCash::find($siteBasedResponse->json('data.id'));
+    expect($siteBasedTxn->is_site_based)->toBeTrue();
+
+    // 2. Total supplier payment (no project_site_id required)
+    $totalResponse = $this->actingAs($this->siteManager)
+        ->postJson('/site-cash', [
+            'transaction_type' => 'Supplier Payment',
+            'amount' => 45000.00,
+            'payment_mode' => 'Cash',
+            'paid_to' => 'Direct to Supplier',
+            'supplier_id' => $this->supplier->id,
+            'supplier_name' => $this->supplier->name,
+            'supplier_payment_scope' => 'total',
+            'payment_date' => '2026-11-20',
+            'description' => 'Total Supplier Payment to supplier',
+        ]);
+
+    $totalResponse->assertStatus(201);
+    $totalTxn = SiteCash::find($totalResponse->json('data.id'));
+    expect($totalTxn->is_site_based)->toBeFalse();
+    expect($totalTxn->project_site_id)->toBeNull();
 });

@@ -39,6 +39,20 @@
 @section('content')
     <div class="container-fluid px-0">
 
+        <!-- Navigation Tabs: Daily Ledger vs Admin Ledger -->
+        <ul class="nav nav-tabs mb-3 border-bottom">
+            <li class="nav-item">
+                <a class="nav-link active" href="{{ route('ledger.index') }}">
+                    <i class="bi bi-book-half me-1"></i> Daily Ledger (தினசரி பேரேடு)
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{{ route('admin-ledger.index') }}">
+                    <i class="bi bi-journal-bookmark-fill me-1 text-primary"></i> Admin Ledger (நிர்வாக பேரேடு)
+                </a>
+            </li>
+        </ul>
+
         <!-- Header & Action Row -->
         <div class="card-custom p-3 mb-4 bg-white">
             <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">

@@ -90,6 +90,15 @@ class DashboardService implements DashboardServiceInterface
             ];
         }
 
+        if ($period === 'all') {
+            return [
+                'start' => '1970-01-01',
+                'end' => '2099-12-31',
+                'label' => 'All Time',
+                'ta_label' => 'அனைத்தும்',
+            ];
+        }
+
         return match ($period) {
             'this_week' => [
                 'start' => $now->copy()->subDays(6)->toDateString(),
@@ -145,20 +154,26 @@ class DashboardService implements DashboardServiceInterface
         // Admin-specific Expense Distribution by Source
         $adminExpenseBreakdown = [];
         if ($user && $user->isAdmin()) {
-            $adminExpenseBreakdown = $this->getAdminExpenseBreakdown($user, $periodInfo['start'], $periodInfo['end']);
+            $adminExpenseBreakdown = $this->getAdminExpenseBreakdown($user, $periodInfo['start'], $periodInfo['end'], $period);
         }
 
         // Attach period spent to active sites based on date filter
-        $sitePeriodExpenses = $this->scopeForUser(Ledger::expense(), $user)
-            ->whereNotNull('project_site_id')
-            ->whereBetween('entry_date', [$periodInfo['start'], $periodInfo['end']])
+        $sitePeriodExpensesQuery = $this->scopeForUser(Ledger::expense(), $user)
+            ->whereNotNull('project_site_id');
+        if ($period !== 'all') {
+            $sitePeriodExpensesQuery->whereBetween('entry_date', [$periodInfo['start'], $periodInfo['end']]);
+        }
+        $sitePeriodExpenses = $sitePeriodExpensesQuery
             ->groupBy('project_site_id')
             ->selectRaw('project_site_id, SUM(amount) as total_spent')
             ->pluck('total_spent', 'project_site_id');
 
-        $sitePeriodAllocations = $this->scopeForUser(DailyAllocation::query(), $user)
-            ->whereNotNull('project_site_id')
-            ->whereBetween('date', [$periodInfo['start'], $periodInfo['end']])
+        $sitePeriodAllocationsQuery = $this->scopeForUser(DailyAllocation::query(), $user)
+            ->whereNotNull('project_site_id');
+        if ($period !== 'all') {
+            $sitePeriodAllocationsQuery->whereBetween('date', [$periodInfo['start'], $periodInfo['end']]);
+        }
+        $sitePeriodAllocations = $sitePeriodAllocationsQuery
             ->groupBy('project_site_id')
             ->selectRaw('project_site_id, SUM(grand_total) as total_spent')
             ->pluck('total_spent', 'project_site_id');
@@ -420,19 +435,19 @@ class DashboardService implements DashboardServiceInterface
         $endDate = $dateRange['end'];
 
         // 1. Period-aware Ledger Income & Expense
-        $periodIncome = (float) $this->scopeForUser(Ledger::income(), $user)
-            ->whereBetween('entry_date', [$startDate, $endDate])
-            ->sum('amount');
-        $periodIncomeCount = (int) $this->scopeForUser(Ledger::income(), $user)
-            ->whereBetween('entry_date', [$startDate, $endDate])
-            ->count();
+        $periodIncomeQuery = $this->scopeForUser(Ledger::income(), $user);
+        $periodExpenseQuery = $this->scopeForUser(Ledger::expense(), $user);
 
-        $periodExpense = (float) $this->scopeForUser(Ledger::expense(), $user)
-            ->whereBetween('entry_date', [$startDate, $endDate])
-            ->sum('amount');
-        $periodExpenseCount = (int) $this->scopeForUser(Ledger::expense(), $user)
-            ->whereBetween('entry_date', [$startDate, $endDate])
-            ->count();
+        if ($period !== 'all') {
+            $periodIncomeQuery->whereBetween('entry_date', [$startDate, $endDate]);
+            $periodExpenseQuery->whereBetween('entry_date', [$startDate, $endDate]);
+        }
+
+        $periodIncome = (float) $periodIncomeQuery->sum('amount');
+        $periodIncomeCount = (int) $periodIncomeQuery->count();
+
+        $periodExpense = (float) $periodExpenseQuery->sum('amount');
+        $periodExpenseCount = (int) $periodExpenseQuery->count();
 
         // Also calculate today's specific numbers
         $todayIncome = (float) $this->scopeForUser(Ledger::income(), $user)->whereDate('entry_date', $today)->sum('amount');
@@ -454,15 +469,19 @@ class DashboardService implements DashboardServiceInterface
         $ledgerClosingBalance = (float) ($ledgerTotals['closing_balance'] ?? 0.0);
 
         // Period-specific Labour & Allocation metrics
-        $periodAllocationsQuery = $this->scopeForUser(DailyAllocation::query(), $user)
-            ->whereBetween('date', [$startDate, $endDate]);
+        $periodAllocationsQuery = $this->scopeForUser(DailyAllocation::query(), $user);
+        if ($period !== 'all') {
+            $periodAllocationsQuery->whereBetween('date', [$startDate, $endDate]);
+        }
         $periodAllocationsCount = (int) $periodAllocationsQuery->count();
         $periodLabourCount = (int) $periodAllocationsQuery->sum('total_labour_count');
         $periodWagesTotal = (float) $periodAllocationsQuery->sum('grand_total');
 
         // Period-specific Purchases & PO metrics
-        $periodPurchaseOrdersQuery = $this->scopeForUser(PurchaseOrder::query(), $user)
-            ->whereBetween('order_date', [$startDate, $endDate]);
+        $periodPurchaseOrdersQuery = $this->scopeForUser(PurchaseOrder::query(), $user);
+        if ($period !== 'all') {
+            $periodPurchaseOrdersQuery->whereBetween('order_date', [$startDate, $endDate]);
+        }
         $periodPurchaseOrdersCount = (int) $periodPurchaseOrdersQuery->count();
         $periodPurchasesTotal = (float) $periodPurchaseOrdersQuery->sum('total_amount');
 
@@ -489,15 +508,20 @@ class DashboardService implements DashboardServiceInterface
         $activeSuppliersCount = Supplier::where('status', 'Active')->count();
         $totalPurchaseOrdersCount = $this->scopeForUser(PurchaseOrder::query(), $user)->count();
         $pendingSupplierPayables = (float) $this->scopeForUser(PurchaseOrder::where('status', '!=', 'Paid'), $user)->sum('total_amount');
-        $periodPendingPayables = (float) $this->scopeForUser(PurchaseOrder::where('status', '!=', 'Paid'), $user)
-            ->whereBetween('order_date', [$startDate, $endDate])
-            ->sum('total_amount');
+        $periodPendingPayablesQuery = $this->scopeForUser(PurchaseOrder::where('status', '!=', 'Paid'), $user);
+        if ($period !== 'all') {
+            $periodPendingPayablesQuery->whereBetween('order_date', [$startDate, $endDate]);
+        }
+        $periodPendingPayables = (float) $periodPendingPayablesQuery->sum('total_amount');
         $totalSupplierPurchases = (float) $this->scopeForUser(PurchaseOrder::query(), $user)->sum('total_amount');
         $totalSupplierMaterialsCount = SupplierMaterial::count();
 
         // 5. Recent Ledger Entries filtered by date range
-        $recentLedgers = $this->scopeForUser(Ledger::query(), $user)
-            ->whereBetween('entry_date', [$startDate, $endDate])
+        $recentLedgersQuery = $this->scopeForUser(Ledger::query(), $user);
+        if ($period !== 'all') {
+            $recentLedgersQuery->whereBetween('entry_date', [$startDate, $endDate]);
+        }
+        $recentLedgers = $recentLedgersQuery
             ->with([
                 'projectSite.client',
                 'supplier',
@@ -612,6 +636,36 @@ class DashboardService implements DashboardServiceInterface
                     $totalPeriodExpense += $mOutflow;
                 }
             }
+        } elseif ($period === 'all') {
+            // Multi-year timeline across all recorded data without grouping into months of a single year
+            $minEntryDate = $this->scopeForUser(Ledger::query(), $user)->min('entry_date');
+            $maxEntryDate = $this->scopeForUser(Ledger::query(), $user)->max('entry_date');
+
+            $earliestRecordYear = $minEntryDate ? (int) Carbon::parse($minEntryDate)->year : Carbon::now()->year;
+            $latestRecordYear = $maxEntryDate ? (int) Carbon::parse($maxEntryDate)->year : Carbon::now()->year;
+
+            // Ensure a multi-year range from earliest record up to current/latest year (at least past 5 years if only current year has entries)
+            $startYear = min($earliestRecordYear, Carbon::now()->subYears(4)->year);
+            $endYear = max($latestRecordYear, Carbon::now()->year);
+
+            for ($y = $startYear; $y <= $endYear; $y++) {
+                $chartLabels[] = (string) $y;
+
+                $yInflow = (float) $this->scopeForUser(Ledger::income(), $user)
+                    ->whereYear('entry_date', $y)
+                    ->sum('amount');
+
+                $yOutflow = (float) $this->scopeForUser(Ledger::expense(), $user)
+                    ->whereYear('entry_date', $y)
+                    ->sum('amount');
+
+                $incomeData[] = $yInflow;
+                $expenseData[] = $yOutflow;
+            }
+
+            // All-time totals spanning all years and entries
+            $totalPeriodIncome = (float) $this->scopeForUser(Ledger::income(), $user)->sum('amount');
+            $totalPeriodExpense = (float) $this->scopeForUser(Ledger::expense(), $user)->sum('amount');
         } elseif ($period === 'this_year') {
             // Group by 12 months of the year
             $year = Carbon::now()->year;
@@ -717,10 +771,13 @@ class DashboardService implements DashboardServiceInterface
      *
      * @return array{expenseBreakdownLabels: array<string>, expenseBreakdownData: array<float>, totalExpenseBreakdown: float, topExpenseItems: array<array{label: string, value: float, percentage: float}>}
      */
-    public function getAdminExpenseBreakdown(?User $user, string $startDate, string $endDate): array
+    public function getAdminExpenseBreakdown(?User $user, string $startDate, string $endDate, string $period = ''): array
     {
-        $expensesBySource = $this->scopeForUser(Ledger::expense(), $user)
-            ->whereBetween('entry_date', [$startDate, $endDate])
+        $expensesQuery = $this->scopeForUser(Ledger::expense(), $user);
+        if ($period !== 'all') {
+            $expensesQuery->whereBetween('entry_date', [$startDate, $endDate]);
+        }
+        $expensesBySource = $expensesQuery
             ->selectRaw('source, SUM(amount) as total_amount')
             ->groupBy('source')
             ->having('total_amount', '>', 0)

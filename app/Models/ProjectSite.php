@@ -161,4 +161,14 @@ class ProjectSite extends Model
     {
         return $this->hasMany(StockTransfer::class, 'to_project_site_id');
     }
+
+    /**
+     * Get the client statements generated for this project site.
+     *
+     * @return HasMany<ProjectClientStatement, $this>
+     */
+    public function clientStatements(): HasMany
+    {
+        return $this->hasMany(ProjectClientStatement::class, 'project_site_id')->orderByDesc('id');
+    }
 }

@@ -263,6 +263,27 @@
                                             @endif
                                         </td>
                                     </tr>
+                                    @if ($transaction->transaction_type === 'Supplier Payment')
+                                        <tr>
+                                            <td class="text-muted small py-2">Payment Basis (பட்டுவாடா வகை):</td>
+                                            <td class="fw-semibold py-2">
+                                                @if ($transaction->is_site_based)
+                                                    <span class="badge bg-primary-subtle text-primary border border-primary-subtle">
+                                                        <i class="bi bi-building me-1"></i>Site Based (தள வாரியாக)
+                                                    </span>
+                                                @else
+                                                    <span class="badge bg-success-subtle text-success border border-success-subtle">
+                                                        <i class="bi bi-cash-stack me-1"></i>Total Supplier Payment (சப்ளையர் மொத்த பட்டுவாடா)
+                                                    </span>
+                                                @endif
+                                                @if ($transaction->purchase_order_no)
+                                                    <span class="badge bg-light text-dark border ms-1 font-monospace">
+                                                        PO: {{ $transaction->purchase_order_no }}
+                                                    </span>
+                                                @endif
+                                            </td>
+                                        </tr>
+                                    @endif
                                     </tr>
                                     <tr>
                                         <td class="text-muted small py-2">Bill / Voucher Ref:</td>

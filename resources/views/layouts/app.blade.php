@@ -793,7 +793,7 @@
                 @endif
 
                 @php
-                    $canSeeFinance = auth()->user()?->canAccessAny(['ledger', 'cash_transfer']) ?? true;
+                    $canSeeFinance = auth()->user()?->canAccessAny(['ledger', 'cash_transfer', 'admin_ledger']) ?? true;
                 @endphp
 
                 @if ($canSeeFinance)
@@ -806,6 +806,16 @@
                                     <i class="bi bi-book-half"></i>
                                     <span>Daily Ledger <span class="ta-text text-white-50"
                                             style="font-size:0.75rem;">(பேரேடு)</span></span>
+                                </a>
+                            </li>
+                        @endif
+                        @if (auth()->user()?->canAccess('admin_ledger') ?? true)
+                            <li class="nav-item">
+                                <a href="{{ url('/admin-ledger') }}" class="nav-link {{ Request::is('admin-ledger*') ? 'active' : '' }}"
+                                    data-menu="admin_ledger">
+                                    <i class="bi bi-journal-bookmark-fill"></i>
+                                    <span>Admin Ledger <span class="ta-text text-white-50"
+                                            style="font-size:0.75rem;">(நிர்வாக பேரேடு)</span></span>
                                 </a>
                             </li>
                         @endif

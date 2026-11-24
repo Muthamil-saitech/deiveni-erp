@@ -162,6 +162,14 @@ return [
             'icon' => 'bi bi-book-half',
             'url' => '/ledger',
         ],
+        'admin_ledger' => [
+            'key' => 'admin_ledger',
+            'name' => 'Admin Ledger',
+            'name_ta' => 'நிர்வாக பேரேடு',
+            'section' => 'FINANCE & LEDGER',
+            'icon' => 'bi bi-journal-bookmark-fill',
+            'url' => '/admin-ledger',
+        ],
         'cash_transfer' => [
             'key' => 'cash_transfer',
             'name' => 'Cash Transfer',

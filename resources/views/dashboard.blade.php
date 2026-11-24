@@ -98,56 +98,44 @@
         @if (auth()->user()?->isAdmin())
             <!-- Admin Period Filter Bar -->
             <div class="card-custom p-2 p-md-3 mb-3 bg-white border">
-                <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3">
-                    <div class="d-flex align-items-center gap-2 flex-wrap">
-                        @php
-                            $periodOptions = [
-                                'today' => ['en' => 'Today', 'ta' => 'இன்று', 'icon' => 'bi-calendar-day'],
-                                'this_week' => ['en' => 'This Week', 'ta' => 'இந்த வாரம்', 'icon' => 'bi-calendar-week'],
-                                'this_month' => ['en' => 'This Month', 'ta' => 'இந்த மாதம்', 'icon' => 'bi-calendar-month'],
-                                'this_year' => ['en' => 'This Year', 'ta' => 'இந்த ஆண்டு', 'icon' => 'bi-calendar'],
-                            ];
-                        @endphp
-                        <div class="btn-group btn-group-sm" role="group">
-                            @foreach ($periodOptions as $pKey => $pMeta)
-                                <a href="{{ route('dashboard', ['period' => $pKey]) }}"
-                                    class="btn {{ ($selectedPeriod ?? 'today') === $pKey ? 'btn-primary active fw-bold' : 'btn-outline-secondary' }}">
-                                    <i class="bi {{ $pMeta['icon'] }} me-1"></i>{{ $pMeta['en'] }} ({{ $pMeta['ta'] }})
-                                </a>
-                            @endforeach
+                <div class="d-flex align-items-center gap-2 flex-wrap">
+                    @php
+                        $periodOptions = [
+                            'today' => ['en' => 'Today', 'ta' => 'இன்று', 'icon' => 'bi-calendar-day'],
+                            'this_week' => ['en' => 'This Week', 'ta' => 'இந்த வாரம்', 'icon' => 'bi-calendar-week'],
+                            'this_month' => ['en' => 'This Month', 'ta' => 'இந்த மாதம்', 'icon' => 'bi-calendar-month'],
+                            'this_year' => ['en' => 'This Year', 'ta' => 'இந்த ஆண்டு', 'icon' => 'bi-calendar'],
+                            'all' => ['en' => 'All', 'ta' => 'அனைத்தும்', 'icon' => 'bi-infinity'],
+                        ];
+                    @endphp
+                    <div class="btn-group btn-group-sm" role="group">
+                        @foreach ($periodOptions as $pKey => $pMeta)
+                            <a href="{{ route('dashboard', ['period' => $pKey]) }}"
+                                class="btn {{ ($selectedPeriod ?? 'today') === $pKey ? 'btn-primary active fw-bold' : 'btn-outline-secondary' }}">
+                                <i class="bi {{ $pMeta['icon'] }} me-1"></i>{{ $pMeta['en'] }} ({{ $pMeta['ta'] }})
+                            </a>
+                        @endforeach
+                    </div>
+
+                    <!-- Custom Datepicker Form -->
+                    <form method="GET" action="{{ route('dashboard') }}"
+                        class="d-flex align-items-center gap-1 ms-sm-2 flex-wrap" id="customDateRangeForm">
+                        <input type="hidden" name="period" value="custom">
+                        <div class="input-group input-group-sm" style="width: auto;">
+                            <span class="input-group-text bg-white border-end-0 py-1">
+                                <i class="bi bi-calendar-event text-primary"></i>
+                            </span>
+                            <input type="date" name="start_date" id="dashCustomStart"
+                                class="form-control form-control-sm border-start-0"
+                                value="{{ $customStartDate ?? $periodStart ?? '' }}" title="Start Date">
+                            <span class="input-group-text bg-light py-1">&sim;</span>
+                            <input type="date" name="end_date" id="dashCustomEnd" class="form-control form-control-sm"
+                                value="{{ $customEndDate ?? $periodEnd ?? '' }}" title="End Date">
+                            <button type="submit" class="btn btn-sm btn-outline-primary py-1">
+                                <i class="bi bi-filter"></i> Apply
+                            </button>
                         </div>
-
-                        <!-- Custom Datepicker Form -->
-                        <form method="GET" action="{{ route('dashboard') }}"
-                            class="d-flex align-items-center gap-1 ms-sm-2 flex-wrap" id="customDateRangeForm">
-                            <input type="hidden" name="period" value="custom">
-                            <div class="input-group input-group-sm" style="width: auto;">
-                                <span class="input-group-text bg-white border-end-0 py-1">
-                                    <i class="bi bi-calendar-event text-primary"></i>
-                                </span>
-                                <input type="date" name="start_date" id="dashCustomStart"
-                                    class="form-control form-control-sm border-start-0"
-                                    value="{{ $customStartDate ?? $periodStart ?? '' }}" title="Start Date">
-                                <span class="input-group-text bg-light py-1">&sim;</span>
-                                <input type="date" name="end_date" id="dashCustomEnd" class="form-control form-control-sm"
-                                    value="{{ $customEndDate ?? $periodEnd ?? '' }}" title="End Date">
-                                <button type="submit" class="btn btn-sm btn-outline-primary py-1">
-                                    <i class="bi bi-filter"></i> Apply
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-
-                    <div class="d-flex align-items-center gap-2">
-                        <span class="badge bg-primary-subtle text-primary border border-primary-subtle py-2 px-3 small">
-                            <i class="bi bi-clock-history me-1"></i> {{ $periodLabel ?? 'Today' }}
-                            ({{ $periodLabelTa ?? 'இன்று' }}):
-                            <strong>{{ \Carbon\Carbon::parse($periodStart ?? now())->format('d M Y') }}</strong>
-                            @if (($periodStart ?? '') !== ($periodEnd ?? ''))
-                                &sim; <strong>{{ \Carbon\Carbon::parse($periodEnd ?? now())->format('d M Y') }}</strong>
-                            @endif
-                        </span>
-                    </div>
+                    </form>
                 </div>
             </div>
         @endif
@@ -502,6 +490,8 @@
                                     Past 7 Days Activity (இந்த வார சுருக்கம்)
                                 @elseif (($selectedPeriod ?? '') === 'this_month')
                                     This Month Daily Activity (இந்த மாத சுருக்கம்)
+                                @elseif (($selectedPeriod ?? '') === 'all')
+                                    All Time Activity (அனைத்து ஆண்டுகள் சுருக்கம்)
                                 @else
                                     This Year Monthly Activity (இந்த ஆண்டு சுருக்கம்)
                                 @endif

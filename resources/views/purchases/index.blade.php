@@ -386,8 +386,9 @@
                             <div class="col-12 col-md-6">
                                 <label class="form-label small fw-semibold" for="purDate">Purchase Date (தேதி) <span
                                         class="text-danger">*</span></label>
-                                <input type="date" class="form-control" id="purDate" value="{{ date('Y-m-d') }}" max="{{ date('Y-m-d') }}">
+                                <input type="date" class="form-control" id="purDate" value="{{ date('Y-m-d') }}" min="{{ date('Y-m-d', strtotime('-1 day')) }}" max="{{ date('Y-m-d') }}">
                                 <div class="invalid-feedback" id="errDate"></div>
+                                <div class="form-text small mt-1 text-primary fw-semibold" style="font-size: 0.75rem;"><i class="bi bi-calendar-check me-1"></i>Allowed: <strong>Yesterday ({{ date('d-m-Y', strtotime('-1 day')) }})</strong> & <strong>Today ({{ date('d-m-Y') }})</strong> <span class="text-muted">(நேற்று அல்லது இன்று மட்டும்)</span></div>
                             </div>
                             <div class="col-12 col-md-6">
                                 <label class="form-label small fw-semibold" for="purBillNo">PO / Invoice No. (கொள்முதல் ஆணை எண்) <span
@@ -1465,6 +1466,8 @@
                 $('#purchaseEditId').val('');
                 $('#purchaseForm')[0].reset();
                 clearPurchaseFormErrors();
+                $('#purDate').attr('min', '{{ date('Y-m-d', strtotime('-1 day')) }}');
+                $('#purDate').attr('max', '{{ date('Y-m-d') }}');
                 $('#purDate').val(new Date().toISOString().split('T')[0]);
                 $('#purBillNo').val(defaultNextPo);
 
@@ -1490,7 +1493,12 @@
                 $('#savePurBtnText').text('Update Purchase Entry');
                 $('#purchaseEditId').val(tr.data('id'));
                 clearPurchaseFormErrors();
-                $('#purDate').val(tr.data('date'));
+                const orderDate = tr.data('date');
+                $('#purDate').val(orderDate);
+                const yesterdayStr = '{{ date('Y-m-d', strtotime('-1 day')) }}';
+                const minAllowed = orderDate && orderDate < yesterdayStr ? orderDate : yesterdayStr;
+                $('#purDate').attr('min', minAllowed);
+                $('#purDate').attr('max', '{{ date('Y-m-d') }}');
                 $('#purBillNo').val(tr.data('bill-no'));
                 $('#purSite').val(tr.data('site'));
 
@@ -1588,6 +1596,20 @@
                 modal.show();
             });
 
+            // Purchase date change validation (Only Today and Yesterday)
+            $('#purDate').on('change', function () {
+                const val = $(this).val();
+                const minD = $(this).attr('min') || '{{ date('Y-m-d', strtotime('-1 day')) }}';
+                const maxD = '{{ date('Y-m-d') }}';
+                if (val > maxD) {
+                    $(this).val(maxD);
+                    showToast('Purchase date cannot be a future date (தேதி எதிர்காலமாக இருக்க முடியாது).', 'danger');
+                } else if (val < minD) {
+                    $(this).val(minD);
+                    showToast('Purchase date can only be today or yesterday (கொள்முதல் தேதி நேற்று அல்லது இன்று மட்டுமே இருக்க வேண்டும்).', 'danger');
+                }
+            });
+
             // Form Submit (Create or Update)
             $('#purchaseForm').on('submit', function (e) {
                 e.preventDefault();
@@ -1596,6 +1618,19 @@
                 const editId = $('#purchaseEditId').val();
                 const isEdit = Boolean(editId);
                 const date = $('#purDate').val();
+                const minDate = $('#purDate').attr('min') || '{{ date('Y-m-d', strtotime('-1 day')) }}';
+                const maxDate = '{{ date('Y-m-d') }}';
+                if (!date) {
+                    $('#purDate').addClass('is-invalid');
+                    $('#errDate').text('Please select a purchase date (கொள்முதல் தேதியை தேர்வு செய்க).').show();
+                    return;
+                }
+                if (date < minDate || date > maxDate) {
+                    $('#purDate').addClass('is-invalid');
+                    $('#errDate').text('Purchase date can only be today or yesterday (கொள்முதல் தேதி நேற்று அல்லது இன்று மட்டுமே இருக்க வேண்டும்).').show();
+                    showToast('Purchase date can only be today or yesterday (கொள்முதல் தேதி நேற்று அல்லது இன்று மட்டுமே இருக்க வேண்டும்).', 'danger');
+                    return;
+                }
                 const billNo = $('#purBillNo').val().trim();
                 const site = $('#purSite').val();
                 const siteOpt = $('#purSite option:selected');

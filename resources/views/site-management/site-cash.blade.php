@@ -312,6 +312,24 @@
                                             <span class="fw-semibold text-primary">
                                                 <i class="bi bi-truck-front-fill me-1"></i>{{ $supplierName }}
                                             </span>
+                                            @if ($txn->transaction_type === 'Supplier Payment')
+                                                <div class="mt-1 d-flex align-items-center gap-1 flex-wrap">
+                                                    @if ($txn->is_site_based)
+                                                        <span class="badge bg-primary-subtle text-primary border border-primary-subtle" style="font-size:0.68rem;">
+                                                            <i class="bi bi-building me-1"></i>Site Based
+                                                        </span>
+                                                    @else
+                                                        <span class="badge bg-success-subtle text-success border border-success-subtle" style="font-size:0.68rem;">
+                                                            <i class="bi bi-cash-stack me-1"></i>Total Payment
+                                                        </span>
+                                                    @endif
+                                                    @if ($txn->purchase_order_no)
+                                                        <span class="badge bg-light text-dark border font-monospace" style="font-size:0.68rem;">
+                                                            PO: {{ $txn->purchase_order_no }}
+                                                        </span>
+                                                    @endif
+                                                </div>
+                                            @endif
                                             @if (!empty($txn->items) && is_array($txn->items))
                                                 <div class="mt-1 d-flex flex-wrap gap-1">
                                                     @foreach ($txn->items as $it)
@@ -462,7 +480,7 @@
                     @csrf
                     <div class="modal-body">
                         <div class="row g-3">
-                            <div class="col-12 col-md-6">
+                            <div class="col-12 col-md-6" id="siteSelectGroup">
                                 <label class="form-label small fw-semibold">Project Site (திட்ட தளம்) <span
                                         class="text-danger">*</span></label>
                                 <select class="form-select" id="newTxnSite" name="project_site_id">
@@ -638,6 +656,29 @@
 
                                     <!-- Third Party Supplier Selection -->
                                     <div id="thirdPartySupplierBox">
+                                        <!-- Payment Basis (Site Based vs Total) -->
+                                        <div class="mb-3" id="supplierPaymentScopeBox">
+                                            <label class="form-label small fw-semibold text-dark mb-1">
+                                                <i class="bi bi-diagram-3 text-primary me-1"></i>Payment Basis (பட்டுவாடா வகை)
+                                            </label>
+                                            <div class="d-flex gap-4">
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="radio" name="supplier_payment_scope"
+                                                        id="scopeSiteBased" value="site_based" checked>
+                                                    <label class="form-check-label small fw-semibold" for="scopeSiteBased">
+                                                        <i class="bi bi-building me-1 text-primary"></i>Site Based (தள வாரியாக)
+                                                    </label>
+                                                </div>
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="radio" name="supplier_payment_scope"
+                                                        id="scopeTotal" value="total">
+                                                    <label class="form-check-label small fw-semibold text-primary" for="scopeTotal">
+                                                        <i class="bi bi-cash-stack me-1 text-success"></i>Total (மொத்தமாக)
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </div>
+
                                         <label class="form-label small fw-semibold text-dark">
                                             <i class="bi bi-truck text-primary me-1"></i>Select Supplier (சப்ளையர்)
                                             <span class="text-danger">*</span>
@@ -658,47 +699,31 @@
                                             @endforeach
                                         </select>
                                         <div class="invalid-feedback" id="errNewTxnSupplier"></div>
-                                        <div id="supplierContactInfoBox" class="p-2 mt-2 rounded bg-white border small text-dark d-flex align-items-center justify-content-between flex-wrap gap-2" style="display: none;">
-                                            <div>
-                                                <i class="bi bi-person-badge text-primary me-1"></i>Contact Person: <strong id="supplierContactPersonText">—</strong>
-                                                <span class="text-muted mx-2">&bull;</span>
-                                                <i class="bi bi-telephone text-primary me-1"></i>Phone: <span id="supplierPhoneText" class="font-monospace fw-semibold">—</span>
-                                            </div>
-                                            <span class="badge bg-primary-subtle text-primary border">Supplier Details</span>
-                                        </div>
 
                                         <!-- Cash Handover Person (ONLY for Supplier Option in Cash Mode) -->
                                         <div class="mt-2" id="cashReceiverGroup" style="display: none;">
                                             <label class="form-label small fw-semibold text-dark mb-1">
-                                                <i class="bi bi-person-check text-primary me-1"></i>Handover Person / Received By Name (பணம் பெற்றுக் கொண்ட சப்ளையர் ஆள் / நபர்) <span class="text-muted fw-normal">(Optional)</span>
+                                                <i class="bi bi-person-check text-primary me-1"></i>Received By (பணம் பெற்றுக் கொண்ட நபர்)
                                             </label>
                                             <div class="input-group">
                                                 <span class="input-group-text bg-white"><i class="bi bi-person"></i></span>
-                                                <input type="text" class="form-control" id="newTxnCashReceiver" placeholder="e.g. In-person Bala Murugan / Delivery Person">
+                                                <input type="text" class="form-control" id="newTxnCashReceiver" placeholder="Person Name">
                                             </div>
                                         </div>
 
-                                        <!-- Purchase Orders Select Section -->
+                                        <!-- Purchase Orders Select Section (Shown ONLY when Site Based) -->
                                         <div id="poListSection" class="mt-3">
-                                            <div class="d-flex justify-content-between align-items-center mb-1">
-                                                <label class="form-label small fw-semibold text-dark mb-0"
-                                                    for="newTxnPurchaseOrder">
-                                                    <i class="bi bi-file-earmark-ruled text-primary me-1"></i>Select
-                                                    Purchase Order (கொள்முதல் ஆணை)
-                                                </label>
-                                                <span class="badge bg-primary-subtle text-primary border small"
-                                                    id="poCountBadge" style="display:none;">0 POs</span>
-                                            </div>
+                                            <label class="form-label small fw-semibold text-dark mb-1"
+                                                for="newTxnPurchaseOrder">
+                                                <i class="bi bi-file-earmark-ruled text-primary me-1"></i>Select
+                                                Purchase Order (கொள்முதல் ஆணை)
+                                            </label>
                                             <select class="form-select fw-semibold" id="newTxnPurchaseOrder"
                                                 name="purchase_order_no">
-                                                <option value="" selected>-- Select Project Site and Supplier above --
+                                                <option value="" selected>-- Select Purchase Order (கொள்முதல் ஆணை) --
                                                 </option>
                                             </select>
                                             <div class="invalid-feedback" id="errNewTxnPurchaseOrder"></div>
-                                            <div class="form-text small text-muted" id="poPromptMsg">
-                                                <i class="bi bi-info-circle me-1"></i>Select Project Site and Supplier above
-                                                to view matching purchase orders.
-                                            </div>
                                         </div>
                                     </div>
 
@@ -950,16 +975,13 @@
                 if (type === 'Client Direct to Supplier') {
                     $('#newTxnPaidTo').val('Direct to Supplier');
                     $('#purchaseOrderSelectGroup').slideDown(200);
-                    if ($('input[name="material_source"]:checked').val() !== 'own_warehouse') {
-                        updatePurchaseOrderList();
-                    }
+                    syncSupplierPaymentScope();
                 } else if (type === 'Supplier Payment' || $('#newTxnPaidTo').val() === 'Direct to Supplier') {
                     $('#purchaseOrderSelectGroup').slideDown(200);
-                    if ($('input[name="material_source"]:checked').val() !== 'own_warehouse') {
-                        updatePurchaseOrderList();
-                    }
+                    syncSupplierPaymentScope();
                 } else {
                     $('#purchaseOrderSelectGroup').slideUp(200);
+                    $('#siteSelectGroup').slideDown(200);
                     $('#newTxnSupplier').val('');
                 }
 
@@ -981,11 +1003,10 @@
                 const recipient = $(this).val();
                 if (recipient === 'Direct to Supplier') {
                     $('#purchaseOrderSelectGroup').slideDown(200);
-                    if ($('input[name="material_source"]:checked').val() !== 'own_warehouse') {
-                        updatePurchaseOrderList();
-                    }
+                    syncSupplierPaymentScope();
                 } else if ($('#newTxnType').val() !== 'Supplier Payment' && $('#newTxnType').val() !== 'Client Direct to Supplier') {
                     $('#purchaseOrderSelectGroup').slideUp(200);
+                    $('#siteSelectGroup').slideDown(200);
                 }
                 syncPaymentModeFields();
             });
@@ -1010,14 +1031,6 @@
                 const phone = selected.data('phone') || '';
                 const name = selected.data('name') || '';
 
-                if (contact || phone) {
-                    $('#supplierContactPersonText').text(contact || 'N/A');
-                    $('#supplierPhoneText').text(phone || 'N/A');
-                    $('#supplierContactInfoBox').slideDown(150);
-                } else {
-                    $('#supplierContactInfoBox').slideUp(150);
-                }
-
                 const mode = $('input[name="payment_mode"]:checked').val() || 'Cash';
                 if (mode === 'UPI') {
                     if (contact || name) {
@@ -1036,7 +1049,12 @@
                     }
                 }
 
-                updatePurchaseOrderList();
+                const isSiteBased = $('input[name="supplier_payment_scope"]:checked').val() === 'site_based';
+                if (!isSiteBased) {
+                    calculateTotalSupplierPending($(this).val(), name);
+                } else {
+                    updatePurchaseOrderList();
+                }
             });
 
             function updateDailyAllocationList() {
@@ -1231,25 +1249,102 @@
                 $('#newTxnDesc').val(`Daily labour wage payment: ${summaryText} on ${dateFormatted}`);
             });
 
+            function calculateTotalSupplierPending(supplierId, supplierName) {
+                if (!supplierId) {
+                    $('#newTxnAmount').val('');
+                    return;
+                }
+
+                $.ajax({
+                    url: '{{ route("site-cash.purchase-orders") }}',
+                    type: 'GET',
+                    data: {
+                        supplier_id: supplierId,
+                        supplier_name: supplierName,
+                        scope: 'total',
+                        is_site_based: 0
+                    },
+                    headers: { 'Accept': 'application/json' },
+                    success: function (res) {
+                        if (res.success) {
+                            const totalAmount = parseFloat(res.total_pending_amount) || 0;
+                            const count = parseInt(res.pending_count) || 0;
+                            const formatted = totalAmount.toLocaleString('en-IN', {
+                                minimumFractionDigits: 2,
+                                maximumFractionDigits: 2
+                            });
+
+                            if (totalAmount > 0) {
+                                $('#newTxnAmount').val(totalAmount.toFixed(2));
+                                $('#newTxnDesc').val(`Total Supplier Payment to ${supplierName || 'Supplier'}: ₹${formatted} (${count} pending POs across your assigned sites)`);
+                                showToast(`Total pending ₹${formatted} across ${count} POs loaded.`, 'info');
+                            } else {
+                                $('#newTxnAmount').val('');
+                                $('#newTxnDesc').val(supplierName ? `Total Supplier Payment to ${supplierName}` : 'Total Supplier Payment');
+                                showToast(`No pending POs found for ${supplierName || 'this supplier'} on your assigned sites.`, 'info');
+                            }
+                        }
+                    }
+                });
+            }
+
+            // Sync site and PO visibility based on Supplier Payment basis (Site Based vs Total)
+            function syncSupplierPaymentScope() {
+                const type = $('#newTxnType').val();
+                const isSupplierPayment = (type === 'Supplier Payment' || $('#newTxnPaidTo').val() === 'Direct to Supplier');
+
+                if (isSupplierPayment) {
+                    const isSiteBased = $('input[name="supplier_payment_scope"]:checked').val() === 'site_based';
+                    if (isSiteBased) {
+                        $('#siteSelectGroup').slideDown(150);
+                        $('#poListSection').slideDown(150);
+                        $('#newTxnAmount').val('');
+                        $('#newTxnDesc').val('');
+                        updatePurchaseOrderList();
+                    } else {
+                        // Total chosen: hide PO selection and site selection
+                        $('#siteSelectGroup').slideUp(150);
+                        $('#poListSection').slideUp(150);
+                        $('#newTxnPurchaseOrder').val('');
+                        $('#newTxnSite').val('');
+                        const suppId = $('#newTxnSupplier').val();
+                        const suppName = $('#newTxnSupplier option:selected').data('name') || '';
+                        $('#newTxnDesc').val(suppName ? `Total Supplier Payment to ${suppName}` : 'Total Supplier Payment');
+                        if (suppId) {
+                            calculateTotalSupplierPending(suppId, suppName);
+                        }
+                    }
+                } else {
+                    $('#siteSelectGroup').slideDown(150);
+                    $('#poListSection').hide();
+                }
+            }
+
+            // Payment Scope radio change (Site Based vs Total)
+            $('input[name="supplier_payment_scope"]').on('change', function () {
+                syncSupplierPaymentScope();
+            });
+
             function updatePurchaseOrderList() {
+                const isSiteBased = $('input[name="supplier_payment_scope"]:checked').val() === 'site_based';
+                if (!isSiteBased) {
+                    $('#poListSection').hide();
+                    return;
+                }
+
                 const siteId = $('#newTxnSite').val();
                 const supplierId = $('#newTxnSupplier').val();
                 const supplierName = $('#newTxnSupplier option:selected').data('name') || '';
-
                 const poSelect = $('#newTxnPurchaseOrder');
-                const badge = $('#poCountBadge');
-                const promptMsg = $('#poPromptMsg');
 
                 if (!siteId || !supplierId) {
-                    badge.hide();
-                    poSelect.empty().append('<option value="" selected>-- Select Project Site and Supplier above --</option>');
-                    promptMsg.html('<i class="bi bi-info-circle me-1"></i>Select both Project Site and Supplier above to load purchase orders.');
+                    poSelect.empty().append('<option value="" selected>-- Select Purchase Order (கொள்முதல் ஆணை) --</option>');
                     return;
                 }
 
                 // Filter matching purchase orders for this site and supplier from cache
                 const cachedMatching = allPurchaseOrders.filter(function (po) {
-                    const matchSite = String(po.project_site_id) === String(siteId);
+                    const matchSite = (String(po.project_site_id) === String(siteId));
                     const matchSupplier = (supplierId && String(po.supplier_id) === String(supplierId)) ||
                         (supplierName && po.supplier_name && po.supplier_name.trim().toLowerCase() === supplierName.trim().toLowerCase());
                     return matchSite && matchSupplier;
@@ -1263,7 +1358,9 @@
                     data: {
                         project_site_id: siteId,
                         supplier_id: supplierId,
-                        supplier_name: supplierName
+                        supplier_name: supplierName,
+                        scope: 'site_based',
+                        is_site_based: 1
                     },
                     headers: { 'Accept': 'application/json' },
                     success: function (res) {
@@ -1277,20 +1374,13 @@
 
             function renderPurchaseOrders(matchingPOs) {
                 const poSelect = $('#newTxnPurchaseOrder');
-                const badge = $('#poCountBadge');
-                const promptMsg = $('#poPromptMsg');
 
                 if (!matchingPOs || matchingPOs.length === 0) {
-                    badge.hide();
-                    poSelect.empty().append('<option value="" selected>-- All POs for this supplier are recorded (கொள்முதல் ஆணைகள் அனைத்தும் சேர்க்கப்பட்டுவிட்டது) --</option>');
-                    promptMsg.html('<i class="bi bi-check-circle text-success me-1"></i>All purchase orders for this site and supplier have already been recorded in Site Cash. Any new or updated POs will appear here.');
+                    poSelect.empty().append('<option value="" selected>-- No Pending POs (கொள்முதல் ஆணைகள் இல்லை) --</option>');
                     return;
                 }
 
-                badge.text(`${matchingPOs.length} Pending PO${matchingPOs.length > 1 ? 's' : ''}`).show();
-
-                poSelect.empty();
-                poSelect.append('<option value="" selected>-- Select Purchase Order (கொள்முதல் ஆணை) --</option>');
+                poSelect.empty().append('<option value="" selected>-- Select Purchase Order (கொள்முதல் ஆணை) --</option>');
 
                 matchingPOs.forEach(function (po) {
                     const rawAmount = parseFloat(po.total_amount) || 0;
@@ -1311,7 +1401,7 @@
                     const dateStr = po.order_date ? new Date(po.order_date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : '';
                     const datePart = dateStr ? ` | ${dateStr}` : '';
                     const isUpdated = Boolean(po.is_po_updated);
-                    const updateNotice = isUpdated ? ' ⚠️ [UPDATED / மாற்றப்பட்டது]' : '';
+                    const updateNotice = isUpdated ? ' ⚠️ [UPDATED]' : '';
 
                     const optionText = `${po.po_number}${updateNotice} - ₹${formattedAmount} (${itemsSummary}${datePart})`;
 
@@ -1326,8 +1416,6 @@
 
                     poSelect.append(opt);
                 });
-
-                promptMsg.html('<i class="bi bi-check2-circle text-success me-1"></i>Select a purchase order to auto-fill amount, bill number, and description.');
             }
 
             // Change purchase order: fill amount, bill number, description
@@ -2054,17 +2142,17 @@
                 $('#newTxnCashReceiver').val('');
                 $('#newTxnPaymentReference').val('').removeClass('is-invalid');
                 $('#newTxnReceiverName').val('');
-                $('#supplierContactInfoBox').hide();
+                $('#siteSelectGroup').show();
                 $('#newTxnPaidTo').val('Site Manager');
                 $('#purchaseOrderSelectGroup').hide();
                 $('#sourceThirdParty').prop('checked', true);
+                $('#scopeSiteBased').prop('checked', true);
                 $('#thirdPartySupplierBox').show();
                 $('#warehouseMaterialBox').hide();
                 $('#siteCashWhTableBody').empty();
                 $('#newTxnSupplier').val('');
-                $('#newTxnPurchaseOrder').empty().append('<option value="" selected>-- Select Project Site and Supplier above --</option>');
-                $('#poPromptMsg').html('<i class="bi bi-info-circle me-1"></i>Select Project Site and Supplier above to view matching purchase orders.');
-                $('#poCountBadge').hide();
+                $('#poListSection').show();
+                $('#newTxnPurchaseOrder').empty().append('<option value="" selected>-- Select Purchase Order (கொள்முதல் ஆணை) --</option>');
                 $('#newTxnImagePreviewBox').attr('style', 'display: none !important;').removeClass('d-flex');
                 $('#saveSpinner').addClass('d-none');
                 $('#saveCashTxnBtn').prop('disabled', false);

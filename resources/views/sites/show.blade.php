@@ -144,6 +144,11 @@
                     </div>
                 </div>
                 <div class="d-flex gap-2 flex-wrap">
+                    <a href="{{ route('sites.client-statement', $site->encrypted_id) }}"
+                        class="btn btn-primary btn-sm d-inline-flex align-items-center shadow-sm"
+                        title="Prepare and print client statement">
+                        <i class="bi bi-printer-fill me-1"></i> Client (கிளையண்ட் அறிக்கை)
+                    </a>
                     @if ($site->client?->phone)
                         <a href="tel:{{ $site->client->phone }}"
                             class="btn btn-outline-success btn-sm d-inline-flex align-items-center">
@@ -367,6 +372,13 @@
                                 <span class="text-muted d-block fw-semibold"><i
                                         class="bi bi-geo-alt text-primary me-1"></i>Billing & Contact Address:</span>
                                 <span class="text-dark">{{ $site->client->address ?: $site->location }}</span>
+                            </div>
+
+                            <div class="pt-2 border-top">
+                                <a href="{{ route('sites.client-statement', $site->encrypted_id) }}"
+                                    class="btn btn-outline-primary btn-sm w-100 d-flex align-items-center justify-content-center gap-1 shadow-sm">
+                                    <i class="bi bi-printer-fill"></i> Client Statement & Print (அறிக்கை & பிரிண்ட்)
+                                </a>
                             </div>
                         </div>
                     @else
@@ -1321,6 +1333,108 @@
             @endif
         </div>
 
+        <!-- Saved Client Statements & Prints Section (கிளையண்ட் அச்சிடப்பட்ட அறிக்கைகள் & பதிவிறக்கம்) -->
+        <div class="card-custom p-4 bg-white mt-4 mb-4" id="clientStatementsSection">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-3 border-bottom pb-3">
+                <div class="d-flex align-items-center gap-2">
+                    <div class="bg-primary-subtle text-primary p-2 rounded-3">
+                        <i class="bi bi-file-earmark-ruled fs-5"></i>
+                    </div>
+                    <div>
+                        <h5 class="fw-bold mb-0 text-dark">
+                            Client Statements & Print History <span class="ta-text small text-muted">(கிளையண்ட் அச்சிடப்பட்ட அறிக்கைகள்)</span>
+                        </h5>
+                        <small class="text-muted">History of client statements, customized billing prints, and downloads for this project.</small>
+                    </div>
+                </div>
+                <div class="d-flex align-items-center gap-2">
+                    <a href="{{ route('sites.client-statement', $site->encrypted_id) }}" class="btn btn-primary btn-sm d-inline-flex align-items-center gap-1 shadow-sm px-3">
+                        <i class="bi bi-plus-circle"></i> + New Client Print (புதிய அறிக்கை அச்சிடு)
+                    </a>
+                </div>
+            </div>
+
+            @if (!isset($clientStatements) || $clientStatements->isEmpty())
+                <div class="text-center py-5 text-muted">
+                    <i class="bi bi-file-earmark-x fs-1 d-block mb-2 text-secondary opacity-50"></i>
+                    <div class="fw-semibold">No Client Statements Generated Yet</div>
+                    <small class="ta-text text-muted">இந்த திட்டத்திற்கான கிளையண்ட் பிரிண்ட் அறிக்கைகள் எதுவும் இதுவரை சேமிக்கப்படவில்லை.</small>
+                    <div class="mt-3">
+                        <a href="{{ route('sites.client-statement', $site->encrypted_id) }}" class="btn btn-outline-primary btn-sm">
+                            <i class="bi bi-printer me-1"></i> Create First Client Statement (அறிக்கை உருவாக்கு)
+                        </a>
+                    </div>
+                </div>
+            @else
+                <div class="table-responsive rounded border">
+                    <table class="table table-hover align-middle mb-0" id="clientStatementsTable" style="font-size: 0.83rem;">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="ps-3 py-2 text-muted" style="width: 40px; font-size: 0.72rem;">#</th>
+                                <th class="py-2 text-muted text-uppercase" style="font-size: 0.72rem;">Statement No</th>
+                                <th class="py-2 text-muted text-uppercase" style="font-size: 0.72rem;">Date</th>
+                                <th class="py-2 text-muted text-uppercase" style="font-size: 0.72rem;">Client & Title</th>
+                                <th class="py-2 text-center text-muted text-uppercase" style="font-size: 0.72rem;">Items</th>
+                                <th class="py-2 text-end text-muted text-uppercase" style="font-size: 0.72rem;">Billed Amount</th>
+                                <th class="py-2 text-muted text-uppercase" style="font-size: 0.72rem;">Created By</th>
+                                <th class="pe-3 py-2 text-end text-muted text-uppercase" style="width: 220px; font-size: 0.72rem;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach ($clientStatements as $csIdx => $cStatement)
+                                @php
+                                    $stItems = is_array($cStatement->items) ? $cStatement->items : (json_decode($cStatement->items, true) ?: []);
+                                    $printUrl = route('sites.client-statements.print', $cStatement->encrypted_id);
+                                @endphp
+                                <tr>
+                                    <td class="ps-3 text-muted text-center font-monospace">{{ str_pad($csIdx + 1, 2, '0', STR_PAD_LEFT) }}</td>
+                                    <td>
+                                        <a href="{{ $printUrl }}" target="_blank" class="fw-bold font-monospace text-primary text-decoration-none">
+                                            {{ $cStatement->statement_number }}
+                                        </a>
+                                    </td>
+                                    <td>
+                                        <div class="fw-semibold text-dark">{{ \Carbon\Carbon::parse($cStatement->statement_date)->format('d M Y') }}</div>
+                                        <small class="text-muted">{{ $cStatement->created_at ? $cStatement->created_at->format('h:i A') : '' }}</small>
+                                    </td>
+                                    <td>
+                                        <div class="fw-semibold text-dark">{{ $cStatement->client_name ?: ($site->client?->name ?? 'Client') }}</div>
+                                        <small class="text-muted text-truncate d-block" style="max-width: 240px;">{{ $cStatement->title }}</small>
+                                    </td>
+                                    <td class="text-center">
+                                        <span class="badge bg-light text-dark border px-2 py-1">
+                                            {{ count($stItems) }} Items
+                                        </span>
+                                    </td>
+                                    <td class="text-end fw-bold text-success fs-6">
+                                        ₹{{ number_format((float) $cStatement->total_amount, 2) }}
+                                    </td>
+                                    <td>
+                                        <span class="small text-muted">
+                                            <i class="bi bi-person me-1"></i>{{ $cStatement->creator?->name ?? 'User' }}
+                                        </span>
+                                    </td>
+                                    <td class="pe-3 text-end">
+                                        <div class="btn-group btn-group-sm">
+                                            <a href="{{ $printUrl }}?autoprint=1" target="_blank" class="btn btn-outline-primary" title="Print Statement (அச்சிடு)">
+                                                <i class="bi bi-printer"></i> Print
+                                            </a>
+                                            <a href="{{ $printUrl }}" target="_blank" class="btn btn-outline-success" title="View & Download PDF / HTML (பதிவிறக்கம்)">
+                                                <i class="bi bi-download"></i> Download
+                                            </a>
+                                            <button type="button" class="btn btn-outline-danger btn-delete-statement" data-id="{{ $cStatement->encrypted_id }}" title="Delete Statement">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            @endif
+        </div>
+
     </div>
 @endsection
 
@@ -1622,6 +1736,35 @@
                 } else {
                     $('#supplierPagination').show();
                     makeTabPaginator('supplierTabBody', 'supplierTabNav', 'supplierTabSummary', 'supplierPerPage');
+                }
+            });
+
+            // Delete client statement handler
+            $(document).on('click', '.btn-delete-statement', async function () {
+                const statementEncId = $(this).data('id');
+                if (!confirm('Are you sure you want to delete this saved client statement? (இந்த அறிக்கையை நீக்க விரும்புகிறீர்களா?)')) {
+                    return;
+                }
+
+                try {
+                    const res = await fetch(`/sites/client-statements/${statementEncId}`, {
+                        method: 'DELETE',
+                        headers: {
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'Accept': 'application/json'
+                        }
+                    });
+                    const data = await res.json();
+                    if (data.success) {
+                        alert(data.message || 'Statement deleted.');
+                        window.location.reload();
+                    } else {
+                        alert(data.message || 'Error deleting statement.');
+                    }
+                } catch (e) {
+                    console.error('Delete error:', e);
+                    alert('Network error while deleting statement.');
                 }
             });
         });
