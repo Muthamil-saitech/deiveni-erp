@@ -24,6 +24,7 @@ class SupplierFactory extends Factory
             'address' => fake()->address(),
             'gst_number' => fake()->bothify('33#####????#Z#'),
             'status' => 'Active',
+            'is_site_based' => true,
         ];
     }
 }

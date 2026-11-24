@@ -30,8 +30,11 @@ test('suppliers index page renders successfully and displays seeded suppliers an
     $response->assertSee('Jindal Steels & Hardware');
     $response->assertSee('33AAAAA0000A1Z5');
     $response->assertSee('id="supplierStatusFilter"', false);
+    $response->assertSee('id="supplierScopeFilter"', false);
     $response->assertSee('<th>Status</th>', false);
     $response->assertSee('<th>Materials</th>', false);
+    $response->assertSee('Site Based');
+    $response->assertSee('supplier-site-based-toggle', false);
     $response->assertSee('view-supplier-btn', false);
     $response->assertDontSee('Material Types Supplied');
     $response->assertDontSee('Total Registered Suppliers:');
@@ -134,6 +137,9 @@ test('storing a supplier validates gst number format strictly according to india
         'name' => 'New Valid Supplier 3',
         'phone' => '94441 99993',
         'gst_number' => '33ABCDE1234F1Z9',
+        'materials' => [
+            ['material_id' => 1, 'price' => 500.00],
+        ],
     ]);
 
     $response3->assertStatus(201);
@@ -180,6 +186,9 @@ test('updating supplier validates unique name and gst against other suppliers bu
         'phone' => '94442 22999',
         'gst_number' => $supplier2->gst_number,
         'status' => 'Active',
+        'materials' => [
+            ['material_id' => 1, 'price' => 450.00],
+        ],
     ]);
 
     $validResponse->assertStatus(200)
@@ -294,10 +303,10 @@ test('supplier detail page renders successfully with full supplier information, 
     $response = $this->get('/suppliers/'.$firstSupplier->encrypted_id);
 
     $response->assertStatus(200);
-    $response->assertSee('Supplier Details');
+    $response->assertSee('Supplier Statement');
     $response->assertSee($firstSupplier->name);
     $response->assertSee($firstSupplier->phone);
-    $response->assertSee('Materials Supplied');
+    $response->assertSee('Materials Purchased');
     $response->assertSee('Back to Suppliers');
 
     // Non-existent encrypted ID → 404
@@ -475,4 +484,40 @@ test('supplier detail page renders total purchased, balance payable, site-based 
     $response->assertSee('Select Project');
     $response->assertSee('Total Stock');
     $response->assertSee('Print Statement');
+});
+
+test('toggle site based endpoint updates is_site_based flag on supplier', function () {
+    $user = User::factory()->create([
+        'role' => UserRole::SiteManager,
+        'status' => 'Active',
+    ]);
+
+    $supplier = Supplier::factory()->create([
+        'is_site_based' => true,
+    ]);
+
+    $response = $this->actingAs($user)->postJson("/suppliers/{$supplier->id}/toggle-site-based", [
+        'is_site_based' => 0,
+    ]);
+
+    $response->assertOk();
+    $response->assertJson([
+        'success' => true,
+        'is_site_based' => false,
+    ]);
+
+    expect($supplier->fresh()->is_site_based)->toBeFalse();
+
+    // Toggle back to true
+    $response2 = $this->actingAs($user)->postJson("/suppliers/{$supplier->id}/toggle-site-based", [
+        'is_site_based' => 1,
+    ]);
+
+    $response2->assertOk();
+    $response2->assertJson([
+        'success' => true,
+        'is_site_based' => true,
+    ]);
+
+    expect($supplier->fresh()->is_site_based)->toBeTrue();
 });

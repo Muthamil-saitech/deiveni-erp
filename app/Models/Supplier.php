@@ -26,7 +26,20 @@ class Supplier extends Model
         'address',
         'gst_number',
         'status',
+        'is_site_based',
     ];
+
+    /**
+     * Get the attributes that should be cast.
+     *
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'is_site_based' => 'boolean',
+        ];
+    }
 
     /**
      * The accessors to append to the model's array form.

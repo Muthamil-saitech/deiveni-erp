@@ -65,6 +65,10 @@ test('admin ledger index page renders successfully with summary and records', fu
     $response->assertSee('Dr. K. Senthil Kumar');
     $response->assertSee('Site B - Clinic &amp; Residence', false);
     $response->assertSee('150,000.00');
+    $response->assertSee('id="tablePaginationContainer"', false);
+    $response->assertSee('id="perPageSelect"', false);
+    $response->assertSee('id="paginationNav"', false);
+    $response->assertSee('id="paginationSummary"', false);
 });
 
 test('client projects endpoint returns projects for selected client', function () {

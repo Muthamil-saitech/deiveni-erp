@@ -21,6 +21,7 @@ return new class extends Migration
             $table->string('gst_number', 50)->nullable();
             $table->string('materials_supplied', 500)->nullable();
             $table->string('status')->default('Active');
+            $table->boolean('is_site_based')->default(true);
             $table->timestamps();
         });
 

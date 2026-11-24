@@ -274,8 +274,39 @@
                                 </td>
                             </tr>
                         @endforelse
+                        <tr id="adminLedgerFilterEmptyRow" class="d-none">
+                            <td colspan="11" class="text-center py-4 text-muted">
+                                <i class="bi bi-search fs-3 d-block mb-2 text-secondary"></i>
+                                <h6>No matching transactions found</h6>
+                                <p class="small mb-0">Try adjusting your search query or filter criteria.</p>
+                            </td>
+                        </tr>
                     </tbody>
                 </table>
+            </div>
+
+            <!-- Table Pagination & Footer Summary -->
+            <div class="p-3 bg-white border-top d-flex flex-column flex-md-row justify-content-between align-items-center gap-3"
+                id="tablePaginationContainer">
+                <div class="d-flex align-items-center gap-2 flex-wrap">
+                    <span class="small text-muted">Rows per page:</span>
+                    <select class="form-select form-select-sm" id="perPageSelect" style="width: 75px;">
+                        <option value="5">5</option>
+                        <option value="10" selected>10</option>
+                        <option value="25">25</option>
+                        <option value="50">50</option>
+                    </select>
+                    <span class="small text-muted ms-md-2" id="paginationSummary">
+                        Showing <strong class="text-dark" id="pageStart">1</strong> &minus; <strong class="text-dark"
+                            id="pageEnd">{{ min(10, count($entries)) }}</strong> of <strong class="text-dark"
+                            id="pageTotal">{{ count($entries) }}</strong> entries
+                    </span>
+                </div>
+                <nav aria-label="Admin ledger table pagination">
+                    <ul class="pagination pagination-sm mb-0 gap-1" id="paginationNav">
+                        <!-- Dynamic page links rendered by JS -->
+                    </ul>
+                </nav>
             </div>
         </div>
 
@@ -355,8 +386,8 @@
                             <!-- SUPPLIER PAYMENT SECTION -->
                             <div class="col-12" id="supplierPaymentSection">
                                 <div class="p-3 bg-light rounded-3 border">
-                                    <!-- Payment Basis Radio: Site Based vs Total -->
-                                    <div class="mb-3">
+                                    <!-- Payment Basis Radio: Site Based vs Total - Only shown if supplier in master is NOT site-based -->
+                                    <div class="mb-3" id="adminSupplierPaymentScopeBox" style="display: none;">
                                         <label class="form-label small fw-semibold text-dark mb-1">
                                             <i class="bi bi-diagram-3 text-primary me-1"></i>Payment Basis (பட்டுவாடா வகை) <span
                                                 class="text-danger">*</span>
@@ -390,7 +421,8 @@
                                                 @foreach ($suppliers as $supplier)
                                                     <option value="{{ $supplier->id }}" data-name="{{ $supplier->name }}"
                                                         data-contact="{{ $supplier->contact_person }}"
-                                                        data-phone="{{ $supplier->phone }}">
+                                                        data-phone="{{ $supplier->phone }}"
+                                                        data-is-site-based="{{ $supplier->is_site_based ? '1' : '0' }}">
                                                         {{ $supplier->name }} {{ $supplier->contact_person ? "({$supplier->contact_person})" : '' }}
                                                     </option>
                                                 @endforeach
@@ -592,11 +624,26 @@
 
             // Supplier change
             $('#supplierSelect').on('change', function () {
-                const isSiteBased = $('input[name="supplier_payment_scope"]:checked').val() === 'site_based';
-                if (!isSiteBased) {
-                    calculateTotalSupplierPending();
+                const selected = $(this).find('option:selected');
+                const supplierIsSiteBased = selected.data('is-site-based');
+                if (supplierIsSiteBased !== undefined && supplierIsSiteBased !== null && supplierIsSiteBased !== '') {
+                    const isSb = (String(supplierIsSiteBased) === '1' || supplierIsSiteBased === true);
+                    if (isSb) {
+                        $('#adminSupplierPaymentScopeBox').hide();
+                        $('#adminScopeSiteBased').prop('checked', true);
+                    } else {
+                        $('#adminSupplierPaymentScopeBox').slideDown(150);
+                        $('#adminScopeTotal').prop('checked', true);
+                    }
+                    syncSupplierPaymentScope();
                 } else {
-                    loadPurchaseOrders();
+                    $('#adminSupplierPaymentScopeBox').hide();
+                    const isSiteBased = $('input[name="supplier_payment_scope"]:checked').val() === 'site_based';
+                    if (!isSiteBased) {
+                        calculateTotalSupplierPending();
+                    } else {
+                        loadPurchaseOrders();
+                    }
                 }
             });
 
@@ -794,6 +841,7 @@
                 $('.is-invalid').removeClass('is-invalid');
                 $('.invalid-feedback').text('').hide();
                 $('#categorySelect').val('supplier_payment').trigger('change');
+                $('#adminSupplierPaymentScopeBox').hide();
                 $('#adminScopeSiteBased').prop('checked', true).trigger('change');
                 $('#bankChequeDetailsGroup').hide();
                 $('#entryDate').val('{{ date("Y-m-d") }}');
@@ -826,9 +874,12 @@
                 });
             });
 
-            // Client-side quick filter
-            function filterTable() {
-                const search = $('#adminLedgerSearch').val().toLowerCase();
+            // Pagination & Filter state
+            let currentPage = 1;
+            let perPage = 10;
+
+            function getMatchingRows() {
+                const search = ($('#adminLedgerSearch').val() || '').toLowerCase().trim();
                 const category = $('#categoryFilter').val();
                 const dateMode = $('#dateFilter').val();
                 const customDate = $('#customDateInput').val();
@@ -836,10 +887,11 @@
                 const todayStr = '{{ date("Y-m-d") }}';
                 const yesterdayStr = '{{ date("Y-m-d", strtotime("-1 day")) }}';
 
-                let visibleCount = 0;
+                const matchingRows = [];
 
                 $('#adminLedgerTableBody tr').each(function () {
-                    if ($(this).attr('id') === 'emptyLedgerRow') return;
+                    const id = $(this).attr('id');
+                    if (id === 'emptyLedgerRow' || id === 'adminLedgerFilterEmptyRow') return;
 
                     const rowText = $(this).text().toLowerCase();
                     const rowCategory = $(this).data('category') || '';
@@ -858,14 +910,142 @@
                     }
 
                     if (matchSearch && matchCategory && matchDate) {
-                        $(this).show();
-                        visibleCount++;
-                    } else {
-                        $(this).hide();
+                        matchingRows.push(this);
                     }
                 });
 
-                $('#entryCountDisplay').text(visibleCount);
+                return matchingRows;
+            }
+
+            function updatePagination() {
+                const matchingRows = getMatchingRows();
+                const filteredCount = matchingRows.length;
+                const totalCount = $('#adminLedgerTableBody tr:not(#emptyLedgerRow):not(#adminLedgerFilterEmptyRow)').length;
+
+                const totalPages = Math.max(1, Math.ceil(filteredCount / perPage));
+                if (currentPage > totalPages) {
+                    currentPage = totalPages;
+                }
+                if (currentPage < 1) {
+                    currentPage = 1;
+                }
+
+                // Hide all data rows
+                $('#adminLedgerTableBody tr:not(#emptyLedgerRow):not(#adminLedgerFilterEmptyRow)').hide();
+
+                if (totalCount === 0) {
+                    $('#adminLedgerFilterEmptyRow').addClass('d-none');
+                    $('#tablePaginationContainer').addClass('d-none');
+                    $('#entryCountDisplay').text('0');
+                    return;
+                }
+
+                if (filteredCount === 0) {
+                    $('#adminLedgerFilterEmptyRow').removeClass('d-none');
+                    $('#tablePaginationContainer').addClass('d-none');
+                    $('#entryCountDisplay').text(`0 of ${totalCount}`);
+                    return;
+                } else {
+                    $('#adminLedgerFilterEmptyRow').addClass('d-none');
+                    $('#tablePaginationContainer').removeClass('d-none');
+                }
+
+                // Slice visible rows for current page
+                const startIndex = (currentPage - 1) * perPage;
+                const endIndex = Math.min(startIndex + perPage, filteredCount);
+
+                for (let i = startIndex; i < endIndex; i++) {
+                    $(matchingRows[i]).show();
+                }
+
+                // Update summary text
+                let summaryHtml = `Showing <strong class="text-dark">${startIndex + 1}</strong> &minus; <strong class="text-dark">${endIndex}</strong> of <strong class="text-dark">${filteredCount}</strong>`;
+                if (filteredCount !== totalCount) {
+                    summaryHtml += ` <span class="text-muted">(filtered from ${totalCount})</span>`;
+                }
+                summaryHtml += ' entries';
+                $('#paginationSummary').html(summaryHtml);
+
+                if (filteredCount !== totalCount) {
+                    $('#entryCountDisplay').text(`${filteredCount} of ${totalCount}`);
+                } else {
+                    $('#entryCountDisplay').text(filteredCount);
+                }
+
+                renderPaginationButtons(totalPages, currentPage);
+            }
+
+            function renderPaginationButtons(totalPages, current) {
+                const nav = $('#paginationNav');
+                nav.empty();
+
+                const prevDisabled = current === 1 ? 'disabled' : '';
+                nav.append(`
+                    <li class="page-item ${prevDisabled}">
+                        <button class="page-link" type="button" data-page="${current - 1}" aria-label="Previous" title="Previous Page">
+                            <i class="bi bi-chevron-left"></i>
+                        </button>
+                    </li>
+                `);
+
+                let pages = [];
+                if (totalPages <= 7) {
+                    for (let i = 1; i <= totalPages; i++) pages.push(i);
+                } else {
+                    pages.push(1);
+                    if (current > 3) pages.push('...');
+                    const start = Math.max(2, current - 1);
+                    const end = Math.min(totalPages - 1, current + 1);
+                    for (let i = start; i <= end; i++) {
+                        if (!pages.includes(i)) pages.push(i);
+                    }
+                    if (current < totalPages - 2) pages.push('...');
+                    if (!pages.includes(totalPages)) pages.push(totalPages);
+                }
+
+                pages.forEach(p => {
+                    if (p === '...') {
+                        nav.append(`<li class="page-item disabled"><span class="page-link border-0 bg-transparent">&hellip;</span></li>`);
+                    } else {
+                        const active = p === current ? 'active' : '';
+                        nav.append(`
+                            <li class="page-item ${active}">
+                                <button class="page-link" type="button" data-page="${p}">${p}</button>
+                            </li>
+                        `);
+                    }
+                });
+
+                const nextDisabled = current === totalPages ? 'disabled' : '';
+                nav.append(`
+                    <li class="page-item ${nextDisabled}">
+                        <button class="page-link" type="button" data-page="${current + 1}" aria-label="Next" title="Next Page">
+                            <i class="bi bi-chevron-right"></i>
+                        </button>
+                    </li>
+                `);
+            }
+
+            // Per page dropdown change
+            $('#perPageSelect').on('change', function () {
+                perPage = parseInt($(this).val()) || 10;
+                currentPage = 1;
+                updatePagination();
+            });
+
+            // Pagination button click delegation
+            $(document).on('click', '#paginationNav .page-link', function (e) {
+                e.preventDefault();
+                const page = $(this).data('page');
+                if (page && !$(this).parent().hasClass('disabled') && !$(this).parent().hasClass('active')) {
+                    currentPage = parseInt(page);
+                    updatePagination();
+                }
+            });
+
+            function filterTable() {
+                currentPage = 1;
+                updatePagination();
             }
 
             $('#adminLedgerSearch').on('input', filterTable);
@@ -887,6 +1067,9 @@
                 $('#customDateCol').addClass('d-none');
                 filterTable();
             });
+
+            // Initial pagination setup
+            updatePagination();
         });
     </script>
 @endpush

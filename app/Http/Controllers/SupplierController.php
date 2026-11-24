@@ -293,6 +293,36 @@ class SupplierController extends Controller
     }
 
     /**
+     * Toggle the site-based payment mode of a supplier.
+     */
+    public function toggleSiteBased(Request $request, int $id): JsonResponse
+    {
+        $supplier = $this->supplierService->getSupplierById($id);
+
+        if (! $supplier) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Supplier not found.',
+            ], 404);
+        }
+
+        $isSiteBased = $request->has('is_site_based')
+            ? filter_var($request->input('is_site_based'), FILTER_VALIDATE_BOOLEAN)
+            : ! (bool) $supplier->is_site_based;
+
+        $supplier->update(['is_site_based' => $isSiteBased]);
+
+        $modeLabel = $isSiteBased ? 'Site Based' : 'Total';
+
+        return response()->json([
+            'success' => true,
+            'message' => "Supplier \"{$supplier->name}\" payment mode updated to {$modeLabel}.",
+            'is_site_based' => $isSiteBased,
+            'data' => $supplier,
+        ]);
+    }
+
+    /**
      * Remove the specified supplier.
      */
     public function destroy(int $id): JsonResponse|RedirectResponse

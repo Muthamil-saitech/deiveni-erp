@@ -656,8 +656,8 @@
 
                                     <!-- Third Party Supplier Selection -->
                                     <div id="thirdPartySupplierBox">
-                                        <!-- Payment Basis (Site Based vs Total) -->
-                                        <div class="mb-3" id="supplierPaymentScopeBox">
+                                        <!-- Payment Basis (Site Based vs Total) - Only shown if supplier in master is NOT site-based -->
+                                        <div class="mb-3" id="supplierPaymentScopeBox" style="display: none;">
                                             <label class="form-label small fw-semibold text-dark mb-1">
                                                 <i class="bi bi-diagram-3 text-primary me-1"></i>Payment Basis (பட்டுவாடா வகை)
                                             </label>
@@ -690,7 +690,8 @@
                                                 <option value="{{ $supplier->id }}"
                                                     data-name="{{ $supplier->name }}"
                                                     data-contact="{{ $supplier->contact_person }}"
-                                                    data-phone="{{ $supplier->phone }}">
+                                                    data-phone="{{ $supplier->phone }}"
+                                                    data-is-site-based="{{ $supplier->is_site_based ? '1' : '0' }}">
                                                     {{ $supplier->name }}
                                                     @if ($supplier->contact_person)
                                                         ({{ $supplier->contact_person }})
@@ -1049,11 +1050,28 @@
                     }
                 }
 
-                const isSiteBased = $('input[name="supplier_payment_scope"]:checked').val() === 'site_based';
-                if (!isSiteBased) {
-                    calculateTotalSupplierPending($(this).val(), name);
+                // Auto-switch payment mode and toggle scope selector visibility based on supplier's is_site_based configuration
+                const supplierIsSiteBased = selected.data('is-site-based');
+                if (supplierIsSiteBased !== undefined && supplierIsSiteBased !== null && supplierIsSiteBased !== '') {
+                    const isSb = (String(supplierIsSiteBased) === '1' || supplierIsSiteBased === true);
+                    if (isSb) {
+                        // Site based toggle la iruntha intha option kaata thevai ila
+                        $('#supplierPaymentScopeBox').hide();
+                        $('#scopeSiteBased').prop('checked', true);
+                    } else {
+                        // Site based toggle aagama iruntha athuku mattum site based and total kaatanum
+                        $('#supplierPaymentScopeBox').slideDown(150);
+                        $('#scopeTotal').prop('checked', true);
+                    }
+                    syncSupplierPaymentScope();
                 } else {
-                    updatePurchaseOrderList();
+                    $('#supplierPaymentScopeBox').hide();
+                    const isSiteBased = $('input[name="supplier_payment_scope"]:checked').val() === 'site_based';
+                    if (!isSiteBased) {
+                        calculateTotalSupplierPending($(this).val(), name);
+                    } else {
+                        updatePurchaseOrderList();
+                    }
                 }
             });
 
@@ -2147,6 +2165,7 @@
                 $('#purchaseOrderSelectGroup').hide();
                 $('#sourceThirdParty').prop('checked', true);
                 $('#scopeSiteBased').prop('checked', true);
+                $('#supplierPaymentScopeBox').hide();
                 $('#thirdPartySupplierBox').show();
                 $('#warehouseMaterialBox').hide();
                 $('#siteCashWhTableBody').empty();

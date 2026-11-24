@@ -60,24 +60,31 @@
         <!-- Search & Status Filter Row -->
         <div class="card-custom p-3 mb-4 bg-white">
             <div class="row g-2 align-items-center">
-                <div class="col-12 col-md-5">
+                <div class="col-12 col-md-4">
                     <div class="input-group input-group-sm">
                         <span class="input-group-text bg-light border-end-0"><i class="bi bi-search text-muted"></i></span>
                         <input type="text" class="form-control border-start-0 ps-0" id="supplierSearchInput"
                             placeholder="Search by Supplier Name, GST No, Location, Material, Grade...">
                     </div>
                 </div>
-                <div class="col-6 col-md-3">
+                <div class="col-6 col-md-2">
                     <select class="form-select form-select-sm" id="supplierStatusFilter">
                         <option value="">All Status (அனைத்து நிலை)</option>
                         <option value="Active">Active (செயலில் உள்ளவை)</option>
                         <option value="Inactive">Inactive (நிறுத்தப்பட்டவை)</option>
                     </select>
                 </div>
+                <div class="col-6 col-md-2">
+                    <select class="form-select form-select-sm" id="supplierScopeFilter">
+                        <option value="">All Payment Scope (அனைத்தும்)</option>
+                        <option value="1">Site Based (தள வாரியாக)</option>
+                        <option value="0">Total (மொத்தமாக)</option>
+                    </select>
+                </div>
                 <div class="col-6 col-md-1">
                     <button type="button" class="btn btn-outline-secondary btn-sm px-2 py-1" id="historyFilterResetBtn"
-                    title="Reset filters">
-                    <i class="bi bi-arrow-counterclockwise"></i>
+                        title="Reset filters">
+                        <i class="bi bi-arrow-counterclockwise"></i>
                     </button>
                 </div>
                 <div class="col-12 col-md-3 text-md-end">
@@ -99,6 +106,7 @@
                             <th>Address / Location</th>
                             <th>GST Number</th>
                             <th>Materials</th>
+                            <th class="text-center" style="width: 140px;">Site Based</th>
                             <th>Status</th>
                             <th class="text-end" style="width: 125px;">Actions</th>
                         </tr>
@@ -108,6 +116,7 @@
                             @php
                                 $purchaseOrdersCount = (int) ($supplier->purchase_orders_count ?? 0);
                                 $inUse = $purchaseOrdersCount > 0;
+                                $isSiteBased = (bool) ($supplier->is_site_based ?? true);
                                 $materialsJson = json_encode($supplier->materials->map(function ($m) {
                                     return [
                                         'id' => $m->id,
@@ -123,6 +132,7 @@
                                 data-contact="{{ $supplier->contact_person }}" data-phone="{{ $supplier->phone }}"
                                 data-address="{{ $supplier->address }}" data-gst="{{ $supplier->gst_number }}"
                                 data-materials="{{ $materialsJson }}" data-status="{{ $supplier->status }}"
+                                data-is-site-based="{{ $isSiteBased ? '1' : '0' }}"
                                 data-purchase-orders-count="{{ $purchaseOrdersCount }}" data-in-use="{{ $inUse ? '1' : '0' }}">
                                 <td class="text-muted fw-semibold serial-cell">{{ str_pad($index + 1, 2, '0', STR_PAD_LEFT) }}
                                 </td>
@@ -161,6 +171,21 @@
                                         <span class="text-muted small">—</span>
                                     @endif
                                 </td>
+                                <td class="text-center row-supplier-site-based">
+                                    <div class="form-check form-switch d-inline-flex align-items-center gap-1 justify-content-center mb-0">
+                                        <input class="form-check-input supplier-site-based-toggle" type="checkbox" role="switch"
+                                            data-id="{{ $supplier->id }}"
+                                            data-name="{{ $supplier->name }}"
+                                            id="toggleSiteBased_{{ $supplier->id }}"
+                                            {{ $isSiteBased ? 'checked' : '' }}
+                                            style="cursor: pointer; width: 2.2em; height: 1.15em;"
+                                            title="Toggle Site Based (தள வாரியாக) vs Total (மொத்தமாக)">
+                                        <label class="form-check-label small fw-semibold cursor-pointer text-nowrap toggle-site-label-{{ $supplier->id }} {{ $isSiteBased ? 'text-primary' : 'text-muted' }}"
+                                            for="toggleSiteBased_{{ $supplier->id }}" style="font-size: 0.75rem;">
+                                            {{ $isSiteBased ? 'Site Based' : 'Total' }}
+                                        </label>
+                                    </div>
+                                </td>
                                 <td class="row-supplier-status">
                                     @if ($supplier->status === 'Active')
                                         <span class="badge bg-success-subtle text-success row-status-badge">Active</span>
@@ -176,7 +201,7 @@
                                                 <i class="bi bi-three-dots-vertical"></i>
                                             </button>
                                             <ul class="dropdown-menu dropdown-menu-end shadow-sm">
-                                                <li><a class="dropdown-item"
+                                                <li><a class="dropdown-item view-supplier-btn"
                                                         href="{{ route('suppliers.show', $supplier->encrypted_id) }}"><i
                                                             class="bi bi-eye text-info me-2"></i>View Details</a></li>
                                                 <li><button class="dropdown-item edit-supplier-btn" type="button"><i
@@ -206,7 +231,7 @@
                             </tr>
                         @empty
                             <tr id="emptySuppliersRow">
-                                <td colspan="8" class="text-center py-5 text-muted">
+                                <td colspan="9" class="text-center py-5 text-muted">
                                     <i class="bi bi-truck display-5 d-block mb-2 text-secondary opacity-50"></i>
                                     <h6>No Suppliers Found (சப்ளையர்கள் இல்லை)</h6>
                                     <p class="small mb-0">Click "Add New Supplier" to register your first supplier.</p>
@@ -214,7 +239,7 @@
                             </tr>
                         @endforelse
                         <tr id="noResultsRow" class="d-none">
-                            <td colspan="8" class="text-center py-5 text-muted">
+                            <td colspan="9" class="text-center py-5 text-muted">
                                 <i class="bi bi-search fs-2 d-block mb-2 text-secondary"></i>
                                 No matching suppliers found for your search or filter criteria.
                             </td>
@@ -302,6 +327,18 @@
                                     <option value="Inactive">Inactive</option>
                                 </select>
                                 <div class="invalid-feedback" id="errSupplierStatus"></div>
+                            </div>
+                            <div class="col-12 col-md-6">
+                                <label class="form-label small fw-semibold" for="supplierSiteBased">Payment Basis / Scope (பட்டுவாடா வகை)</label>
+                                <div class="d-flex align-items-center gap-2 mt-1">
+                                    <div class="form-check form-switch mb-0">
+                                        <input class="form-check-input" type="checkbox" role="switch" id="supplierSiteBased" name="is_site_based" value="1" checked style="cursor: pointer; width: 2.2em; height: 1.2em;">
+                                        <label class="form-check-label small fw-semibold" for="supplierSiteBased" id="supplierSiteBasedLabel">
+                                            Site Based (தள வாரியாக)
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="text-muted" style="font-size: 0.72rem;">Enabled: Settle per Site PO. Disabled: Settle in Total across sites.</div>
                             </div>
 
                             <!-- Materials, Grade and Price Section (Dynamic Rows) -->
@@ -681,6 +718,7 @@
             function getMatchingRows() {
                 const query = $('#supplierSearchInput').val().toLowerCase().trim();
                 const statusFilter = $('#supplierStatusFilter').val();
+                const scopeFilter = $('#supplierScopeFilter').val();
                 const matching = [];
 
                 $('#suppliersTableBody tr').each(function () {
@@ -693,6 +731,7 @@
                     const address = String($(this).data('address') || '').toLowerCase();
                     const gst = String($(this).data('gst') || '').toLowerCase();
                     const status = String($(this).data('status') || 'Active');
+                    const isSiteBased = String($(this).data('is-site-based') !== undefined ? $(this).data('is-site-based') : '1');
 
                     const matData = $(this).data('materials') || [];
                     let matNames = '';
@@ -713,8 +752,9 @@
                         matNames.includes(query);
 
                     const matchesStatus = !statusFilter || status === statusFilter;
+                    const matchesScope = !scopeFilter || isSiteBased === scopeFilter;
 
-                    if (matchesQuery && matchesStatus) {
+                    if (matchesQuery && matchesStatus && matchesScope) {
                         matching.push(this);
                     }
                 });
@@ -864,8 +904,8 @@
                 }
             });
 
-            // Filter on search or status change
-            $('#supplierSearchInput, #supplierStatusFilter').on('input change', function () {
+            // Filter on search, status, or scope change
+            $('#supplierSearchInput, #supplierStatusFilter, #supplierScopeFilter').on('input change', function () {
                 currentPage = 1;
                 updatePagination();
             });
@@ -874,8 +914,52 @@
             $('#historyFilterResetBtn').on('click', function () {
                 $('#supplierSearchInput').val('');
                 $('#supplierStatusFilter').val('');
+                $('#supplierScopeFilter').val('');
                 currentPage = 1;
                 updatePagination();
+            });
+
+            // Toggle Supplier Site Based Mode via Switch in Table
+            $(document).on('change', '.supplier-site-based-toggle', function () {
+                const $switch = $(this);
+                const supplierId = $switch.data('id');
+                const supplierName = $switch.data('name') || 'Supplier';
+                const isChecked = $switch.is(':checked');
+                const $row = $switch.closest('tr');
+                const $label = $row.find(`.toggle-site-label-${supplierId}`);
+
+                $switch.prop('disabled', true);
+
+                $.ajax({
+                    url: `/suppliers/${supplierId}/toggle-site-based`,
+                    type: 'POST',
+                    data: {
+                        is_site_based: isChecked ? 1 : 0,
+                        _token: '{{ csrf_token() }}'
+                    },
+                    headers: { 'Accept': 'application/json' },
+                    success: function (res) {
+                        $switch.prop('disabled', false);
+                        if (res.success) {
+                            $row.data('is-site-based', isChecked ? '1' : '0').attr('data-is-site-based', isChecked ? '1' : '0');
+                            if (isChecked) {
+                                $label.text('Site Based').removeClass('text-muted').addClass('text-primary');
+                                showToast(`${supplierName} is now set to Site Based (தள வாரியாக) payment mode.`, 'success');
+                            } else {
+                                $label.text('Total').removeClass('text-primary').addClass('text-muted');
+                                showToast(`${supplierName} is now set to Total (மொத்தமாக) payment mode.`, 'info');
+                            }
+                        } else {
+                            $switch.prop('checked', !isChecked);
+                            showToast(res.message || 'Failed to update payment mode.', 'danger');
+                        }
+                    },
+                    error: function () {
+                        $switch.prop('disabled', false);
+                        $switch.prop('checked', !isChecked);
+                        showToast('Failed to update payment mode. Please try again.', 'danger');
+                    }
+                });
             });
 
             // Open Add Modal
@@ -885,6 +969,8 @@
                 $('#supplierEditId').val('');
                 $('#supplierForm')[0].reset();
                 $('#supplierStatus').val('Active');
+                $('#supplierSiteBased').prop('checked', true);
+                $('#supplierSiteBasedLabel').text('Site Based (தள வாரியாக)');
                 resetMaterialRows();
                 clearFormErrors();
             });
@@ -901,6 +987,11 @@
                 $('#supplierAddress').val(tr.data('address') || '');
                 $('#supplierGst').val(tr.data('gst') || '');
                 $('#supplierStatus').val(tr.data('status') || 'Active');
+
+                const isSiteBased = tr.data('is-site-based');
+                const isSb = (isSiteBased === undefined || isSiteBased === null || String(isSiteBased) === '1' || isSiteBased === true);
+                $('#supplierSiteBased').prop('checked', isSb);
+                $('#supplierSiteBasedLabel').text(isSb ? 'Site Based (தள வாரியாக)' : 'Total (மொத்தமாக)');
 
                 let mats = tr.data('materials') || [];
                 if (typeof mats === 'string') {
@@ -926,6 +1017,11 @@
 
                 clearFormErrors();
                 supplierModalInstance.show();
+            });
+
+            // Modal Site Based Switch Label Update
+            $('#supplierSiteBased').on('change', function () {
+                $('#supplierSiteBasedLabel').text($(this).is(':checked') ? 'Site Based (தள வாரியாக)' : 'Total (மொத்தமாக)');
             });
 
             // Form Submit (Create or Update)
@@ -965,6 +1061,7 @@
                     address: $('#supplierAddress').val().trim(),
                     gst_number: $('#supplierGst').val().trim(),
                     status: $('#supplierStatus').val(),
+                    is_site_based: $('#supplierSiteBased').is(':checked') ? 1 : 0,
                     materials: materialsPayload
                 };
 
@@ -1013,6 +1110,23 @@
                                 : '<small class="text-muted row-supplier-contact"><i class="bi bi-person me-1"></i>—</small>';
                             const addressHtml = supplier.address ? escapeHtml(supplier.address) : '—';
                             const statusBadgeHtml = renderStatusBadge(supplier.status);
+                            const isSb = (supplier.is_site_based !== undefined ? Boolean(supplier.is_site_based) : true);
+
+                            const toggleCellHtml = `
+                                <div class="form-check form-switch d-inline-flex align-items-center gap-1 justify-content-center mb-0">
+                                    <input class="form-check-input supplier-site-based-toggle" type="checkbox" role="switch"
+                                        data-id="${supplier.id}"
+                                        data-name="${escapeHtml(supplier.name)}"
+                                        id="toggleSiteBased_${supplier.id}"
+                                        ${isSb ? 'checked' : ''}
+                                        style="cursor: pointer; width: 2.2em; height: 1.15em;"
+                                        title="Toggle Site Based (தள வாரியாக) vs Total (மொத்தமாக)">
+                                    <label class="form-check-label small fw-semibold cursor-pointer text-nowrap toggle-site-label-${supplier.id} ${isSb ? 'text-primary' : 'text-muted'}"
+                                        for="toggleSiteBased_${supplier.id}" style="font-size: 0.75rem;">
+                                        ${isSb ? 'Site Based' : 'Total'}
+                                    </label>
+                                </div>
+                            `;
 
                             if (isEdit) {
                                 const tr = $(`#suppliersTableBody tr[data-id="${supplier.id}"]`);
@@ -1023,6 +1137,8 @@
                                     .data('gst', supplier.gst_number)
                                     .data('materials', materialsList)
                                     .data('status', supplier.status)
+                                    .data('is-site-based', isSb ? '1' : '0')
+                                    .attr('data-is-site-based', isSb ? '1' : '0')
                                     .attr('data-materials', materialsJsonStr);
 
                                 tr.find('.row-supplier-name').text(supplier.name);
@@ -1031,6 +1147,7 @@
                                 tr.find('.row-supplier-address').text(addressHtml);
                                 tr.find('.row-supplier-gst').html(gstHtml);
                                 tr.find('.row-supplier-materials').html(materialNamesHtml);
+                                tr.find('.row-supplier-site-based').html(toggleCellHtml);
                                 tr.find('.row-supplier-status').html(statusBadgeHtml);
 
                                 showToast(res.message || `Supplier "${supplier.name}" updated successfully!`, 'success');
@@ -1038,41 +1155,43 @@
                                 $('#emptySuppliersRow').remove();
 
                                 const newRowHtml = `
-                                                                        <tr data-id="${supplier.id}"
-                                                                            data-name="${escapeHtml(supplier.name)}"
-                                                                            data-contact="${escapeHtml(supplier.contact_person || '')}"
-                                                                            data-phone="${escapeHtml(supplier.phone)}"
-                                                                            data-address="${escapeHtml(supplier.address || '')}"
-                                                                            data-gst="${escapeHtml(supplier.gst_number || '')}"
-                                                                            data-materials='${materialsJsonStr}'
-                                                                            data-status="${escapeHtml(supplier.status || 'Active')}">
-                                                                            <td class="text-muted fw-semibold serial-cell">01</td>
-                                                                            <td>
-                                                                                <div class="fw-bold text-dark row-supplier-name">${escapeHtml(supplier.name)}</div>
-                                                                                ${contactHtml}
-                                                                            </td>
-                                                                            <td class="row-supplier-phone"><i class="bi bi-telephone text-muted me-1"></i>${escapeHtml(supplier.phone)}</td>
-                                                                            <td class="row-supplier-address">${addressHtml}</td>
-                                                                            <td class="row-supplier-gst">${gstHtml}</td>
-                                                                            <td class="row-supplier-materials">${materialNamesHtml}</td>
-                                                                            <td class="row-supplier-status">${statusBadgeHtml}</td>
-                                                                            <td class="text-end">
-                                                                                <div class="d-inline-flex align-items-center gap-1">
-                                                                                    <div class="dropdown table-action-dropdown">
-                                                                                        <button class="btn table-action-btn" type="button" data-bs-toggle="dropdown" data-bs-popper-config='{"strategy":"fixed"}' aria-expanded="false" title="Actions">
-                                                                                            <i class="bi bi-three-dots-vertical"></i>
-                                                                                        </button>
-                                                                                        <ul class="dropdown-menu dropdown-menu-end shadow-sm">
-                                                                                            <li><a class="dropdown-item" href="${'{{ route("suppliers.show", ":id") }}'.replace(':id', supplier.encrypted_id)}"><i class="bi bi-eye text-info me-2"></i>View Details</a></li>
-                                                                                            <li><button class="dropdown-item edit-supplier-btn" type="button"><i class="bi bi-pencil text-primary me-2"></i>Edit</button></li>
-                                                                                            <li><hr class="dropdown-divider my-1"></li>
-                                                                                            <li><button class="dropdown-item text-danger delete-supplier-btn" type="button"><i class="bi bi-trash3 text-danger me-2"></i>Delete</button></li>
-                                                                                        </ul>
-                                                                                    </div>
-                                                                                </div>
-                                                                            </td>
-                                                                        </tr>
-                                                                    `;
+                                    <tr data-id="${supplier.id}"
+                                        data-name="${escapeHtml(supplier.name)}"
+                                        data-contact="${escapeHtml(supplier.contact_person || '')}"
+                                        data-phone="${escapeHtml(supplier.phone)}"
+                                        data-address="${escapeHtml(supplier.address || '')}"
+                                        data-gst="${escapeHtml(supplier.gst_number || '')}"
+                                        data-materials='${materialsJsonStr}'
+                                        data-status="${escapeHtml(supplier.status || 'Active')}"
+                                        data-is-site-based="${isSb ? '1' : '0'}">
+                                        <td class="text-muted fw-semibold serial-cell">01</td>
+                                        <td>
+                                            <div class="fw-bold text-dark row-supplier-name">${escapeHtml(supplier.name)}</div>
+                                            ${contactHtml}
+                                        </td>
+                                        <td class="row-supplier-phone"><i class="bi bi-telephone text-muted me-1"></i>${escapeHtml(supplier.phone)}</td>
+                                        <td class="row-supplier-address">${addressHtml}</td>
+                                        <td class="row-supplier-gst">${gstHtml}</td>
+                                        <td class="row-supplier-materials">${materialNamesHtml}</td>
+                                        <td class="text-center row-supplier-site-based">${toggleCellHtml}</td>
+                                        <td class="row-supplier-status">${statusBadgeHtml}</td>
+                                        <td class="text-end">
+                                            <div class="d-inline-flex align-items-center gap-1">
+                                                <div class="dropdown table-action-dropdown">
+                                                    <button class="btn table-action-btn" type="button" data-bs-toggle="dropdown" data-bs-popper-config='{"strategy":"fixed"}' aria-expanded="false" title="Actions">
+                                                        <i class="bi bi-three-dots-vertical"></i>
+                                                    </button>
+                                                    <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+                                                        <li><a class="dropdown-item" href="${'{{ route("suppliers.show", ":id") }}'.replace(':id', supplier.encrypted_id)}"><i class="bi bi-eye text-info me-2"></i>View Details</a></li>
+                                                        <li><button class="dropdown-item edit-supplier-btn" type="button"><i class="bi bi-pencil text-primary me-2"></i>Edit</button></li>
+                                                        <li><hr class="dropdown-divider my-1"></li>
+                                                        <li><button class="dropdown-item text-danger delete-supplier-btn" type="button"><i class="bi bi-trash3 text-danger me-2"></i>Delete</button></li>
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                `;
 
                                 $('#suppliersTableBody').prepend(newRowHtml);
                                 const newTr = $(`#suppliersTableBody tr[data-id="${supplier.id}"]`);

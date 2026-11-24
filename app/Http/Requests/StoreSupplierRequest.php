@@ -48,6 +48,10 @@ class StoreSupplierRequest extends FormRequest
                 $this->merge(['materials' => $decoded]);
             }
         }
+
+        if ($this->has('is_site_based')) {
+            $this->merge(['is_site_based' => filter_var($this->is_site_based, FILTER_VALIDATE_BOOLEAN)]);
+        }
     }
 
     /**
@@ -70,6 +74,7 @@ class StoreSupplierRequest extends FormRequest
                 Rule::unique('suppliers', 'gst_number'),
             ],
             'status' => ['nullable', 'string', 'in:Active,Inactive'],
+            'is_site_based' => ['nullable', 'boolean'],
             'materials' => ['required', 'array', 'min:1'],
             'materials.*.material_id' => ['required', 'integer', 'exists:materials,id', 'distinct'],
             'materials.*.price' => ['required', 'numeric', 'min:0'],

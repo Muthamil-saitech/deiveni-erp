@@ -83,6 +83,7 @@ Route::middleware('auth')->group(function () {
     Route::middleware('role:site_manager,account_manager')->group(function () {
         Route::get('/suppliers', [SupplierController::class, 'index'])->name('suppliers.index');
         Route::post('/suppliers', [SupplierController::class, 'store'])->name('suppliers.store');
+        Route::post('/suppliers/{id}/toggle-site-based', [SupplierController::class, 'toggleSiteBased'])->name('suppliers.toggle-site-based');
         Route::get('/suppliers/{encryptedId}', [SupplierController::class, 'show'])->name('suppliers.show');
         Route::post('/suppliers/{id}/update', [SupplierController::class, 'update'])->name('suppliers.update');
         Route::put('/suppliers/{id}', [SupplierController::class, 'update']);
