@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('title', 'Admin Ledger')
-@section('page_title', 'Admin Ledger (நிர்வாக பேரேடு)')
+@section('page_title', 'Admin Ledger')
 
 @push('styles')
     <style>
@@ -49,12 +49,12 @@
         <ul class="nav nav-tabs mb-3 border-bottom">
             <li class="nav-item">
                 <a class="nav-link" href="{{ route('ledger.index') }}">
-                    <i class="bi bi-book-half me-1"></i> Daily Ledger (தினசரி பேரேடு)
+                    <i class="bi bi-book-half me-1"></i> Daily Ledger
                 </a>
             </li>
             <li class="nav-item">
                 <a class="nav-link active" href="{{ route('admin-ledger.index') }}">
-                    <i class="bi bi-journal-bookmark-fill me-1 text-primary"></i> Admin Ledger (நிர்வாக பேரேடு)
+                    <i class="bi bi-journal-bookmark-fill me-1 text-primary"></i> Admin Ledger
                 </a>
             </li>
         </ul>
@@ -64,7 +64,7 @@
             <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
                 <div>
                     <h5 class="fw-bold mb-0 text-dark">
-                        <i class="bi bi-journal-check text-primary me-2"></i>Admin Ledger (நிர்வாக வரவு - செலவு பேரேடு)
+                        <i class="bi bi-journal-check text-primary me-2"></i>Admin Ledger
                     </h5>
                     <small class="text-muted">Client Payments (Income +) & Supplier Payments (Expense -)</small>
                 </div>
@@ -89,7 +89,7 @@
                     <h3 class="fw-bold text-success mb-0" id="summaryTotalIncome">
                         +₹{{ number_format($summary['total_income'] ?? 0, 2) }}
                     </h3>
-                    <small class="ta-text text-white-50" style="font-size: 0.72rem;">மொத்த வாடிக்கையாளர் வரவு (+)</small>
+                    
                 </div>
 
                 <!-- Total Expense -->
@@ -100,13 +100,13 @@
                     <h3 class="fw-bold text-danger mb-0" id="summaryTotalExpense">
                         -₹{{ number_format($summary['total_expense'] ?? 0, 2) }}
                     </h3>
-                    <small class="ta-text text-white-50" style="font-size: 0.72rem;">மொத்த சப்ளையர் பட்டுவாடா (-)</small>
+                    
                 </div>
 
                 <!-- Net Running Balance -->
                 <div class="col-12 col-md-4">
                     <div class="text-white-50 small text-uppercase fw-semibold" style="font-size: 0.72rem;">
-                        <i class="bi bi-wallet2 text-warning me-1"></i>Net Running Balance (இருப்பு)
+                        <i class="bi bi-wallet2 text-warning me-1"></i>Net Running Balance
                     </div>
                     @php
                         $net = (float) ($summary['net_balance'] ?? 0);
@@ -114,7 +114,7 @@
                     <h2 class="fw-bold {{ $net >= 0 ? 'text-info' : 'text-warning' }} mb-0" id="summaryNetBalance">
                         {{ $net >= 0 ? '₹' . number_format($net, 2) : '-₹' . number_format(abs($net), 2) }}
                     </h2>
-                    <small class="ta-text text-white-50" style="font-size: 0.72rem;">கையிருப்பு நிகர பேலன்ஸ்</small>
+                    
                 </div>
             </div>
         </div>
@@ -131,17 +131,17 @@
                 </div>
                 <div class="col-6 col-md-2">
                     <select class="form-select form-select-sm" id="categoryFilter">
-                        <option value="">All Categories (அனைத்தும்)</option>
+                        <option value="">All Categories</option>
                         <option value="client_payment">Client Payment (+ Income)</option>
                         <option value="supplier_payment">Supplier Payment (- Expense)</option>
                     </select>
                 </div>
                 <div class="col-6 col-md-2">
                     <select class="form-select form-select-sm" id="dateFilter">
-                        <option value="all" selected>All Dates (அனைத்து தேதிகள்)</option>
-                        <option value="today">Today (இன்று)</option>
-                        <option value="yesterday">Yesterday (நேற்று)</option>
-                        <option value="custom">Pick Date (தேதி தேர்வு)...</option>
+                        <option value="all" selected>All Dates</option>
+                        <option value="today">Today</option>
+                        <option value="yesterday">Yesterday</option>
+                        <option value="custom">Pick Date...</option>
                     </select>
                 </div>
                 <div class="col-6 col-md-2 d-none" id="customDateCol">
@@ -204,9 +204,9 @@
                                 </td>
                                 <td>
                                     @if ($isIncome)
-                                        <span class="badge bg-success text-white" style="font-size:0.7rem;">Dr (வரவு)</span>
+                                        <span class="badge bg-success text-white" style="font-size:0.7rem;">Dr (Income)</span>
                                     @else
-                                        <span class="badge bg-danger text-white" style="font-size:0.7rem;">Cr (செலவு)</span>
+                                        <span class="badge bg-danger text-white" style="font-size:0.7rem;">Cr (Expense)</span>
                                     @endif
                                 </td>
                                 <td>
@@ -318,7 +318,7 @@
             <div class="modal-content border-0 shadow">
                 <div class="modal-header bg-primary text-white">
                     <h5 class="modal-title fw-bold">
-                        <i class="bi bi-journal-plus me-2"></i>Add Admin Ledger Entry (நிர்வாக பேரேடு பதிவு)
+                        <i class="bi bi-journal-plus me-2"></i>Add Admin Ledger Entry
                     </h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
                         aria-label="Close"></button>
@@ -329,7 +329,7 @@
                         <div class="row g-3">
                             <!-- Entry Date -->
                             <div class="col-12 col-md-6">
-                                <label class="form-label small fw-semibold">Entry Date (தேதி) <span
+                                <label class="form-label small fw-semibold">Entry Date <span
                                         class="text-danger">*</span></label>
                                 <input type="date" class="form-control" id="entryDate" name="entry_date"
                                     value="{{ date('Y-m-d') }}" required>
@@ -338,11 +338,11 @@
 
                             <!-- Category Selection -->
                             <div class="col-12 col-md-6">
-                                <label class="form-label small fw-semibold">Payment Category (வகை) <span
+                                <label class="form-label small fw-semibold">Payment Category <span
                                         class="text-danger">*</span></label>
                                 <select class="form-select fw-semibold" id="categorySelect" name="category" required>
-                                    <option value="supplier_payment" selected>Supplier Payment (-) [Expense / செலவு]</option>
-                                    <option value="client_payment">Client Payment (+) [Income / வரவு]</option>
+                                    <option value="supplier_payment" selected>Supplier Payment (-) [Expense]</option>
+                                    <option value="client_payment">Client Payment (+) [Income]</option>
                                 </select>
                                 <div class="invalid-feedback" id="errCategory"></div>
                             </div>
@@ -351,12 +351,12 @@
                             <div class="col-12" id="clientPaymentSection" style="display: none;">
                                 <div class="p-3 bg-success-subtle bg-opacity-25 rounded-3 border border-success-subtle">
                                     <h6 class="fw-bold text-success mb-3">
-                                        <i class="bi bi-person-check me-1"></i>Client Payment Details (வாடிக்கையாளர் வரவு விவரம்)
+                                        <i class="bi bi-person-check me-1"></i>Client Payment Details
                                     </h6>
                                     <div class="row g-3">
                                         <!-- Select Client -->
                                         <div class="col-12 col-md-6">
-                                            <label class="form-label small fw-semibold text-dark">Select Client (வாடிக்கையாளர்) <span
+                                            <label class="form-label small fw-semibold text-dark">Select Client <span
                                                     class="text-danger">*</span></label>
                                             <select class="form-select fw-semibold" id="clientSelect" name="client_id">
                                                 <option value="" disabled selected>-- Select Client --</option>
@@ -371,7 +371,7 @@
 
                                         <!-- Select Project Site (under that client) -->
                                         <div class="col-12 col-md-6">
-                                            <label class="form-label small fw-semibold text-dark">Select Project (திட்டம் / தளம்) <span
+                                            <label class="form-label small fw-semibold text-dark">Select Project <span
                                                     class="text-danger">*</span></label>
                                             <select class="form-select fw-semibold" id="clientProjectSelect"
                                                 name="project_site_id">
@@ -389,7 +389,7 @@
                                     <!-- Payment Basis Radio: Site Based vs Total - Only shown if supplier in master is NOT site-based -->
                                     <div class="mb-3" id="adminSupplierPaymentScopeBox" style="display: none;">
                                         <label class="form-label small fw-semibold text-dark mb-1">
-                                            <i class="bi bi-diagram-3 text-primary me-1"></i>Payment Basis (பட்டுவாடா வகை) <span
+                                            <i class="bi bi-diagram-3 text-primary me-1"></i>Payment Basis <span
                                                 class="text-danger">*</span>
                                         </label>
                                         <div class="d-flex gap-4 pt-1">
@@ -397,7 +397,7 @@
                                                 <input class="form-check-input" type="radio" name="supplier_payment_scope"
                                                     id="adminScopeSiteBased" value="site_based" checked>
                                                 <label class="form-check-label small fw-semibold" for="adminScopeSiteBased">
-                                                    <i class="bi bi-building me-1 text-primary"></i>Site Based (தள வாரியாக)
+                                                    <i class="bi bi-building me-1 text-primary"></i>Site Based
                                                 </label>
                                             </div>
                                             <div class="form-check">
@@ -405,7 +405,7 @@
                                                     id="adminScopeTotal" value="total">
                                                 <label class="form-check-label small fw-semibold text-primary"
                                                     for="adminScopeTotal">
-                                                    <i class="bi bi-cash-stack me-1 text-success"></i>Total (மொத்தமாக)
+                                                    <i class="bi bi-cash-stack me-1 text-success"></i>Total
                                                 </label>
                                             </div>
                                         </div>
@@ -414,7 +414,7 @@
                                     <div class="row g-3">
                                         <!-- Select Supplier -->
                                         <div class="col-12 col-md-6">
-                                            <label class="form-label small fw-semibold text-dark">Select Supplier (சப்ளையர்) <span
+                                            <label class="form-label small fw-semibold text-dark">Select Supplier <span
                                                     class="text-danger">*</span></label>
                                             <select class="form-select fw-semibold" id="supplierSelect" name="supplier_id">
                                                 <option value="" disabled selected>-- Select Supplier --</option>
@@ -432,7 +432,7 @@
 
                                         <!-- Select Site (Shown ONLY when Site Based) -->
                                         <div class="col-12 col-md-6" id="supplierSiteGroup">
-                                            <label class="form-label small fw-semibold text-dark">Project Site (திட்ட தளம்) <span
+                                            <label class="form-label small fw-semibold text-dark">Project Site <span
                                                     class="text-danger">*</span></label>
                                             <select class="form-select fw-semibold" id="supplierSiteSelect"
                                                 name="project_site_id">
@@ -449,7 +449,7 @@
                                         <!-- Purchase Order Selection (Shown ONLY when Site Based) -->
                                         <div class="col-12" id="supplierPoGroup">
                                             <label class="form-label small fw-semibold text-dark mb-1">
-                                                <i class="bi bi-file-earmark-text text-primary me-1"></i>Purchase Order (கொள்முதல் ஆணை - Optional)
+                                                <i class="bi bi-file-earmark-text text-primary me-1"></i>Purchase Order (Optional)
                                             </label>
                                             <select class="form-select font-monospace" id="purchaseOrderSelect"
                                                 name="purchase_order_no">
@@ -463,7 +463,7 @@
 
                             <!-- Amount -->
                             <div class="col-12 col-md-6">
-                                <label class="form-label small fw-semibold" id="amountLabel">Amount (ரூ.) <span
+                                <label class="form-label small fw-semibold" id="amountLabel">Amount (₹) <span
                                         class="text-danger">*</span></label>
                                 <div class="input-group">
                                     <span class="input-group-text bg-white fw-bold">₹</span>
@@ -475,11 +475,11 @@
 
                             <!-- Payment Mode -->
                             <div class="col-12 col-md-6">
-                                <label class="form-label small fw-semibold">Payment Mode (செலுத்தும் முறை) <span
+                                <label class="form-label small fw-semibold">Payment Mode <span
                                         class="text-danger">*</span></label>
                                 <select class="form-select fw-semibold" id="paymentModeSelect" name="payment_mode" required>
-                                    <option value="Cash" selected>Cash (ரொக்கம்)</option>
-                                    <option value="Cheque">Cheque (காசோலை)</option>
+                                    <option value="Cash" selected>Cash</option>
+                                    <option value="Cheque">Cheque</option>
                                     <option value="UPI">UPI / GPay / PhonePe</option>
                                     <option value="Bank Transfer">Bank Transfer / NEFT / RTGS</option>
                                 </select>
@@ -506,7 +506,7 @@
 
                             <!-- Description -->
                             <div class="col-12">
-                                <label class="form-label small fw-semibold">Description / Notes (குறிப்பு)</label>
+                                <label class="form-label small fw-semibold">Description / Notes</label>
                                 <textarea class="form-control" id="adminDescription" name="description" rows="2"
                                     placeholder="Enter payment details, stage info, or notes..."></textarea>
                                 <div class="invalid-feedback" id="errDescription"></div>
@@ -543,7 +543,7 @@
                 if (category === 'client_payment') {
                     $('#clientPaymentSection').slideDown(150);
                     $('#supplierPaymentSection').slideUp(150);
-                    $('#amountLabel').html('Income Amount (வரவு ரூ.) <span class="text-danger">*</span>');
+                    $('#amountLabel').html('Income Amount (₹) <span class="text-danger">*</span>');
                     // Reset supplier inputs
                     $('#supplierSelect').val('');
                     $('#supplierSiteSelect').val('');
@@ -551,7 +551,7 @@
                 } else {
                     $('#clientPaymentSection').slideUp(150);
                     $('#supplierPaymentSection').slideDown(150);
-                    $('#amountLabel').html('Expense Amount (செலவு ரூ.) <span class="text-danger">*</span>');
+                    $('#amountLabel').html('Expense Amount (₹) <span class="text-danger">*</span>');
                     // Reset client inputs
                     $('#clientSelect').val('');
                     $('#clientProjectSelect').empty().append('<option value="" disabled selected>-- Select Client First --</option>');

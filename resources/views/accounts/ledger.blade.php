@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('title', 'Daily Ledger')
-@section('page_title', 'Daily Income & Expense Ledger (தினசரி வரவு - செலவு பேரேடு)')
+@section('page_title', 'Daily Income & Expense Ledger')
 
 @push('styles')
     <style>
@@ -43,12 +43,12 @@
         <ul class="nav nav-tabs mb-3 border-bottom">
             <li class="nav-item">
                 <a class="nav-link active" href="{{ route('ledger.index') }}">
-                    <i class="bi bi-book-half me-1"></i> Daily Ledger (தினசரி பேரேடு)
+                    <i class="bi bi-book-half me-1"></i> Daily Ledger
                 </a>
             </li>
             <li class="nav-item">
                 <a class="nav-link" href="{{ route('admin-ledger.index') }}">
-                    <i class="bi bi-journal-bookmark-fill me-1 text-primary"></i> Admin Ledger (நிர்வாக பேரேடு)
+                    <i class="bi bi-journal-bookmark-fill me-1 text-primary"></i> Admin Ledger
                 </a>
             </li>
         </ul>
@@ -57,7 +57,7 @@
         <div class="card-custom p-3 mb-4 bg-white">
             <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
                 <div>
-                    <h5 class="fw-bold mb-0 text-dark">Notebook Style Daily Ledger (தினசரி குறிப்பேட்டு பேரேடு)</h5>
+                    <h5 class="fw-bold mb-0 text-dark">Notebook Style Daily Ledger</h5>
                 </div>
                 <div class="d-flex gap-2">
                     <button class="btn btn-deiveni btn-sm" data-bs-toggle="modal" data-bs-target="#ledgerModal"
@@ -81,7 +81,7 @@
                         $displayOpening = $priorBal != 0 ? $priorBal : $yesterdayIncome;
                     @endphp
                     <h4 class="fw-bold text-warning mb-0" id="ledgerOpeningBal">{{ $displayOpening >= 0 ? '₹' . number_format($displayOpening, 2) : '-₹' . number_format(abs($displayOpening), 2) }}</h4>
-                    <small class="ta-text text-white-50" style="font-size: 0.72rem;">முந்தைய வரவு (நேற்றைய வரவு)</small>
+                    
                 </div>
 
                 <!-- Total Income Dr -->
@@ -91,7 +91,7 @@
                         $todayInc = (float) ($summary['today_income'] ?? $summary['total_income'] ?? 0);
                     @endphp
                     <h4 class="fw-bold text-success mb-0" id="ledgerTotalIncome">{{ $todayInc > 0 ? '+₹' . number_format($todayInc, 2) : '₹0.00' }}</h4>
-                    <small class="ta-text text-white-50" style="font-size: 0.72rem;" id="lblLedgerIncomeSub">இன்றைய வரவு</small>
+                    <small class="ta-text text-white-50" style="font-size: 0.72rem;" id="lblLedgerIncomeSub">Income</small>
                 </div>
 
                 <!-- Total Expense Cr -->
@@ -101,7 +101,7 @@
                         $todayExp = (float) ($summary['today_expense'] ?? $summary['total_expense'] ?? 0);
                     @endphp
                     <h4 class="fw-bold text-danger mb-0" id="ledgerTotalExpense">{{ $todayExp > 0 ? '−₹' . number_format($todayExp, 2) : '₹0.00' }}</h4>
-                    <small class="ta-text text-white-50" style="font-size: 0.72rem;" id="lblLedgerExpenseSub">இன்றைய செலவு</small>
+                    <small class="ta-text text-white-50" style="font-size: 0.72rem;" id="lblLedgerExpenseSub">Expense</small>
                 </div>
 
                 <!-- Closing Running Balance -->
@@ -111,7 +111,7 @@
                         $todayClosing = (float) ($summary['today_closing'] ?? $summary['closing_balance'] ?? 0);
                     @endphp
                     <h3 class="fw-bold text-info mb-0" id="ledgerClosingBal">{{ $todayClosing != 0 ? ($todayClosing >= 0 ? '₹' . number_format($todayClosing, 2) : '-₹' . number_format(abs($todayClosing), 2)) : '₹0.00' }}</h3>
-                    <small class="ta-text text-white-50" style="font-size: 0.72rem;" id="lblLedgerClosingSub">கையிருப்பு பேலன்ஸ்</small>
+                    <small class="ta-text text-white-50" style="font-size: 0.72rem;" id="lblLedgerClosingSub">Balance</small>
                 </div>
             </div>
         </div>
@@ -127,19 +127,19 @@
                     </div>
                 </div>
                 <div class="col-6 col-md-2">
-                    <select class="form-select form-select-sm fw-semibold" id="ledgerDateFilter" title="Filter by Date (தேதி வடிகட்ட)">
-                        <option value="today" selected>Today (இன்று - {{ \Carbon\Carbon::today()->format('d M') }})</option>
-                        <option value="yesterday">Yesterday (நேற்று - {{ \Carbon\Carbon::yesterday()->format('d M') }})</option>
-                        <option value="all">All Dates (அனைத்து தேதிகள்)</option>
-                        <option value="custom">Pick Date (தேதி தேர்வு)...</option>
+                    <select class="form-select form-select-sm fw-semibold" id="ledgerDateFilter" title="Filter by Date">
+                        <option value="today" selected>Today ({{ \Carbon\Carbon::today()->format('d M') }})</option>
+                        <option value="yesterday">Yesterday ({{ \Carbon\Carbon::yesterday()->format('d M') }})</option>
+                        <option value="all">All Dates</option>
+                        <option value="custom">Pick Date...</option>
                     </select>
                 </div>
                 <div class="col-6 col-md-2 d-none" id="ledgerCustomDateCol">
                     <input type="date" class="form-control form-control-sm" id="ledgerCustomDateInput" value="{{ \Carbon\Carbon::today()->toDateString() }}">
                 </div>
                 <div class="col-6 col-md-2">
-                    <select class="form-select form-select-sm" id="siteFilter" title="Filter by Site (தளத்தின்படி வடிகட்ட)">
-                        <option value="">All Sites (அனைத்து தளங்கள்)</option>
+                    <select class="form-select form-select-sm" id="siteFilter" title="Filter by Site">
+                        <option value="">All Sites</option>
                         @foreach($activeProjectSites as $site)
                             <option value="{{ $site->name }}">{{ $site->name }}</option>
                         @endforeach
@@ -147,11 +147,11 @@
                 </div>
                 <div class="col-6 col-md-2">
                     <select class="form-select form-select-sm" id="sourceFilter">
-                        <option value="">All Sources / Categories (அனைத்து வகைகள்)</option>
-                        <option value="Construction">Construction (கட்டுமானம்)</option>
+                        <option value="">All Categories</option>
+                        <option value="Construction">Construction</option>
                         <option value="Bank Valuation">Bank (Valuation / Inspection)</option>
-                        <option value="Rental">Rental (வாடகை)</option>
-                        <option value="Supplier">Supplier (சப்ளையர்)</option>
+                        <option value="Rental">Rental</option>
+                        <option value="Supplier">Supplier</option>
                         <option value="Office and other expenses">Office and other expenses</option>
                     </select>
                 </div>
@@ -186,7 +186,7 @@
                             <th style="width: 180px;">Site (Optional)</th>
                             <th class="text-end" style="width: 140px; background-color: #f0fdf4;">Income (Dr)</th>
                             <th class="text-end" style="width: 140px; background-color: #fef2f2;">Expense (Cr)</th>
-                            <th class="text-end" style="width: 150px;">Running Bal (ரூ.)</th>
+                            <th class="text-end" style="width: 150px;">Running Bal (₹)</th>
                             <th class="text-center" style="width: 70px;">Action</th>
                         </tr>
                     </thead>
@@ -199,7 +199,7 @@
                             <td colspan="4" class="py-2 text-start">
                                 <span class="text-warning-emphasis fw-bold">
                                     <i class="bi bi-box-arrow-in-down-right me-1"></i>
-                                    முந்தைய நாளின் கையிருப்பு (Opening Balance Carried Forward):
+                                    Opening Balance Carried Forward:
                                 </span>
                             </td>
                             <td class="text-end text-muted py-2">-</td>
@@ -298,7 +298,7 @@
                                 <td class="text-center">
                                     <a href="{{ route('ledger.show', $ledger->encrypted_id) }}"
                                         class="btn btn-outline-primary btn-sm px-2 py-1"
-                                        title="View Details (விவரங்களை பார்க்க)">
+                                        title="View Details">
                                         <i class="bi bi-eye"></i>
                                     </a>
                                 </td>
@@ -318,7 +318,7 @@
                                 <tr class="date-summary-row fw-bold" data-summary-date="{{ $currentDateKey }}" style="background-color: #f1f5f9; border-top: 2px solid #cbd5e1; border-bottom: 2px solid #cbd5e1;">
                                     <td colspan="4" class="py-2 text-start">
                                         <span class="text-primary"><i class="bi bi-calendar-check-fill me-1"></i>{{ $ledger->entry_date->format('d M Y') }}</span>
-                                        <span class="text-secondary small fw-semibold ms-2">அன்றைய மொத்த கணக்கு (Day Total):</span>
+                                        <span class="text-secondary small fw-semibold ms-2">Day Total:</span>
                                     </td>
                                     <td class="text-end text-success py-2" style="background-color: #e8f5e9;">
                                         {{ $dayInc > 0 ? '+₹' . number_format($dayInc, 2) : '₹0.00' }}
@@ -400,7 +400,7 @@
         <div class="modal-dialog modal-dialog-centered modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title fw-bold">Add Daily Ledger Entry (புதிய பேரேடு பதிவு)</h5>
+                    <h5 class="modal-title fw-bold">Add Daily Ledger Entry</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <form id="ledgerForm" method="POST" enctype="multipart/form-data" novalidate>
@@ -408,7 +408,7 @@
                     <div class="modal-body">
                         <div class="row g-3">
                             <div class="col-12 col-md-4">
-                                <label class="form-label small fw-semibold">Entry Date (தேதி) <span
+                                <label class="form-label small fw-semibold">Entry Date <span
                                         class="text-danger">*</span></label>
                                 <input type="date" class="form-control" id="newLedgerDate" name="entry_date"
                                     value="{{ date('Y-m-d') }}">
@@ -418,8 +418,8 @@
                                 <label class="form-label small fw-semibold">Entry Flow Type <span
                                         class="text-danger">*</span></label>
                                 <select class="form-select" id="newLedgerFlow" name="flow">
-                                    <option value="income">Income (Dr - வரவு)</option>
-                                    <option value="expense">Expense (Cr - செலவு)</option>
+                                    <option value="income">Income (Dr)</option>
+                                    <option value="expense">Expense (Cr)</option>
                                 </select>
                                 <div class="invalid-feedback" id="errFlow"></div>
                             </div>
@@ -427,9 +427,9 @@
                                 <label class="form-label small fw-semibold">Source / Category <span
                                         class="text-danger">*</span></label>
                                 <select class="form-select" id="newLedgerSource" name="source">
-                                    <option value="Construction">Construction (கட்டுமானம் - Stage/Advance)</option>
+                                    <option value="Construction">Construction (Stage/Advance)</option>
                                     <option value="Bank Valuation">Bank (Valuation / Inspection fee)</option>
-                                    <option value="Rental">Rental (வாடகை வருமானம்)</option>
+                                    <option value="Rental">Rental (Income)</option>
                                     <option value="Office and other expenses">Office and other expenses</option>
                                 </select>
                                 <div class="invalid-feedback" id="errSource"></div>
@@ -439,14 +439,14 @@
                             <div class="col-12 bank-fields-group d-none">
                                 <div class="p-3 bg-light rounded-3 border">
                                     <span class="small fw-bold text-primary mb-2 d-block"><i
-                                            class="bi bi-bank me-1"></i>Bank Valuation Details (வங்கி ஆய்வு
-                                        விவரங்கள்)</span>
+                                            class="bi bi-bank me-1"></i>Bank Valuation Details
+                                        </span>
                                     <div class="row g-2">
                                         <div class="col-12 col-md-6" id="bankSelectContainer">
-                                            <label class="form-label small fw-semibold">Select Bank (வங்கி)
+                                            <label class="form-label small fw-semibold">Select Bank
                                                 <span class="text-danger">*</span></label>
                                             <select class="form-select form-select-sm" id="ledgerBankSelect" name="bank_id">
-                                                <option value="" disabled selected>-- Select Bank (வங்கியை தேர்வு செய்க) --
+                                                <option value="" disabled selected>-- Select Bank --
                                                 </option>
                                                 @foreach($activeBanks as $bank)
                                                     <option value="{{ $bank->id }}" data-bank-name="{{ $bank->bank_name }}">
@@ -457,18 +457,18 @@
                                             <div class="invalid-feedback" id="errBankId"></div>
                                         </div>
                                         <div class="col-12 col-md-6 d-none" id="branchSelectContainer">
-                                            <label class="form-label small fw-semibold">Select Branch (கிளை)
+                                            <label class="form-label small fw-semibold">Select Branch
                                                 <span class="text-danger">*</span></label>
                                             <select class="form-select form-select-sm" id="ledgerBranchSelect"
                                                 name="branch_id">
-                                                <option value="" disabled selected>-- Select Branch (முதலில் கிளையை தேர்வு
-                                                    செய்க) --</option>
+                                                <option value="" disabled selected>-- Select Branch (Select Bank First) --
+                                                    </option>
                                             </select>
                                             <div class="invalid-feedback" id="errBranchId"></div>
                                         </div>
                                         <div class="col-12">
-                                            <label class="form-label small fw-semibold">Customer / Loan Ref (வாடிக்கையாளர் /
-                                                கடன் குறிப்பு)</label>
+                                            <label class="form-label small fw-semibold">Customer / Loan Ref
+                                                </label>
                                             <input type="text" class="form-control form-control-sm" id="bankCustomer"
                                                 name="bank_customer_ref" placeholder="e.g. Mr. S. Karthi (Ref #88)">
                                             <div class="invalid-feedback" id="errBankCustomerRef"></div>
@@ -481,14 +481,14 @@
                             <div class="col-12 rental-fields-group d-none">
                                 <div class="p-3 bg-light rounded-3 border">
                                     <span class="small fw-bold text-primary mb-2 d-block"><i
-                                            class="bi bi-house me-1"></i>Rental Income Details (வாடகை விவரங்கள்)</span>
+                                            class="bi bi-house me-1"></i>Rental Income Details</span>
                                     <div class="row g-2">
                                         <div class="col-12 col-md-6" id="propertySelectContainer">
-                                            <label class="form-label small fw-semibold">Select Property (வாடகை சொத்து)
+                                            <label class="form-label small fw-semibold">Select Property
                                                 <span class="text-danger">*</span></label>
                                             <select class="form-select form-select-sm" id="ledgerPropertySelect"
                                                 name="property_id">
-                                                <option value="" disabled selected>-- Select Property (சொத்தை தேர்வு செய்க)
+                                                <option value="" disabled selected>-- Select Property --
                                                     --</option>
                                                 @foreach($activeProperties as $prop)
                                                     <option value="{{ $prop->id }}"
@@ -500,13 +500,13 @@
                                             <div class="invalid-feedback" id="errPropertyId"></div>
                                         </div>
                                         <div class="col-12 col-md-6 d-none" id="propertyTypeSelectContainer">
-                                            <label class="form-label small fw-semibold">Select Property Type / Unit (சொத்து
-                                                வகை / அலகு)
+                                            <label class="form-label small fw-semibold">Select Property Type / Unit
+                                                
                                                 <span class="text-danger">*</span></label>
                                             <select class="form-select form-select-sm" id="ledgerPropertyTypeSelect"
                                                 name="property_type_id">
-                                                <option value="" disabled selected>-- Select Property Type / Unit (அலகு /
-                                                    வகை தேர்வு செய்க) --</option>
+                                                <option value="" disabled selected>-- Select Property Type / Unit --
+                                                    </option>
                                             </select>
                                             <div class="invalid-feedback" id="errPropertyTypeId"></div>
                                         </div>
@@ -518,15 +518,15 @@
                             <div class="col-12 construction-fields-group d-none">
                                 <div class="p-3 bg-light rounded-3 border">
                                     <span class="small fw-bold text-primary mb-2 d-block">
-                                        <i class="bi bi-building me-1"></i>Construction Site Details (கட்டுமான தளம்)
+                                        <i class="bi bi-building me-1"></i>Construction Site Details
                                     </span>
                                     <div class="row g-2">
                                         <div class="col-12" id="constructionSiteWrapper">
-                                            <label class="form-label small fw-semibold">Associated Site (தளம்) <span
+                                            <label class="form-label small fw-semibold">Associated Site <span
                                                     class="text-danger">*</span></label>
                                             <select class="form-select form-select-sm" id="constructionSite"
                                                 name="project_site_id">
-                                                <option value="">-- Select Site (தளத்தை தேர்வு செய்க) --</option>
+                                                <option value="">-- Select Site --</option>
                                                 @foreach($activeProjectSites as $site)
                                                     <option value="{{ $site->id }}" data-site-name="{{ $site->name }}"
                                                         data-client-name="{{ $site->client ? $site->client->name : '' }}">
@@ -539,7 +539,7 @@
                                         <!-- Task 3: Appended Client Name input with auto-filled value, editable by user -->
                                         <div class="col-12 d-none" id="constructionClientContainer">
                                             <label class="form-label small fw-semibold">
-                                                Client Name (வாடிக்கையாளர் பெயர்)
+                                                Client Name
                                                 <span class="badge bg-secondary-subtle text-secondary fw-normal ms-1"
                                                     style="font-size: 0.7rem;">Auto-filled / Editable</span>
                                             </label>
@@ -548,7 +548,7 @@
                                                         class="bi bi-person text-muted"></i></span>
                                                 <input type="text" class="form-control form-control-sm"
                                                     id="constructionClientName" name="client_name"
-                                                    placeholder="Client Name (வாடிக்கையாளர் பெயர்)">
+                                                    placeholder="Client Name">
                                                 <div class="invalid-feedback" id="errClientName"></div>
                                             </div>
                                             <small class="text-muted" style="font-size: 0.72rem;">Pre-filled from site
@@ -581,7 +581,7 @@
                                                         </div>
                                                         <div>
                                                             <h6 class="mb-0 fw-bold text-dark" style="font-size: 0.88rem;">Painter & Electrician Daily Wages</h6>
-                                                            <small class="text-muted" style="font-size: 0.7rem;">ஒதுக்கப்பட்ட தினக்கூலி விவரம்</small>
+                                                            <small class="text-muted" style="font-size: 0.7rem;">Allocated Daily Wages</small>
                                                         </div>
                                                     </div>
                                                     <span class="badge bg-primary-subtle text-primary border border-primary-subtle fw-semibold" id="wageCheckBadge" style="font-size: 0.72rem;">
@@ -597,17 +597,17 @@
                                                 <!-- Cash Source Segmented Button Group (Clean, Modern, No bulky box) -->
                                                 <div class="mb-3">
                                                     <label class="form-label small fw-semibold text-secondary mb-1 d-block" style="font-size: 0.75rem;">
-                                                        <i class="bi bi-wallet2 text-primary me-1"></i>Wage Payment Source (பண ஆதாரம்)
+                                                        <i class="bi bi-wallet2 text-primary me-1"></i>Wage Payment Source
                                                     </label>
                                                     <div class="btn-group btn-group-sm w-100" role="group">
                                                         <input type="radio" class="btn-check wage-source-radio" name="wage_cash_source" id="wageSourceOfficeCash" value="office_cash" checked>
                                                         <label class="btn btn-outline-primary py-1" for="wageSourceOfficeCash" style="font-size: 0.78rem;">
-                                                            <i class="bi bi-building me-1"></i>Office Cash (அலுவலக ரொக்கம்)
+                                                            <i class="bi bi-building me-1"></i>Office Cash
                                                         </label>
 
                                                         <input type="radio" class="btn-check wage-source-radio" name="wage_cash_source" id="wageSourceProjectCash" value="project_cash">
                                                         <label class="btn btn-outline-primary py-1" for="wageSourceProjectCash" style="font-size: 0.78rem;">
-                                                            <i class="bi bi-cash-stack me-1"></i>Project Cash (திட்ட / தள ரொக்கம்)
+                                                            <i class="bi bi-cash-stack me-1"></i>Project Cash
                                                         </label>
                                                     </div>
                                                 </div>
@@ -616,10 +616,10 @@
                                                 <div class="mb-3 pt-2 border-top" id="extraWorkersSection">
                                                     <div class="d-flex align-items-center justify-content-between mb-2">
                                                         <span class="small fw-semibold text-secondary" style="font-size: 0.75rem;">
-                                                            <i class="bi bi-person-plus text-primary me-1"></i>Extra Helper / Support Worker (கூடுதல் தொழிலாளர்)
+                                                            <i class="bi bi-person-plus text-primary me-1"></i>Extra Helper / Support Worker
                                                         </span>
                                                         <button type="button" class="btn btn-sm btn-outline-primary py-0 px-2 rounded-pill" id="btnAddExtraWorker" style="font-size: 0.72rem;">
-                                                            <i class="bi bi-plus-lg me-1"></i>Add Helper (+ உதவியாளர்)
+                                                            <i class="bi bi-plus-lg me-1"></i>Add Helper
                                                         </button>
                                                     </div>
                                                     <div id="extraWorkersContainer" class="d-flex flex-column gap-2">
@@ -649,16 +649,16 @@
                             <div class="col-12 supplier-fields-group d-none">
                                 <div class="p-3 bg-light rounded-3 border">
                                     <span class="small fw-bold text-primary mb-2 d-block">
-                                        <i class="bi bi-truck me-1"></i>Supplier Details (சப்ளையர் விவரங்கள்)
+                                        <i class="bi bi-truck me-1"></i>Supplier Details
                                     </span>
                                     <div class="row g-2">
                                         <div class="col-12">
-                                            <label class="form-label small fw-semibold">Select Supplier (சப்ளையர்) <span
+                                            <label class="form-label small fw-semibold">Select Supplier <span
                                                     class="text-danger">*</span></label>
                                             <select class="form-select form-select-sm fw-semibold" id="ledgerSupplier"
                                                 name="supplier_id">
-                                                <option value="" disabled selected>-- Select Supplier (சப்ளையரை
-                                                    தேர்ந்தெடுக்கவும்) --</option>
+                                                <option value="" disabled selected>-- Select Supplier --
+                                                    </option>
                                                 @foreach($activeSuppliers as $supplier)
                                                     <option value="{{ $supplier->id }}"
                                                         data-supplier-name="{{ $supplier->name }}">{{ $supplier->name }}
@@ -698,7 +698,7 @@
                             </div>
 
                             <div class="col-12 col-md-6">
-                                <label class="form-label small fw-semibold">Amount (ரூ.) <span
+                                <label class="form-label small fw-semibold">Amount (₹) <span
                                         class="text-danger">*</span></label>
                                 <div class="input-group has-validation">
                                     <span class="input-group-text">₹</span>
@@ -716,7 +716,7 @@
                             </div>
                             <div class="col-12">
                                 <label class="form-label small fw-semibold">Receipt / Voucher Image <span
-                                        class="text-muted fw-normal">(Optional / ரசீது அல்லது வவுச்சர் படம்)</span></label>
+                                        class="text-muted fw-normal">(Optional)</span></label>
                                 <input type="file" class="form-control" id="newLedgerImage" name="receipt_image"
                                     accept="image/png, image/jpeg, image/jpg, image/webp">
                                 <div class="invalid-feedback" id="errReceiptImage"></div>
@@ -831,14 +831,14 @@
             // Source / Category options based on Entry Flow Type
             const sourceOptionsByFlow = {
                 income: [
-                    { value: 'Construction', text: 'Construction (கட்டுமானம் - Stage/Advance)' },
+                    { value: 'Construction', text: 'Construction (Stage/Advance)' },
                     { value: 'Bank Valuation', text: 'Bank (Valuation / Inspection fee)' },
-                    { value: 'Rental', text: 'Rental (வாடகை வருமானம்)' },
+                    { value: 'Rental', text: 'Rental (Income)' },
                     { value: 'Office and other expenses', text: 'Office and other expenses' }
                 ],
                 expense: [
-                    { value: 'Construction', text: 'Construction (கட்டுமானம் - Stage/Advance)' },
-                    { value: 'Supplier', text: 'Supplier (சப்ளையர்)' },
+                    { value: 'Construction', text: 'Construction (Stage/Advance)' },
+                    { value: 'Supplier', text: 'Supplier' },
                     { value: 'Office and other expenses', text: 'Office and other expenses' }
                 ]
             };
@@ -988,7 +988,7 @@
                                     <div class="px-2 py-1 rounded-2 border bg-light d-inline-flex align-items-center gap-2" style="font-size: 0.8rem;">
                                         <i class="bi ${icon} ${iconColor}"></i>
                                         <span class="fw-semibold text-dark">${it.name_ta || it.name_en}</span>
-                                        <span class="text-muted" style="font-size: 0.72rem;">(${it.count} ஆட்கள்)</span>
+                                        <span class="text-muted" style="font-size: 0.72rem;">(${it.count} workers)</span>
                                         <strong class="text-success ms-1">₹${Math.round(it.subtotal).toLocaleString('en-IN')}</strong>
                                         ${statusHtml}
                                     </div>
@@ -1048,7 +1048,7 @@
                 const siteName = $('#constructionSite option:selected').data('site-name') || 'Site';
                 const dateVal = $('#newLedgerDate').val();
                 const cashSourceVal = $('input[name="wage_cash_source"]:checked').val() || 'office_cash';
-                const cashSourceText = cashSourceVal === 'project_cash' ? 'Project Cash (திட்ட ரொக்கம்)' : 'Office Cash (அலுவலக ரொக்கம்)';
+                const cashSourceText = cashSourceVal === 'project_cash' ? 'Project Cash' : 'Office Cash';
 
                 let extraText = '';
                 if (extraDetails.length > 0) {
@@ -1067,10 +1067,10 @@
                     <div class="extra-worker-item p-2 rounded-2 bg-light border">
                         <div class="row g-1 align-items-center">
                             <div class="col-12 col-sm-4">
-                                <input type="text" class="form-control form-control-sm extra-worker-name bg-white" placeholder="Worker Name (பெயர்)" required>
+                                <input type="text" class="form-control form-control-sm extra-worker-name bg-white" placeholder="Worker Name" required>
                             </div>
                             <div class="col-12 col-sm-4">
-                                <input type="text" class="form-control form-control-sm extra-worker-work bg-white" placeholder="Role (வேலை / பணி)" required>
+                                <input type="text" class="form-control form-control-sm extra-worker-work bg-white" placeholder="Role / Work" required>
                             </div>
                             <div class="col-9 col-sm-3">
                                 <div class="input-group input-group-sm">
@@ -1128,7 +1128,7 @@
 
                 if (!bankId) {
                     $('#branchSelectContainer').addClass('d-none');
-                    branchSelect.append('<option value="" disabled selected>-- Select Branch (முதலில் கிளையை தேர்வு செய்க) --</option>');
+                    branchSelect.append('<option value="" disabled selected>-- Select Branch (Select Bank First) --</option>');
                     return;
                 }
 
@@ -1138,7 +1138,7 @@
                     : [];
 
                 if (activeBranches.length > 0) {
-                    branchSelect.append('<option value="" disabled selected>-- Select Branch (கிளையை தேர்வு செய்க) --</option>');
+                    branchSelect.append('<option value="" disabled selected>-- Select Branch --</option>');
                     activeBranches.forEach(br => {
                         const taText = br.branch_name_ta ? ` (${br.branch_name_ta})` : '';
                         const feeVal = parseFloat(br.valuation_fee) || 0;
@@ -1154,7 +1154,7 @@
                     });
                     $('#branchSelectContainer').removeClass('d-none');
                 } else {
-                    branchSelect.append('<option value="" disabled selected>-- No active branches for this bank (செயலில் உள்ள கிளைகள் இல்லை) --</option>');
+                    branchSelect.append('<option value="" disabled selected>-- No active branches for this bank --</option>');
                     $('#branchSelectContainer').removeClass('d-none');
                 }
             });
@@ -1178,7 +1178,7 @@
 
                 if (!propertyId) {
                     $('#propertyTypeSelectContainer').addClass('d-none');
-                    propertyTypeSelect.append('<option value="" disabled selected>-- Select Property Type / Unit (அலகு / வகை தேர்வு செய்க) --</option>');
+                    propertyTypeSelect.append('<option value="" disabled selected>-- Select Property Type / Unit --</option>');
                     return;
                 }
 
@@ -1188,7 +1188,7 @@
                     : [];
 
                 if (activePropertyTypes.length > 0) {
-                    propertyTypeSelect.append('<option value="" disabled selected>-- Select Property Type / Unit (அலகு / வகை தேர்வு செய்க) --</option>');
+                    propertyTypeSelect.append('<option value="" disabled selected>-- Select Property Type / Unit --</option>');
                     activePropertyTypes.forEach(pt => {
                         const rentVal = parseFloat(pt.monthly_rent) || 0;
                         const rentText = rentVal > 0 ? ` - ₹${rentVal.toLocaleString('en-IN')}/mo` : '';
@@ -1207,7 +1207,7 @@
                     });
                     $('#propertyTypeSelectContainer').removeClass('d-none');
                 } else {
-                    propertyTypeSelect.append('<option value="" disabled selected>-- No active units/types for this property (செயலில் உள்ள பிரிவுகள் இல்லை) --</option>');
+                    propertyTypeSelect.append('<option value="" disabled selected>-- No active units/types for this property --</option>');
                     $('#propertyTypeSelectContainer').removeClass('d-none');
                 }
             });
@@ -1469,11 +1469,11 @@
                     const closing = totalInc - totalExp;
 
                     $('#lblLedgerIncome').text('Total Income (Dr)');
-                    $('#lblLedgerIncomeSub').text('மொத்த வரவு');
+                    $('#lblLedgerIncomeSub').text('Total Income');
                     $('#lblLedgerExpense').text('Total Expense (Cr)');
-                    $('#lblLedgerExpenseSub').text('மொத்த செலவு');
+                    $('#lblLedgerExpenseSub').text('Total Expense');
                     $('#lblLedgerClosing').text('Closing Running Balance');
-                    $('#lblLedgerClosingSub').text('கையிருப்பு பேலன்ஸ்');
+                    $('#lblLedgerClosingSub').text('Closing Balance');
 
                     $('#ledgerOpeningBal').text('₹0.00');
                     $('#ledgerTotalIncome').text(totalInc > 0 ? '+₹' + formatMoney(totalInc) : '₹0.00');
@@ -1488,11 +1488,11 @@
 
                     const dateLabel = (dateFilter === 'today') ? "Today's" : ((dateFilter === 'yesterday') ? "Yesterday's" : targetDate);
                     $('#lblLedgerIncome').text(`${dateLabel} Income (Dr)`);
-                    $('#lblLedgerIncomeSub').text('இன்றைய வரவு');
+                    $('#lblLedgerIncomeSub').text('Today\'s Income');
                     $('#lblLedgerExpense').text(`${dateLabel} Expense (Cr)`);
-                    $('#lblLedgerExpenseSub').text('இன்றைய செலவு');
+                    $('#lblLedgerExpenseSub').text('Today\'s Expense');
                     $('#lblLedgerClosing').text(`${dateLabel} Closing Balance`);
-                    $('#lblLedgerClosingSub').text('கையிருப்பு பேலன்ஸ்');
+                    $('#lblLedgerClosingSub').text('Closing Balance');
 
                     $('#ledgerOpeningBal').text((stats.opening >= 0 ? '₹' : '−₹') + formatMoney(Math.abs(stats.opening)));
                     $('#ledgerTotalIncome').text(stats.income > 0 ? '+₹' + formatMoney(stats.income) : '₹0.00');

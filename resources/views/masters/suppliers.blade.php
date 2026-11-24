@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('title', 'Suppliers Master')
-@section('page_title', 'Suppliers Master (சப்ளையர்கள் முதன்மை பட்டியல்)')
+@section('page_title', 'Suppliers Master')
 
 @push('styles')
     <style>
@@ -43,7 +43,7 @@
         <div class="card-custom p-3 mb-4 bg-white">
             <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
                 <div>
-                    <h5 class="fw-bold mb-1 text-dark">Material Suppliers Directory (சப்ளையர் விவரங்கள்)</h5>
+                    <h5 class="fw-bold mb-1 text-dark">Material Suppliers Directory</h5>
                     <p class="text-muted small mb-0">Suppliers for Cement, Steel, Blue Metal, Sand, Bricks, Tiles & Hardware
                         with material grades & rates.
                     </p>
@@ -69,16 +69,16 @@
                 </div>
                 <div class="col-6 col-md-2">
                     <select class="form-select form-select-sm" id="supplierStatusFilter">
-                        <option value="">All Status (அனைத்து நிலை)</option>
-                        <option value="Active">Active (செயலில் உள்ளவை)</option>
-                        <option value="Inactive">Inactive (நிறுத்தப்பட்டவை)</option>
+                        <option value="">All Status</option>
+                        <option value="Active">Active</option>
+                        <option value="Inactive">Inactive</option>
                     </select>
                 </div>
                 <div class="col-6 col-md-2">
                     <select class="form-select form-select-sm" id="supplierScopeFilter">
-                        <option value="">All Payment Scope (அனைத்தும்)</option>
-                        <option value="1">Site Based (தள வாரியாக)</option>
-                        <option value="0">Total (மொத்தமாக)</option>
+                        <option value="">All Payment Scope</option>
+                        <option value="1">Site Based</option>
+                        <option value="0">Total</option>
                     </select>
                 </div>
                 <div class="col-6 col-md-1">
@@ -179,7 +179,7 @@
                                             id="toggleSiteBased_{{ $supplier->id }}"
                                             {{ $isSiteBased ? 'checked' : '' }}
                                             style="cursor: pointer; width: 2.2em; height: 1.15em;"
-                                            title="Toggle Site Based (தள வாரியாக) vs Total (மொத்தமாக)">
+                                            title="Toggle Site Based vs Total">
                                         <label class="form-check-label small fw-semibold cursor-pointer text-nowrap toggle-site-label-{{ $supplier->id }} {{ $isSiteBased ? 'text-primary' : 'text-muted' }}"
                                             for="toggleSiteBased_{{ $supplier->id }}" style="font-size: 0.75rem;">
                                             {{ $isSiteBased ? 'Site Based' : 'Total' }}
@@ -233,7 +233,7 @@
                             <tr id="emptySuppliersRow">
                                 <td colspan="9" class="text-center py-5 text-muted">
                                     <i class="bi bi-truck display-5 d-block mb-2 text-secondary opacity-50"></i>
-                                    <h6>No Suppliers Found (சப்ளையர்கள் இல்லை)</h6>
+                                    <h6>No Suppliers Found</h6>
                                     <p class="small mb-0">Click "Add New Supplier" to register your first supplier.</p>
                                 </td>
                             </tr>
@@ -280,7 +280,7 @@
         <div class="modal-dialog modal-dialog-centered modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title fw-bold" id="supplierModalTitle">Add New Supplier (புதிய சப்ளையர்)</h5>
+                    <h5 class="modal-title fw-bold" id="supplierModalTitle">Add New Supplier</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <form id="supplierForm" novalidate>
@@ -329,12 +329,12 @@
                                 <div class="invalid-feedback" id="errSupplierStatus"></div>
                             </div>
                             <div class="col-12 col-md-6">
-                                <label class="form-label small fw-semibold" for="supplierSiteBased">Payment Basis / Scope (பட்டுவாடா வகை)</label>
+                                <label class="form-label small fw-semibold" for="supplierSiteBased">Payment Basis / Scope</label>
                                 <div class="d-flex align-items-center gap-2 mt-1">
                                     <div class="form-check form-switch mb-0">
                                         <input class="form-check-input" type="checkbox" role="switch" id="supplierSiteBased" name="is_site_based" value="1" checked style="cursor: pointer; width: 2.2em; height: 1.2em;">
                                         <label class="form-check-label small fw-semibold" for="supplierSiteBased" id="supplierSiteBasedLabel">
-                                            Site Based (தள வாரியாக)
+                                            Site Based
                                         </label>
                                     </div>
                                 </div>
@@ -347,7 +347,7 @@
                                     <div>
                                         <label class="form-label small fw-bold mb-0 text-dark">
                                             <i class="bi bi-boxes text-primary me-1"></i>Materials Supplied, Grade & Price
-                                            (வழங்கும் பொருட்கள், தரம் & விலை) <span class="text-danger">*</span>
+                                             <span class="text-danger">*</span>
                                         </label>
                                         <div class="text-muted" style="font-size: 0.75rem;">Select at least one material and
                                             rate per unit (grade is optional)</div>
@@ -362,10 +362,9 @@
                                     <div class="card p-2 border bg-light-subtle material-row shadow-none">
                                         <div class="row g-2 align-items-start">
                                             <div class="col-12 col-md-5">
-                                                <label class="form-label small text-muted mb-1 d-md-none">Material
-                                                    (பொருள்) <span class="text-danger">*</span></label>
+                                                <label class="form-label small text-muted mb-1 d-md-none">Material <span class="text-danger">*</span></label>
                                                 <select class="form-select form-select-sm material-select">
-                                                    <option value="">-- Select Material (பொருள் தேர்வு) --</option>
+                                                    <option value="">-- Select Material --</option>
                                                     @foreach ($materials as $material)
                                                         <option value="{{ $material->id }}"
                                                             data-unit="{{ $material->unit?->name_en ?? (string) $material->unit }}"
@@ -380,22 +379,20 @@
                                                     style="display: none;"></div>
                                             </div>
                                             <div class="col-12 col-md-3">
-                                                <label class="form-label small text-muted mb-1 d-md-none">Grade
-                                                    (தரம்)</label>
+                                                <label class="form-label small text-muted mb-1 d-md-none">Grade</label>
                                                 <select class="form-select form-select-sm material-grade-select">
-                                                    <option value="" selected>-- Select Grade (தரம் தேர்வு) --</option>
-                                                    <option value="1st Quality">1st Quality (முதல் தரம்)</option>
-                                                    <option value="2nd Quality">2nd Quality (இரண்டாம் தரம்)</option>
-                                                    <option value="3rd Quality">3rd Quality (மூன்றாம் தரம்)</option>
-                                                    <option value="Standard">Standard (சாதாரண தரம்)</option>
-                                                    <option value="Premium">Premium (உயர் தரம்)</option>
+                                                    <option value="" selected>-- Select Grade --</option>
+                                                    <option value="1st Quality">1st Quality</option>
+                                                    <option value="2nd Quality">2nd Quality</option>
+                                                    <option value="3rd Quality">3rd Quality</option>
+                                                    <option value="Standard">Standard</option>
+                                                    <option value="Premium">Premium</option>
                                                 </select>
                                                 <div class="invalid-feedback material-grade-feedback"
                                                     style="display: none;"></div>
                                             </div>
                                             <div class="col-12 col-md-4">
-                                                <label class="form-label small text-muted mb-1 d-md-none">Price / Rate
-                                                    (விலை) <span class="text-danger">*</span></label>
+                                                <label class="form-label small text-muted mb-1 d-md-none">Price / Rate <span class="text-danger">*</span></label>
                                                 <div class="input-group input-group-sm">
                                                     <span class="input-group-text bg-white text-muted">₹</span>
                                                     <input type="number" step="0.01" min="0"
@@ -460,7 +457,7 @@
 
             // HTML options for material select dropdown
             const materialOptionsHtml = `
-                                                    <option value="">-- Select Material (பொருள் தேர்வு) --</option>
+                                                    <option value="">-- Select Material --</option>
                                                     @foreach ($materials as $material)
                                                         <option value="{{ $material->id }}" data-unit="{{ $material->unit?->name_en ?? (string) $material->unit }}" data-tamil="{{ $material->name_ta }}" data-name="{{ $material->name_en }}">
                                                             {{ $material->name_en }} {{ $material->name_ta ? '- ' . $material->name_ta : '' }}
@@ -494,26 +491,26 @@
                                         <div class="card p-2 border bg-light-subtle material-row shadow-none">
                                             <div class="row g-2 align-items-start">
                                                 <div class="col-12 col-md-5">
-                                                    <label class="form-label small text-muted mb-1 d-md-none">Material (பொருள்) <span class="text-danger">*</span></label>
+                                                    <label class="form-label small text-muted mb-1 d-md-none">Material <span class="text-danger">*</span></label>
                                                     <select class="form-select form-select-sm material-select">
                                                         ${materialOptionsHtml}
                                                     </select>
                                                     <div class="invalid-feedback material-select-feedback" style="display: none;"></div>
                                                 </div>
                                                 <div class="col-12 col-md-3">
-                                                    <label class="form-label small text-muted mb-1 d-md-none">Grade (தரம்)</label>
+                                                    <label class="form-label small text-muted mb-1 d-md-none">Grade</label>
                                                     <select class="form-select form-select-sm material-grade-select">
-                                                        <option value="" ${!grade ? 'selected' : ''}>-- Select Grade (தரம் தேர்வு) --</option>
-                                                        <option value="1st Quality" ${grade === '1st Quality' ? 'selected' : ''}>1st Quality (முதல் தரம்)</option>
-                                                        <option value="2nd Quality" ${grade === '2nd Quality' ? 'selected' : ''}>2nd Quality (இரண்டாம் தரம்)</option>
-                                                        <option value="3rd Quality" ${grade === '3rd Quality' ? 'selected' : ''}>3rd Quality (மூன்றாம் தரம்)</option>
-                                                        <option value="Standard" ${grade === 'Standard' ? 'selected' : ''}>Standard (சாதாரண தரம்)</option>
-                                                        <option value="Premium" ${grade === 'Premium' ? 'selected' : ''}>Premium (உயர் தரம்)</option>
+                                                        <option value="" ${!grade ? 'selected' : ''}>-- Select Grade --</option>
+                                                        <option value="1st Quality" ${grade === '1st Quality' ? 'selected' : ''}>1st Quality</option>
+                                                        <option value="2nd Quality" ${grade === '2nd Quality' ? 'selected' : ''}>2nd Quality</option>
+                                                        <option value="3rd Quality" ${grade === '3rd Quality' ? 'selected' : ''}>3rd Quality</option>
+                                                        <option value="Standard" ${grade === 'Standard' ? 'selected' : ''}>Standard</option>
+                                                        <option value="Premium" ${grade === 'Premium' ? 'selected' : ''}>Premium</option>
                                                     </select>
                                                     <div class="invalid-feedback material-grade-feedback" style="display: none;"></div>
                                                 </div>
                                                 <div class="col-12 col-md-4">
-                                                    <label class="form-label small text-muted mb-1 d-md-none">Price / Rate (விலை) <span class="text-danger">*</span></label>
+                                                    <label class="form-label small text-muted mb-1 d-md-none">Price / Rate <span class="text-danger">*</span></label>
                                                     <div class="input-group input-group-sm">
                                                         <span class="input-group-text bg-white text-muted">₹</span>
                                                         <input type="number" step="0.01" min="0" class="form-control material-price-input" 
@@ -537,7 +534,7 @@
 
                 if (typeof window.makeSearchableSelect === 'function') {
                     window.makeSearchableSelect($row.find('.material-select'), {
-                        placeholder: '-- Select Material (பொருள் தேர்வு) --',
+                        placeholder: '-- Select Material --',
                         type: 'material'
                     });
                 }
@@ -568,7 +565,7 @@
 
             if (typeof window.makeSearchableSelect === 'function') {
                 window.makeSearchableSelect($('#materialRowsContainer .material-select'), {
-                    placeholder: '-- Select Material (பொருள் தேர்வு) --',
+                    placeholder: '-- Select Material --',
                     type: 'material'
                 });
             }
@@ -785,7 +782,7 @@
                                         <tr id="emptySuppliersRow">
                                             <td colspan="8" class="text-center py-5 text-muted">
                                                 <i class="bi bi-truck display-5 d-block mb-2 text-secondary opacity-50"></i>
-                                                <h6>No Suppliers Found (சப்ளையர்கள் இல்லை)</h6>
+                                                <h6>No Suppliers Found</h6>
                                                 <p class="small mb-0">Click "Add New Supplier" to register your first supplier.</p>
                                             </td>
                                         </tr>
@@ -944,10 +941,10 @@
                             $row.data('is-site-based', isChecked ? '1' : '0').attr('data-is-site-based', isChecked ? '1' : '0');
                             if (isChecked) {
                                 $label.text('Site Based').removeClass('text-muted').addClass('text-primary');
-                                showToast(`${supplierName} is now set to Site Based (தள வாரியாக) payment mode.`, 'success');
+                                showToast(`${supplierName} is now set to Site Based payment mode.`, 'success');
                             } else {
                                 $label.text('Total').removeClass('text-primary').addClass('text-muted');
-                                showToast(`${supplierName} is now set to Total (மொத்தமாக) payment mode.`, 'info');
+                                showToast(`${supplierName} is now set to Total payment mode.`, 'info');
                             }
                         } else {
                             $switch.prop('checked', !isChecked);
@@ -964,13 +961,13 @@
 
             // Open Add Modal
             $('#addSupplierBtn').on('click', function () {
-                $('#supplierModalTitle').text('Add New Supplier (புதிய சப்ளையர்)');
+                $('#supplierModalTitle').text('Add New Supplier');
                 $('#saveSupplierBtnText').text('Save Supplier');
                 $('#supplierEditId').val('');
                 $('#supplierForm')[0].reset();
                 $('#supplierStatus').val('Active');
                 $('#supplierSiteBased').prop('checked', true);
-                $('#supplierSiteBasedLabel').text('Site Based (தள வாரியாக)');
+                $('#supplierSiteBasedLabel').text('Site Based');
                 resetMaterialRows();
                 clearFormErrors();
             });
@@ -978,7 +975,7 @@
             // Open Edit Modal
             $(document).on('click', '.edit-supplier-btn', function () {
                 const tr = $(this).closest('tr');
-                $('#supplierModalTitle').text('Edit Supplier (சப்ளையர் திருத்து)');
+                $('#supplierModalTitle').text('Edit Supplier');
                 $('#saveSupplierBtnText').text('Update Supplier');
                 $('#supplierEditId').val(tr.data('id'));
                 $('#supplierName').val(tr.data('name') || '');
@@ -991,7 +988,7 @@
                 const isSiteBased = tr.data('is-site-based');
                 const isSb = (isSiteBased === undefined || isSiteBased === null || String(isSiteBased) === '1' || isSiteBased === true);
                 $('#supplierSiteBased').prop('checked', isSb);
-                $('#supplierSiteBasedLabel').text(isSb ? 'Site Based (தள வாரியாக)' : 'Total (மொத்தமாக)');
+                $('#supplierSiteBasedLabel').text(isSb ? 'Site Based' : 'Total');
 
                 let mats = tr.data('materials') || [];
                 if (typeof mats === 'string') {
@@ -1021,7 +1018,7 @@
 
             // Modal Site Based Switch Label Update
             $('#supplierSiteBased').on('change', function () {
-                $('#supplierSiteBasedLabel').text($(this).is(':checked') ? 'Site Based (தள வாரியாக)' : 'Total (மொத்தமாக)');
+                $('#supplierSiteBasedLabel').text($(this).is(':checked') ? 'Site Based' : 'Total');
             });
 
             // Form Submit (Create or Update)
@@ -1120,7 +1117,7 @@
                                         id="toggleSiteBased_${supplier.id}"
                                         ${isSb ? 'checked' : ''}
                                         style="cursor: pointer; width: 2.2em; height: 1.15em;"
-                                        title="Toggle Site Based (தள வாரியாக) vs Total (மொத்தமாக)">
+                                        title="Toggle Site Based vs Total">
                                     <label class="form-check-label small fw-semibold cursor-pointer text-nowrap toggle-site-label-${supplier.id} ${isSb ? 'text-primary' : 'text-muted'}"
                                         for="toggleSiteBased_${supplier.id}" style="font-size: 0.75rem;">
                                         ${isSb ? 'Site Based' : 'Total'}

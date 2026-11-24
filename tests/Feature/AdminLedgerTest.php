@@ -61,7 +61,7 @@ test('admin ledger index page renders successfully with summary and records', fu
     $response = $this->actingAs($this->owner)->get('/admin-ledger');
 
     $response->assertStatus(200);
-    $response->assertSee('Admin Ledger (நிர்வாக பேரேடு)');
+    $response->assertSee('Admin Ledger');
     $response->assertSee('Dr. K. Senthil Kumar');
     $response->assertSee('Site B - Clinic &amp; Residence', false);
     $response->assertSee('150,000.00');

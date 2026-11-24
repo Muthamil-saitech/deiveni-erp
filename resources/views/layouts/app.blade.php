@@ -574,7 +574,7 @@
                     </div>
                     <div>
                         <div class="fw-bold fs-6 tracking-wide lh-1 text-white">DEIVENI</div>
-                        <small class="ta-text text-warning" style="font-size: 0.72rem;">தெய்வேணி கன்ஸ்ட்ரக்ஷன்</small>
+                        <small class="text-warning text-uppercase" style="font-size: 0.72rem; letter-spacing: 0.05em;">Construction</small>
                     </div>
                 </a>
                 <button class="btn btn-sm btn-link text-white-50 d-lg-none p-0" id="closeSidebarBtn">
@@ -602,7 +602,7 @@
                 @endphp
 
                 @if ($canSeeMasters)
-                    <div class="sidebar-heading" data-role-section="masters">MASTERS (முதன்மை தகவல்)</div>
+                    <div class="sidebar-heading" data-role-section="masters">MASTERS</div>
                     <ul class="nav flex-column">
                         @if (auth()->user()?->canAccess('worker_categories') ?? true)
                             <li class="nav-item">
@@ -610,8 +610,7 @@
                                     class="nav-link {{ Request::is('worker-categories*') ? 'active' : '' }}"
                                     data-menu="worker_categories">
                                     <i class="bi bi-person-badge-fill"></i>
-                                    <span>Worker Categories <span class="ta-text text-white-50"
-                                            style="font-size:0.75rem;">(பிரிவுகள்)</span></span>
+                                    <span>Worker Categories</span>
                                 </a>
                             </li>
                         @endif
@@ -621,8 +620,7 @@
                                 <a href="{{ url('/units') }}" class="nav-link {{ Request::is('units*') ? 'active' : '' }}"
                                     data-menu="units">
                                     <i class="bi bi-rulers"></i>
-                                    <span>Units Master <span class="ta-text text-white-50"
-                                            style="font-size:0.75rem;">(அளவீடுகள்)</span></span>
+                                    <span>Units Master</span>
                                 </a>
                             </li>
                         @endif
@@ -632,8 +630,7 @@
                                 <a href="{{ url('/materials') }}"
                                     class="nav-link {{ Request::is('materials*') ? 'active' : '' }}" data-menu="materials">
                                     <i class="bi bi-box-seam-fill"></i>
-                                    <span>Materials Master <span class="ta-text text-white-50"
-                                            style="font-size:0.75rem;">(பொருட்கள்)</span></span>
+                                    <span>Materials Master</span>
                                 </a>
                             </li>
                         @endif
@@ -643,8 +640,7 @@
                                 <a href="{{ url('/suppliers') }}"
                                     class="nav-link {{ Request::is('suppliers*') ? 'active' : '' }}" data-menu="suppliers">
                                     <i class="bi bi-truck"></i>
-                                    <span>Suppliers <span class="ta-text text-white-50"
-                                            style="font-size:0.75rem;">(சப்ளையர்கள்)</span></span>
+                                    <span>Suppliers</span>
                                 </a>
                             </li>
                         @endif
@@ -655,8 +651,7 @@
                                     class="nav-link {{ Request::is('banks*') || Request::is('bank-master*') ? 'active' : '' }}"
                                     data-menu="banks">
                                     <i class="bi bi-bank"></i>
-                                    <span>Bank Master <span class="ta-text text-white-50" style="font-size:0.75rem;">(வங்கி
-                                            தகவல்)</span></span>
+                                    <span>Bank Master</span>
                                 </a>
                             </li>
                         @endif
@@ -667,8 +662,7 @@
                                     class="nav-link {{ Request::is('branches*') || Request::is('branch-master*') ? 'active' : '' }}"
                                     data-menu="branches">
                                     <i class="bi bi-diagram-3"></i>
-                                    <span>Branch Master <span class="ta-text text-white-50" style="font-size:0.75rem;">(வங்கி
-                                            கிளைகள்)</span></span>
+                                    <span>Branch Master</span>
                                 </a>
                             </li>
                         @endif
@@ -679,8 +673,7 @@
                                     class="nav-link {{ Request::is('properties*') || Request::is('property-master*') ? 'active' : '' }}"
                                     data-menu="properties">
                                     <i class="bi bi-building"></i>
-                                    <span>Property Master <span class="ta-text text-white-50" style="font-size:0.75rem;">(சொத்து
-                                            விவரங்கள்)</span></span>
+                                    <span>Property Master</span>
                                 </a>
                             </li>
                         @endif
@@ -691,8 +684,7 @@
                                     class="nav-link {{ Request::is('property-types*') || Request::is('property-type-master*') || Request::is('rentals*') || Request::is('rental-master*') ? 'active' : '' }}"
                                     data-menu="property_types">
                                     <i class="bi bi-buildings"></i>
-                                    <span>Property Type Master <span class="ta-text text-white-50"
-                                            style="font-size:0.75rem;">(சொத்து வகைகள்)</span></span>
+                                    <span>Property Type Master</span>
                                 </a>
                             </li>
                         @endif
@@ -703,8 +695,7 @@
                                     class="nav-link {{ Request::is('transaction-types*') ? 'active' : '' }}"
                                     data-menu="transaction_types">
                                     <i class="bi bi-arrow-left-right"></i>
-                                    <span>Transaction Types <span class="ta-text text-white-50"
-                                            style="font-size:0.75rem;">(பரிவர்த்தனை வகைகள்)</span></span>
+                                    <span>Transaction Types</span>
                                 </a>
                             </li>
                         @endif
@@ -716,15 +707,14 @@
                 @endphp
 
                 @if ($canSeeSiteOps)
-                    <div class="sidebar-heading" data-role-section="site-mgmt">SITE OPERATIONS (தள நிர்வாகம்)</div>
+                    <div class="sidebar-heading" data-role-section="site-mgmt">SITE OPERATIONS</div>
                     <ul class="nav flex-column">
                         @if (auth()->user()?->canAccess('sites') ?? true)
                             <li class="nav-item">
                                 <a href="{{ url('/sites') }}" class="nav-link {{ Request::is('sites*') ? 'active' : '' }}"
                                     data-menu="sites">
                                     <i class="bi bi-building-gear"></i>
-                                    <span>Project Sites <span class="ta-text text-white-50"
-                                            style="font-size:0.75rem;">(தளங்கள்)</span></span>
+                                    <span>Project Sites </span>
                                 </a>
                             </li>
                         @endif
@@ -734,8 +724,7 @@
                                     class="nav-link {{ Request::is('daily-allocation*') ? 'active' : '' }}"
                                     data-menu="daily_allocation">
                                     <i class="bi bi-calendar-check-fill"></i>
-                                    <span>Daily Allocation <span class="ta-text text-white-50"
-                                            style="font-size:0.75rem;">(தினசரி ஒதுக்கீடு)</span></span>
+                                    <span>Daily Allocation </span>
                                 </a>
                             </li>
                         @endif
@@ -745,8 +734,7 @@
                                     class="nav-link {{ Request::is('weekly-wages*') ? 'active' : '' }}"
                                     data-menu="weekly_wages">
                                     <i class="bi bi-journal-text"></i>
-                                    <span>Weekly Wages <span class="ta-text text-white-50" style="font-size:0.75rem;">(வார
-                                            கூலி)</span></span>
+                                    <span>Weekly Wages </span>
                                 </a>
                             </li>
                         @endif
@@ -764,8 +752,7 @@
                                 <a href="{{ url('/purchases') }}"
                                     class="nav-link {{ Request::is('purchases*') ? 'active' : '' }}" data-menu="purchases">
                                     <i class="bi bi-cart-check-fill"></i>
-                                    <span>Purchases & Inward <span class="ta-text text-white-50"
-                                            style="font-size:0.75rem;">(கொள்முதல்)</span></span>
+                                    <span>Purchases & Inward </span>
                                 </a>
                             </li>
                         @endif
@@ -774,8 +761,7 @@
                                 <a href="{{ url('/material-usages') }}"
                                     class="nav-link {{ Request::is('material-usage*') ? 'active' : '' }}" data-menu="material_usage">
                                     <i class="bi bi-hammer"></i>
-                                    <span>Material Usage <span class="ta-text text-white-50"
-                                            style="font-size:0.75rem;">(பொருள் பயன்பாடு)</span></span>
+                                    <span>Material Usage </span>
                                 </a>
                             </li>
                         @endif
@@ -784,8 +770,7 @@
                                 <a href="{{ url('/stock-transfers') }}"
                                     class="nav-link {{ Request::is('stock-transfers*') ? 'active' : '' }}" data-menu="stock_transfer">
                                     <i class="bi bi-arrow-left-right"></i>
-                                    <span>Stock Transfer <span class="ta-text text-white-50"
-                                            style="font-size:0.75rem;">(பொருள் பரிமாற்றம்)</span></span>
+                                    <span>Stock Transfer </span>
                                 </a>
                             </li>
                         @endif
@@ -797,15 +782,14 @@
                 @endphp
 
                 @if ($canSeeFinance)
-                    <div class="sidebar-heading" data-role-section="accounts">FINANCE & LEDGER (கணக்குகள்)</div>
+                    <div class="sidebar-heading" data-role-section="accounts">FINANCE & LEDGER</div>
                     <ul class="nav flex-column">
                         @if (auth()->user()?->canAccess('ledger') ?? true)
                             <li class="nav-item">
                                 <a href="{{ url('/ledger') }}" class="nav-link {{ Request::is('ledger*') ? 'active' : '' }}"
                                     data-menu="ledger">
                                     <i class="bi bi-book-half"></i>
-                                    <span>Daily Ledger <span class="ta-text text-white-50"
-                                            style="font-size:0.75rem;">(பேரேடு)</span></span>
+                                    <span>Daily Ledger </span>
                                 </a>
                             </li>
                         @endif
@@ -814,8 +798,7 @@
                                 <a href="{{ url('/admin-ledger') }}" class="nav-link {{ Request::is('admin-ledger*') ? 'active' : '' }}"
                                     data-menu="admin_ledger">
                                     <i class="bi bi-journal-bookmark-fill"></i>
-                                    <span>Admin Ledger <span class="ta-text text-white-50"
-                                            style="font-size:0.75rem;">(நிர்வாக பேரேடு)</span></span>
+                                    <span>Admin Ledger </span>
                                 </a>
                             </li>
                         @endif
@@ -825,8 +808,7 @@
                                     class="nav-link {{ Request::is('cash-transfer*') ? 'active' : '' }}"
                                     data-menu="cash_transfer">
                                     <i class="bi bi-arrow-left-right"></i>
-                                    <span>Cash Transfer <span class="ta-text text-white-50"
-                                            style="font-size:0.75rem;">(பணப் பரிமாற்றம்)</span></span>
+                                    <span>Cash Transfer </span>
                                 </a>
                             </li>
                         @endif
@@ -834,7 +816,7 @@
                 @endif
 
                 @if (auth()->user()?->canAccess('warehouse') ?? true)
-                    <div class="sidebar-heading" data-role-section="inventory">INVENTORY (கிடங்கு)</div>
+                    <div class="sidebar-heading" data-role-section="inventory">INVENTORY</div>
                     <ul class="nav flex-column">
                         <li class="nav-item">
                             <a href="{{ url('/warehouse') }}"
@@ -861,15 +843,14 @@
                 @endphp
 
                 @if ($showReportsSection)
-                    <div class="sidebar-heading" data-role-section="reports">REPORTS & ANALYTICS (அறிக்கைகள்)</div>
+                    <div class="sidebar-heading" data-role-section="reports">REPORTS & ANALYTICS</div>
                     <ul class="nav flex-column">
                         @if ($canProfitLoss)
                             <li class="nav-item" data-menu="reports_profit_loss">
                                 <a href="{{ route('reports.admin.profit-loss') }}"
                                     class="nav-link {{ Request::is('reports/admin/profit-loss*') ? 'active' : '' }}">
                                     <i class="bi bi-graph-up-arrow"></i>
-                                    <span>Profit & Loss <span class="ta-text text-white-50"
-                                            style="font-size:0.75rem;">(லாப/நஷ்டம்)</span></span>
+                                    <span>Profit & Loss </span>
                                 </a>
                             </li>
                         @endif
@@ -878,8 +859,7 @@
                                 <a href="{{ route('reports.site.labour-allocations') }}"
                                     class="nav-link {{ Request::is('reports/site/labour-allocations*') ? 'active' : '' }}">
                                     <i class="bi bi-people-fill"></i>
-                                    <span>Labour Allocation <span class="ta-text text-white-50" style="font-size:0.75rem;">(கூலி
-                                            பட்டியல்)</span></span>
+                                    <span>Labour Allocation </span>
                                 </a>
                             </li>
                         @endif
@@ -888,8 +868,7 @@
                                 <a href="{{ route('reports.site.daily-expenses') }}"
                                     class="nav-link {{ Request::is('reports/site/daily-expenses*') ? 'active' : '' }}">
                                     <i class="bi bi-receipt-cutoff"></i>
-                                    <span>Daily Expenses <span class="ta-text text-white-50"
-                                            style="font-size:0.75rem;">(தினசரி செலவுகள்)</span></span>
+                                    <span>Daily Expenses </span>
                                 </a>
                             </li>
                         @endif
@@ -898,8 +877,7 @@
                                 <a href="{{ route('reports.site.cash-handling') }}"
                                     class="nav-link {{ Request::is('reports/site/cash-handling*') ? 'active' : '' }}">
                                     <i class="bi bi-cash-stack"></i>
-                                    <span>Site Cash Handling <span class="ta-text text-white-50" style="font-size:0.75rem;">(தள
-                                            பணப்புழக்கம்)</span></span>
+                                    <span>Site Cash Handling </span>
                                 </a>
                             </li>
                         @endif
@@ -908,8 +886,7 @@
                                 <a href="{{ route('reports.site.purchases-inward') }}"
                                     class="nav-link {{ Request::is('reports/site/purchases-inward*') ? 'active' : '' }}">
                                     <i class="bi bi-cart-check-fill"></i>
-                                    <span>Purchases & Inward <span class="ta-text text-white-50"
-                                            style="font-size:0.75rem;">(கொள்முதல்)</span></span>
+                                    <span>Purchases & Inward </span>
                                 </a>
                             </li>
                         @endif
@@ -918,8 +895,7 @@
                                 <a href="{{ route('reports.site.warehouse-inventory') }}"
                                     class="nav-link {{ Request::is('reports/site/warehouse-inventory*') ? 'active' : '' }}">
                                     <i class="bi bi-boxes"></i>
-                                    <span>Warehouse Stock <span class="ta-text text-white-50"
-                                            style="font-size:0.75rem;">(கிடங்கு இருப்பு)</span></span>
+                                    <span>Warehouse Stock </span>
                                 </a>
                             </li>
                         @endif
@@ -928,8 +904,7 @@
                                 <a href="{{ route('reports.site.stock-transfers') }}"
                                     class="nav-link {{ Request::is('reports/site/stock-transfers*') ? 'active' : '' }}">
                                     <i class="bi bi-arrow-left-right"></i>
-                                    <span>Stock Transfer <span class="ta-text text-white-50"
-                                            style="font-size:0.75rem;">(பொருள் பரிமாற்றம்)</span></span>
+                                    <span>Stock Transfer </span>
                                 </a>
                             </li>
                         @endif
@@ -938,8 +913,7 @@
                                 <a href="{{ route('reports.account.ledger') }}"
                                     class="nav-link {{ Request::is('reports/account/ledger*') ? 'active' : '' }}">
                                     <i class="bi bi-journal-text"></i>
-                                    <span>Financial & Ledger <span class="ta-text text-white-50"
-                                            style="font-size:0.75rem;">(நிதி லெட்ஜர்)</span></span>
+                                    <span>Financial & Ledger </span>
                                 </a>
                             </li>
                         @endif
@@ -953,7 +927,7 @@
 
                 @if ($canAdmin || $canProfile)
                     <div class="sidebar-heading" data-role-section="admin">
-                        {{ $canAdmin ? 'ADMINISTRATION (நிர்வாகம்)' : 'ACCOUNT (சுயவிவரம்)' }}
+                        {{ $canAdmin ? 'ADMINISTRATION' : 'ACCOUNT' }}
                     </div>
                     <ul class="nav flex-column">
                         @if (auth()->user()?->canAccess('users'))
@@ -971,8 +945,7 @@
                                 <a href="{{ url('/audit-logs') }}"
                                     class="nav-link {{ Request::is('audit-logs*') ? 'active' : '' }}" data-menu="audit_logs">
                                     <i class="bi bi-clock-history"></i>
-                                    <span>Audit Logs <span class="ta-text text-white-50" style="font-size:0.75rem;">(தணிக்கை
-                                            பதிவு)</span></span>
+                                    <span>Audit Logs </span>
                                 </a>
                             </li>
                         @endif
@@ -1062,7 +1035,7 @@
                             @endif
                             @if (auth()->user()?->canAccess('audit_logs'))
                                 <li><a class="dropdown-item" href="{{ url('/audit-logs') }}"><i
-                                            class="bi bi-clock-history me-2"></i>Audit Logs (தணிக்கை)</a></li>
+                                            class="bi bi-clock-history me-2"></i>Audit Logs</a></li>
                             @endif
                             <li>
                                 <hr class="dropdown-divider">
@@ -1099,7 +1072,7 @@
                             <strong>Deiveni Construction Management System</strong> &bull; Phase 1 Prototype
                         </div>
                         <!-- <div class="ta-text text-muted" style="font-size: 0.8rem;">
-                            மேஸ்திரி, கொத்தனார் & சித்தாள் தினசரி கூலி மற்றும் கணக்கு நிர்வாக மென்பொருள்
+                            Construction Site Operations & Financial Management System
                         </div> -->
                     </div>
                 </footer>
@@ -1309,7 +1282,7 @@
                                 <div class="input-group input-group-sm mb-2">
                                     <span class="input-group-text bg-light border-end-0 py-1"><i class="bi bi-search text-muted"></i></span>
                                     <input type="text" class="form-control searchable-search-input border-start-0 ps-0 py-1"
-                                           placeholder="Type to search (தேடுக)..." autocomplete="off">
+                                           placeholder="Type to search..." autocomplete="off">
                                     <button class="btn btn-outline-secondary searchable-clear-search d-none py-1 px-2" type="button"><i class="bi bi-x"></i></button>
                                 </div>
                                 <div class="searchable-options-list overflow-auto" style="max-height: 250px;">
@@ -1442,7 +1415,7 @@
                                     <i class="bi bi-inbox me-1"></i>No items available
                                     <div class="mt-2">
                                         <button type="button" class="btn btn-sm btn-outline-primary searchable-add-empty-btn py-1 px-2" style="font-size:0.78rem;">
-                                            <i class="bi bi-plus-circle me-1"></i>Add New Material (+ புதிய பொருள்)
+                                            <i class="bi bi-plus-circle me-1"></i>Add New Material
                                         </button>
                                     </div>
                                 </div>
@@ -1535,7 +1508,7 @@
                                 <div class="searchable-add-new-wrap p-2 border-top bg-light mt-1">
                                     <button type="button" class="btn btn-sm btn-primary w-100 searchable-add-new-btn d-flex align-items-center justify-content-center py-1 fw-semibold" style="font-size:0.8rem;">
                                         <i class="bi bi-plus-circle me-1"></i>
-                                        <span>Add "${rawQuery}" as New Material (+ புதிய பொருள்)</span>
+                                        <span>Add "${rawQuery}" as New Material</span>
                                     </button>
                                 </div>
                             `);

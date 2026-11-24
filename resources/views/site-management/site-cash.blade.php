@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('title', 'Site Cash Handling')
-@section('page_title', 'Site Cash Handling (தள ரொக்க மேலாண்மை)')
+@section('page_title', 'Site Cash Handling')
 
 @push('styles')
     <style>
@@ -43,7 +43,7 @@
         <div class="card-custom p-3 mb-4 bg-white">
             <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
                 <div>
-                    <h5 class="fw-bold mb-0 text-dark">Site Manager Cash-in-Hand Book (தள ரொக்க குறிப்பேடு)</h5>
+                    <h5 class="fw-bold mb-0 text-dark">Site Manager Cash-in-Hand Book</h5>
                 </div>
                 <div class="d-flex gap-2 flex-wrap">
                     <button class="btn btn-outline-secondary btn-sm" id="exportCashBookBtn">
@@ -78,7 +78,7 @@
                     <small class="text-muted d-block fw-semibold">CURRENT CASH-IN-HAND</small>
                     <h3 class="fw-bold text-success mb-0" id="liveCashInHandTotal">
                         @amount($stats['cash_in_hand'] ?? 0)</h3>
-                    <small class="ta-text text-secondary" style="font-size: 0.75rem;">கையில் உள்ள ரொக்கம்</small>
+                    
                 </div>
             </div>
         </div>
@@ -89,17 +89,17 @@
                 <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
                     <div>
                         <strong class="text-dark">
-                            <i class="bi bi-bell-fill text-warning me-2 fs-5"></i>Pending Cash Transfer for Acceptance (ஏற்க வேண்டிய ரொக்கப் பரிமாற்றம் உள்ளது):
+                            <i class="bi bi-bell-fill text-warning me-2 fs-5"></i>Pending Cash Transfer for Acceptance:
                         </strong>
                         <div class="small text-dark mt-1">
                             @foreach ($pendingIncomingTransfers as $pt)
-                                <div>• <strong>{{ $pt->directionLabel() }}</strong>: <strong class="text-primary">₹{{ number_format((float) $pt->amount, 2) }}</strong> sent by {{ $pt->handed_over_by }} ({{ $pt->transfer_date ? \Carbon\Carbon::parse($pt->transfer_date)->format('d M Y') : '' }}). தளம்: <strong>{{ $pt->projectSite?->name ?? 'N/A' }}</strong>. நீங்கள் Accept செய்த பின்னரே Site Cash Handling கணக்கில் ஏற்றப்படும்.</div>
+                                <div>• <strong>{{ $pt->directionLabel() }}</strong>: <strong class="text-primary">₹{{ number_format((float) $pt->amount, 2) }}</strong> sent by {{ $pt->handed_over_by }} ({{ $pt->transfer_date ? \Carbon\Carbon::parse($pt->transfer_date)->format('d M Y') : '' }}). Site: <strong>{{ $pt->projectSite?->name ?? 'N/A' }}</strong>. Please accept to reflect in Site Cash Handling.</div>
                             @endforeach
                         </div>
                     </div>
                     <div>
                         <a href="{{ route('cash-transfer.index') }}" class="btn btn-warning btn-sm fw-bold shadow-sm">
-                            <i class="bi bi-check-circle me-1"></i>Accept Transfer (ஏற்றுக்கொள்)
+                            <i class="bi bi-check-circle me-1"></i>Accept Transfer
                         </a>
                     </div>
                 </div>
@@ -193,7 +193,7 @@
                 </div>
                 <div class="col-6 col-md-3">
                     <select class="form-select form-select-sm" id="txnTypeFilter">
-                        <option value="">All Cash Flow Types (அனைத்து பரிவர்த்தனைகள்)</option>
+                        <option value="">All Cash Flow Types</option>
                         <option value="Project Cash Received">Project Cash Received from AM (+)</option>
                         <option value="Owner Advance">Advance Received from Owner (+)</option>
                         <option value="Client Advance">Advance Received from Client (+)</option>
@@ -206,7 +206,7 @@
                 </div>
                 <div class="col-6 col-md-2">
                     <select class="form-select form-select-sm" id="siteFilter">
-                        <option value="">All Project Sites (அனைத்து தளங்கள்)</option>
+                        <option value="">All Project Sites</option>
                         @foreach ($sites as $site)
                             <option value="{{ $site->id }}">{{ $site->name }}</option>
                         @endforeach
@@ -233,11 +233,11 @@
                     <thead>
                         <tr>
                             <th>Date & Time</th>
-                            <th>Type (வகை)</th>
+                            <th>Type</th>
                             <th>Paid To / Recipient</th>
                             <th>Site Project</th>
-                            <th>Supplier (சப்ளையர்)</th>
-                            <th>Description / Notes (விவரம்)</th>
+                            <th>Supplier</th>
+                            <th>Description / Notes</th>
                             <th>Mode & Ref / Bill</th>
                             <th class="text-end">Inflow (+)</th>
                             <th class="text-end">Outflow (-)</th>
@@ -417,7 +417,7 @@
                                 <td class="text-center">
                                     <a href="{{ route('site-cash.show', $txn->encrypted_id) }}"
                                         class="btn btn-outline-primary btn-sm px-2 py-1"
-                                        title="View Details (விவரங்களை பார்க்க)">
+                                        title="View Details">
                                         <i class="bi bi-eye me-1"></i>View
                                     </a>
                                 </td>
@@ -481,10 +481,10 @@
                     <div class="modal-body">
                         <div class="row g-3">
                             <div class="col-12 col-md-6" id="siteSelectGroup">
-                                <label class="form-label small fw-semibold">Project Site (திட்ட தளம்) <span
+                                <label class="form-label small fw-semibold">Project Site <span
                                         class="text-danger">*</span></label>
                                 <select class="form-select" id="newTxnSite" name="project_site_id">
-                                    <option value="" disabled selected>-- Select Project Site (தளத்தை தேர்வு செய்க) --
+                                    <option value="" disabled selected>-- Select Project Site --
                                     </option>
                                     @foreach ($sites as $site)
                                         <option value="{{ $site->id }}" data-name="{{ $site->name }}">{{ $site->name }}</option>
@@ -493,13 +493,13 @@
                                 <div class="invalid-feedback" id="errNewTxnSite"></div>
                             </div>
                             <div class="col-12 col-md-6">
-                                <label class="form-label small fw-semibold">Transaction Flow Type (பரிவர்த்தனை வகை) <span
+                                <label class="form-label small fw-semibold">Transaction Flow Type <span
                                         class="text-danger">*</span></label>
                                 <select class="form-select" id="newTxnType" name="transaction_type">
-                                    <option value="" disabled selected>-- Select Flow Type (வகையை தேர்வு செய்க) --</option>
+                                    <option value="" disabled selected>-- Select Flow Type --</option>
                                     <option value="Owner Advance">Advance Received from Owner (+)</option>
                                     <option value="Client Advance">Advance Received from Client (+)</option>
-                                    <option value="Client Direct to Supplier">Client Direct to Supplier (சப்ளையருக்கு நேரடியாக) (-)</option>
+                                    <option value="Client Direct to Supplier">Client Direct to Supplier (-)</option>
                                     <option value="Tool Rental">Tool Rental Purchase (-)</option>
                                     <option value="Supplier Payment">Supplier Payment (-)</option>
                                     <option value="Daily Wage Payment">Daily Worker Wage Payment (-)</option>
@@ -510,41 +510,41 @@
                             </div>
 
                             <div class="col-12 col-md-6">
-                                <label class="form-label small fw-semibold">Paid To / Handled By (யாருக்கு / யாரிடம் கொடுக்கப்பட்டது) <span
+                                <label class="form-label small fw-semibold">Paid To / Handled By <span
                                         class="text-danger">*</span></label>
                                 <select class="form-select" id="newTxnPaidTo" name="paid_to">
-                                    <option value="Site Manager" selected>Site Manager (தள மேலாளர்)</option>
-                                    <option value="Account Manager">Account Manager (கணக்கு மேலாளர்)</option>
-                                    <option value="Direct to Supplier">Direct to Supplier (சப்ளையருக்கு நேரடியாக)</option>
-                                    <option value="Supplier Delivery Person">Supplier Delivery Person / Rep (சப்ளையர் ஆள் / நபர்)</option>
-                                    <option value="Other">Other (பிறர்)</option>
+                                    <option value="Site Manager" selected>Site Manager</option>
+                                    <option value="Account Manager">Account Manager</option>
+                                    <option value="Direct to Supplier">Direct to Supplier</option>
+                                    <option value="Supplier Delivery Person">Supplier Delivery Person / Rep</option>
+                                    <option value="Other">Other</option>
                                 </select>
                                 <div class="invalid-feedback" id="errNewTxnPaidTo"></div>
                             </div>
 
                             <div class="col-12 col-md-6">
-                                <label class="form-label small fw-semibold">Payment Mode (செலுத்தும் முறை) <span
+                                <label class="form-label small fw-semibold">Payment Mode <span
                                         class="text-danger">*</span></label>
                                 <div class="d-flex gap-3 align-items-center flex-wrap pt-2">
                                     <div class="form-check">
                                         <input class="form-check-input" type="radio" name="payment_mode" id="payModeCash"
                                             value="Cash" checked>
                                         <label class="form-check-label small fw-semibold text-success" for="payModeCash">
-                                            <i class="bi bi-cash-stack me-1"></i>Cash (ரொக்கம்)
+                                            <i class="bi bi-cash-stack me-1"></i>Cash
                                         </label>
                                     </div>
                                     <div class="form-check">
                                         <input class="form-check-input" type="radio" name="payment_mode" id="payModeCheque"
                                             value="Cheque">
                                         <label class="form-check-label small fw-semibold text-warning-emphasis" for="payModeCheque">
-                                            <i class="bi bi-card-text me-1"></i>Cheque (காசோலை)
+                                            <i class="bi bi-card-text me-1"></i>Cheque
                                         </label>
                                     </div>
                                     <div class="form-check">
                                         <input class="form-check-input" type="radio" name="payment_mode" id="payModeUPI"
                                             value="UPI">
                                         <label class="form-check-label small fw-semibold text-info-emphasis" for="payModeUPI">
-                                            <i class="bi bi-qr-code me-1"></i>UPI (யுபிஐ)
+                                            <i class="bi bi-qr-code me-1"></i>UPI
                                         </label>
                                     </div>
                                 </div>
@@ -556,13 +556,13 @@
                                 <div class="p-3 rounded-3 border bg-warning-subtle bg-opacity-25">
                                     <div class="d-flex align-items-center justify-content-between mb-2">
                                         <span class="small fw-bold text-dark">
-                                            <i class="bi bi-card-text text-warning me-1"></i>Cheque Payment Details (காசோலை விவரம்)
+                                            <i class="bi bi-card-text text-warning me-1"></i>Cheque Payment Details
                                         </span>
                                         <span class="badge bg-warning text-dark small">Cheque Mode</span>
                                     </div>
                                     <div class="row g-2">
                                         <div class="col-12 col-md-4">
-                                            <label class="form-label small fw-semibold">Cheque Number (காசோலை எண்) <span class="text-danger">*</span></label>
+                                            <label class="form-label small fw-semibold">Cheque Number <span class="text-danger">*</span></label>
                                             <div class="input-group">
                                                 <span class="input-group-text bg-white"><i class="bi bi-hash"></i></span>
                                                 <input type="text" class="form-control font-monospace fw-bold" id="newTxnChequeNo" placeholder="e.g. CHQ-981245">
@@ -570,14 +570,14 @@
                                             <div class="invalid-feedback" id="errNewTxnChequeNo"></div>
                                         </div>
                                         <div class="col-12 col-md-4">
-                                            <label class="form-label small fw-semibold">Bank Name (வங்கி பெயர்)</label>
+                                            <label class="form-label small fw-semibold">Bank Name</label>
                                             <div class="input-group">
                                                 <span class="input-group-text bg-white"><i class="bi bi-bank"></i></span>
                                                 <input type="text" class="form-control" id="newTxnBankName" name="bank_name" placeholder="e.g. SBI, Indian Bank, HDFC">
                                             </div>
                                         </div>
                                         <div class="col-12 col-md-4">
-                                            <label class="form-label small fw-semibold">Cheque Handed Over To / Received By (யாரிடம் கொடுக்கப்பட்டது)</label>
+                                            <label class="form-label small fw-semibold">Cheque Handed Over To / Received By</label>
                                             <div class="input-group">
                                                 <span class="input-group-text bg-white"><i class="bi bi-person"></i></span>
                                                 <input type="text" class="form-control" id="newTxnChequeReceiver" placeholder="e.g. Site Manager, Account Manager, Supplier Contact">
@@ -592,13 +592,13 @@
                                 <div class="p-3 rounded-3 border bg-info-subtle bg-opacity-25">
                                     <div class="d-flex align-items-center justify-content-between mb-2">
                                         <span class="small fw-bold text-dark">
-                                            <i class="bi bi-qr-code text-info me-1"></i>UPI Transaction Details (யுபிஐ பரிவர்த்தனை விவரம்)
+                                            <i class="bi bi-qr-code text-info me-1"></i>UPI Transaction Details
                                         </span>
                                         <span class="badge bg-info text-white small">UPI Mode</span>
                                     </div>
                                     <div class="row g-2">
                                         <div class="col-12 col-md-4">
-                                            <label class="form-label small fw-semibold">UPI Ref / UTR No (பரிவர்த்தனை எண் / UTR) <span class="text-danger">*</span></label>
+                                            <label class="form-label small fw-semibold">UPI Ref / UTR No <span class="text-danger">*</span></label>
                                             <div class="input-group">
                                                 <span class="input-group-text bg-white"><i class="bi bi-hash"></i></span>
                                                 <input type="text" class="form-control font-monospace fw-bold" id="newTxnUpiRef" placeholder="e.g. 438920194821">
@@ -606,14 +606,14 @@
                                             <div class="invalid-feedback" id="errNewTxnUpiRef"></div>
                                         </div>
                                         <div class="col-12 col-md-4">
-                                            <label class="form-label small fw-semibold">Supplier UPI ID / Mobile (சப்ளையர் UPI ஐடி / எண்)</label>
+                                            <label class="form-label small fw-semibold">Supplier UPI ID / Mobile</label>
                                             <div class="input-group">
                                                 <span class="input-group-text bg-white"><i class="bi bi-phone"></i></span>
                                                 <input type="text" class="form-control font-monospace" id="newTxnUpiId" name="upi_id" placeholder="e.g. 9444111222@upi / GPay No">
                                             </div>
                                         </div>
                                         <div class="col-12 col-md-4">
-                                            <label class="form-label small fw-semibold">UPI Account Holder Name (கணக்கு வைத்திருப்பவர் பெயர்)</label>
+                                            <label class="form-label small fw-semibold">UPI Account Holder Name</label>
                                             <div class="input-group">
                                                 <span class="input-group-text bg-white"><i class="bi bi-person-check"></i></span>
                                                 <input type="text" class="form-control fw-semibold" id="newTxnAccountHolder" name="account_holder_name" placeholder="e.g. Bala Murugan / Balaji Metals">
@@ -633,14 +633,14 @@
                                     <div class="mb-2">
                                         <label class="form-label small fw-semibold text-dark mb-1">
                                             <i class="bi bi-box-arrow-in-down text-primary me-1"></i>Material / Supplier
-                                            Source (பொருள் பெறும் ஆதாரம்)
+                                            Source
                                         </label>
                                         <div class="d-flex gap-3">
                                             <div class="form-check">
                                                 <input class="form-check-input" type="radio" name="material_source"
                                                     id="sourceThirdParty" value="third_party" checked>
                                                 <label class="form-check-label small fw-semibold" for="sourceThirdParty">
-                                                    Third-Party Supplier (வெளி சப்ளையர்)
+                                                    Third-Party Supplier
                                                 </label>
                                             </div>
                                             <div class="form-check">
@@ -648,7 +648,7 @@
                                                     id="sourceWarehouse" value="own_warehouse">
                                                 <label class="form-check-label small fw-semibold text-primary"
                                                     for="sourceWarehouse">
-                                                    Own Warehouse (மைய கிடங்கு இருப்பு)
+                                                    Own Warehouse
                                                 </label>
                                             </div>
                                         </div>
@@ -659,32 +659,32 @@
                                         <!-- Payment Basis (Site Based vs Total) - Only shown if supplier in master is NOT site-based -->
                                         <div class="mb-3" id="supplierPaymentScopeBox" style="display: none;">
                                             <label class="form-label small fw-semibold text-dark mb-1">
-                                                <i class="bi bi-diagram-3 text-primary me-1"></i>Payment Basis (பட்டுவாடா வகை)
+                                                <i class="bi bi-diagram-3 text-primary me-1"></i>Payment Basis
                                             </label>
                                             <div class="d-flex gap-4">
                                                 <div class="form-check">
                                                     <input class="form-check-input" type="radio" name="supplier_payment_scope"
                                                         id="scopeSiteBased" value="site_based" checked>
                                                     <label class="form-check-label small fw-semibold" for="scopeSiteBased">
-                                                        <i class="bi bi-building me-1 text-primary"></i>Site Based (தள வாரியாக)
+                                                        <i class="bi bi-building me-1 text-primary"></i>Site Based
                                                     </label>
                                                 </div>
                                                 <div class="form-check">
                                                     <input class="form-check-input" type="radio" name="supplier_payment_scope"
                                                         id="scopeTotal" value="total">
                                                     <label class="form-check-label small fw-semibold text-primary" for="scopeTotal">
-                                                        <i class="bi bi-cash-stack me-1 text-success"></i>Total (மொத்தமாக)
+                                                        <i class="bi bi-cash-stack me-1 text-success"></i>Total
                                                     </label>
                                                 </div>
                                             </div>
                                         </div>
 
                                         <label class="form-label small fw-semibold text-dark">
-                                            <i class="bi bi-truck text-primary me-1"></i>Select Supplier (சப்ளையர்)
+                                            <i class="bi bi-truck text-primary me-1"></i>Select Supplier
                                             <span class="text-danger">*</span>
                                         </label>
                                         <select class="form-select fw-semibold mb-2" id="newTxnSupplier" name="supplier_id">
-                                            <option value="" disabled selected>-- Select Supplier (சப்ளையரை தேர்வு செய்க) --
+                                            <option value="" disabled selected>-- Select Supplier --
                                             </option>
                                             @foreach ($suppliers as $supplier)
                                                 <option value="{{ $supplier->id }}"
@@ -704,7 +704,7 @@
                                         <!-- Cash Handover Person (ONLY for Supplier Option in Cash Mode) -->
                                         <div class="mt-2" id="cashReceiverGroup" style="display: none;">
                                             <label class="form-label small fw-semibold text-dark mb-1">
-                                                <i class="bi bi-person-check text-primary me-1"></i>Received By (பணம் பெற்றுக் கொண்ட நபர்)
+                                                <i class="bi bi-person-check text-primary me-1"></i>Received By
                                             </label>
                                             <div class="input-group">
                                                 <span class="input-group-text bg-white"><i class="bi bi-person"></i></span>
@@ -717,11 +717,11 @@
                                             <label class="form-label small fw-semibold text-dark mb-1"
                                                 for="newTxnPurchaseOrder">
                                                 <i class="bi bi-file-earmark-ruled text-primary me-1"></i>Select
-                                                Purchase Order (கொள்முதல் ஆணை)
+                                                Purchase Order
                                             </label>
                                             <select class="form-select fw-semibold" id="newTxnPurchaseOrder"
                                                 name="purchase_order_no">
-                                                <option value="" selected>-- Select Purchase Order (கொள்முதல் ஆணை) --
+                                                <option value="" selected>-- Select Purchase Order --
                                                 </option>
                                             </select>
                                             <div class="invalid-feedback" id="errNewTxnPurchaseOrder"></div>
@@ -732,13 +732,13 @@
                                     <div id="warehouseMaterialBox" style="display: none;">
                                         <label class="form-label small fw-semibold text-dark mb-1">
                                             <i class="bi bi-boxes text-primary me-1"></i>Select In-Stock Materials from
-                                            Central Warehouse (கிடங்கு இருப்பு பொருட்கள்)
+                                            Central Warehouse
                                         </label>
                                         <div class="table-responsive">
                                             <table class="table table-sm table-bordered bg-white mb-2" id="siteCashWhTable">
                                                 <thead class="table-light small">
                                                     <tr>
-                                                        <th>Material (பொருள்)</th>
+                                                        <th>Material</th>
                                                         <th style="width: 90px;">In Stock</th>
                                                         <th style="width: 100px;">Rate (₹)</th>
                                                         <th style="width: 90px;">Qty</th>
@@ -764,7 +764,7 @@
                             <div class="col-12 col-md-6" id="dailyAllocationDateGroup" style="display: none;">
                                 <div class="d-flex justify-content-between align-items-center mb-1">
                                     <label class="form-label small fw-semibold text-dark mb-0" for="newTxnDailyAllocation">
-                                        <i class="bi bi-calendar-event text-primary me-1"></i>Allocation Date (ஒதுக்கீடு தேதி) <span class="text-danger">*</span>
+                                        <i class="bi bi-calendar-event text-primary me-1"></i>Allocation Date <span class="text-danger">*</span>
                                     </label>
                                     <span class="badge bg-primary-subtle text-primary border small" id="allocationCountBadge" style="display:none;">0 Days</span>
                                 </div>
@@ -776,13 +776,13 @@
                             <div class="col-12" id="dailyAllocationWorkersGroup" style="display: none;">
                                 <div class="d-flex justify-content-between align-items-center mb-1">
                                     <label class="form-label small fw-semibold text-dark mb-0">
-                                        <i class="bi bi-people-fill text-primary me-1"></i>Work Details (வேலை மற்றும் தொழிலாளர் விவரம்)
+                                        <i class="bi bi-people-fill text-primary me-1"></i>Work Details
                                     </label>
                                     <span class="badge bg-primary-subtle text-primary border small" id="workersTotalCountBadge" style="display:none;">0 Workers</span>
                                 </div>
                                 <div id="newTxnWorkersContainer" class="p-2 rounded border bg-light d-flex flex-wrap gap-2 align-items-center" style="min-height: 44px;">
                                     <span class="text-muted small fst-italic" id="newTxnWorkersPlaceholder">
-                                        <i class="bi bi-info-circle me-1"></i>ஒதுக்கீட்டுத் தேதியைத் தேர்வு செய்தவுடன் தொழிலாளர்கள் விவரம் தனித்தனியாக இங்கே காட்டப்படும்.
+                                        <i class="bi bi-info-circle me-1"></i>Worker details will appear here once an allocation date is selected.
                                     </span>
                                 </div>
                                 <input type="hidden" id="newTxnWorkersDisplay" name="workers_summary">
@@ -794,28 +794,28 @@
                                     <div class="card-header bg-primary-subtle py-2 px-2 px-md-3 d-flex justify-content-between align-items-center flex-wrap gap-2">
                                         <div class="d-flex align-items-center gap-2">
                                             <span class="small fw-bold text-primary">
-                                                <i class="bi bi-wallet2 me-1"></i>Balance to Return (திரும்பச் செலுத்தும் விவரம்)
+                                                <i class="bi bi-wallet2 me-1"></i>Balance to Return
                                             </span>
                                         </div>
                                         <div class="btn-group btn-group-sm" role="group" id="returnSourceToggleGroup">
                                             <button type="button" class="btn btn-primary active py-0 px-2 small" id="returnTabWagesBtn" style="font-size: 0.76rem;">
-                                                <i class="bi bi-people me-1"></i>Office Cash Wages (கூலி)
+                                                <i class="bi bi-people me-1"></i>Office Cash Wages
                                             </button>
                                             <button type="button" class="btn btn-outline-primary py-0 px-2 small" id="returnTabTransfersBtn" style="font-size: 0.76rem;">
-                                                <i class="bi bi-arrow-left-right me-1"></i>Cash Transfer (பணப் பரிமாற்றம்)
+                                                <i class="bi bi-arrow-left-right me-1"></i>Cash Transfer
                                             </button>
                                         </div>
                                     </div>
                                     <div class="card-body p-2 p-md-3" id="balanceReturnedOfficeCashBody">
                                         <div class="text-muted small py-1">
                                             <i class="bi bi-arrow-up-circle text-primary me-1"></i>
-                                            மேலே உள்ள திட்டத் தளத்தை (Project Site) தேர்வு செய்தால், கணக்கு மேலாளருக்கு திரும்பச் செலுத்த வேண்டிய Office Cash கூலி அல்லது பணப் பரிமாற்ற விவரம் தானாகவே இங்கே காட்டப்படும்.
+                                            Select a Project Site above to display returnable Office Cash wages or cash transfer details.
                                         </div>
                                     </div>
                                     <div class="card-body p-2 p-md-3 d-none" id="balanceReturnedCashTransferBody">
                                         <div class="text-muted small py-1">
                                             <i class="bi bi-arrow-up-circle text-primary me-1"></i>
-                                            மேலே உள்ள திட்டத் தளத்தை (Project Site) தேர்வு செய்தால், திரும்பச் செலுத்த வேண்டிய பணப் பரிமாற்ற விவரம் (Cash Transfers) இங்கே காட்டப்படும்.
+                                            Select a Project Site above to display returnable Cash Transfer details.
                                         </div>
                                     </div>
                                 </div>
@@ -826,7 +826,7 @@
                             </div>
 
                             <div class="col-12 col-md-6">
-                                <label class="form-label small fw-semibold" id="txnAmountLabel">Cash Amount (ரூ.) <span
+                                <label class="form-label small fw-semibold" id="txnAmountLabel">Cash Amount (₹) <span
                                         class="text-danger">*</span></label>
                                 <div class="input-group">
                                     <span class="input-group-text">₹</span>
@@ -846,7 +846,7 @@
                             </div>
                             <div class="col-12">
                                 <label class="form-label small fw-semibold">Bill / Receipt Image <span
-                                        class="text-muted fw-normal">(Optional / பில் அல்லது ரசீது படம்)</span></label>
+                                        class="text-muted fw-normal">(Optional)</span></label>
                                 <input type="file" class="form-control" id="newTxnImage" name="receipt_image"
                                     accept="image/png, image/jpeg, image/jpg, image/webp">
                                 <div class="invalid-feedback" id="errNewTxnImage"></div>
@@ -956,7 +956,7 @@
                 if (type === 'Daily Wage Payment' || type === 'Daily Worker Wage Payment') {
                     $('#dailyAllocationDateGroup').slideDown(200);
                     $('#dailyAllocationWorkersGroup').slideDown(200);
-                    $('#txnAmountLabel').html('Labour Wages / Cash Amount (ரூ.) <span class="text-danger">*</span>');
+                    $('#txnAmountLabel').html('Labour Wages / Cash Amount (₹) <span class="text-danger">*</span>');
                     $('#purchaseOrderSelectGroup').slideUp(200);
                     $('#newTxnPaidTo').val('Site Manager');
                     updateDailyAllocationList();
@@ -967,9 +967,9 @@
                     $('#dailyAllocationWorkersGroup').slideUp(200);
                     $('#newTxnWorkersDisplay').val('');
                     $('#workersTotalCountBadge').hide();
-                    $('#newTxnWorkersContainer').html('<span class="text-muted small fst-italic"><i class="bi bi-info-circle me-1"></i>ஒதுக்கீட்டுத் தேதியைத் தேர்வு செய்தவுடன் தொழிலாளர்கள் விவரம் தனித்தனியாக இங்கே காட்டப்படும்.</span>');
+                    $('#newTxnWorkersContainer').html('<span class="text-muted small fst-italic"><i class="bi bi-info-circle me-1"></i>Worker details will appear here once an allocation date is selected.</span>');
                     $('#labourWageHint').hide();
-                    $('#txnAmountLabel').html('Cash Amount (ரூ.) <span class="text-danger">*</span>');
+                    $('#txnAmountLabel').html('Cash Amount (₹) <span class="text-danger">*</span>');
                 }
 
                 // 2. Client Direct to Supplier handling
@@ -1086,7 +1086,7 @@
                     allocSelect.empty().append('<option value="" selected>-- Select Project Site above --</option>');
                     $('#newTxnWorkersDisplay').val('');
                     $('#workersTotalCountBadge').hide();
-                    $('#newTxnWorkersContainer').html('<span class="text-muted small fst-italic"><i class="bi bi-info-circle me-1"></i>ஒதுக்கீட்டுத் தேதியைத் தேர்வு செய்தவுடன் தொழிலாளர்கள் விவரம் தனித்தனியாக இங்கே காட்டப்படும்.</span>');
+                    $('#newTxnWorkersContainer').html('<span class="text-muted small fst-italic"><i class="bi bi-info-circle me-1"></i>Worker details will appear here once an allocation date is selected.</span>');
                     $('#labourWageHint').hide();
                     return;
                 }
@@ -1125,17 +1125,17 @@
 
                 if (!list || list.length === 0) {
                     badge.hide();
-                    allocSelect.empty().append('<option value="" selected>-- All daily wages recorded (தினசரி கூலிகள் சேர்க்கப்பட்டுவிட்டது) --</option>');
+                    allocSelect.empty().append('<option value="" selected>-- All daily wages recorded --</option>');
                     $('#newTxnWorkersDisplay').val('');
                     totalCountBadge.hide();
-                    workersContainer.html('<span class="text-success small fw-semibold"><i class="bi bi-check-circle me-1"></i>அனைத்து தினசரி கூலிகளும் தள ரொக்கத்தில் சேர்க்கப்பட்டுவிட்டது.</span>');
+                    workersContainer.html('<span class="text-success small fw-semibold"><i class="bi bi-check-circle me-1"></i>All daily wages have been recorded in Site Cash.</span>');
                     $('#labourWageHint').hide();
                     return;
                 }
 
                 badge.text(`${list.length} Pending Day${list.length > 1 ? 's' : ''}`).show();
                 allocSelect.empty();
-                allocSelect.append('<option value="">-- Select Allocation Date (ஒதுக்கீடு தேதி) --</option>');
+                allocSelect.append('<option value="">-- Select Allocation Date --</option>');
 
                 list.forEach(function (a) {
                     const rawWage = (a.site_payable_wage !== undefined && a.site_payable_wage !== null) ? parseFloat(a.site_payable_wage) : (parseFloat(a.total_labour_wage) || 0);
@@ -1190,7 +1190,7 @@
                 if (!allocId) {
                     $('#newTxnWorkersDisplay').val('');
                     totalCountBadge.hide();
-                    workersContainer.html('<span class="text-muted small fst-italic"><i class="bi bi-info-circle me-1"></i>ஒதுக்கீட்டுத் தேதியைத் தேர்வு செய்தவுடன் தொழிலாளர்கள் விவரம் தனித்தனியாக இங்கே காட்டப்படும்.</span>');
+                    workersContainer.html('<span class="text-muted small fst-italic"><i class="bi bi-info-circle me-1"></i>Worker details will appear here once an allocation date is selected.</span>');
                     $('#labourWageHint').hide();
                     return;
                 }
@@ -1224,7 +1224,7 @@
                     const itemsArr = JSON.parse(itemsJson);
                     if (Array.isArray(itemsArr) && itemsArr.length > 0) {
                         itemsArr.forEach(function (it) {
-                            const name = it.name_ta || it.name_en || 'தொழிலாளர்';
+                            const name = it.name_en || it.name_ta || 'Worker';
                             const count = parseInt(it.worker_count) || 1;
                             const dailyWage = parseFloat(it.daily_wage) || 0;
                             const isAmPaid = (it.paid_by === 'Account Manager');
@@ -1234,7 +1234,7 @@
                                     <i class="bi ${isAmPaid ? 'bi-person-check text-info' : 'bi-person text-primary'} fs-6"></i>
                                     <span class="fw-semibold text-dark">${name}:</span>
                                     <strong class="${isAmPaid ? 'text-info' : 'text-primary'} fs-6">${count}</strong>
-                                    ${dailyWage > 0 ? `<span class="text-muted small ps-1 border-start">₹${dailyWage.toLocaleString('en-IN')}/நாள்</span>` : ''}
+                                    ${dailyWage > 0 ? `<span class="text-muted small ps-1 border-start">₹${dailyWage.toLocaleString('en-IN')}/day</span>` : ''}
                                     ${isAmPaid ? `<span class="badge bg-info text-white ms-1" style="font-size:0.7rem;">Paid by AM</span>` : ''}
                                 </span>
                             `);
@@ -1356,7 +1356,7 @@
                 const poSelect = $('#newTxnPurchaseOrder');
 
                 if (!siteId || !supplierId) {
-                    poSelect.empty().append('<option value="" selected>-- Select Purchase Order (கொள்முதல் ஆணை) --</option>');
+                    poSelect.empty().append('<option value="" selected>-- Select Purchase Order --</option>');
                     return;
                 }
 
@@ -1394,11 +1394,11 @@
                 const poSelect = $('#newTxnPurchaseOrder');
 
                 if (!matchingPOs || matchingPOs.length === 0) {
-                    poSelect.empty().append('<option value="" selected>-- No Pending POs (கொள்முதல் ஆணைகள் இல்லை) --</option>');
+                    poSelect.empty().append('<option value="" selected>-- No Pending POs --</option>');
                     return;
                 }
 
-                poSelect.empty().append('<option value="" selected>-- Select Purchase Order (கொள்முதல் ஆணை) --</option>');
+                poSelect.empty().append('<option value="" selected>-- Select Purchase Order --</option>');
 
                 matchingPOs.forEach(function (po) {
                     const rawAmount = parseFloat(po.total_amount) || 0;
@@ -1463,7 +1463,7 @@
                     $container.html(`
                         <div class="text-muted small py-1">
                             <i class="bi bi-arrow-up-circle text-primary me-1"></i>
-                            மேலே உள்ள திட்டத் தளத்தை (Project Site) தேர்வு செய்தால், கணக்கு மேலாளருக்கு திரும்பச் செலுத்த வேண்டிய Office Cash கூலி விவரம் தானாகவே இங்கே காட்டப்படும்.
+                            Select a Project Site above to view pending Office Cash wage details.
                         </div>
                     `);
                     return;
@@ -1498,8 +1498,8 @@
                                 <div class="text-muted small py-1 d-flex align-items-center">
                                     <i class="bi bi-info-circle text-secondary fs-5 me-2"></i>
                                     <div>
-                                        <strong class="text-dark">இந்தத் தளத்திற்கு திரும்பச் செலுத்த வேண்டிய Office Cash கூலி நிலுவை எதுவும் இல்லை.</strong>
-                                        <div class="text-secondary" style="font-size: 0.78rem;">Project Cash மூலம் வழங்கப்பட்ட பெயிண்டர்/எலக்ட்ரீஷியன் கூலியைத் திரும்பச் செலுத்த வேண்டியதில்லை. நீங்கள் வழக்கமான முன்பண மீதத்தை (Advance Balance) உள்ளிடலாம்.</div>
+                                        <strong class="text-dark">No pending Office Cash wages to return for this site.</strong>
+                                        <div class="text-secondary" style="font-size: 0.78rem;">Painter/electrician wages paid via Project Cash do not need to be returned. You can enter regular advance balance if any.</div>
                                     </div>
                                 </div>
                             `);
@@ -1550,7 +1550,7 @@
                                 <div class="alert alert-success py-2 px-3 small d-flex align-items-center mb-2">
                                     <i class="bi bi-check-circle-fill fs-5 me-2 text-success"></i>
                                     <div>
-                                        <strong>அனைத்து Office Cash கூலிகளும் கணக்கு மேலாளருக்கு திரும்பச் செலுத்தப்பட்டுவிட்டன!</strong>
+                                        <strong>All Office Cash wages have been returned to the account manager!</strong>
                                         <div class="text-muted" style="font-size: 0.76rem;">All office cash wage payments for this site have been fully returned.</div>
                                     </div>
                                 </div>
@@ -1805,7 +1805,7 @@
                     $container.html(`
                         <div class="text-muted small py-1">
                             <i class="bi bi-arrow-up-circle text-primary me-1"></i>
-                            மேலே உள்ள திட்டத் தளத்தை (Project Site) தேர்வு செய்தால், பணப் பரிமாற்ற விவரம் (Cash Transfers) இங்கே காட்டப்படும்.
+                            Select a Project Site above to view Cash Transfer details.
                         </div>
                     `);
                     return;
@@ -1837,8 +1837,8 @@
                                 <div class="text-muted small py-1 d-flex align-items-center">
                                     <i class="bi bi-info-circle text-secondary fs-5 me-2"></i>
                                     <div>
-                                        <strong class="text-dark">இந்தத் தளத்திற்கு திரும்பச் செலுத்த வேண்டிய Cash Transfer நிலுவை எதுவும் இல்லை.</strong>
-                                        <div class="text-secondary" style="font-size: 0.78rem;">அனைத்து பணப் பரிமாற்றங்களும் ஏற்கனவே சமரசம் (Settled) செய்யப்பட்டுவிட்டன.</div>
+                                        <strong class="text-dark">No pending Cash Transfer balance to return for this site.</strong>
+                                        <div class="text-secondary" style="font-size: 0.78rem;">All cash transfers have already been settled.</div>
                                     </div>
                                 </div>
                             `);
@@ -1872,16 +1872,16 @@
                                         <span class="fw-bold text-danger fs-6">${ct.amount_formatted}</span>
                                     </div>
                                     <div class="p-2 rounded bg-light border-start border-3 border-primary small mb-1">
-                                        <div class="text-muted" style="font-size: 0.72rem;">காரணம் / Purpose:</div>
+                                        <div class="text-muted" style="font-size: 0.72rem;">Purpose:</div>
                                         <strong class="text-dark" style="font-size: 0.82rem;">
                                             <i class="bi bi-chat-left-quote text-primary me-1"></i>${escapeHtml(ct.purpose)}
                                         </strong>
                                     </div>
                                     <div class="d-flex justify-content-between align-items-center flex-wrap gap-1 text-muted" style="font-size: 0.72rem;">
                                         <div>
-                                            <span>வழங்கியவர்: <strong class="text-dark">${escapeHtml(ct.handed_over_by || '-')}</strong></span>
+                                            <span>Handed over by: <strong class="text-dark">${escapeHtml(ct.handed_over_by || '-')}</strong></span>
                                             <span class="mx-1">&bull;</span>
-                                            <span>பெற்றவர்: <strong class="text-dark">${escapeHtml(ct.received_by || '-')}</strong></span>
+                                            <span>Received by: <strong class="text-dark">${escapeHtml(ct.received_by || '-')}</strong></span>
                                         </div>
                                         <button type="button" class="btn btn-sm btn-outline-primary py-0 px-2 select-ct-return-btn" data-id="${ct.id}" style="font-size: 0.75rem;">
                                             <i class="bi bi-check-circle me-1"></i>Select to Return
@@ -2143,9 +2143,9 @@
                 $('#newTxnDailyAllocation').empty().append('<option value="" selected>-- Select Project Site above --</option>');
                 $('#newTxnWorkersDisplay').val('');
                 $('#workersTotalCountBadge').hide();
-                $('#newTxnWorkersContainer').html('<span class="text-muted small fst-italic"><i class="bi bi-info-circle me-1"></i>ஒதுக்கீட்டுத் தேதியைத் தேர்வு செய்தவுடன் தொழிலாளர்கள் விவரம் தனித்தனியாக இங்கே காட்டப்படும்.</span>');
+                $('#newTxnWorkersContainer').html('<span class="text-muted small fst-italic"><i class="bi bi-info-circle me-1"></i>Worker details will appear here once an allocation date is selected.</span>');
                 $('#labourWageHint').hide();
-                $('#txnAmountLabel').html('Cash Amount (ரூ.) <span class="text-danger">*</span>');
+                $('#txnAmountLabel').html('Cash Amount (₹) <span class="text-danger">*</span>');
                 $('#allocationCountBadge').hide();
                 $('#payModeCash').prop('checked', true);
                 $('#chequeDetailsGroup').hide();
@@ -2171,7 +2171,7 @@
                 $('#siteCashWhTableBody').empty();
                 $('#newTxnSupplier').val('');
                 $('#poListSection').show();
-                $('#newTxnPurchaseOrder').empty().append('<option value="" selected>-- Select Purchase Order (கொள்முதல் ஆணை) --</option>');
+                $('#newTxnPurchaseOrder').empty().append('<option value="" selected>-- Select Purchase Order --</option>');
                 $('#newTxnImagePreviewBox').attr('style', 'display: none !important;').removeClass('d-flex');
                 $('#saveSpinner').addClass('d-none');
                 $('#saveCashTxnBtn').prop('disabled', false);
@@ -2196,7 +2196,7 @@
 
                     if (!chq) {
                         $('#newTxnChequeNo').addClass('is-invalid');
-                        $('#errNewTxnChequeNo').text('Please enter the Cheque Number (காசோலை எண்).').show();
+                        $('#errNewTxnChequeNo').text('Please enter the Cheque Number.').show();
                         showToast('Please enter the Cheque Number.', 'warning');
                         return;
                     }
