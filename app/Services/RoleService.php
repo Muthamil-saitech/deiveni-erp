@@ -52,6 +52,10 @@ class RoleService implements RoleServiceInterface
         if (is_array($menus)) {
             // Non-owner roles can never have administration access (Owner Only)
             $menus = array_values(array_diff($menus, ['users', 'audit_logs']));
+            // Daily Ledger is strictly for Account Manager / account roles; disabled for Owner & Site Manager
+            if ($roleData['slug'] === 'owner' || str_contains($roleData['slug'], 'site-manager') || str_contains(strtolower($roleData['name']), 'site manager')) {
+                $menus = array_values(array_diff($menus, ['ledger']));
+            }
             $this->roleRepository->syncMenus($role, $menus);
         }
 
@@ -85,6 +89,7 @@ class RoleService implements RoleServiceInterface
         if (isset($data['menus']) && is_array($data['menus'])) {
             $menus = $data['menus'];
             $isOwner = $role->slug === 'owner' || strtolower($role->name) === 'owner';
+            $isSiteManager = in_array($role->slug, ['site-manager', 'site_manager'], true) || str_contains(strtolower($role->name), 'site manager');
 
             if ($isOwner) {
                 // Owner always retains administration access
@@ -94,6 +99,12 @@ class RoleService implements RoleServiceInterface
                 if (! in_array('audit_logs', $menus, true)) {
                     $menus[] = 'audit_logs';
                 }
+                // Daily Ledger is disabled for Owner & Site Manager (only for Account Manager)
+                $menus = array_values(array_diff($menus, ['ledger']));
+            } elseif ($isSiteManager) {
+                // Non-owner roles cannot have administration access (Owner Only)
+                // Daily Ledger is disabled for Site Manager
+                $menus = array_values(array_diff($menus, ['users', 'audit_logs', 'ledger']));
             } else {
                 // Non-owner roles cannot have administration access (Owner Only)
                 $menus = array_values(array_diff($menus, ['users', 'audit_logs']));

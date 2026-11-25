@@ -332,6 +332,9 @@
                                                     @if(in_array($menuKey, ['users', 'audit_logs'], true))
                                                         <span class="badge bg-secondary-subtle text-secondary border ms-1"
                                                             style="font-size: 0.65rem;">Owner Only</span>
+                                                    @elseif($menuKey === 'ledger')
+                                                        <span class="badge bg-info-subtle text-info border ms-1"
+                                                            style="font-size: 0.65rem;">Account Roles Only</span>
                                                     @endif
 </span>
                                                 @if(!empty($menu['name_ta']))
@@ -645,6 +648,7 @@
                         $('#formRoleDescription').val(role.description || '');
 
                         const isOwner = role.is_system && (role.slug === 'owner' || role.slug === 'admin' || (role.name && role.name.toLowerCase() === 'owner'));
+                        const isSiteManager = (role.slug === 'site-manager' || role.slug === 'site_manager' || (role.name && role.name.toLowerCase().includes('site manager')));
 
                         if (isOwner) {
                             $('#formRoleName').prop('readonly', true);
@@ -659,6 +663,23 @@
                             // Task 2: Only owner is defaultly checked and disabled for administration access
                             $('#menu_users').prop('checked', true).prop('disabled', true);
                             $('#menu_audit_logs').prop('checked', true).prop('disabled', true);
+                            // Daily Ledger is disabled for Owner
+                            $('#menu_ledger').prop('checked', false).prop('disabled', true);
+                        } else if (isSiteManager) {
+                            $('#formRoleName').prop('readonly', role.is_system);
+                            $('.menu-checkbox').prop('disabled', false);
+
+                            if (role.menus && Array.isArray(role.menus)) {
+                                role.menus.forEach(function (menuKey) {
+                                    $(`#menu_${menuKey}`).prop('checked', true);
+                                });
+                            }
+
+                            // Administration access is strictly for Owner role (disabled and unchecked)
+                            $('#menu_users').prop('checked', false).prop('disabled', true);
+                            $('#menu_audit_logs').prop('checked', false).prop('disabled', true);
+                            // Daily Ledger is disabled for Site Manager
+                            $('#menu_ledger').prop('checked', false).prop('disabled', true);
                         } else {
                             $('#formRoleName').prop('readonly', role.is_system);
                             $('.menu-checkbox').prop('disabled', false);
@@ -672,6 +693,8 @@
                             // Task 2: Administration access is strictly for Owner role (disabled and unchecked)
                             $('#menu_users').prop('checked', false).prop('disabled', true);
                             $('#menu_audit_logs').prop('checked', false).prop('disabled', true);
+                            // Daily Ledger is enabled for Account Manager and other roles
+                            $('#menu_ledger').prop('disabled', false);
                         }
 
                         const modal = new bootstrap.Modal(document.getElementById('roleModal'));

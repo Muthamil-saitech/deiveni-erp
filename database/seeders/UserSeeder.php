@@ -35,8 +35,8 @@ class UserSeeder extends Seeder
             'is_system' => true,
         ]);
 
-        // Ensure initial menu permissions
-        foreach (array_keys(config('menus.items', [])) as $key) {
+        // Ensure initial menu permissions (Daily Ledger is disabled for Owner & Site Manager)
+        foreach (array_diff(array_keys(config('menus.items', [])), ['ledger']) as $key) {
             RoleMenu::firstOrCreate(['role_id' => $ownerRole->id, 'menu_key' => $key]);
         }
 

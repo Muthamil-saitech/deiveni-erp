@@ -41,16 +41,20 @@
 
         <!-- Navigation Tabs: Daily Ledger vs Admin Ledger -->
         <ul class="nav nav-tabs mb-3 border-bottom">
-            <li class="nav-item">
-                <a class="nav-link active" href="{{ route('ledger.index') }}">
-                    <i class="bi bi-book-half me-1"></i> Daily Ledger 
-</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="{{ route('admin-ledger.index') }}">
-                    <i class="bi bi-journal-bookmark-fill me-1 text-primary"></i> Admin Ledger 
-</a>
-            </li>
+            @if (auth()->user()?->canAccess('ledger'))
+                <li class="nav-item">
+                    <a class="nav-link active" href="{{ route('ledger.index') }}">
+                        <i class="bi bi-book-half me-1"></i> Daily Ledger 
+                    </a>
+                </li>
+            @endif
+            @if (auth()->user()?->canAccess('admin_ledger'))
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ route('admin-ledger.index') }}">
+                        <i class="bi bi-journal-bookmark-fill me-1 text-primary"></i> Admin Ledger 
+                    </a>
+                </li>
+            @endif
         </ul>
 
         <!-- Header & Action Row -->

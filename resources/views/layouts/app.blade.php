@@ -1101,10 +1101,17 @@
                 <i class="bi bi-bank"></i>
                 <span>Banks</span>
 </a>
-            <a href="{{ url('/ledger') }}" class="mobile-nav-item {{ Request::is('ledger*') ? 'active' : '' }}">
-                <i class="bi bi-book-half"></i>
-                <span>Ledger</span>
-</a>
+            @if (auth()->user()?->canAccess('ledger'))
+                <a href="{{ url('/ledger') }}" class="mobile-nav-item {{ Request::is('ledger*') ? 'active' : '' }}">
+                    <i class="bi bi-book-half"></i>
+                    <span>Ledger</span>
+                </a>
+            @elseif (auth()->user()?->canAccess('admin_ledger'))
+                <a href="{{ url('/admin-ledger') }}" class="mobile-nav-item {{ Request::is('admin-ledger*') ? 'active' : '' }}">
+                    <i class="bi bi-journal-bookmark-fill"></i>
+                    <span>Admin Ledger</span>
+                </a>
+            @endif
             @if ($showReportsSection)
                 @php
                     $mobileAmReportUrl = $canAccountLedger ? route('reports.account.ledger') : ($canLabourAlloc ? route('reports.site.labour-allocations') : ($canCashHandling ? route('reports.site.cash-handling') : ($canPurchasesInward ? route('reports.site.purchases-inward') : ($canWarehouseStock ? route('reports.site.warehouse-inventory') : route('reports.admin.profit-loss')))));
@@ -1148,10 +1155,17 @@
                 <i class="bi bi-journal-text"></i>
                 <span>Wages</span>
 </a>
-            <a href="{{ url('/ledger') }}" class="mobile-nav-item {{ Request::is('ledger*') ? 'active' : '' }}">
-                <i class="bi bi-book-half"></i>
-                <span>Ledger</span>
-</a>
+            @if (auth()->user()?->canAccess('ledger'))
+                <a href="{{ url('/ledger') }}" class="mobile-nav-item {{ Request::is('ledger*') ? 'active' : '' }}">
+                    <i class="bi bi-book-half"></i>
+                    <span>Ledger</span>
+                </a>
+            @elseif (auth()->user()?->canAccess('admin_ledger'))
+                <a href="{{ url('/admin-ledger') }}" class="mobile-nav-item {{ Request::is('admin-ledger*') ? 'active' : '' }}">
+                    <i class="bi bi-journal-bookmark-fill"></i>
+                    <span>Admin Ledger</span>
+                </a>
+            @endif
             @if ($showReportsSection)
                 @php
                     $mobileAdminReportUrl = $canProfitLoss ? route('reports.admin.profit-loss') : ($canLabourAlloc ? route('reports.site.labour-allocations') : ($canCashHandling ? route('reports.site.cash-handling') : ($canPurchasesInward ? route('reports.site.purchases-inward') : ($canWarehouseStock ? route('reports.site.warehouse-inventory') : route('reports.account.ledger')))));
