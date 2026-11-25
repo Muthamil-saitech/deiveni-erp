@@ -139,18 +139,26 @@
                                 <td class="text-muted fw-semibold serial-cell">{{ str_pad($index + 1, 2, '0', STR_PAD_LEFT) }}
                                 </td>
                                 <td>
-                                    <div class="fw-bold text-dark fs-6 row-name-en">{{ $material->name_en }}</div>
+                                    @if (! empty($material->name_ta))
+                                        <div class="fw-bold text-dark fs-6 ta-text row-name-primary">{{ $material->name_ta }}</div>
+                                    @else
+                                        <div class="fw-bold text-dark fs-6 row-name-primary">{{ $material->name_en }}</div>
+                                    @endif
                                     <div class="d-flex align-items-center gap-1 mt-0.5">
-                                        <span class="ta-badge row-name-ta">{{ $material->name_ta }}</span>
+                                        @if (! empty($material->name_ta))
+                                            <small class="text-muted row-name-secondary">{{ $material->name_en }}</small>
+                                        @else
+                                            <small class="text-muted row-name-secondary d-none"></small>
+                                        @endif
                                         @if ($inUse)
                                             <span class="badge bg-light text-secondary border border-secondary-subtle"
                                                 style="font-size: 0.68rem;"
                                                 title="Supplied by {{ $suppliersCount }} {{ $suppliersCount === 1 ? 'supplier' : 'suppliers' }} in Supplier Master">
                                                 <i class="bi bi-truck me-0.5"></i>{{ $suppliersCount }}
                                                 {{ $suppliersCount === 1 ? 'supplier' : 'suppliers' }}
-</span>
+                                            </span>
                                         @endif
-</div>
+                                    </div>
                                 </td>
                                 <td>
                                     <span class="badge bg-light text-primary border fw-semibold px-2 py-1 row-unit-badge">
@@ -656,8 +664,13 @@
                                     .data('unit', unitName)
                                     .data('status', mat.status);
 
-                                tr.find('.row-name-en').text(mat.name_en);
-                                tr.find('.row-name-ta').text(mat.name_ta);
+                                const hasTa = Boolean(mat.name_ta && mat.name_ta.trim() !== '');
+                                tr.find('.row-name-primary')
+                                    .toggleClass('ta-text', hasTa)
+                                    .text(hasTa ? mat.name_ta : mat.name_en);
+                                tr.find('.row-name-secondary')
+                                    .toggleClass('d-none', !hasTa)
+                                    .text(hasTa ? mat.name_en : '');
                                 tr.find('.row-unit-badge').html(`<i class="${unitIcon} me-1"></i><span class="row-unit-text">${unitName}</span>`);
 
                                 if (mat.status === 'Active') {
@@ -674,6 +687,7 @@
                                     ? '<span class="badge bg-success-subtle text-success row-status-badge">Active</span>'
                                     : '<span class="badge bg-secondary-subtle text-muted row-status-badge">Inactive</span>';
 
+                                const hasTa = Boolean(mat.name_ta && mat.name_ta.trim() !== '');
                                 const newRowHtml = `
                                         <tr data-id="${mat.id}"
                                             data-name-en="${mat.name_en}"
@@ -685,10 +699,10 @@
                                             data-in-use="0">
                                             <td class="text-muted fw-semibold serial-cell">01</td>
                                             <td>
-                                                <div class="fw-bold text-dark fs-6 row-name-en">${mat.name_en}</div>
+                                                <div class="fw-bold text-dark fs-6 ${hasTa ? 'ta-text' : ''} row-name-primary">${hasTa ? mat.name_ta : mat.name_en}</div>
                                                 <div class="d-flex align-items-center gap-1 mt-0.5">
-                                                    <span class="ta-badge row-name-ta">${mat.name_ta}</span>
-</div>
+                                                    <small class="text-muted row-name-secondary ${hasTa ? '' : 'd-none'}">${hasTa ? mat.name_en : ''}</small>
+                                                </div>
                                             </td>
                                             <td>
                                                 <span class="badge bg-light text-primary border fw-semibold px-2 py-1 row-unit-badge">

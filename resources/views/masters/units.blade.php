@@ -114,15 +114,23 @@
                                 data-in-use="{{ $inUse ? '1' : '0' }}">
                                 <td class="text-muted fw-semibold serial-cell">{{ str_pad($index + 1, 2, '0', STR_PAD_LEFT) }}</td>
                                 <td>
-                                    <div class="fw-bold text-dark fs-6 row-name-en">{{ $unit->name_en }}</div>
+                                    @if (! empty($unit->name_ta))
+                                        <div class="fw-bold text-dark fs-6 ta-text row-name-primary">{{ $unit->name_ta }}</div>
+                                    @else
+                                        <div class="fw-bold text-dark fs-6 row-name-primary">{{ $unit->name_en }}</div>
+                                    @endif
                                     <div class="d-flex align-items-center gap-1 mt-0.5">
-                                        <span class="ta-badge row-name-ta">{{ $unit->name_ta }}</span>
+                                        @if (! empty($unit->name_ta))
+                                            <small class="text-muted row-name-secondary">{{ $unit->name_en }}</small>
+                                        @else
+                                            <small class="text-muted row-name-secondary d-none"></small>
+                                        @endif
                                         @if ($inUse)
                                             <span class="badge bg-light text-secondary border border-secondary-subtle" style="font-size: 0.68rem;" title="Used by {{ $materialsCount }} material(s) in Material Master">
                                                 <i class="bi bi-link-45deg me-0.5"></i>{{ $materialsCount }} {{ $materialsCount === 1 ? 'material' : 'materials' }}
-</span>
+                                            </span>
                                         @endif
-</div>
+                                    </div>
                                 </td>
                                 <td>
                                     <span class="font-monospace badge bg-primary-subtle text-primary border border-primary-subtle fs-6 row-code">{{ $unit->code }}</span>
@@ -572,8 +580,13 @@
                                   .data('usage', unit.usage || '')
                                   .data('status', unit.status);
 
-                                tr.find('.row-name-en').text(unit.name_en);
-                                tr.find('.row-name-ta').text(unit.name_ta);
+                                const hasTa = Boolean(unit.name_ta && unit.name_ta.trim() !== '');
+                                tr.find('.row-name-primary')
+                                    .toggleClass('ta-text', hasTa)
+                                    .text(hasTa ? unit.name_ta : unit.name_en);
+                                tr.find('.row-name-secondary')
+                                    .toggleClass('d-none', !hasTa)
+                                    .text(hasTa ? unit.name_en : '');
                                 tr.find('.row-code').text(unit.code);
                                 tr.find('.row-usage').text(displayUsage);
 
@@ -587,6 +600,7 @@
                             } else {
                                 $('#emptyUnitsRow').hide();
 
+                                const hasTa = Boolean(unit.name_ta && unit.name_ta.trim() !== '');
                                 const newRowHtml = `
                                     <tr data-id="${unit.id}"
                                         data-name-en="${unit.name_en}"
@@ -598,10 +612,10 @@
                                         data-in-use="0">
                                         <td class="text-muted fw-semibold serial-cell">01</td>
                                         <td>
-                                            <div class="fw-bold text-dark fs-6 row-name-en">${unit.name_en}</div>
+                                            <div class="fw-bold text-dark fs-6 ${hasTa ? 'ta-text' : ''} row-name-primary">${hasTa ? unit.name_ta : unit.name_en}</div>
                                             <div class="d-flex align-items-center gap-1 mt-0.5">
-                                                <span class="ta-badge row-name-ta">${unit.name_ta}</span>
-</div>
+                                                <small class="text-muted row-name-secondary ${hasTa ? '' : 'd-none'}">${hasTa ? unit.name_en : ''}</small>
+                                            </div>
                                         </td>
                                         <td>
                                             <span class="font-monospace badge bg-primary-subtle text-primary border border-primary-subtle fs-6 row-code">${unit.code}</span>

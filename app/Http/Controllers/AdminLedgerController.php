@@ -6,10 +6,10 @@ use App\Http\Requests\StoreAdminLedgerRequest;
 use App\Http\Requests\UpdateAdminLedgerRequest;
 use App\Models\Client;
 use App\Models\ProjectSite;
-use App\Models\PurchaseOrder;
 use App\Models\Supplier;
 use App\Services\Contracts\AdminLedgerServiceInterface;
 use App\Services\IdCipherService;
+use App\Services\SupplierPurchaseOrderService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -17,7 +17,8 @@ use Illuminate\View\View;
 class AdminLedgerController extends Controller
 {
     public function __construct(
-        public AdminLedgerServiceInterface $service
+        public AdminLedgerServiceInterface $service,
+        public SupplierPurchaseOrderService $purchaseOrderService
     ) {}
 
     /**
@@ -192,33 +193,20 @@ class AdminLedgerController extends Controller
             ? filter_var($request->query('is_site_based'), FILTER_VALIDATE_BOOLEAN)
             : ($scope !== 'total');
 
-        $query = PurchaseOrder::with(['items', 'projectSite', 'supplier'])
-            ->whereIn('status', ['Order Received', 'Order Completed']);
-
-        if ($isSiteBased && $siteId) {
-            $query->where('project_site_id', (int) $siteId);
-        }
-
-        if ($supplierId) {
-            $query->where(function ($q) use ($supplierId, $supplierName) {
-                $q->where('supplier_id', $supplierId);
-                if ($supplierName) {
-                    $q->orWhere('supplier_name', $supplierName);
-                }
-            });
-        } elseif ($supplierName) {
-            $query->where('supplier_name', $supplierName);
-        }
-
-        $orders = $query->orderByDesc('order_date')->get();
-
-        $totalPendingAmount = (float) $orders->sum(fn ($po) => (float) $po->total_amount);
+        $result = $this->purchaseOrderService->getPendingPurchaseOrders(
+            siteId: $siteId ? (int) $siteId : null,
+            supplierId: $supplierId ? (int) $supplierId : null,
+            supplierName: $supplierName ? (string) $supplierName : null,
+            isSiteBased: $isSiteBased,
+            user: $request->user(),
+            scopeToUserSites: false,
+        );
 
         return response()->json([
             'success' => true,
-            'orders' => $orders,
-            'total_pending_amount' => round($totalPendingAmount, 2),
-            'pending_count' => $orders->count(),
+            'orders' => $result['orders'],
+            'total_pending_amount' => $result['total_pending_amount'],
+            'pending_count' => $result['pending_count'],
         ]);
     }
 }

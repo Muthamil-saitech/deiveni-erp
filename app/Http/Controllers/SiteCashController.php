@@ -8,13 +8,13 @@ use App\Models\CashTransfer;
 use App\Models\DailyAllocation;
 use App\Models\DailyAllocationItem;
 use App\Models\ProjectSite;
-use App\Models\PurchaseOrder;
 use App\Models\SiteCash;
 use App\Models\Supplier;
 use App\Services\Contracts\ProjectSiteServiceInterface;
 use App\Services\Contracts\SiteCashServiceInterface;
 use App\Services\Contracts\WarehouseServiceInterface;
 use App\Services\IdCipherService;
+use App\Services\SupplierPurchaseOrderService;
 use Carbon\Carbon;
 use DateTimeInterface;
 use Illuminate\Http\JsonResponse;
@@ -28,7 +28,8 @@ class SiteCashController extends Controller
     public function __construct(
         public SiteCashServiceInterface $siteCashService,
         public ProjectSiteServiceInterface $projectSiteService,
-        public WarehouseServiceInterface $warehouseService
+        public WarehouseServiceInterface $warehouseService,
+        public SupplierPurchaseOrderService $purchaseOrderService
     ) {}
 
     /**
@@ -45,17 +46,11 @@ class SiteCashController extends Controller
             ->get();
         $warehouseItems = $this->warehouseService->getInStockItems();
         $user = $request->user();
-        $purchaseOrdersQuery = PurchaseOrder::with(['items', 'projectSite', 'supplier'])
-            ->whereIn('status', ['Order Received', 'Order Completed']);
-        if ($user && ! $user->isAdmin()) {
-            $purchaseOrdersQuery->whereHas('projectSite', function ($sq) use ($user) {
-                $sq->where('created_by', $user->id);
-            });
-        }
-        $rawPurchaseOrders = $purchaseOrdersQuery
-            ->orderByDesc('order_date')
-            ->get();
-        $purchaseOrders = $this->filterUnrecordedOrUpdatedPurchaseOrders($rawPurchaseOrders);
+        $purchaseOrders = $this->purchaseOrderService->getPendingPurchaseOrders(
+            isSiteBased: false,
+            user: $user,
+            scopeToUserSites: true,
+        )['orders'];
         $dailyAllocationsQuery = DailyAllocation::with(['items', 'projectSite', 'expenses']);
         if ($user && ! $user->isAdmin()) {
             $dailyAllocationsQuery->whereHas('projectSite', function ($sq) use ($user) {
@@ -426,104 +421,21 @@ class SiteCashController extends Controller
             ? filter_var($request->query('is_site_based'), FILTER_VALIDATE_BOOLEAN)
             : ($scope !== 'total');
 
-        $user = $request->user();
-        $query = PurchaseOrder::with(['items', 'projectSite', 'supplier'])
-            ->whereIn('status', ['Order Received', 'Order Completed']);
-        if ($user && ! $user->isAdmin()) {
-            $query->whereHas('projectSite', function ($sq) use ($user) {
-                $sq->where('created_by', $user->id);
-            });
-        }
-
-        if ($isSiteBased && $siteId) {
-            $query->where('project_site_id', $siteId);
-        }
-
-        if ($supplierId) {
-            $query->where(function ($q) use ($supplierId, $supplierName) {
-                $q->where('supplier_id', $supplierId);
-                if ($supplierName) {
-                    $q->orWhere('supplier_name', $supplierName);
-                }
-            });
-        } elseif ($supplierName) {
-            $query->where('supplier_name', $supplierName);
-        }
-
-        $orders = $query->orderByDesc('order_date')->get();
-        $filtered = $this->filterUnrecordedOrUpdatedPurchaseOrders($orders, ($isSiteBased && $siteId) ? (int) $siteId : null);
-
-        $totalPendingAmount = (float) $filtered->sum(function ($po) {
-            return (float) $po->total_amount;
-        });
+        $result = $this->purchaseOrderService->getPendingPurchaseOrders(
+            siteId: $siteId ? (int) $siteId : null,
+            supplierId: $supplierId ? (int) $supplierId : null,
+            supplierName: $supplierName ? (string) $supplierName : null,
+            isSiteBased: $isSiteBased,
+            user: $request->user(),
+            scopeToUserSites: true,
+        );
 
         return response()->json([
             'success' => true,
-            'orders' => $filtered,
-            'total_pending_amount' => round($totalPendingAmount, 2),
-            'pending_count' => $filtered->count(),
+            'orders' => $result['orders'],
+            'total_pending_amount' => $result['total_pending_amount'],
+            'pending_count' => $result['pending_count'],
         ]);
-    }
-
-    /**
-     * Filter purchase orders to exclude those already recorded in site cash,
-     * unless the purchase order was updated after the cash transaction was recorded.
-     *
-     * @param  Collection<int, PurchaseOrder>  $orders
-     * @return Collection<int, PurchaseOrder>
-     */
-    protected function filterUnrecordedOrUpdatedPurchaseOrders($orders, ?int $siteId = null)
-    {
-        $siteCashQuery = SiteCash::query();
-
-        if ($siteId) {
-            $siteCashQuery->where('project_site_id', $siteId);
-        }
-
-        $siteTransactions = $siteCashQuery->get();
-
-        return $orders->filter(function (PurchaseOrder $po) use ($siteTransactions) {
-            $poNumber = trim((string) $po->po_number);
-
-            if (empty($poNumber)) {
-                return true;
-            }
-
-            // Find matching site cash transactions for this PO number
-            $matchingTxn = $siteTransactions
-                ->where('project_site_id', $po->project_site_id)
-                ->filter(function (SiteCash $txn) use ($poNumber) {
-                    return $txn->purchase_order_no === $poNumber
-                        || $txn->bill_no === $poNumber
-                        || (str_starts_with($txn->bill_no ?? '', $poNumber))
-                        || (str_contains($txn->description ?? '', $poNumber));
-                })
-                ->sortByDesc('updated_at')
-                ->first();
-
-            if (! $matchingTxn) {
-                $po->setAttribute('is_po_updated', false);
-                $po->setAttribute('is_po_recorded', false);
-
-                return true;
-            }
-
-            // PO was previously recorded. Check if it was updated since.
-            $amountDiff = abs((float) $po->total_amount - (float) $matchingTxn->amount);
-            $isUpdated = ($po->updated_at && $matchingTxn->updated_at && $po->updated_at->gt($matchingTxn->updated_at))
-                || $amountDiff >= 0.01;
-
-            if ($isUpdated) {
-                $po->setAttribute('is_po_updated', true);
-                $po->setAttribute('is_po_recorded', true);
-                $po->setAttribute('previous_amount_paid', (float) $matchingTxn->amount);
-
-                return true;
-            }
-
-            // Already recorded in Site Cash and unmodified: exclude it
-            return false;
-        })->values();
     }
 
     /**

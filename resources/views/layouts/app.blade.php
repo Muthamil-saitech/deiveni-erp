@@ -703,7 +703,7 @@
                 @endif
 
                 @php
-                    $canSeeSiteOps = auth()->user()?->canAccessAny(['sites', 'daily_allocation', 'weekly_wages', 'site_cash', 'purchases', 'material_usage', 'stock_transfer']) ?? true;
+                    $canSeeSiteOps = auth()->user()?->canAccessAny(['sites', 'daily_allocation', 'weekly_wages', 'temporary_billing', 'site_cash', 'purchases', 'material_usage', 'stock_transfer']) ?? true;
                 @endphp
 
                 @if ($canSeeSiteOps)
@@ -735,7 +735,17 @@
                                     data-menu="weekly_wages">
                                     <i class="bi bi-journal-text"></i>
                                     <span>Weekly Wages</span>
-</a>
+                                </a>
+                            </li>
+                        @endif
+                        @if (auth()->user()?->canAccess('temporary_billing') ?? true)
+                            <li class="nav-item">
+                                <a href="{{ url('/temporary-billing') }}"
+                                    class="nav-link {{ Request::is('temporary-billing*') ? 'active' : '' }}"
+                                    data-menu="temporary_billing">
+                                    <i class="bi bi-receipt"></i>
+                                    <span>Temporary Billing</span>
+                                </a>
                             </li>
                         @endif
                         @if (auth()->user()?->canAccess('site_cash') ?? true)

@@ -144,10 +144,14 @@
                                             <i class="{{ $iconClass }}"></i>
 </div>
                                         <div>
-                                            <div class="fw-bold text-dark fs-6 ta-text row-name-ta">{{ $category->name_en }}
-</div>
-                                            <small class="text-muted row-name-en">{{ $category->name_ta }}</small>
-</div>
+                                            @if (! empty($category->name_ta))
+                                                <div class="fw-bold text-dark fs-6 ta-text row-name-primary">{{ $category->name_ta }}</div>
+                                                <small class="text-muted row-name-secondary">{{ $category->name_en }}</small>
+                                            @else
+                                                <div class="fw-bold text-dark fs-6 row-name-primary">{{ $category->name_en }}</div>
+                                                <small class="text-muted row-name-secondary d-none"></small>
+                                            @endif
+                                        </div>
 </div>
                                 </td>
                                 <td><span
@@ -651,8 +655,13 @@
                                     .data('shift', cat.shift)
                                     .data('status', cat.status);
 
-                                tr.find('.row-name-ta').text(cat.name_ta);
-                                tr.find('.row-name-en').text(cat.name_en);
+                                const hasTa = Boolean(cat.name_ta && cat.name_ta.trim() !== '');
+                                tr.find('.row-name-primary')
+                                    .toggleClass('ta-text', hasTa)
+                                    .text(hasTa ? cat.name_ta : cat.name_en);
+                                tr.find('.row-name-secondary')
+                                    .toggleClass('d-none', !hasTa)
+                                    .text(hasTa ? cat.name_en : '');
                                 tr.find('.row-code').text(cat.code);
                                 tr.find('.row-wage').text(`₹${formattedWage}`);
                                 tr.find('.row-shift').html(`<i class="bi bi-clock me-1"></i>${cat.shift}`);
@@ -668,6 +677,7 @@
                             } else {
                                 $('#emptyCategoriesRow').hide();
 
+                                const hasTa = Boolean(cat.name_ta && cat.name_ta.trim() !== '');
                                 const newRowHtml = `
                                                                         <tr data-id="${cat.id}"
                                                                             data-name-ta="${cat.name_ta}"
@@ -684,12 +694,12 @@
                                                                                     <div class="rounded-circle ${iconConfig.badge} d-flex align-items-center justify-content-center fw-bold me-2 icon-wrapper"
                                                                                         style="width: 36px; height: 36px;">
                                                                                         <i class="${iconConfig.icon}"></i>
-</div>
+                                                                                    </div>
                                                                                     <div>
-                                                                                        <div class="fw-bold text-dark fs-6 ta-text row-name-ta">${cat.name_en}</div>
-                                                                                        <small class="text-muted row-name-en">${cat.name_ta}</small>
-</div>
-</div>
+                                                                                        <div class="fw-bold text-dark fs-6 ${hasTa ? 'ta-text' : ''} row-name-primary">${hasTa ? cat.name_ta : cat.name_en}</div>
+                                                                                        <small class="text-muted row-name-secondary ${hasTa ? '' : 'd-none'}">${hasTa ? cat.name_en : ''}</small>
+                                                                                    </div>
+                                                                                </div>
                                                                             </td>
                                                                             <td><span class="font-monospace badge bg-light text-dark border row-code">${cat.code}</span></td>
                                                                             <td>

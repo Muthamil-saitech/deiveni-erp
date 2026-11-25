@@ -29,6 +29,7 @@ use App\Http\Controllers\SiteWarehouseInventoryReportController;
 use App\Http\Controllers\StockTransferController;
 use App\Http\Controllers\StockTransferReportController;
 use App\Http\Controllers\SupplierController;
+use App\Http\Controllers\TemporaryBillController;
 use App\Http\Controllers\TransactionTypeController;
 use App\Http\Controllers\UnitController;
 use App\Http\Controllers\UserController;
@@ -173,6 +174,16 @@ Route::middleware('auth')->group(function () {
         Route::get('/weekly-wages/data', [WeeklyWageController::class, 'getData'])->name('weekly-wages.data');
         Route::post('/weekly-wages/expenses', [WeeklyWageController::class, 'saveExpenses'])->name('weekly-wages.expenses');
         Route::post('/weekly-wages/settle', [WeeklyWageController::class, 'settle'])->name('weekly-wages.settle');
+
+        Route::get('/temporary-billing', [TemporaryBillController::class, 'index'])->name('temporary-billing.index');
+        Route::get('/temporary-billing/create', [TemporaryBillController::class, 'create'])->name('temporary-billing.create');
+        Route::get('/temporary-billing/site-payments', [TemporaryBillController::class, 'getSitePayments'])->name('temporary-billing.site-payments');
+        Route::post('/temporary-billing', [TemporaryBillController::class, 'store'])->name('temporary-billing.store');
+        Route::get('/temporary-billing/{encryptedId}/edit', [TemporaryBillController::class, 'edit'])->name('temporary-billing.edit');
+        Route::post('/temporary-billing/{encryptedId}/update', [TemporaryBillController::class, 'update'])->name('temporary-billing.update');
+        Route::get('/temporary-billing/{encryptedId}/print', [TemporaryBillController::class, 'print'])->name('temporary-billing.print');
+        Route::delete('/temporary-billing/{encryptedId}', [TemporaryBillController::class, 'destroy'])->name('temporary-billing.destroy');
+        Route::post('/temporary-billing/{encryptedId}/delete', [TemporaryBillController::class, 'destroy'])->name('temporary-billing.delete');
 
         Route::get('/purchases', [PurchaseController::class, 'index'])->name('purchases.index');
         Route::get('/purchases/next-po-number', [PurchaseController::class, 'nextPoNumber'])->name('purchases.next-po-number');

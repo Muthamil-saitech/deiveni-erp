@@ -121,6 +121,14 @@ return [
             'icon' => 'bi bi-journal-text',
             'url' => '/weekly-wages',
         ],
+        'temporary_billing' => [
+            'key' => 'temporary_billing',
+            'name' => 'Temporary Billing',
+            'name_ta' => '',
+            'section' => 'SITE OPERATIONS',
+            'icon' => 'bi bi-receipt',
+            'url' => '/temporary-billing',
+        ],
         'site_cash' => [
             'key' => 'site_cash',
             'name' => 'Site Cash Handling',

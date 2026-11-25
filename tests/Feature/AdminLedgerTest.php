@@ -5,6 +5,7 @@ use App\Models\AdminLedger;
 use App\Models\Client;
 use App\Models\ProjectSite;
 use App\Models\PurchaseOrder;
+use App\Models\SiteCash;
 use App\Models\Supplier;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -292,4 +293,210 @@ test('admin ledger entry can be updated successfully', function () {
     $fresh = AdminLedger::find($entry->id);
     expect((float) $fresh->amount)->toBe(60000.00);
     expect($fresh->description)->toBe('Updated amount to 60000');
+});
+
+test('owner paying a PO in admin ledger hides that PO from site manager and admin ledger, showing only new POs', function () {
+    $siteManager = User::factory()->create([
+        'role' => UserRole::SiteManager,
+        'status' => 'Active',
+    ]);
+
+    $managedSite = ProjectSite::create([
+        'client_id' => $this->client->id,
+        'name' => 'Site Managed By SM',
+        'location' => 'Velachery, Chennai',
+        'work_type' => 'New Build',
+        'start_date' => '2026-11-01',
+        'end_date' => '2027-04-30',
+        'status' => 'In Progress',
+        'created_by' => $siteManager->id,
+    ]);
+
+    PurchaseOrder::create([
+        'po_number' => 'PO-OWN-PAID-001',
+        'order_date' => '2026-11-20',
+        'project_site_id' => $managedSite->id,
+        'supplier_id' => $this->supplier->id,
+        'supplier_name' => $this->supplier->name,
+        'source_type' => 'Third-Party Supplier',
+        'status' => 'Order Received',
+        'subtotal' => 25000.00,
+        'tax_amount' => 0.00,
+        'total_amount' => 25000.00,
+        'created_by' => $siteManager->id,
+    ]);
+
+    PurchaseOrder::create([
+        'po_number' => 'PO-NEW-UNPAID-002',
+        'order_date' => '2026-11-22',
+        'project_site_id' => $managedSite->id,
+        'supplier_id' => $this->supplier->id,
+        'supplier_name' => $this->supplier->name,
+        'source_type' => 'Third-Party Supplier',
+        'status' => 'Order Received',
+        'subtotal' => 15000.00,
+        'tax_amount' => 0.00,
+        'total_amount' => 15000.00,
+        'created_by' => $siteManager->id,
+    ]);
+
+    // Owner pays PO-OWN-PAID-001 via Admin Ledger
+    AdminLedger::create([
+        'entry_date' => '2026-11-23',
+        'category' => 'supplier_payment',
+        'flow' => 'expense',
+        'is_site_based' => true,
+        'project_site_id' => $managedSite->id,
+        'site_name' => $managedSite->name,
+        'supplier_id' => $this->supplier->id,
+        'supplier_name' => $this->supplier->name,
+        'purchase_order_no' => 'PO-OWN-PAID-001',
+        'amount' => 25000.00,
+        'payment_mode' => 'Bank Transfer',
+        'created_by' => $this->owner->id,
+    ]);
+
+    // Site Manager checks Site Cash purchase orders -> must ONLY see PO-NEW-UNPAID-002
+    $smResponse = $this->actingAs($siteManager)
+        ->getJson("/site-cash/purchase-orders?project_site_id={$managedSite->id}&supplier_id={$this->supplier->id}&scope=site_based");
+
+    $smResponse->assertStatus(200);
+    $smOrders = collect($smResponse->json('orders'));
+    expect($smOrders->pluck('po_number'))->not->toContain('PO-OWN-PAID-001');
+    expect($smOrders->pluck('po_number'))->toContain('PO-NEW-UNPAID-002');
+    expect($smResponse->json('total_pending_amount'))->toEqual(15000.00);
+
+    // Owner/Accountant checks Admin Ledger purchase orders -> must ONLY see PO-NEW-UNPAID-002
+    $alResponse = $this->actingAs($this->owner)
+        ->getJson("/admin-ledger/purchase-orders?project_site_id={$managedSite->id}&supplier_id={$this->supplier->id}&scope=site_based");
+
+    $alResponse->assertStatus(200);
+    $alOrders = collect($alResponse->json('orders'));
+    expect($alOrders->pluck('po_number'))->not->toContain('PO-OWN-PAID-001');
+    expect($alOrders->pluck('po_number'))->toContain('PO-NEW-UNPAID-002');
+    expect($alResponse->json('total_pending_amount'))->toEqual(15000.00);
+});
+
+test('owner paying total lump-sum in admin ledger settles existing POs and only new POs appear afterwards', function () {
+    $siteManager = User::factory()->create([
+        'role' => UserRole::SiteManager,
+        'status' => 'Active',
+    ]);
+
+    $managedSite = ProjectSite::create([
+        'client_id' => $this->client->id,
+        'name' => 'Site Total Settlement',
+        'location' => 'Tambaram, Chennai',
+        'work_type' => 'New Build',
+        'start_date' => '2026-11-01',
+        'end_date' => '2027-04-30',
+        'status' => 'In Progress',
+        'created_by' => $siteManager->id,
+    ]);
+
+    PurchaseOrder::create([
+        'po_number' => 'PO-OLD-TOTAL-1',
+        'order_date' => '2026-11-18',
+        'project_site_id' => $managedSite->id,
+        'supplier_id' => $this->supplier->id,
+        'supplier_name' => $this->supplier->name,
+        'source_type' => 'Third-Party Supplier',
+        'status' => 'Order Received',
+        'subtotal' => 40000.00,
+        'tax_amount' => 0.00,
+        'total_amount' => 40000.00,
+        'created_by' => $siteManager->id,
+    ]);
+
+    // Owner pays 40,000 in Total mode (no purchase_order_no)
+    AdminLedger::create([
+        'entry_date' => '2026-11-20',
+        'category' => 'supplier_payment',
+        'flow' => 'expense',
+        'is_site_based' => false,
+        'project_site_id' => null,
+        'site_name' => 'All Sites (Total)',
+        'supplier_id' => $this->supplier->id,
+        'supplier_name' => $this->supplier->name,
+        'purchase_order_no' => null,
+        'amount' => 40000.00,
+        'payment_mode' => 'Bank Transfer',
+        'created_by' => $this->owner->id,
+    ]);
+
+    // Before new PO: Site Manager sees 0 pending
+    $beforeNewPo = $this->actingAs($siteManager)
+        ->getJson("/site-cash/purchase-orders?supplier_id={$this->supplier->id}&scope=total");
+    $beforeNewPo->assertStatus(200);
+    expect($beforeNewPo->json('pending_count'))->toBe(0);
+    expect($beforeNewPo->json('total_pending_amount'))->toEqual(0.0);
+
+    // New PO arrives later
+    PurchaseOrder::create([
+        'po_number' => 'PO-NEW-TOTAL-2',
+        'order_date' => '2026-11-25',
+        'project_site_id' => $managedSite->id,
+        'supplier_id' => $this->supplier->id,
+        'supplier_name' => $this->supplier->name,
+        'source_type' => 'Third-Party Supplier',
+        'status' => 'Order Received',
+        'subtotal' => 18000.00,
+        'tax_amount' => 0.00,
+        'total_amount' => 18000.00,
+        'created_by' => $siteManager->id,
+    ]);
+
+    // Only the new PO (18,000) appears for Site Manager & Admin Ledger
+    $afterNewPoSm = $this->actingAs($siteManager)
+        ->getJson("/site-cash/purchase-orders?supplier_id={$this->supplier->id}&scope=total");
+    $afterNewPoSm->assertStatus(200);
+    expect(collect($afterNewPoSm->json('orders'))->pluck('po_number'))->toEqual(collect(['PO-NEW-TOTAL-2']));
+    expect($afterNewPoSm->json('total_pending_amount'))->toEqual(18000.00);
+
+    $afterNewPoAl = $this->actingAs($this->owner)
+        ->getJson("/admin-ledger/purchase-orders?supplier_id={$this->supplier->id}&scope=total");
+    $afterNewPoAl->assertStatus(200);
+    expect(collect($afterNewPoAl->json('orders'))->pluck('po_number'))->toEqual(collect(['PO-NEW-TOTAL-2']));
+    expect($afterNewPoAl->json('total_pending_amount'))->toEqual(18000.00);
+});
+
+test('site manager paying a PO in site cash hides that PO from admin ledger', function () {
+    PurchaseOrder::create([
+        'po_number' => 'PO-SM-PAID-001',
+        'order_date' => '2026-11-20',
+        'project_site_id' => $this->site->id,
+        'supplier_id' => $this->supplier->id,
+        'supplier_name' => $this->supplier->name,
+        'source_type' => 'Third-Party Supplier',
+        'status' => 'Order Received',
+        'subtotal' => 12000.00,
+        'tax_amount' => 0.00,
+        'total_amount' => 12000.00,
+        'created_by' => $this->owner->id,
+    ]);
+
+    SiteCash::create([
+        'project_site_id' => $this->site->id,
+        'transaction_type' => 'Supplier Payment',
+        'flow_type' => 'outflow',
+        'amount' => 12000.00,
+        'out_amount' => 12000.00,
+        'is_expense' => true,
+        'is_site_based' => true,
+        'supplier_id' => $this->supplier->id,
+        'supplier_name' => $this->supplier->name,
+        'purchase_order_no' => 'PO-SM-PAID-001',
+        'bill_no' => 'PO-SM-PAID-001',
+        'payment_date' => '2026-11-21',
+        'payment_mode' => 'Cash',
+        'paid_to' => 'Direct to Supplier',
+        'created_by' => $this->owner->id,
+    ]);
+
+    $alResponse = $this->actingAs($this->owner)
+        ->getJson("/admin-ledger/purchase-orders?project_site_id={$this->site->id}&supplier_id={$this->supplier->id}&scope=site_based");
+
+    $alResponse->assertStatus(200);
+    expect(collect($alResponse->json('orders'))->pluck('po_number'))->not->toContain('PO-SM-PAID-001');
+    expect($alResponse->json('total_pending_amount'))->toEqual(0.0);
 });

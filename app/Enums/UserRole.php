@@ -83,13 +83,13 @@ enum UserRole: string
         return match ($this) {
             self::SiteManager => in_array($menu, [
                 'dashboard', 'worker_categories', 'units', 'materials', 'suppliers', 'transaction_types',
-                'sites', 'daily_allocation', 'weekly_wages', 'site_cash', 'purchases', 'cash_transfer', 'material_usage', 'stock_transfer',
+                'sites', 'daily_allocation', 'weekly_wages', 'temporary_billing', 'site_cash', 'purchases', 'cash_transfer', 'material_usage', 'stock_transfer',
                 'warehouse', 'reports', 'reports_labour_allocations', 'reports_daily_expenses', 'reports_cash_handling',
                 'reports_purchases_inward', 'reports_warehouse_inventory', 'reports_stock_transfer', 'profile',
             ], true),
             self::AccountManager => in_array($menu, [
                 'dashboard', 'banks', 'branches', 'properties', 'property_types', 'rentals',
-                'transaction_types', 'suppliers', 'ledger', 'admin_ledger', 'cash_transfer', 'cash_transfer_settle', 'reports', 'reports_ledger', 'profile',
+                'transaction_types', 'suppliers', 'ledger', 'admin_ledger', 'temporary_billing', 'cash_transfer', 'cash_transfer_settle', 'reports', 'reports_ledger', 'profile',
             ], true),
             default => false,
         };

@@ -136,8 +136,8 @@
                     <div class="d-flex align-items-center gap-2">
                         <span class="small fw-bold text-secondary text-uppercase"
                             style="letter-spacing: 0.5px; font-size: 0.75rem;">
-                            <i class="bi bi-calendar-week me-1 text-primary"></i> Current Week Working Days 
-</span>
+                            <i class="bi bi-calendar-week me-1 text-primary"></i> Week Working Days 
+                        </span>
                         <span class="badge bg-light text-muted border" id="weekRangeLabel"></span>
 </div>
                     <small class="text-muted" style="font-size: 0.78rem;">
@@ -516,27 +516,26 @@
                 if (!dateVal) return;
                 const d = new Date(dateVal + 'T00:00:00');
                 const daysEn = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-                const daysTa = ['ஞாயிறு', 'திங்கள்', 'செவ்வாய்', 'புதன்', 'வியாழன்', 'வெள்ளி', 'சனி'];
-                const dayEn = daysEn[d.getDay()];
-                const dayTa = daysTa[d.getDay()];
-                $('#dayNameDisplay').html(`${dayEn} &bull; ${dayTa}`);
+                $('#dayNameDisplay').text(daysEn[d.getDay()]);
             }
 
-            // Render Current Week Strip (Mon to Sun, Sun disabled, future days disabled)
+            // Render Selected Week Strip (Mon to Sun based on Entry Date; Sun disabled, future days disabled)
             function renderCurrentWeekStrip() {
                 const strip = $('#currentWeekDaysStrip');
                 strip.empty();
 
                 const selectedDate = $('#dailyAllocDate').val();
+                const refDate = selectedDate ? new Date(selectedDate + 'T00:00:00') : now;
+                const selectedWeekBounds = getWeekBounds(refDate);
 
-                $('#weekRangeLabel').text(`${weekBounds.mondayStr} to ${weekBounds.saturdayStr}`);
+                $('#weekRangeLabel').text(`${selectedWeekBounds.mondayStr} to ${selectedWeekBounds.sundayStr}`);
 
                 const daysShort = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
                 const daysTaShort = ['திங்கள்', 'செவ்வாய்', 'புதன்', 'வியாழன்', 'வெள்ளி', 'சனி', 'ஞாயிறு'];
 
                 for (let i = 0; i < 7; i++) {
-                    const curDate = new Date(weekBounds.monday);
-                    curDate.setDate(weekBounds.monday.getDate() + i);
+                    const curDate = new Date(selectedWeekBounds.monday);
+                    curDate.setDate(selectedWeekBounds.monday.getDate() + i);
                     const curDateStr = getLocalDateString(curDate);
                     const isSunday = (i === 6);
                     const isToday = (curDateStr === todayStr);
@@ -570,10 +569,10 @@
                                     <div class="d-flex justify-content-between align-items-center gap-1 mb-1">
                                         <span class="fw-bold pill-day">${daysShort[i]}</span>
                                         ${badgeHtml}
-</div>
+                                    </div>
                                     <div class="small fw-semibold pill-sub">${curDate.getDate()} ${curDate.toLocaleString('en-US', { month: 'short' })}</div>
                                     <div class="small text-muted ta-text pill-sub" style="font-size: 0.7rem;">${daysTaShort[i]}</div>
-</div>
+                                </div>
                             `);
 
                     if (!isSunday && !isFuture) {
@@ -611,6 +610,7 @@
 
             // Data Entry Mode Controller (Allows Today and Previous Dates, blocks future dates & Sundays)
             function applyDataEntryMode() {
+                renderCurrentWeekStrip();
                 const selectedDate = $('#dailyAllocDate').val();
                 const isToday = (selectedDate === todayStr);
                 const chosen = new Date(selectedDate + 'T00:00:00');

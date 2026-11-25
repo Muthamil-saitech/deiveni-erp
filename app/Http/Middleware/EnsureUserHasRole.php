@@ -26,6 +26,7 @@ class EnsureUserHasRole
         'material-usage*' => 'material_usage',
         'stock-transfers*' => 'stock_transfer',
         'admin-ledger*' => 'admin_ledger',
+        'temporary-billing*' => 'temporary_billing',
     ];
 
     /**
