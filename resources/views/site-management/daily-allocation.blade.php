@@ -930,9 +930,6 @@
                 const list = [];
                 $('.labour-row').each(function () {
                     const isOther = $(this).hasClass('is-other-row') || $(this).data('is-other');
-                    const paidBy = $(this).attr('data-paid-by') || $(this).data('paid-by') || null;
-                    const wageSource = $(this).attr('data-wage-source') || $(this).data('wage-source') || null;
-                    const ledgerId = $(this).attr('data-ledger-id') || $(this).data('ledger-id') || null;
 
                     if (isOther) {
                         const en = ($(this).find('.other-worker-cat-en').val() || '').trim();
@@ -944,10 +941,7 @@
                                 name_en: en,
                                 name_ta: ta,
                                 daily_wage: rate,
-                                master_wage: 0,
-                                paid_by: paidBy,
-                                wage_cash_source: wageSource,
-                                ledger_id: ledgerId
+                                master_wage: 0
                             });
                         }
                     } else {
@@ -966,10 +960,7 @@
                                 name_en: en,
                                 master_wage: masterRate,
                                 daily_wage: rate,
-                                worker_category_id: catId,
-                                paid_by: paidBy,
-                                wage_cash_source: wageSource,
-                                ledger_id: ledgerId
+                                worker_category_id: catId
                             });
                         }
                     }
@@ -1764,7 +1755,7 @@
                         if (retainedWorkerCategories && retainedWorkerCategories.length > 0) {
                             retainedWorkerCategories.forEach(function (w) {
                                 if (w.isOther) {
-                                    const otherRow = $(createOtherWorkerRowHtml(w.paid_by, w.wage_cash_source, w.ledger_id));
+                                    const otherRow = $(createOtherWorkerRowHtml(null, null, null));
                                     otherRow.find('.other-worker-cat-en').val(w.name_en || '');
                                     otherRow.find('.other-worker-cat-ta').val(w.name_ta || '');
                                     otherRow.find('.labour-rate-input').val(w.daily_wage || 0);
@@ -1780,9 +1771,9 @@
                                             0,
                                             w.master_wage || w.daily_wage,
                                             w.worker_category_id,
-                                            w.paid_by,
-                                            w.wage_cash_source,
-                                            w.ledger_id
+                                            null,
+                                            null,
+                                            null
                                         )
                                     );
                                 }

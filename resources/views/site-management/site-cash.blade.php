@@ -1250,8 +1250,9 @@
                     let workerParts = [];
                     if (a.items && a.items.length > 0) {
                         a.items.forEach(function (it) {
+                            const count = parseInt(it.worker_count, 10) || 0;
+                            if (count <= 0) return;
                             const name = it.name_ta || it.name_en || 'Worker';
-                            const count = parseInt(it.worker_count) || 1;
                             const amTag = (it.paid_by === 'Account Manager') ? ' [AM Paid]' : '';
                             workerParts.push(`${name} : ${count}${amTag}`);
                         });
@@ -1351,7 +1352,8 @@
 
                     itemsArr.forEach(function (it) {
                         const name = it.name_en || it.name_ta || 'Worker';
-                        const count = parseInt(it.worker_count) || 1;
+                        const count = parseInt(it.worker_count, 10) || 0;
+                        if (count <= 0) return;
                         const dailyWage = parseFloat(it.daily_wage) || 0;
                         const subtotal = parseFloat(it.subtotal) || (count * dailyWage);
                         const isPaid = Boolean(it.paid_by);
@@ -1410,7 +1412,7 @@
                         return {
                             name: it.name_ta || it.name_en || 'Daily Labour',
                             materialName: it.name_ta || it.name_en || 'Daily Labour',
-                            qty: it.worker_count || 1,
+                            qty: parseInt(it.worker_count, 10) || 0,
                             rate: it.daily_wage || 0,
                             total: it.subtotal || 0,
                             unit: 'Worker(s)'

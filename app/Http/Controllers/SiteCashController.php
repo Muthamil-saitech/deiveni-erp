@@ -52,7 +52,11 @@ class SiteCashController extends Controller
             user: $user,
             scopeToUserSites: true,
         )['orders'];
-        $dailyAllocationsQuery = DailyAllocation::with(['items', 'projectSite', 'expenses']);
+        $dailyAllocationsQuery = DailyAllocation::with([
+            'items' => fn ($q) => $q->where('worker_count', '>', 0),
+            'projectSite',
+            'expenses',
+        ]);
         if ($user && ! $user->isAdmin()) {
             $dailyAllocationsQuery->whereHas('projectSite', function ($sq) use ($user) {
                 $sq->where('created_by', $user->id);
@@ -118,7 +122,11 @@ class SiteCashController extends Controller
         $siteId = $request->query('project_site_id');
         $user = $request->user();
 
-        $query = DailyAllocation::with(['items', 'projectSite', 'expenses']);
+        $query = DailyAllocation::with([
+            'items' => fn ($q) => $q->where('worker_count', '>', 0),
+            'projectSite',
+            'expenses',
+        ]);
         if ($user && ! $user->isAdmin()) {
             $query->where('created_by', $user->id);
         }
@@ -373,6 +381,15 @@ class SiteCashController extends Controller
                 })
                 ->sortByDesc('updated_at')
                 ->first();
+
+            // Clear stale Site Manager paid_by flags if no matching SiteCash transaction backs them
+            if (! $matchingTxn) {
+                $alloc->items->each(function ($it) {
+                    if ($it->paid_by === 'Site Manager' && empty($it->site_cash_id)) {
+                        $it->setAttribute('paid_by', null);
+                    }
+                });
+            }
 
             $amPaidTotal = (float) $alloc->items->where('paid_by', 'Account Manager')->sum('subtotal');
             $smPaidTotal = (float) $alloc->items->where('paid_by', 'Site Manager')->sum('subtotal');

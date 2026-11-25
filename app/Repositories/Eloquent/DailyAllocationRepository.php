@@ -100,6 +100,11 @@ class DailyAllocationRepository implements DailyAllocationRepositoryInterface
                 foreach ($data['items'] as $item) {
                     $key = $item['worker_category_id'] ?? ($item['category_code'] ?? ($item['name_ta'] ?? ''));
                     $priorPaid = $existingPaidItems->get($key);
+                    $workerCount = (int) ($item['worker_count'] ?? ($item['count'] ?? 0));
+
+                    if ($workerCount <= 0 && ! $priorPaid) {
+                        continue;
+                    }
 
                     DailyAllocationItem::create([
                         'daily_allocation_id' => $allocation->id,
@@ -109,12 +114,14 @@ class DailyAllocationRepository implements DailyAllocationRepositoryInterface
                         'name_en' => $item['name_en'] ?? ($item['nameEn'] ?? null),
                         'daily_wage' => $item['daily_wage'] ?? ($item['rate'] ?? 0),
                         'master_wage' => $item['master_wage'] ?? ($item['masterRate'] ?? ($item['rate'] ?? 0)),
-                        'worker_count' => $item['worker_count'] ?? ($item['count'] ?? 0),
+                        'worker_count' => $workerCount,
                         'subtotal' => $item['subtotal'] ?? 0,
-                        'paid_by' => $item['paid_by'] ?? ($priorPaid?->paid_by),
-                        'wage_cash_source' => $item['wage_cash_source'] ?? ($priorPaid?->wage_cash_source),
-                        'ledger_id' => $item['ledger_id'] ?? ($priorPaid?->ledger_id),
-                        'paid_at' => $item['paid_at'] ?? ($priorPaid?->paid_at),
+                        'paid_by' => $priorPaid?->paid_by,
+                        'wage_cash_source' => $priorPaid?->wage_cash_source,
+                        'ledger_id' => $priorPaid?->ledger_id,
+                        'site_cash_id' => $priorPaid?->site_cash_id,
+                        'referred_to_am' => $priorPaid?->referred_to_am ?? false,
+                        'paid_at' => $priorPaid?->paid_at,
                     ]);
                 }
             }
