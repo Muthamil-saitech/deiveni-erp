@@ -138,7 +138,7 @@
                                 <th style="width: 135px;">Date</th>
                                 <th style="width: 150px;">Category</th>
                                 <th>Item / Description</th>
-                                <th class="text-center" style="width: 130px;">Qty & Unit</th>
+                                <th class="text-center" style="min-width: 185px; width: 195px;">Qty & Unit</th>
                                 <th class="text-end" style="width: 120px;">Actual Cost (₹)</th>
                                 <th class="text-end" style="width: 160px;">Client Amount (₹) <span class="text-danger">*</span></th>
                                 <th class="text-center" style="width: 45px;">Action</th>
@@ -175,9 +175,9 @@
                                     </td>
                                     <td>
                                         <div class="input-group input-group-sm">
-                                            <input type="number" step="0.01" class="form-control text-center item-qty"
+                                            <input type="number" step="0.01" class="form-control text-center item-qty px-1" style="max-width: 72px;"
                                                 name="items[{{ $index }}][quantity]" value="{{ $item['quantity'] }}">
-                                            <input type="text" class="form-control text-center item-unit" style="max-width: 60px;"
+                                            <input type="text" class="form-control text-center item-unit px-2" style="min-width: 90px;"
                                                 name="items[{{ $index }}][unit]" value="{{ $item['unit'] }}">
 </div>
                                     </td>
@@ -587,9 +587,9 @@ document.addEventListener('DOMContentLoaded', function () {
             </td>
             <td>
                 <div class="input-group input-group-sm">
-                    <input type="number" step="0.01" class="form-control text-center item-qty"
+                    <input type="number" step="0.01" class="form-control text-center item-qty px-1" style="max-width: 72px;"
                         name="items[${idx}][quantity]" value="1">
-                    <input type="text" class="form-control text-center item-unit" style="max-width: 60px;"
+                    <input type="text" class="form-control text-center item-unit px-2" style="min-width: 90px;"
                         name="items[${idx}][unit]" value="Job">
 </div>
             </td>

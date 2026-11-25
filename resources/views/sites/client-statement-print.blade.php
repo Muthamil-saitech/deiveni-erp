@@ -273,7 +273,7 @@
                     <th style="width: 85px;">Date</th>
                     <th style="width: 130px;">Category</th>
                     <th>Item / Description</th>
-                    <th class="text-center" style="width: 85px;">Qty & Unit</th>
+                    <th class="text-center" style="width: 115px;">Qty & Unit</th>
                     <th class="text-end" style="width: 110px;">Amount (₹)</th>
                 </tr>
             </thead>
