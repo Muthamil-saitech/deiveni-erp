@@ -3,10 +3,14 @@
 namespace App\Repositories\Eloquent;
 
 use App\Models\DailyAllocation;
+use App\Models\DailyAllocationItem;
+use App\Models\ProjectSite;
+use App\Models\SiteCash;
 use App\Models\WeeklyWage;
 use App\Models\WeeklyWageExpense;
 use App\Repositories\Concerns\ScopesByCreator;
 use App\Repositories\Contracts\WeeklyWageRepositoryInterface;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -118,7 +122,7 @@ class WeeklyWageRepository implements WeeklyWageRepositoryInterface
     }
 
     /**
-     * Approve and settle a weekly wage.
+     * Approve and settle a weekly wage and automatically record the net balance in Site Cash Handling.
      */
     public function settle(int $siteId, string $startDate, string $endDate): WeeklyWage
     {
@@ -129,8 +133,110 @@ class WeeklyWageRepository implements WeeklyWageRepositoryInterface
                 'settled_at' => now(),
             ]);
 
+            $this->syncWeeklySettlementToSiteCash($weeklyWage, $siteId, $startDate, $endDate);
+
             return $weeklyWage->fresh(['expenses', 'projectSite']);
         });
+    }
+
+    /**
+     * Automatically create/update the Weekly Settlement expense in Site Cash Handling,
+     * deducting Site Manager daily wage payments and Account Manager office cash payments
+     * (while NOT deducting Account Manager project cash payments).
+     */
+    protected function syncWeeklySettlementToSiteCash(
+        WeeklyWage $weeklyWage,
+        int $siteId,
+        string $startDate,
+        string $endDate
+    ): void {
+        $startStr = Carbon::parse($startDate)->toDateString();
+        $endStr = Carbon::parse($endDate)->toDateString();
+
+        // 1. Sum daily Site Cash wage payments made by Site Manager in this week
+        $dailyWageTxns = SiteCash::query()
+            ->where('project_site_id', $siteId)
+            ->whereIn('transaction_type', ['Daily Wage Payment', 'Daily Worker Wage Payment'])
+            ->where(function ($q) {
+                $q->whereNull('paid_by')
+                    ->orWhere('paid_by', '!=', 'Account Manager');
+            })
+            ->get();
+
+        $dailyPaidAmount = 0.0;
+        foreach ($dailyWageTxns as $txn) {
+            $resolvedDate = null;
+            $billNo = (string) ($txn->bill_no ?? '');
+            if (preg_match('/(\d{4}-\d{2}-\d{2})/', $billNo, $m)) {
+                $resolvedDate = $m[1];
+            } elseif ($txn->payment_date) {
+                $resolvedDate = Carbon::parse($txn->payment_date)->toDateString();
+            }
+
+            if ($resolvedDate && $resolvedDate >= $startStr && $resolvedDate <= $endStr) {
+                $dailyPaidAmount += (float) $txn->amount;
+            }
+        }
+
+        // 2. Sum Account Manager paid items: deduct ONLY office_cash, NOT project_cash
+        $amOfficePaidAmount = (float) DailyAllocationItem::query()
+            ->whereHas('dailyAllocation', function ($q) use ($siteId, $startStr, $endStr) {
+                $q->where('project_site_id', $siteId)
+                    ->whereBetween('date', [$startStr, $endStr]);
+            })
+            ->where('paid_by', 'Account Manager')
+            ->where(function ($q) {
+                $q->whereNull('wage_cash_source')
+                    ->orWhere('wage_cash_source', '!=', 'project_cash');
+            })
+            ->sum('subtotal');
+
+        $netPayout = round((float) $weeklyWage->net_payout, 2);
+        $payableAmount = max(0.0, round($netPayout - $dailyPaidAmount - $amOfficePaidAmount, 2));
+
+        $existing = SiteCash::query()
+            ->where('project_site_id', $siteId)
+            ->where('weekly_wage_id', $weeklyWage->id)
+            ->where('transaction_type', 'Weekly Settlement')
+            ->first();
+
+        if ($payableAmount > 0.01) {
+            $startFormatted = Carbon::parse($startStr)->format('d M Y');
+            $endFormatted = Carbon::parse($endStr)->format('d M Y');
+            $payload = [
+                'project_site_id' => $siteId,
+                'weekly_wage_id' => $weeklyWage->id,
+                'transaction_type' => 'Weekly Settlement',
+                'flow_type' => 'outflow',
+                'amount' => $payableAmount,
+                'in_amount' => 0.00,
+                'out_amount' => $payableAmount,
+                'is_expense' => true,
+                'payment_mode' => 'Cash',
+                'paid_to' => 'Site Manager',
+                'bill_no' => "WEEKLY-{$startStr}",
+                'payment_date' => now()->toDateString(),
+                'payment_time' => now()->format('h:i A'),
+                'description' => "Weekly settlement ({$startFormatted} – {$endFormatted})",
+                'created_by' => Auth::id() ?? $weeklyWage->created_by,
+            ];
+
+            if ($existing) {
+                $existing->update($payload);
+            } else {
+                SiteCash::create($payload);
+            }
+        } elseif ($existing) {
+            $existing->delete();
+        }
+
+        // Recalculate project_sites.spent
+        $totalSpent = (float) SiteCash::query()
+            ->where('project_site_id', $siteId)
+            ->where('is_expense', true)
+            ->sum('amount');
+
+        ProjectSite::whereKey($siteId)->update(['spent' => round($totalSpent, 2)]);
     }
 
     /**

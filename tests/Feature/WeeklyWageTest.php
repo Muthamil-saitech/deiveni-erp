@@ -362,3 +362,76 @@ test('saving weekly expenses with new material and unit stores it in materials m
         'status' => 'Active',
     ]);
 });
+
+test('approving weekly wage automatically adds site cash expense deducting AM office cash but not AM project cash', function () {
+    $monday = '2026-10-12';
+    $sunday = '2026-10-18';
+
+    // Total labour = 6000 (2000 SM unpaid + 1500 AM office_cash + 2500 AM project_cash) + 500 daily expense = 6500
+    $alloc = DailyAllocation::create([
+        'project_site_id' => $this->site->id,
+        'date' => $monday,
+        'total_labour_count' => 6,
+        'total_labour_wage' => 6000.00,
+        'total_expenses' => 500.00,
+        'grand_total' => 6500.00,
+        'created_by' => $this->siteManager->id,
+    ]);
+
+    DailyAllocationItem::create([
+        'daily_allocation_id' => $alloc->id,
+        'name_ta' => 'கொத்தனார்',
+        'name_en' => 'Mason',
+        'worker_count' => 2,
+        'daily_wage' => 1000.00,
+        'master_wage' => 1000.00,
+        'subtotal' => 2000.00,
+    ]);
+
+    DailyAllocationItem::create([
+        'daily_allocation_id' => $alloc->id,
+        'name_ta' => 'பெயிண்டர்',
+        'name_en' => 'Painter',
+        'worker_count' => 1,
+        'daily_wage' => 1500.00,
+        'master_wage' => 1500.00,
+        'subtotal' => 1500.00,
+        'paid_by' => 'Account Manager',
+        'wage_cash_source' => 'office_cash',
+    ]);
+
+    DailyAllocationItem::create([
+        'daily_allocation_id' => $alloc->id,
+        'name_ta' => 'எலக்ட்ரீஷியன்',
+        'name_en' => 'Electrician',
+        'worker_count' => 2,
+        'daily_wage' => 1250.00,
+        'master_wage' => 1250.00,
+        'subtotal' => 2500.00,
+        'paid_by' => 'Account Manager',
+        'wage_cash_source' => 'project_cash',
+    ]);
+
+    $response = $this->actingAs($this->siteManager)->postJson('/weekly-wages/settle', [
+        'project_site_id' => $this->site->id,
+        'start_date' => $monday,
+        'end_date' => $sunday,
+        'expenses' => [],
+    ]);
+
+    $response->assertStatus(200);
+
+    // Expected Site Cash Weekly Settlement = 6500 - 1500 (AM office_cash) = 5000 (AM project_cash 2500 NOT deducted)
+    $this->assertDatabaseHas('site_cashes', [
+        'project_site_id' => $this->site->id,
+        'transaction_type' => 'Weekly Settlement',
+        'flow_type' => 'outflow',
+        'is_expense' => true,
+        'amount' => 5000.00,
+        'out_amount' => 5000.00,
+        'bill_no' => "WEEKLY-{$monday}",
+    ]);
+
+    $this->site->refresh();
+    expect((float) $this->site->spent)->toEqual(5000.00);
+});

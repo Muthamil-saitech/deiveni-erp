@@ -913,7 +913,7 @@ test('weekly settlement endpoint returns settled weeks with daily site cash dedu
         'created_by' => $this->siteManager->id,
     ]);
 
-    // 1. Fetch weekly settlements -> only settled week appears with balance = 9000 - 5000 = 4000
+    // 1. Fetch weekly settlements -> balance = 9000 - 5000 (daily) - 2200 (AM office cash) = 1800
     $listRes = $this->actingAs($this->siteManager)
         ->getJson("/site-cash/weekly-settlements?project_site_id={$this->site->id}");
 
@@ -923,9 +923,9 @@ test('weekly settlement endpoint returns settled weeks with daily site cash dedu
     expect($settlements[0]['id'])->toBe($settledWeek->id);
     expect((float) $settlements[0]['net_payout'])->toEqual(9000.00);
     expect((float) $settlements[0]['daily_paid_amount'])->toEqual(5000.00);
-    expect((float) $settlements[0]['balance_amount'])->toEqual(4000.00);
+    expect((float) $settlements[0]['balance_amount'])->toEqual(1800.00);
 
-    // 2. View detail page (target="_blank") shows Paid status for Monday and Balance Payable ₹4,000.00
+    // 2. View detail page (target="_blank") shows Paid status for Monday and Balance Payable ₹1,800.00
     $detailRes = $this->actingAs($this->siteManager)
         ->get("/site-cash/weekly-settlement/{$settledWeek->encrypted_id}");
     $detailRes->assertStatus(200);
@@ -936,14 +936,14 @@ test('weekly settlement endpoint returns settled weeks with daily site cash dedu
     $detailRes->assertSee('Account Manager Paid Workers');
     $detailRes->assertSee('Total Paid by Account Manager:');
     $detailRes->assertSee('Paid (₹5,000)');
-    $detailRes->assertSee('4,000.00');
+    $detailRes->assertSee('1,800.00');
 
-    // 3. Record Weekly Settlement payment for remaining 4000 -> week disappears from pending list
+    // 3. Record Weekly Settlement payment for remaining 1800 -> week disappears from pending list
     $storeRes = $this->actingAs($this->siteManager)->postJson('/site-cash', [
         'project_site_id' => $this->site->id,
         'transaction_type' => 'Weekly Settlement',
         'weekly_wage_id' => $settledWeek->id,
-        'amount' => 4000.00,
+        'amount' => 1800.00,
         'payment_mode' => 'Cash',
         'paid_to' => 'Site Manager',
         'bill_no' => "WEEKLY-{$weekStart}",

@@ -623,8 +623,7 @@ class SiteCashController extends Controller
             ->sum('amount');
 
         $netPayout = round((float) $weeklyWage->net_payout, 2);
-        $balanceAmount = max(0.0, round($netPayout - $dailyPaidAmount - $weeklyAlreadySettled, 2));
-        $isWeekFullySettled = $weeklyAlreadySettled > 0 && $balanceAmount <= 0.01;
+        $amOfficePaidAmount = 0.0;
 
         $workerCategoriesMap = [];
         $totalWorkers = 0;
@@ -637,6 +636,19 @@ class SiteCashController extends Controller
         $amTotalLabourWage = 0.0;
         $expenseSummary = [];
         $totalSiteExpenses = 0.0;
+
+        // Pre-compute AM office cash deductions first so $isWeekFullySettled and $smWorkerSummary are accurate
+        foreach ($allocations as $alloc) {
+            foreach ($alloc->items as $item) {
+                if ($item->paid_by === 'Account Manager' && $item->wage_cash_source !== 'project_cash') {
+                    $amOfficePaidAmount += (float) $item->subtotal;
+                }
+            }
+        }
+
+        $amOfficePaidAmount = round($amOfficePaidAmount, 2);
+        $balanceAmount = max(0.0, round($netPayout - $dailyPaidAmount - $amOfficePaidAmount - $weeklyAlreadySettled, 2));
+        $isWeekFullySettled = $weeklyAlreadySettled > 0 && $balanceAmount <= 0.01;
 
         foreach ($allocations as $alloc) {
             $dateStr = Carbon::parse($alloc->date)->toDateString();
