@@ -942,7 +942,6 @@
                                 <tr class="day-record-row align-middle">
                                     <td class="text-start">
                                         <strong class="text-dark d-block">${dayOfWeek}, ${dateFormatted}</strong>
-                                        <small class="text-muted">${dayDateStr}</small>
                                     </td>
                                     <td class="text-start">
                                         <div class="d-flex flex-wrap align-items-center mb-1">
@@ -997,7 +996,6 @@
                                 <tr class="day-record-row bg-light bg-opacity-50 align-middle">
                                     <td class="text-start">
                                         <strong class="text-dark d-block">${dayOfWeek}, ${dateFormatted}</strong>
-                                        <small class="text-muted">${dayDateStr}</small>
                                     </td>
                                     <td class="text-start">
                                         ${categoryBreakdownHtml}
