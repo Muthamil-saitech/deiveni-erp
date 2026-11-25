@@ -83,6 +83,7 @@ class StoreSiteCashRequest extends FormRequest
             'account_holder_name' => ['nullable', 'string', 'max:100'],
             'wage_cash_source' => ['nullable', 'string', 'in:office_cash,project_cash,cash_transfer'],
             'ledger_id' => ['nullable', 'integer'],
+            'weekly_wage_id' => ['nullable', 'integer', 'exists:weekly_wages,id'],
             'cash_transfer_id' => ['nullable', 'integer', 'exists:cash_transfers,id'],
             'returned_wage_ids' => ['nullable'],
             'paid_wage_item_ids' => ['nullable'],

@@ -1464,6 +1464,7 @@
                 $('#purchaseModalTitle').text('Add New Purchase');
                 $('#savePurBtnText').text('Save Purchase Entry');
                 $('#purchaseEditId').val('');
+                $('#purSite option[data-temp-site="1"]').remove();
                 $('#purchaseForm')[0].reset();
                 clearPurchaseFormErrors();
                 $('#purDate').attr('min', '{{ date('Y-m-d', strtotime('-1 day')) }}');
@@ -1500,7 +1501,42 @@
                 $('#purDate').attr('min', minAllowed);
                 $('#purDate').attr('max', '{{ date('Y-m-d') }}');
                 $('#purBillNo').val(tr.data('bill-no'));
-                $('#purSite').val(tr.data('site'));
+
+                $('#purSite option[data-temp-site="1"]').remove();
+                const siteId = String(tr.attr('data-site-id') || '').trim();
+                const siteName = String(tr.attr('data-site') || '').trim();
+                let siteMatched = false;
+
+                if (siteId) {
+                    const matchedById = $('#purSite option').filter(function () {
+                        return String($(this).attr('data-id') || '') === siteId;
+                    }).first();
+                    if (matchedById.length) {
+                        $('#purSite').val(matchedById.val());
+                        siteMatched = true;
+                    }
+                }
+
+                if (!siteMatched && siteName) {
+                    const matchedByName = $('#purSite option').filter(function () {
+                        return String($(this).val() || '').trim() === siteName || $(this).text().trim() === siteName;
+                    }).first();
+                    if (matchedByName.length) {
+                        $('#purSite').val(matchedByName.val());
+                        siteMatched = true;
+                    }
+                }
+
+                if (!siteMatched && (siteId || siteName)) {
+                    const label = siteName || `Site #${siteId}`;
+                    const tempOpt = $('<option>', {
+                        value: label,
+                        text: label,
+                        'data-id': siteId,
+                        'data-temp-site': '1'
+                    });
+                    $('#purSite').append(tempOpt).val(label);
+                }
 
                 const supplierId = tr.data('supplier-id');
                 const supplierName = tr.data('supplier');

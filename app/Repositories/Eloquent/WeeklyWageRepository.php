@@ -124,6 +124,10 @@ class WeeklyWageRepository implements WeeklyWageRepositoryInterface
     {
         return DB::transaction(function () use ($siteId, $startDate, $endDate) {
             $weeklyWage = $this->syncFromDailyAllocations($siteId, $startDate, $endDate);
+            $weeklyWage->update([
+                'status' => 'settled',
+                'settled_at' => now(),
+            ]);
 
             return $weeklyWage->fresh(['expenses', 'projectSite']);
         });

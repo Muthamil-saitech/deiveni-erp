@@ -201,6 +201,8 @@ Route::middleware('auth')->group(function () {
         Route::get('/site-cash/daily-allocations', [SiteCashController::class, 'getDailyAllocations'])->name('site-cash.daily-allocations');
         Route::get('/site-cash/office-cash-wages', [SiteCashController::class, 'getOfficeCashWages'])->name('site-cash.office-cash-wages');
         Route::get('/site-cash/cash-transfers', [SiteCashController::class, 'getCashTransfers'])->name('site-cash.cash-transfers');
+        Route::get('/site-cash/weekly-settlements', [SiteCashController::class, 'getWeeklySettlements'])->name('site-cash.weekly-settlements');
+        Route::get('/site-cash/weekly-settlement/{encryptedId}', [SiteCashController::class, 'showWeeklySettlement'])->name('site-cash.weekly-settlement.show');
         Route::post('/site-cash', [SiteCashController::class, 'store'])->name('site-cash.store');
         Route::get('/site-cash/{encryptedId}', [SiteCashController::class, 'show'])->name('site-cash.show');
         Route::put('/site-cash/{id}', [SiteCashController::class, 'update']);

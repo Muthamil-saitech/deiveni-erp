@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Services\IdCipherService;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -32,8 +33,27 @@ class WeeklyWage extends Model
         'total_daily_expenses',
         'total_weekly_expenses',
         'net_payout',
+        'status',
+        'settled_at',
         'created_by',
     ];
+
+    /**
+     * The accessors to append to the model's array form.
+     *
+     * @var list<string>
+     */
+    protected $appends = [
+        'encrypted_id',
+    ];
+
+    /**
+     * Get the encrypted ID attribute for the weekly wage record.
+     */
+    public function getEncryptedIdAttribute(): string
+    {
+        return IdCipherService::encrypt($this->id);
+    }
 
     /**
      * Get the attributes that should be cast.
@@ -51,6 +71,7 @@ class WeeklyWage extends Model
             'total_daily_expenses' => 'decimal:2',
             'total_weekly_expenses' => 'decimal:2',
             'net_payout' => 'decimal:2',
+            'settled_at' => 'datetime',
             'created_by' => 'integer',
         ];
     }

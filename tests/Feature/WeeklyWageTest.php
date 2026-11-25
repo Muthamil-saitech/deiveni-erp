@@ -7,6 +7,7 @@ use App\Models\DailyAllocationExpense;
 use App\Models\DailyAllocationItem;
 use App\Models\ProjectSite;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
@@ -276,4 +277,27 @@ test('weekly wages data endpoint correctly loads allocations for previous year c
     $dayAllocations = collect($response->json('data.days'));
     expect($dayAllocations->firstWhere('date', '2025-11-10')['has_data'])->toBeTrue();
     expect($dayAllocations->firstWhere('date', '2025-11-11')['has_data'])->toBeFalse();
+});
+
+test('weekly wage cannot be settled before its saturday and can be settled any day from saturday onwards', function () {
+    $futureMonday = now()->addWeek()->startOfWeek(Carbon::MONDAY)->toDateString();
+    $futureSunday = now()->addWeek()->endOfWeek(Carbon::SUNDAY)->toDateString();
+
+    $blockedRes = $this->actingAs($this->siteManager)->postJson('/weekly-wages/settle', [
+        'project_site_id' => $this->site->id,
+        'start_date' => $futureMonday,
+        'end_date' => $futureSunday,
+    ]);
+    $blockedRes->assertStatus(422);
+
+    $lastMonday = now()->subWeek()->startOfWeek(Carbon::MONDAY)->toDateString();
+    $lastSunday = now()->subWeek()->endOfWeek(Carbon::SUNDAY)->toDateString();
+
+    $allowedRes = $this->actingAs($this->siteManager)->postJson('/weekly-wages/settle', [
+        'project_site_id' => $this->site->id,
+        'start_date' => $lastMonday,
+        'end_date' => $lastSunday,
+    ]);
+    $allowedRes->assertStatus(200);
+    $allowedRes->assertJson(['success' => true]);
 });
