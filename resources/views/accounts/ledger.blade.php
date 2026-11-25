@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('title', 'Daily Ledger')
-@section('page_title', 'Daily Income & Expense Ledger')
+@section('page_title', 'Daily Income & Expense Ledger ')
 
 @push('styles')
     <style>
@@ -43,13 +43,13 @@
         <ul class="nav nav-tabs mb-3 border-bottom">
             <li class="nav-item">
                 <a class="nav-link active" href="{{ route('ledger.index') }}">
-                    <i class="bi bi-book-half me-1"></i> Daily Ledger
-                </a>
+                    <i class="bi bi-book-half me-1"></i> Daily Ledger 
+</a>
             </li>
             <li class="nav-item">
                 <a class="nav-link" href="{{ route('admin-ledger.index') }}">
-                    <i class="bi bi-journal-bookmark-fill me-1 text-primary"></i> Admin Ledger
-                </a>
+                    <i class="bi bi-journal-bookmark-fill me-1 text-primary"></i> Admin Ledger 
+</a>
             </li>
         </ul>
 
@@ -58,15 +58,15 @@
             <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
                 <div>
                     <h5 class="fw-bold mb-0 text-dark">Notebook Style Daily Ledger</h5>
-                </div>
+</div>
                 <div class="d-flex gap-2">
                     <button class="btn btn-deiveni btn-sm" data-bs-toggle="modal" data-bs-target="#ledgerModal"
                         id="addLedgerEntryBtn">
                         <i class="bi bi-plus-circle-fill me-1"></i> Add Ledger Entry
-                    </button>
-                </div>
-            </div>
-        </div>
+</button>
+</div>
+</div>
+</div>
 
         <!-- Notebook Balance Summary Bar -->
         <div class="card-custom p-3 p-md-4 mb-4 text-white"
@@ -81,8 +81,7 @@
                         $displayOpening = $priorBal != 0 ? $priorBal : $yesterdayIncome;
                     @endphp
                     <h4 class="fw-bold text-warning mb-0" id="ledgerOpeningBal">{{ $displayOpening >= 0 ? '₹' . number_format($displayOpening, 2) : '-₹' . number_format(abs($displayOpening), 2) }}</h4>
-                    
-                </div>
+</div>
 
                 <!-- Total Income Dr -->
                 <div class="col-6 col-md-3 border-end border-secondary border-opacity-25">
@@ -92,7 +91,7 @@
                     @endphp
                     <h4 class="fw-bold text-success mb-0" id="ledgerTotalIncome">{{ $todayInc > 0 ? '+₹' . number_format($todayInc, 2) : '₹0.00' }}</h4>
                     <small class="ta-text text-white-50" style="font-size: 0.72rem;" id="lblLedgerIncomeSub">Income</small>
-                </div>
+</div>
 
                 <!-- Total Expense Cr -->
                 <div class="col-6 col-md-3 border-end border-secondary border-opacity-25">
@@ -102,7 +101,7 @@
                     @endphp
                     <h4 class="fw-bold text-danger mb-0" id="ledgerTotalExpense">{{ $todayExp > 0 ? '−₹' . number_format($todayExp, 2) : '₹0.00' }}</h4>
                     <small class="ta-text text-white-50" style="font-size: 0.72rem;" id="lblLedgerExpenseSub">Expense</small>
-                </div>
+</div>
 
                 <!-- Closing Running Balance -->
                 <div class="col-6 col-md-3">
@@ -112,9 +111,9 @@
                     @endphp
                     <h3 class="fw-bold text-info mb-0" id="ledgerClosingBal">{{ $todayClosing != 0 ? ($todayClosing >= 0 ? '₹' . number_format($todayClosing, 2) : '-₹' . number_format(abs($todayClosing), 2)) : '₹0.00' }}</h3>
                     <small class="ta-text text-white-50" style="font-size: 0.72rem;" id="lblLedgerClosingSub">Balance</small>
-                </div>
-            </div>
-        </div>
+</div>
+</div>
+</div>
 
         <!-- Filter & Search Bar -->
         <div class="card-custom p-3 mb-4 bg-white">
@@ -124,55 +123,55 @@
                         <span class="input-group-text bg-light border-end-0"><i class="bi bi-search text-muted"></i></span>
                         <input type="text" class="form-control border-start-0 ps-0" id="ledgerSearchInput"
                             placeholder="Search Description, Source, Customer, Bill No...">
-                    </div>
-                </div>
+</div>
+</div>
                 <div class="col-6 col-md-2">
-                    <select class="form-select form-select-sm fw-semibold" id="ledgerDateFilter" title="Filter by Date">
+                    <select class="form-select form-select-sm fw-semibold" id="ledgerDateFilter" title="Filter by Date ">
                         <option value="today" selected>Today ({{ \Carbon\Carbon::today()->format('d M') }})</option>
                         <option value="yesterday">Yesterday ({{ \Carbon\Carbon::yesterday()->format('d M') }})</option>
                         <option value="all">All Dates</option>
-                        <option value="custom">Pick Date...</option>
+                        <option value="custom">Pick Date ...</option>
                     </select>
-                </div>
+</div>
                 <div class="col-6 col-md-2 d-none" id="ledgerCustomDateCol">
                     <input type="date" class="form-control form-control-sm" id="ledgerCustomDateInput" value="{{ \Carbon\Carbon::today()->toDateString() }}">
-                </div>
+</div>
                 <div class="col-6 col-md-2">
-                    <select class="form-select form-select-sm" id="siteFilter" title="Filter by Site">
+                    <select class="form-select form-select-sm" id="siteFilter" title="Filter by Site ">
                         <option value="">All Sites</option>
                         @foreach($activeProjectSites as $site)
                             <option value="{{ $site->name }}">{{ $site->name }}</option>
                         @endforeach
                     </select>
-                </div>
+</div>
                 <div class="col-6 col-md-2">
                     <select class="form-select form-select-sm" id="sourceFilter">
-                        <option value="">All Categories</option>
+                        <option value="">All Sources / Categories</option>
                         <option value="Construction">Construction</option>
                         <option value="Bank Valuation">Bank (Valuation / Inspection)</option>
                         <option value="Rental">Rental</option>
                         <option value="Supplier">Supplier</option>
                         <option value="Office and other expenses">Office and other expenses</option>
                     </select>
-                </div>
+</div>
                 <div class="col-6 col-md-1">
                     <select class="form-select form-select-sm" id="flowFilter">
                         <option value="">All Flows</option>
                         <option value="income">Income (Dr)</option>
                         <option value="expense">Expense (Cr)</option>
                     </select>
-                </div>
+</div>
                 <div class="col-6 col-md-2 text-md-end d-flex align-items-center justify-content-end gap-2">
                     <button type="button" class="btn btn-outline-secondary btn-sm px-2 py-1 flex-fill" id="ledgerFilterResetBtn"
                         title="Reset all filters">
                         <i class="bi bi-arrow-counterclockwise me-1"></i>Reset
-                    </button>
+</button>
                     <span class="small text-muted" id="ledgerCountBadge">Showing <strong
                             class="text-dark">{{ count($ledgers) }}</strong>
                         entries</span>
-                </div>
-            </div>
-        </div>
+</div>
+</div>
+</div>
 
         <!-- Ledger Table with Running Balance Column -->
         <div class="card-custom overflow-hidden">
@@ -200,7 +199,7 @@
                                 <span class="text-warning-emphasis fw-bold">
                                     <i class="bi bi-box-arrow-in-down-right me-1"></i>
                                     Opening Balance Carried Forward:
-                                </span>
+</span>
                             </td>
                             <td class="text-end text-muted py-2">-</td>
                             <td class="text-end text-muted py-2">-</td>
@@ -270,14 +269,14 @@
                                     <div class="fw-bold text-dark d-flex align-items-center flex-wrap gap-1" title="{{ $ledger->description }}">
                                         <span class="text-truncate d-inline-block" style="max-width: 320px;">
                                             {{ \Illuminate\Support\Str::limit($cleanDesc, 45) }}
-                                        </span>
+</span>
                                         @if($ledger->receipt_image)
                                              <span class="badge bg-primary-subtle text-primary border border-primary-subtle ms-1"
                                                 title="Receipt image attached">
                                                 <i class="bi bi-image"></i>
-                                            </span>
+</span>
                                         @endif
-                                    </div>
+</div>
                                     <small class="text-muted">{!! $sourceSubtitle !!}</small>
                                 </td>
                                 <td><span class="badge {{ $badgeClass }}">{{ $ledger->source }}</span></td>
@@ -286,7 +285,7 @@
                                         <span class="badge bg-light text-dark border">{{ $ledger->site_name }}</span>
                                         @if($ledger->client_name)
                                             <div class="small text-muted" style="font-size: 0.75rem;">Client: {{ $ledger->client_name }}
-                                            </div>
+</div>
                                         @endif
                                     @else
                                         -
@@ -298,9 +297,9 @@
                                 <td class="text-center">
                                     <a href="{{ route('ledger.show', $ledger->encrypted_id) }}"
                                         class="btn btn-outline-primary btn-sm px-2 py-1"
-                                        title="View Details">
+                                        title="View Details ">
                                         <i class="bi bi-eye"></i>
-                                    </a>
+</a>
                                 </td>
                             </tr>
                             @php
@@ -329,7 +328,7 @@
                                     <td class="text-end py-2">
                                         <span class="{{ $dayNet >= 0 ? 'text-success' : 'text-danger' }}">
                                             {{ $dayNet >= 0 ? '+₹' : '−₹' }}{{ number_format(abs($dayNet), 2) }}
-                                        </span>
+</span>
                                     </td>
                                     <td></td>
                                 </tr>
@@ -345,8 +344,8 @@
                                         <button type="button" class="btn btn-deiveni btn-sm" data-bs-toggle="modal"
                                             data-bs-target="#ledgerModal">
                                             <i class="bi bi-plus-circle-fill me-1"></i> Add First Ledger Entry
-                                        </button>
-                                    </div>
+</button>
+</div>
                                 </td>
                             </tr>
                         @endforelse
@@ -360,13 +359,13 @@
                                     <button type="button" class="btn btn-outline-secondary btn-sm"
                                         id="clearLedgerFiltersBtn">
                                         <i class="bi bi-arrow-counterclockwise me-1"></i> Reset Filters
-                                    </button>
-                                </div>
+</button>
+</div>
                             </td>
                         </tr>
                     </tbody>
                 </table>
-            </div>
+</div>
 
             <!-- Table Pagination & Footer Summary -->
             <div class="p-3 bg-white border-top d-flex flex-column flex-md-row justify-content-between align-items-center gap-3"
@@ -383,17 +382,17 @@
                         Showing <strong class="text-dark" id="pageStart">1</strong> &minus; <strong class="text-dark"
                             id="pageEnd">{{ min(10, count($ledgers)) }}</strong> of <strong class="text-dark"
                             id="pageTotal">{{ count($ledgers) }}</strong> entries
-                    </span>
-                </div>
+</span>
+</div>
                 <nav aria-label="Ledger table pagination">
                     <ul class="pagination pagination-sm mb-0 gap-1" id="paginationNav">
                         <!-- Dynamic page links rendered by JS -->
                     </ul>
                 </nav>
-            </div>
-        </div>
+</div>
+</div>
 
-    </div>
+</div>
 
     <!-- Add Ledger Entry Modal -->
     <div class="modal fade" id="ledgerModal" tabindex="-1" aria-hidden="true">
@@ -402,18 +401,18 @@
                 <div class="modal-header">
                     <h5 class="modal-title fw-bold">Add Daily Ledger Entry</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
+</div>
                 <form id="ledgerForm" method="POST" enctype="multipart/form-data" novalidate>
                     @csrf
                     <div class="modal-body">
                         <div class="row g-3">
                             <div class="col-12 col-md-4">
-                                <label class="form-label small fw-semibold">Entry Date <span
+                                <label class="form-label small fw-semibold">Entry Date  <span
                                         class="text-danger">*</span></label>
                                 <input type="date" class="form-control" id="newLedgerDate" name="entry_date"
                                     value="{{ date('Y-m-d') }}">
                                 <div class="invalid-feedback" id="errEntryDate"></div>
-                            </div>
+</div>
                             <div class="col-12 col-md-4">
                                 <label class="form-label small fw-semibold">Entry Flow Type <span
                                         class="text-danger">*</span></label>
@@ -422,60 +421,57 @@
                                     <option value="expense">Expense (Cr)</option>
                                 </select>
                                 <div class="invalid-feedback" id="errFlow"></div>
-                            </div>
+</div>
                             <div class="col-12 col-md-4">
                                 <label class="form-label small fw-semibold">Source / Category <span
                                         class="text-danger">*</span></label>
                                 <select class="form-select" id="newLedgerSource" name="source">
-                                    <option value="Construction">Construction (Stage/Advance)</option>
+                                    <option value="Construction">Construction</option>
                                     <option value="Bank Valuation">Bank (Valuation / Inspection fee)</option>
-                                    <option value="Rental">Rental (Income)</option>
+                                    <option value="Rental">Rental</option>
                                     <option value="Office and other expenses">Office and other expenses</option>
                                 </select>
                                 <div class="invalid-feedback" id="errSource"></div>
-                            </div>
+</div>
 
                             <!-- Dynamic Bank Specific Details -->
                             <div class="col-12 bank-fields-group d-none">
                                 <div class="p-3 bg-light rounded-3 border">
                                     <span class="small fw-bold text-primary mb-2 d-block"><i
-                                            class="bi bi-bank me-1"></i>Bank Valuation Details
-                                        </span>
+                                            class="bi bi-bank me-1"></i>Bank Valuation Details</span>
                                     <div class="row g-2">
                                         <div class="col-12 col-md-6" id="bankSelectContainer">
-                                            <label class="form-label small fw-semibold">Select Bank
+                                            <label class="form-label small fw-semibold">Select Bank 
                                                 <span class="text-danger">*</span></label>
                                             <select class="form-select form-select-sm" id="ledgerBankSelect" name="bank_id">
                                                 <option value="" disabled selected>-- Select Bank --
-                                                </option>
+</option>
                                                 @foreach($activeBanks as $bank)
                                                     <option value="{{ $bank->id }}" data-bank-name="{{ $bank->bank_name }}">
                                                         {{ $bank->bank_name }}{{ $bank->bank_name_ta ? ' (' . $bank->bank_name_ta . ')' : '' }}
-                                                    </option>
+</option>
                                                 @endforeach
                                             </select>
                                             <div class="invalid-feedback" id="errBankId"></div>
-                                        </div>
+</div>
                                         <div class="col-12 col-md-6 d-none" id="branchSelectContainer">
-                                            <label class="form-label small fw-semibold">Select Branch
+                                            <label class="form-label small fw-semibold">Select Branch 
                                                 <span class="text-danger">*</span></label>
                                             <select class="form-select form-select-sm" id="ledgerBranchSelect"
                                                 name="branch_id">
-                                                <option value="" disabled selected>-- Select Branch (Select Bank First) --
-                                                    </option>
+                                                <option value="" disabled selected>-- Select Branch --</option>
                                             </select>
                                             <div class="invalid-feedback" id="errBranchId"></div>
-                                        </div>
+</div>
                                         <div class="col-12">
-                                            <label class="form-label small fw-semibold">Customer / Loan Ref
-                                                </label>
+                                            <label class="form-label small fw-semibold">Customer / Loan Ref</label>
                                             <input type="text" class="form-control form-control-sm" id="bankCustomer"
                                                 name="bank_customer_ref" placeholder="e.g. Mr. S. Karthi (Ref #88)">
                                             <div class="invalid-feedback" id="errBankCustomerRef"></div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+</div>
+</div>
+</div>
+</div>
 
                             <!-- Dynamic Rental Specific Details -->
                             <div class="col-12 rental-fields-group d-none">
@@ -484,45 +480,43 @@
                                             class="bi bi-house me-1"></i>Rental Income Details</span>
                                     <div class="row g-2">
                                         <div class="col-12 col-md-6" id="propertySelectContainer">
-                                            <label class="form-label small fw-semibold">Select Property
+                                            <label class="form-label small fw-semibold">Select Property 
                                                 <span class="text-danger">*</span></label>
                                             <select class="form-select form-select-sm" id="ledgerPropertySelect"
                                                 name="property_id">
-                                                <option value="" disabled selected>-- Select Property --
-                                                    --</option>
+                                                <option value="" disabled selected>-- Select Property 
+                                                   --</option>
                                                 @foreach($activeProperties as $prop)
                                                     <option value="{{ $prop->id }}"
                                                         data-property-name="{{ $prop->property_name }}">
                                                         {{ $prop->property_name }}{{ $prop->property_name_ta ? ' (' . $prop->property_name_ta . ')' : '' }}
-                                                    </option>
+</option>
                                                 @endforeach
                                             </select>
                                             <div class="invalid-feedback" id="errPropertyId"></div>
-                                        </div>
+</div>
                                         <div class="col-12 col-md-6 d-none" id="propertyTypeSelectContainer">
-                                            <label class="form-label small fw-semibold">Select Property Type / Unit
-                                                
+                                            <label class="form-label small fw-semibold">Select Property Type / Unit 
                                                 <span class="text-danger">*</span></label>
                                             <select class="form-select form-select-sm" id="ledgerPropertyTypeSelect"
                                                 name="property_type_id">
-                                                <option value="" disabled selected>-- Select Property Type / Unit --
-                                                    </option>
+                                                <option value="" disabled selected>-- Select Property Type / Unit --</option>
                                             </select>
                                             <div class="invalid-feedback" id="errPropertyTypeId"></div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+</div>
+</div>
+</div>
+</div>
 
                             <!-- Dynamic Construction Specific Details (Task 3: Site & Client Auto-fill) -->
                             <div class="col-12 construction-fields-group d-none">
                                 <div class="p-3 bg-light rounded-3 border">
                                     <span class="small fw-bold text-primary mb-2 d-block">
-                                        <i class="bi bi-building me-1"></i>Construction Site Details
-                                    </span>
+                                        <i class="bi bi-building me-1"></i>Construction Site Details 
+</span>
                                     <div class="row g-2">
                                         <div class="col-12" id="constructionSiteWrapper">
-                                            <label class="form-label small fw-semibold">Associated Site <span
+                                            <label class="form-label small fw-semibold">Associated Site  <span
                                                     class="text-danger">*</span></label>
                                             <select class="form-select form-select-sm" id="constructionSite"
                                                 name="project_site_id">
@@ -531,29 +525,29 @@
                                                     <option value="{{ $site->id }}" data-site-name="{{ $site->name }}"
                                                         data-client-name="{{ $site->client ? $site->client->name : '' }}">
                                                         {{ $site->name }}{{ $site->client ? ' (' . $site->client->name . ')' : '' }}
-                                                    </option>
+</option>
                                                 @endforeach
                                             </select>
                                             <div class="invalid-feedback" id="errProjectSiteId"></div>
-                                        </div>
+</div>
                                         <!-- Task 3: Appended Client Name input with auto-filled value, editable by user -->
                                         <div class="col-12 d-none" id="constructionClientContainer">
                                             <label class="form-label small fw-semibold">
-                                                Client Name
+                                                Client Name 
                                                 <span class="badge bg-secondary-subtle text-secondary fw-normal ms-1"
                                                     style="font-size: 0.7rem;">Auto-filled / Editable</span>
-                                            </label>
+</label>
                                             <div class="input-group input-group-sm has-validation">
                                                 <span class="input-group-text bg-white"><i
                                                         class="bi bi-person text-muted"></i></span>
                                                 <input type="text" class="form-control form-control-sm"
                                                     id="constructionClientName" name="client_name"
-                                                    placeholder="Client Name">
+                                                    placeholder="Client Name ">
                                                 <div class="invalid-feedback" id="errClientName"></div>
-                                            </div>
+</div>
                                             <small class="text-muted" style="font-size: 0.72rem;">Pre-filled from site
                                                 master. You may modify the name if needed.</small>
-                                        </div>
+</div>
 
                                         <div class="col-12 d-none" id="cashReceivedFromContainer">
                                             <label class="form-label small fw-semibold">Cash Received From <span class="text-danger">*</span></label>
@@ -561,14 +555,14 @@
                                                 <div class="form-check form-check-inline">
                                                     <input class="form-check-input" type="radio" name="cash_received_from" id="cashReceivedFromClient" value="client">
                                                     <label class="form-check-label" for="cashReceivedFromClient">Client</label>
-                                                </div>
+</div>
                                                 <div class="form-check form-check-inline">
                                                     <input class="form-check-input" type="radio" name="cash_received_from" id="cashReceivedFromOwner" value="owner">
                                                     <label class="form-check-label" for="cashReceivedFromOwner">Owner</label>
-                                                </div>
-                                            </div>
+</div>
+</div>
                                             <div class="invalid-feedback" id="errCashReceivedFrom"></div>
-                                        </div>
+</div>
 
                                         <!-- Painter & Electrician Daily Wage Auto-Check Card -->
                                         <div class="col-12 mt-2 d-none" id="wageCheckCard">
@@ -578,98 +572,97 @@
                                                     <div class="d-flex align-items-center gap-2">
                                                         <div class="bg-primary-subtle text-primary rounded-circle d-flex align-items-center justify-content-center" style="width: 28px; height: 28px;">
                                                             <i class="bi bi-people-fill small"></i>
-                                                        </div>
+</div>
                                                         <div>
                                                             <h6 class="mb-0 fw-bold text-dark" style="font-size: 0.88rem;">Painter & Electrician Daily Wages</h6>
                                                             <small class="text-muted" style="font-size: 0.7rem;">Allocated Daily Wages</small>
-                                                        </div>
-                                                    </div>
+</div>
+</div>
                                                     <span class="badge bg-primary-subtle text-primary border border-primary-subtle fw-semibold" id="wageCheckBadge" style="font-size: 0.72rem;">
                                                         Pending Wages
-                                                    </span>
-                                                </div>
+</span>
+</div>
 
                                                 <!-- Dynamic Worker Badges (Clean Cards) -->
                                                 <div id="wageCheckItemsContainer" class="d-flex flex-wrap gap-2 mb-3">
                                                     <!-- Dynamic Badges -->
-                                                </div>
+</div>
 
                                                 <!-- Cash Source Segmented Button Group (Clean, Modern, No bulky box) -->
                                                 <div class="mb-3">
                                                     <label class="form-label small fw-semibold text-secondary mb-1 d-block" style="font-size: 0.75rem;">
-                                                        <i class="bi bi-wallet2 text-primary me-1"></i>Wage Payment Source
-                                                    </label>
+                                                        <i class="bi bi-wallet2 text-primary me-1"></i>Wage Payment Source 
+</label>
                                                     <div class="btn-group btn-group-sm w-100" role="group">
                                                         <input type="radio" class="btn-check wage-source-radio" name="wage_cash_source" id="wageSourceOfficeCash" value="office_cash" checked>
                                                         <label class="btn btn-outline-primary py-1" for="wageSourceOfficeCash" style="font-size: 0.78rem;">
-                                                            <i class="bi bi-building me-1"></i>Office Cash
-                                                        </label>
+                                                            <i class="bi bi-building me-1"></i>Office Cash 
+</label>
 
                                                         <input type="radio" class="btn-check wage-source-radio" name="wage_cash_source" id="wageSourceProjectCash" value="project_cash">
                                                         <label class="btn btn-outline-primary py-1" for="wageSourceProjectCash" style="font-size: 0.78rem;">
-                                                            <i class="bi bi-cash-stack me-1"></i>Project Cash
-                                                        </label>
-                                                    </div>
-                                                </div>
+                                                            <i class="bi bi-cash-stack me-1"></i>Project Cash 
+</label>
+</div>
+</div>
 
                                                 <!-- Extra / Support Workers Section (Clean, Expandable) -->
                                                 <div class="mb-3 pt-2 border-top" id="extraWorkersSection">
                                                     <div class="d-flex align-items-center justify-content-between mb-2">
                                                         <span class="small fw-semibold text-secondary" style="font-size: 0.75rem;">
-                                                            <i class="bi bi-person-plus text-primary me-1"></i>Extra Helper / Support Worker
-                                                        </span>
+                                                            <i class="bi bi-person-plus text-primary me-1"></i>Extra Helper / Support Worker 
+</span>
                                                         <button type="button" class="btn btn-sm btn-outline-primary py-0 px-2 rounded-pill" id="btnAddExtraWorker" style="font-size: 0.72rem;">
-                                                            <i class="bi bi-plus-lg me-1"></i>Add Helper
-                                                        </button>
-                                                    </div>
+                                                            <i class="bi bi-plus-lg me-1"></i>Add Helper 
+</button>
+</div>
                                                     <div id="extraWorkersContainer" class="d-flex flex-column gap-2">
                                                         <!-- Dynamic extra worker input rows -->
-                                                    </div>
-                                                </div>
+</div>
+</div>
 
                                                 <!-- Clean Summary Bar -->
                                                 <div class="d-flex align-items-center justify-content-between p-2 rounded-2 bg-light border" id="wageCheckActionRow">
                                                     <div class="d-flex align-items-baseline gap-2">
                                                         <span class="text-muted small" style="font-size: 0.78rem;">Total Wages:</span>
                                                         <strong class="text-success fs-5" id="wageCheckTotalText">₹0</strong>
-                                                    </div>
+</div>
                                                     <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1" style="font-size: 0.72rem;">
                                                         <i class="bi bi-check2-circle me-1"></i>Auto-filled in Ledger
-                                                    </span>
-                                                </div>
+</span>
+</div>
                                                 <input type="hidden" name="daily_allocation_id" id="ledgerDailyAllocationId">
                                                 <input type="hidden" name="is_am_wage_payment" id="ledgerIsAmWagePayment" value="0">
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+</div>
+</div>
+</div>
+</div>
+</div>
 
                             <!-- Dynamic Supplier Specific Details (Task 4: Only Supplier Select Box) -->
                             <div class="col-12 supplier-fields-group d-none">
                                 <div class="p-3 bg-light rounded-3 border">
                                     <span class="small fw-bold text-primary mb-2 d-block">
-                                        <i class="bi bi-truck me-1"></i>Supplier Details
-                                    </span>
+                                        <i class="bi bi-truck me-1"></i>Supplier Details 
+</span>
                                     <div class="row g-2">
                                         <div class="col-12">
-                                            <label class="form-label small fw-semibold">Select Supplier <span
+                                            <label class="form-label small fw-semibold">Select Supplier  <span
                                                     class="text-danger">*</span></label>
                                             <select class="form-select form-select-sm fw-semibold" id="ledgerSupplier"
                                                 name="supplier_id">
-                                                <option value="" disabled selected>-- Select Supplier --
-                                                    </option>
+                                                <option value="" disabled selected>-- Select Supplier --</option>
                                                 @foreach($activeSuppliers as $supplier)
                                                     <option value="{{ $supplier->id }}"
                                                         data-supplier-name="{{ $supplier->name }}">{{ $supplier->name }}
-                                                    </option>
+</option>
                                                 @endforeach
                                             </select>
                                             <div class="invalid-feedback" id="errSupplierId"></div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+</div>
+</div>
+</div>
+</div>
 
                             <!-- Dynamic Office and Other Expenses Specific Details -->
                             <div class="col-12 office-expense-fields-group d-none">
@@ -678,7 +671,7 @@
                                     name="office_expense_details"
                                     placeholder="Enter expense (e.g. Office stationery, EB bill, tea/snacks, travel)">
                                 <div class="invalid-feedback" id="errOfficeExpenseDetails"></div>
-                            </div>
+</div>
 
                             <!-- Dynamic Transaction Types from Master (Task 5) -->
                             <div class="col-12 d-none" id="dynamicTransactionTypesContainer">
@@ -686,16 +679,16 @@
                                     <span class="small fw-bold text-primary mb-2 d-block">
                                         <i class="bi bi-tags-fill me-1"></i>Transaction Type Fields (<span
                                             id="txnCategoryLabel">Category</span>)
-                                    </span>
+</span>
                                     <p class="text-muted small mb-2" style="font-size: 0.75rem;">
                                         Linked with Transaction Type Master. Enter any details or values for the
                                         corresponding types below.
                                     </p>
                                     <div class="row g-2" id="txnTypeFieldsWrapper">
                                         <!-- Dynamically populated transaction type input fields -->
-                                    </div>
-                                </div>
-                            </div>
+</div>
+</div>
+</div>
 
                             <div class="col-12 col-md-6">
                                 <label class="form-label small fw-semibold">Amount (₹) <span
@@ -705,15 +698,15 @@
                                     <input type="number" step="1" class="form-control" id="newLedgerAmount" name="amount"
                                         placeholder="e.g. 5000">
                                     <div class="invalid-feedback" id="errAmount"></div>
-                                </div>
-                            </div>
+</div>
+</div>
                             <div class="col-12 col-md-6">
                                 <label class="form-label small fw-semibold">Description / Narration <span
                                         class="text-danger">*</span></label>
                                 <input type="text" class="form-control" id="newLedgerDesc" name="description"
                                     placeholder="e.g. Client stage 3 advance received">
                                 <div class="invalid-feedback" id="errDescription"></div>
-                            </div>
+</div>
                             <div class="col-12">
                                 <label class="form-label small fw-semibold">Receipt / Voucher Image <span
                                         class="text-muted fw-normal">(Optional)</span></label>
@@ -730,27 +723,27 @@
                                             <div class="small fw-semibold text-truncate" id="newLedgerImageName"
                                                 style="max-width: 240px;"></div>
                                             <small class="text-muted" id="newLedgerImageSize"></small>
-                                        </div>
-                                    </div>
+</div>
+</div>
                                     <button type="button" class="btn btn-sm btn-outline-danger py-0 px-2"
                                         id="newLedgerImageClearBtn" title="Remove attached image">
                                         <i class="bi bi-x-circle me-1"></i>Remove
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+</button>
+</div>
+</div>
+</div>
+</div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-light btn-sm" data-bs-dismiss="modal">Cancel</button>
                         <button type="submit" class="btn btn-deiveni btn-sm" id="btnSaveLedgerEntry">
                             <span class="spinner-border spinner-border-sm d-none me-1" id="saveSpinner"></span>
                             Save Entry to Ledger
-                        </button>
-                    </div>
+</button>
+</div>
                 </form>
-            </div>
-        </div>
-    </div>
+</div>
+</div>
+</div>
 @endsection
 
 @push('scripts')
@@ -813,13 +806,13 @@
                                                                 <label class="form-label small fw-semibold">
                                                                     ${escapeHtml(t.name_en)}
                                                                     <span class="badge bg-secondary-subtle text-secondary fw-normal ms-1" style="font-size: 0.68rem;">Input</span>
-                                                                </label>
+</label>
                                                                 <input type="text" class="form-control form-control-sm transaction-type-input"
                                                                     name="transaction_types[${t.id}]"
                                                                     data-id="${t.id}"
                                                                     data-name="${escapeHtml(t.name_en)}"
                                                                     placeholder="Enter ${escapeHtml(t.name_en)} details...">
-                                                            </div>
+</div>
                                                         `;
                         wrapper.append(fieldHtml);
                     });
@@ -831,14 +824,14 @@
             // Source / Category options based on Entry Flow Type
             const sourceOptionsByFlow = {
                 income: [
-                    { value: 'Construction', text: 'Construction (Stage/Advance)' },
+                    { value: 'Construction', text: 'Construction ' },
                     { value: 'Bank Valuation', text: 'Bank (Valuation / Inspection fee)' },
-                    { value: 'Rental', text: 'Rental (Income)' },
+                    { value: 'Rental', text: 'Rental ' },
                     { value: 'Office and other expenses', text: 'Office and other expenses' }
                 ],
                 expense: [
-                    { value: 'Construction', text: 'Construction (Stage/Advance)' },
-                    { value: 'Supplier', text: 'Supplier' },
+                    { value: 'Construction', text: 'Construction ' },
+                    { value: 'Supplier', text: 'Supplier ' },
                     { value: 'Office and other expenses', text: 'Office and other expenses' }
                 ]
             };
@@ -991,7 +984,7 @@
                                         <span class="text-muted" style="font-size: 0.72rem;">(${it.count} workers)</span>
                                         <strong class="text-success ms-1">₹${Math.round(it.subtotal).toLocaleString('en-IN')}</strong>
                                         ${statusHtml}
-                                    </div>
+</div>
                                 `;
                             });
                             $('#wageCheckItemsContainer').html(itemsHtml);
@@ -1048,7 +1041,7 @@
                 const siteName = $('#constructionSite option:selected').data('site-name') || 'Site';
                 const dateVal = $('#newLedgerDate').val();
                 const cashSourceVal = $('input[name="wage_cash_source"]:checked').val() || 'office_cash';
-                const cashSourceText = cashSourceVal === 'project_cash' ? 'Project Cash' : 'Office Cash';
+                const cashSourceText = cashSourceVal === 'project_cash' ? 'Project Cash ' : 'Office Cash ';
 
                 let extraText = '';
                 if (extraDetails.length > 0) {
@@ -1067,24 +1060,24 @@
                     <div class="extra-worker-item p-2 rounded-2 bg-light border">
                         <div class="row g-1 align-items-center">
                             <div class="col-12 col-sm-4">
-                                <input type="text" class="form-control form-control-sm extra-worker-name bg-white" placeholder="Worker Name" required>
-                            </div>
+                                <input type="text" class="form-control form-control-sm extra-worker-name bg-white" placeholder="Worker Name " required>
+</div>
                             <div class="col-12 col-sm-4">
-                                <input type="text" class="form-control form-control-sm extra-worker-work bg-white" placeholder="Role / Work" required>
-                            </div>
+                                <input type="text" class="form-control form-control-sm extra-worker-work bg-white" placeholder="Role " required>
+</div>
                             <div class="col-9 col-sm-3">
                                 <div class="input-group input-group-sm">
                                     <span class="input-group-text bg-white">₹</span>
                                     <input type="number" step="1" min="0" class="form-control form-control-sm extra-worker-salary bg-white" placeholder="Salary" required>
-                                </div>
-                            </div>
+</div>
+</div>
                             <div class="col-3 col-sm-1 text-center">
                                 <button type="button" class="btn btn-sm btn-outline-danger py-0 px-2 btn-remove-extra-worker" title="Remove">
                                     <i class="bi bi-x-lg"></i>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
+</button>
+</div>
+</div>
+</div>
                 `;
                 $('#extraWorkersContainer').append(rowHtml);
                 reindexExtraWorkers();
@@ -1128,7 +1121,7 @@
 
                 if (!bankId) {
                     $('#branchSelectContainer').addClass('d-none');
-                    branchSelect.append('<option value="" disabled selected>-- Select Branch (Select Bank First) --</option>');
+                    branchSelect.append('<option value="" disabled selected>-- Select Branch --</option>');
                     return;
                 }
 
@@ -1622,7 +1615,7 @@
                                         <li class="page-item ${prevDisabled}">
                                             <button class="page-link" type="button" data-page="${current - 1}" aria-label="Previous" title="Previous Page">
                                                 <i class="bi bi-chevron-left"></i>
-                                            </button>
+</button>
                                         </li>
                                     `);
 
@@ -1659,7 +1652,7 @@
                                         <li class="page-item ${nextDisabled}">
                                             <button class="page-link" type="button" data-page="${current + 1}" aria-label="Next" title="Next Page">
                                                 <i class="bi bi-chevron-right"></i>
-                                            </button>
+</button>
                                         </li>
                                     `);
             }

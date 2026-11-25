@@ -23,20 +23,20 @@
 
     <style>
         :root {
-            --bs-font-sans-serif: 'Plus Jakarta Sans', 'Noto Sans Tamil', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            --deiveni-primary: #1e3a8a;
-            --deiveni-primary-dark: #0f172a;
-            --deiveni-primary-light: #3b82f6;
-            --deiveni-accent: #d97706;
-            --deiveni-accent-light: #fef3c7;
-            --deiveni-sidebar-bg: #0f172a;
-            --deiveni-sidebar-hover: #1e293b;
-            --deiveni-sidebar-active: #2563eb;
-            --deiveni-bg: #f8fafc;
-            --deiveni-card-bg: #ffffff;
-            --deiveni-border: #e2e8f0;
-            --deiveni-text-main: #1e293b;
-            --deiveni-text-muted: #64748b;
+           --bs-font-sans-serif: 'Plus Jakarta Sans', 'Noto Sans Tamil', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+           --deiveni-primary: #1e3a8a;
+           --deiveni-primary-dark: #0f172a;
+           --deiveni-primary-light: #3b82f6;
+           --deiveni-accent: #d97706;
+           --deiveni-accent-light: #fef3c7;
+           --deiveni-sidebar-bg: #0f172a;
+           --deiveni-sidebar-hover: #1e293b;
+           --deiveni-sidebar-active: #2563eb;
+           --deiveni-bg: #f8fafc;
+           --deiveni-card-bg: #ffffff;
+           --deiveni-border: #e2e8f0;
+           --deiveni-text-main: #1e293b;
+           --deiveni-text-muted: #64748b;
         }
 
         body {
@@ -571,16 +571,16 @@
                 <a href="{{ route('dashboard') }}" class="d-flex align-items-center text-white text-decoration-none">
                     <div class="brand-logo-icon me-2">
                         <i class="fa-solid fa-helmet-safety"></i>
-                    </div>
+</div>
                     <div>
                         <div class="fw-bold fs-6 tracking-wide lh-1 text-white">DEIVENI</div>
                         <small class="text-warning text-uppercase" style="font-size: 0.72rem; letter-spacing: 0.05em;">Construction</small>
-                    </div>
-                </a>
+</div>
+</a>
                 <button class="btn btn-sm btn-link text-white-50 d-lg-none p-0" id="closeSidebarBtn">
                     <i class="bi bi-x-lg fs-5"></i>
-                </button>
-            </div>
+</button>
+</div>
 
             <!-- Navigation Links -->
             <div class="sidebar-nav flex-grow-1 overflow-y-auto">
@@ -592,7 +592,7 @@
                                 class="nav-link {{ Request::is('dashboard*') ? 'active' : '' }}" data-menu="dashboard">
                                 <i class="bi bi-grid-1x2-fill"></i>
                                 <span>Dashboard</span>
-                            </a>
+</a>
                         </li>
                     </ul>
                 @endif
@@ -611,7 +611,7 @@
                                     data-menu="worker_categories">
                                     <i class="bi bi-person-badge-fill"></i>
                                     <span>Worker Categories</span>
-                                </a>
+</a>
                             </li>
                         @endif
 
@@ -621,7 +621,7 @@
                                     data-menu="units">
                                     <i class="bi bi-rulers"></i>
                                     <span>Units Master</span>
-                                </a>
+</a>
                             </li>
                         @endif
 
@@ -631,7 +631,7 @@
                                     class="nav-link {{ Request::is('materials*') ? 'active' : '' }}" data-menu="materials">
                                     <i class="bi bi-box-seam-fill"></i>
                                     <span>Materials Master</span>
-                                </a>
+</a>
                             </li>
                         @endif
 
@@ -641,7 +641,7 @@
                                     class="nav-link {{ Request::is('suppliers*') ? 'active' : '' }}" data-menu="suppliers">
                                     <i class="bi bi-truck"></i>
                                     <span>Suppliers</span>
-                                </a>
+</a>
                             </li>
                         @endif
 
@@ -652,7 +652,7 @@
                                     data-menu="banks">
                                     <i class="bi bi-bank"></i>
                                     <span>Bank Master</span>
-                                </a>
+</a>
                             </li>
                         @endif
 
@@ -663,7 +663,7 @@
                                     data-menu="branches">
                                     <i class="bi bi-diagram-3"></i>
                                     <span>Branch Master</span>
-                                </a>
+</a>
                             </li>
                         @endif
 
@@ -674,7 +674,7 @@
                                     data-menu="properties">
                                     <i class="bi bi-building"></i>
                                     <span>Property Master</span>
-                                </a>
+</a>
                             </li>
                         @endif
 
@@ -685,7 +685,7 @@
                                     data-menu="property_types">
                                     <i class="bi bi-buildings"></i>
                                     <span>Property Type Master</span>
-                                </a>
+</a>
                             </li>
                         @endif
 
@@ -696,7 +696,7 @@
                                     data-menu="transaction_types">
                                     <i class="bi bi-arrow-left-right"></i>
                                     <span>Transaction Types</span>
-                                </a>
+</a>
                             </li>
                         @endif
                     </ul>
@@ -714,8 +714,8 @@
                                 <a href="{{ url('/sites') }}" class="nav-link {{ Request::is('sites*') ? 'active' : '' }}"
                                     data-menu="sites">
                                     <i class="bi bi-building-gear"></i>
-                                    <span>Project Sites </span>
-                                </a>
+                                    <span>Project Sites</span>
+</a>
                             </li>
                         @endif
                         @if (auth()->user()?->canAccess('daily_allocation') ?? true)
@@ -724,8 +724,8 @@
                                     class="nav-link {{ Request::is('daily-allocation*') ? 'active' : '' }}"
                                     data-menu="daily_allocation">
                                     <i class="bi bi-calendar-check-fill"></i>
-                                    <span>Daily Allocation </span>
-                                </a>
+                                    <span>Daily Allocation</span>
+</a>
                             </li>
                         @endif
                         @if (auth()->user()?->canAccess('weekly_wages') ?? true)
@@ -734,8 +734,8 @@
                                     class="nav-link {{ Request::is('weekly-wages*') ? 'active' : '' }}"
                                     data-menu="weekly_wages">
                                     <i class="bi bi-journal-text"></i>
-                                    <span>Weekly Wages </span>
-                                </a>
+                                    <span>Weekly Wages</span>
+</a>
                             </li>
                         @endif
                         @if (auth()->user()?->canAccess('site_cash') ?? true)
@@ -744,7 +744,7 @@
                                     class="nav-link {{ Request::is('site-cash*') ? 'active' : '' }}" data-menu="site_cash">
                                     <i class="bi bi-cash-stack"></i>
                                     <span>Site Cash Handling</span>
-                                </a>
+</a>
                             </li>
                         @endif
                         @if (auth()->user()?->canAccess('purchases') ?? true)
@@ -752,8 +752,8 @@
                                 <a href="{{ url('/purchases') }}"
                                     class="nav-link {{ Request::is('purchases*') ? 'active' : '' }}" data-menu="purchases">
                                     <i class="bi bi-cart-check-fill"></i>
-                                    <span>Purchases & Inward </span>
-                                </a>
+                                    <span>Purchases & Inward</span>
+</a>
                             </li>
                         @endif
                         @if (auth()->user()?->canAccess('material_usage') ?? true)
@@ -761,8 +761,8 @@
                                 <a href="{{ url('/material-usages') }}"
                                     class="nav-link {{ Request::is('material-usage*') ? 'active' : '' }}" data-menu="material_usage">
                                     <i class="bi bi-hammer"></i>
-                                    <span>Material Usage </span>
-                                </a>
+                                    <span>Material Usage</span>
+</a>
                             </li>
                         @endif
                         @if (auth()->user()?->canAccess('stock_transfer') ?? true)
@@ -770,8 +770,8 @@
                                 <a href="{{ url('/stock-transfers') }}"
                                     class="nav-link {{ Request::is('stock-transfers*') ? 'active' : '' }}" data-menu="stock_transfer">
                                     <i class="bi bi-arrow-left-right"></i>
-                                    <span>Stock Transfer </span>
-                                </a>
+                                    <span>Stock Transfer</span>
+</a>
                             </li>
                         @endif
                     </ul>
@@ -789,8 +789,8 @@
                                 <a href="{{ url('/ledger') }}" class="nav-link {{ Request::is('ledger*') ? 'active' : '' }}"
                                     data-menu="ledger">
                                     <i class="bi bi-book-half"></i>
-                                    <span>Daily Ledger </span>
-                                </a>
+                                    <span>Daily Ledger</span>
+</a>
                             </li>
                         @endif
                         @if (auth()->user()?->canAccess('admin_ledger') ?? true)
@@ -798,8 +798,8 @@
                                 <a href="{{ url('/admin-ledger') }}" class="nav-link {{ Request::is('admin-ledger*') ? 'active' : '' }}"
                                     data-menu="admin_ledger">
                                     <i class="bi bi-journal-bookmark-fill"></i>
-                                    <span>Admin Ledger </span>
-                                </a>
+                                    <span>Admin Ledger</span>
+</a>
                             </li>
                         @endif
                         @if (auth()->user()?->canAccess('cash_transfer') ?? true)
@@ -808,8 +808,8 @@
                                     class="nav-link {{ Request::is('cash-transfer*') ? 'active' : '' }}"
                                     data-menu="cash_transfer">
                                     <i class="bi bi-arrow-left-right"></i>
-                                    <span>Cash Transfer </span>
-                                </a>
+                                    <span>Cash Transfer</span>
+</a>
                             </li>
                         @endif
                     </ul>
@@ -823,7 +823,7 @@
                                 class="nav-link {{ Request::is('warehouse*') ? 'active' : '' }}" data-menu="warehouse">
                                 <i class="bi bi-shop-window"></i>
                                 <span>Warehouse Store</span>
-                            </a>
+</a>
                         </li>
                     </ul>
                 @endif
@@ -850,8 +850,8 @@
                                 <a href="{{ route('reports.admin.profit-loss') }}"
                                     class="nav-link {{ Request::is('reports/admin/profit-loss*') ? 'active' : '' }}">
                                     <i class="bi bi-graph-up-arrow"></i>
-                                    <span>Profit & Loss </span>
-                                </a>
+                                    <span>Profit & Loss</span>
+</a>
                             </li>
                         @endif
                         @if ($canLabourAlloc)
@@ -859,8 +859,8 @@
                                 <a href="{{ route('reports.site.labour-allocations') }}"
                                     class="nav-link {{ Request::is('reports/site/labour-allocations*') ? 'active' : '' }}">
                                     <i class="bi bi-people-fill"></i>
-                                    <span>Labour Allocation </span>
-                                </a>
+                                    <span>Labour Allocation</span>
+</a>
                             </li>
                         @endif
                         @if ($canDailyExpenses)
@@ -868,8 +868,8 @@
                                 <a href="{{ route('reports.site.daily-expenses') }}"
                                     class="nav-link {{ Request::is('reports/site/daily-expenses*') ? 'active' : '' }}">
                                     <i class="bi bi-receipt-cutoff"></i>
-                                    <span>Daily Expenses </span>
-                                </a>
+                                    <span>Daily Expenses</span>
+</a>
                             </li>
                         @endif
                         @if ($canCashHandling)
@@ -877,8 +877,8 @@
                                 <a href="{{ route('reports.site.cash-handling') }}"
                                     class="nav-link {{ Request::is('reports/site/cash-handling*') ? 'active' : '' }}">
                                     <i class="bi bi-cash-stack"></i>
-                                    <span>Site Cash Handling </span>
-                                </a>
+                                    <span>Site Cash Handling</span>
+</a>
                             </li>
                         @endif
                         @if ($canPurchasesInward)
@@ -886,8 +886,8 @@
                                 <a href="{{ route('reports.site.purchases-inward') }}"
                                     class="nav-link {{ Request::is('reports/site/purchases-inward*') ? 'active' : '' }}">
                                     <i class="bi bi-cart-check-fill"></i>
-                                    <span>Purchases & Inward </span>
-                                </a>
+                                    <span>Purchases & Inward</span>
+</a>
                             </li>
                         @endif
                         @if ($canWarehouseStock)
@@ -895,8 +895,8 @@
                                 <a href="{{ route('reports.site.warehouse-inventory') }}"
                                     class="nav-link {{ Request::is('reports/site/warehouse-inventory*') ? 'active' : '' }}">
                                     <i class="bi bi-boxes"></i>
-                                    <span>Warehouse Stock </span>
-                                </a>
+                                    <span>Warehouse Stock</span>
+</a>
                             </li>
                         @endif
                         @if ($canStockTransferReport)
@@ -904,8 +904,8 @@
                                 <a href="{{ route('reports.site.stock-transfers') }}"
                                     class="nav-link {{ Request::is('reports/site/stock-transfers*') ? 'active' : '' }}">
                                     <i class="bi bi-arrow-left-right"></i>
-                                    <span>Stock Transfer </span>
-                                </a>
+                                    <span>Stock Transfer</span>
+</a>
                             </li>
                         @endif
                         @if ($canAccountLedger)
@@ -913,8 +913,8 @@
                                 <a href="{{ route('reports.account.ledger') }}"
                                     class="nav-link {{ Request::is('reports/account/ledger*') ? 'active' : '' }}">
                                     <i class="bi bi-journal-text"></i>
-                                    <span>Financial & Ledger </span>
-                                </a>
+                                    <span>Financial & Ledger</span>
+</a>
                             </li>
                         @endif
                     </ul>
@@ -928,7 +928,7 @@
                 @if ($canAdmin || $canProfile)
                     <div class="sidebar-heading" data-role-section="admin">
                         {{ $canAdmin ? 'ADMINISTRATION' : 'ACCOUNT' }}
-                    </div>
+</div>
                     <ul class="nav flex-column">
                         @if (auth()->user()?->canAccess('users'))
                             <li class="nav-item">
@@ -936,7 +936,7 @@
                                     data-menu="users">
                                     <i class="bi bi-shield-lock-fill"></i>
                                     <span>Users & RBAC</span>
-                                </a>
+</a>
                             </li>
                         @endif
 
@@ -945,8 +945,8 @@
                                 <a href="{{ url('/audit-logs') }}"
                                     class="nav-link {{ Request::is('audit-logs*') ? 'active' : '' }}" data-menu="audit_logs">
                                     <i class="bi bi-clock-history"></i>
-                                    <span>Audit Logs </span>
-                                </a>
+                                    <span>Audit Logs</span>
+</a>
                             </li>
                         @endif
 
@@ -956,12 +956,12 @@
                                     data-menu="profile">
                                     <i class="bi bi-person-circle"></i>
                                     <span>My Profile</span>
-                                </a>
+</a>
                             </li>
                         @endif
                     </ul>
                 @endif
-            </div>
+</div>
 
             <!-- Sidebar Footer -->
             <div
@@ -970,18 +970,18 @@
                     <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center fw-bold me-2"
                         style="width: 32px; height: 32px;" id="userAvatar">
                         {{ strtoupper(substr(Auth::user()->name ?? 'AD', 0, 2)) }}
-                    </div>
+</div>
                     <div style="line-height: 1.2;">
                         <div class="text-white small fw-semibold" id="userName">{{ Auth::user()->name ?? 'K. Deiveni' }}
-                        </div>
+</div>
                         <small class="text-white-50" style="font-size: 0.7rem;" id="userEmail">{{ Auth::user()->email ??
                             'owner@deiveni.com' }}</small>
-                    </div>
-                </div>
+</div>
+</div>
                 <a href="{{ route('logout') }}" class="text-white-50 hover-white" title="Logout">
                     <i class="bi bi-box-arrow-right fs-5"></i>
-                </a>
-            </div>
+</a>
+</div>
         </aside>
 
         <!-- Main Wrapper -->
@@ -993,14 +993,14 @@
                     <button class="btn btn-light btn-sm d-lg-none me-2 border" id="openSidebarBtn"
                         aria-label="Open menu">
                         <i class="bi bi-list fs-5"></i>
-                    </button>
+</button>
                     <div>
                         <h5 class="mb-0 fw-bold text-dark d-flex align-items-center fs-6 fs-md-5">
                             @yield('page_title', 'Dashboard')
-                        </h5>
+</h5>
                         <small class="text-muted d-none d-md-inline" id="currentDateDisplay"></small>
-                    </div>
-                </div>
+</div>
+</div>
 
                 <div class="d-flex align-items-center gap-2">
                     <!-- Top Role Pill Indicator -->
@@ -1008,7 +1008,7 @@
                         class="badge {{ Auth::user()?->roleBadgeClass() ?? 'bg-primary text-white' }} d-none d-sm-inline-flex align-items-center px-2 py-1"
                         id="topRoleBadge">
                         <i class="bi bi-shield-check me-1"></i>{{ Auth::user()?->roleName() ?? 'Owner' }}
-                    </span>
+</span>
 
                     <!-- Profile Dropdown -->
                     <div class="dropdown">
@@ -1018,11 +1018,11 @@
                             <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center fw-bold"
                                 style="width: 26px; height: 26px; font-size: 0.75rem;" id="navAvatar">
                                 {{ strtoupper(substr(Auth::user()->name ?? 'AD', 0, 2)) }}
-                            </div>
+</div>
                             <span class="d-none d-md-inline small fw-semibold"
                                 id="navUserName">{{ Auth::user()->name ?? 'K. Deiveni' }}</span>
                             <i class="bi bi-chevron-down text-muted" style="font-size: 0.65rem;"></i>
-                        </button>
+</button>
                         <ul class="dropdown-menu dropdown-menu-end shadow border-0" style="border-radius: 10px;">
                             <li class="dropdown-header text-uppercase fw-bold text-muted small"
                                 style="font-size: 0.68rem;">Signed in as {{ Auth::user()?->roleName() ?? 'Admin' }}
@@ -1043,8 +1043,8 @@
                             <li><a class="dropdown-item text-danger" href="{{ route('logout') }}"><i
                                         class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
                         </ul>
-                    </div>
-                </div>
+</div>
+</div>
             </header>
 
             <!-- Main Content Area with Independent Scroll -->
@@ -1054,13 +1054,13 @@
                         <div class="alert alert-danger alert-dismissible fade show mb-3" role="alert">
                             <i class="bi bi-shield-exclamation me-2"></i>{{ session('error') }}
                             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                        </div>
+</div>
                     @endif
                     @if (session('success'))
                         <div class="alert alert-success alert-dismissible fade show mb-3" role="alert">
                             <i class="bi bi-check-circle-fill me-2"></i>{{ session('success') }}
                             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                        </div>
+</div>
                     @endif
                     @yield('content')
                 </main>
@@ -1070,31 +1070,31 @@
                     <div class="d-flex flex-column flex-sm-row justify-content-between align-items-center">
                         <div>
                             <strong>Deiveni Construction Management System</strong> &bull; Phase 1 Prototype
-                        </div>
+</div>
                         <!-- <div class="ta-text text-muted" style="font-size: 0.8rem;">
                             Construction Site Operations & Financial Management System
-                        </div> -->
-                    </div>
+</div> -->
+</div>
                 </footer>
-            </div>
-        </div>
-    </div>
+</div>
+</div>
+</div>
 
     <!-- Mobile Bottom Quick Action Bar (Role-Aware) -->
     <nav class="mobile-bottom-nav d-lg-none">
         <a href="{{ route('dashboard') }}" class="mobile-nav-item {{ Request::is('dashboard*') ? 'active' : '' }}">
             <i class="bi bi-grid-1x2-fill"></i>
             <span>Home</span>
-        </a>
+</a>
         @if (auth()->user()?->isAccountManager())
             <a href="{{ url('/banks') }}" class="mobile-nav-item {{ Request::is('banks*') ? 'active' : '' }}">
                 <i class="bi bi-bank"></i>
                 <span>Banks</span>
-            </a>
+</a>
             <a href="{{ url('/ledger') }}" class="mobile-nav-item {{ Request::is('ledger*') ? 'active' : '' }}">
                 <i class="bi bi-book-half"></i>
                 <span>Ledger</span>
-            </a>
+</a>
             @if ($showReportsSection)
                 @php
                     $mobileAmReportUrl = $canAccountLedger ? route('reports.account.ledger') : ($canLabourAlloc ? route('reports.site.labour-allocations') : ($canCashHandling ? route('reports.site.cash-handling') : ($canPurchasesInward ? route('reports.site.purchases-inward') : ($canWarehouseStock ? route('reports.site.warehouse-inventory') : route('reports.admin.profit-loss')))));
@@ -1103,26 +1103,26 @@
                     class="mobile-nav-item {{ Request::is('reports*') ? 'active' : '' }}">
                     <i class="bi bi-file-earmark-bar-graph-fill"></i>
                     <span>Reports</span>
-                </a>
+</a>
             @endif
             <a href="{{ url('/profile') }}" class="mobile-nav-item {{ Request::is('profile*') ? 'active' : '' }}">
                 <i class="bi bi-person-circle"></i>
                 <span>Profile</span>
-            </a>
+</a>
         @elseif (auth()->user()?->isSiteManager())
             <a href="{{ url('/worker-categories') }}"
                 class="mobile-nav-item {{ Request::is('worker-categories*') ? 'active' : '' }}">
                 <i class="bi bi-person-badge-fill"></i>
                 <span>Categories</span>
-            </a>
+</a>
             <a href="{{ url('/weekly-wages') }}" class="mobile-nav-item {{ Request::is('weekly-wages*') ? 'active' : '' }}">
                 <i class="bi bi-journal-text"></i>
                 <span>Wages</span>
-            </a>
+</a>
             <a href="{{ url('/site-cash') }}" class="mobile-nav-item {{ Request::is('site-cash*') ? 'active' : '' }}">
                 <i class="bi bi-cash-stack"></i>
                 <span>Cash</span>
-            </a>
+</a>
             @if ($showReportsSection)
                 @php
                     $mobileSmReportUrl = $canLabourAlloc ? route('reports.site.labour-allocations') : ($canCashHandling ? route('reports.site.cash-handling') : ($canPurchasesInward ? route('reports.site.purchases-inward') : ($canWarehouseStock ? route('reports.site.warehouse-inventory') : ($canAccountLedger ? route('reports.account.ledger') : route('reports.admin.profit-loss')))));
@@ -1131,17 +1131,17 @@
                     class="mobile-nav-item {{ Request::is('reports*') ? 'active' : '' }}">
                     <i class="bi bi-file-earmark-bar-graph-fill"></i>
                     <span>Reports</span>
-                </a>
+</a>
             @endif
         @else
             <a href="{{ url('/weekly-wages') }}" class="mobile-nav-item {{ Request::is('weekly-wages*') ? 'active' : '' }}">
                 <i class="bi bi-journal-text"></i>
                 <span>Wages</span>
-            </a>
+</a>
             <a href="{{ url('/ledger') }}" class="mobile-nav-item {{ Request::is('ledger*') ? 'active' : '' }}">
                 <i class="bi bi-book-half"></i>
                 <span>Ledger</span>
-            </a>
+</a>
             @if ($showReportsSection)
                 @php
                     $mobileAdminReportUrl = $canProfitLoss ? route('reports.admin.profit-loss') : ($canLabourAlloc ? route('reports.site.labour-allocations') : ($canCashHandling ? route('reports.site.cash-handling') : ($canPurchasesInward ? route('reports.site.purchases-inward') : ($canWarehouseStock ? route('reports.site.warehouse-inventory') : route('reports.account.ledger')))));
@@ -1150,12 +1150,12 @@
                     class="mobile-nav-item {{ Request::is('reports*') ? 'active' : '' }}">
                     <i class="bi bi-file-earmark-bar-graph-fill"></i>
                     <span>Reports</span>
-                </a>
+</a>
             @endif
             <a href="{{ url('/users') }}" class="mobile-nav-item {{ Request::is('users*') ? 'active' : '' }}">
                 <i class="bi bi-shield-lock-fill"></i>
                 <span>Users</span>
-            </a>
+</a>
         @endif
     </nav>
 
@@ -1168,12 +1168,12 @@
                 <div class="toast-body d-flex align-items-center">
                     <i class="bi bi-check-circle-fill text-success fs-5 me-2" id="toastIcon"></i>
                     <span id="toastMessage">Action completed successfully!</span>
-                </div>
+</div>
                 <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"
                     aria-label="Close"></button>
-            </div>
-        </div>
-    </div>
+</div>
+</div>
+</div>
 
     <!-- Global Delete Confirmation Modal -->
     <div class="modal fade" id="deleteConfirmModal" tabindex="-1" aria-hidden="true">
@@ -1182,18 +1182,18 @@
                 <div class="modal-body text-center p-4">
                     <div class="rounded-circle bg-danger bg-opacity-10 text-danger d-inline-flex p-3 mb-3">
                         <i class="bi bi-trash3-fill fs-2"></i>
-                    </div>
+</div>
                     <h5 class="modal-title fw-bold mb-2">Are you sure?</h5>
                     <p class="text-muted small mb-4" id="deleteModalMessage">Do you really want to delete this record?
                     </p>
                     <div class="d-flex justify-content-center gap-2">
                         <button type="button" class="btn btn-light btn-sm px-3" data-bs-dismiss="modal">Cancel</button>
                         <button type="button" class="btn btn-danger btn-sm px-3" id="confirmDeleteBtn">Delete</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+</div>
+</div>
+</div>
+</div>
+</div>
 
     <!-- Bootstrap 5.3 JS Bundle -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
@@ -1276,19 +1276,19 @@
                                     aria-expanded="false" style="min-height: 31px;">
                                 <span class="searchable-text text-truncate text-muted">${placeholder}</span>
                                 <i class="bi bi-chevron-down ms-1 text-muted" style="font-size: 0.72rem;"></i>
-                            </button>
+</button>
                             <div class="searchable-menu p-2 shadow border rounded bg-white d-none"
                                  style="min-width: 290px; max-height: 350px; z-index: 99999; overflow: hidden;">
                                 <div class="input-group input-group-sm mb-2">
                                     <span class="input-group-text bg-light border-end-0 py-1"><i class="bi bi-search text-muted"></i></span>
                                     <input type="text" class="form-control searchable-search-input border-start-0 ps-0 py-1"
-                                           placeholder="Type to search..." autocomplete="off">
+                                           placeholder="Type to search ..." autocomplete="off">
                                     <button class="btn btn-outline-secondary searchable-clear-search d-none py-1 px-2" type="button"><i class="bi bi-x"></i></button>
-                                </div>
+</div>
                                 <div class="searchable-options-list overflow-auto" style="max-height: 250px;">
-                                </div>
-                            </div>
-                        </div>
+</div>
+</div>
+</div>
                     `;
                     container = $(wrapHtml);
                     select.after(container);
@@ -1397,12 +1397,12 @@
                                     <div class="text-truncate me-2">
                                         <div class="fw-semibold text-truncate opt-title text-dark">${text}</div>
                                         ${subText}
-                                    </div>
+</div>
                                     <div class="flex-shrink-0 text-end">
                                         ${badgeHtml}
-                                    </div>
-                                </div>
-                            </div>
+</div>
+</div>
+</div>
                         `);
 
                         optionsList.append(item);
@@ -1415,10 +1415,10 @@
                                     <i class="bi bi-inbox me-1"></i>No items available
                                     <div class="mt-2">
                                         <button type="button" class="btn btn-sm btn-outline-primary searchable-add-empty-btn py-1 px-2" style="font-size:0.78rem;">
-                                            <i class="bi bi-plus-circle me-1"></i>Add New Material
-                                        </button>
-                                    </div>
-                                </div>
+                                            <i class="bi bi-plus-circle me-1"></i>Add New Material 
+</button>
+</div>
+</div>
                             `);
                             optionsList.find('.searchable-add-empty-btn').on('click', function (e) {
                                 e.stopPropagation();
@@ -1509,8 +1509,8 @@
                                     <button type="button" class="btn btn-sm btn-primary w-100 searchable-add-new-btn d-flex align-items-center justify-content-center py-1 fw-semibold" style="font-size:0.8rem;">
                                         <i class="bi bi-plus-circle me-1"></i>
                                         <span>Add "${rawQuery}" as New Material</span>
-                                    </button>
-                                </div>
+</button>
+</div>
                             `);
                             addNewBtn.find('.searchable-add-new-btn').on('click', function (e) {
                                 e.stopPropagation();

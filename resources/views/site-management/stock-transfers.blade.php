@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
-@section('title', 'Stock Transfer (பொருள் பரிமாற்றம்)')
-@section('page_title', 'Stock Transfer (தளங்களுக்கிடையேயான பொருள் பரிமாற்றம்)')
+@section('title', 'Stock Transfer ')
+@section('page_title', 'Stock Transfer ')
 
 @push('styles')
     <style>
@@ -66,72 +66,72 @@
             <div class="col-12 col-md-6">
                 <h4 class="fw-bold mb-1 text-dark">
                     <i class="bi bi-arrow-left-right text-primary me-2"></i>Inter-Site Stock Transfer
-                </h4>
+</h4>
                 <p class="text-muted small mb-0">
                     Transfer materials between sites (e.g. 100 bags at Site A &rarr; 10 bags to Site B) with real-time stock balance tracking.
                 </p>
-            </div>
+</div>
             <div class="col-12 col-md-6 text-md-end">
                 <button type="button" class="btn btn-primary btn-sm px-3 shadow-sm fw-semibold" id="newTransferBtn">
                     <i class="bi bi-plus-circle me-1"></i> New Stock Transfer
-                </button>
+</button>
                 <a href="{{ route('reports.site.stock-transfers') }}" class="btn btn-outline-secondary btn-sm px-3 ms-1">
                     <i class="bi bi-file-earmark-bar-graph me-1"></i> Transfer Report
-                </a>
-            </div>
-        </div>
+</a>
+</div>
+</div>
 
         <!-- KPI Summary Cards -->
         <div class="row g-3 mb-3 mb-md-4">
             <div class="col-6 col-lg-3">
                 <div class="card-stat h-100">
                     <div class="d-flex align-items-center justify-content-between mb-2">
-                        <span class="text-muted small fw-semibold">Total Transfers (பரிமாற்றங்கள்)</span>
+                        <span class="text-muted small fw-semibold">Total Transfers</span>
                         <div class="stat-icon-wrapper bg-primary bg-opacity-10 text-primary">
                             <i class="bi bi-box-arrow-right"></i>
-                        </div>
-                    </div>
+</div>
+</div>
                     <h4 class="fw-bold mb-0 text-dark">{{ (int) ($stats['total_transfers_count'] ?? 0) }}</h4>
                     <div class="small text-muted mt-1">Total: <strong class="text-dark">{{ number_format((float) ($stats['total_transferred_qty'] ?? 0), 2) }}</strong> items</div>
-                </div>
-            </div>
+</div>
+</div>
             <div class="col-6 col-lg-3">
                 <div class="card-stat h-100">
                     <div class="d-flex align-items-center justify-content-between mb-2">
-                        <span class="text-muted small fw-semibold">Transfer Value (மதிப்பு)</span>
+                        <span class="text-muted small fw-semibold">Transfer Value</span>
                         <div class="stat-icon-wrapper bg-success bg-opacity-10 text-success">
                             <i class="bi bi-currency-rupee"></i>
-                        </div>
-                    </div>
+</div>
+</div>
                     <h4 class="fw-bold mb-0 text-success">₹{{ number_format((float) ($stats['total_transfer_value'] ?? 0), 2) }}</h4>
                     <div class="small text-muted mt-1">Estimated transfer worth</div>
-                </div>
-            </div>
+</div>
+</div>
             <div class="col-6 col-lg-3">
                 <div class="card-stat h-100">
                     <div class="d-flex align-items-center justify-content-between mb-2">
-                        <span class="text-muted small fw-semibold">Active Sites (தளங்கள்)</span>
+                        <span class="text-muted small fw-semibold">Active Sites</span>
                         <div class="stat-icon-wrapper bg-warning bg-opacity-10 text-warning">
                             <i class="bi bi-buildings"></i>
-                        </div>
-                    </div>
+</div>
+</div>
                     <h4 class="fw-bold mb-0 text-warning">{{ (int) ($stats['sites_count'] ?? 0) }}</h4>
                     <div class="small text-muted mt-1">Sites exchanging material</div>
-                </div>
-            </div>
+</div>
+</div>
             <div class="col-6 col-lg-3">
                 <div class="card-stat h-100">
                     <div class="d-flex align-items-center justify-content-between mb-2">
                         <span class="text-muted small fw-semibold">Completed Transfers</span>
                         <div class="stat-icon-wrapper bg-info bg-opacity-10 text-info">
                             <i class="bi bi-check2-all"></i>
-                        </div>
-                    </div>
+</div>
+</div>
                     <h4 class="fw-bold mb-0 text-info">{{ (int) ($stats['completed_transfers_count'] ?? ($stats['total_transfers_count'] ?? 0)) }}</h4>
                     <div class="small text-muted mt-1">Successfully transferred</div>
-                </div>
-            </div>
-        </div>
+</div>
+</div>
+</div>
 
         <!-- Filter & Search Card -->
         <div class="card-custom p-3 mb-3 bg-white">
@@ -142,39 +142,39 @@
                             <span class="input-group-text bg-light text-muted"><i class="bi bi-search"></i></span>
                             <input type="text" class="form-control" name="search" id="filterSearch"
                                 placeholder="Search by transfer #, vehicle, driver..." value="{{ $filters['search'] ?? '' }}">
-                        </div>
-                    </div>
+</div>
+</div>
                     <div class="col-6 col-md-3">
                         <select class="form-select form-select-sm" name="site_id" id="filterSite">
-                            <option value="">-- All Sites (தளங்கள்) --</option>
+                            <option value="">-- All Sites --</option>
                             @foreach ($sites as $site)
                                 <option value="{{ $site->id }}" {{ ($filters['site_id'] ?? '') == $site->id ? 'selected' : '' }}>
                                     {{ $site->name }}@if(!empty($site->location)) ({{ $site->location }})@endif
-                                </option>
+</option>
                             @endforeach
                         </select>
-                    </div>
+</div>
                     <div class="col-6 col-md-3">
                         <select class="form-select form-select-sm" name="material_id" id="filterMaterial">
-                            <option value="">-- All Materials (பொருட்கள்) --</option>
+                            <option value="">-- All Materials --</option>
                             @foreach ($materials as $mat)
                                 <option value="{{ $mat->id }}" {{ ($filters['material_id'] ?? '') == $mat->id ? 'selected' : '' }}>
                                     {{ $mat->name_en }} {{ $mat->name_ta ? "({$mat->name_ta})" : '' }}
-                                </option>
+</option>
                             @endforeach
                         </select>
-                    </div>
+</div>
                     <div class="col-12 col-md-2 text-md-end">
                         <button type="submit" class="btn btn-dark btn-sm px-3">
                             <i class="bi bi-funnel me-1"></i> Filter
-                        </button>
+</button>
                         <a href="{{ route('stock-transfers.index') }}" id="filterResetBtn" class="btn btn-outline-secondary btn-sm px-2 ms-1" title="Reset Filters">
                             <i class="bi bi-arrow-clockwise"></i> Reset
-                        </a>
-                    </div>
-                </div>
+</a>
+</div>
+</div>
             </form>
-        </div>
+</div>
 
         <!-- Transfers Table Card -->
         <div class="card-custom bg-white p-0 overflow-hidden shadow-sm">
@@ -184,8 +184,8 @@
                         <tr class="text-muted small text-uppercase fw-bold" style="font-size:0.75rem;">
                             <th class="ps-3" style="width: 40px;">#</th>
                             <th style="width: 140px;">Transfer # &amp; Date</th>
-                            <th style="min-width: 220px;">Movement (தளம் நகர்வு)</th>
-                            <th style="min-width: 180px;">Material &amp; Unit (பொருள்)</th>
+                            <th style="min-width: 220px;">Movement</th>
+                            <th style="min-width: 180px;">Material &amp; Unit</th>
                             <th class="text-center" style="width: 110px;">Quantity</th>
                             <th style="min-width: 140px;">Vehicle &amp; Ref</th>
                             <th style="min-width: 120px;">Created By</th>
@@ -224,48 +224,48 @@
                                     <div class="fw-bold text-dark font-monospace" style="font-size:0.85rem;">{{ $tr->transfer_no }}</div>
                                     <div class="text-muted small" style="font-size:0.75rem;">
                                         <i class="bi bi-calendar3 me-1"></i>{{ $tr->transfer_date?->format('d M Y') }}
-                                    </div>
+</div>
                                     <span class="badge bg-primary-subtle text-primary border border-primary-subtle mt-1" style="font-size:0.68rem;">
                                         <i class="bi bi-box-arrow-right me-1"></i>TRANSFER
-                                    </span>
+</span>
                                 </td>
                                 <td>
                                     <div class="transfer-arrow-badge">
-                                        <span class="site-chip site-from" title="Source Site (வழங்கிய தளம்)">
+                                        <span class="site-chip site-from" title="Source Site ">
                                             {{ $tr->fromSite?->site_name ?? 'Site #'.$tr->from_project_site_id }}
-                                        </span>
+</span>
                                         <i class="bi bi-arrow-right text-muted fw-bold"></i>
-                                        <span class="site-chip site-to" title="Destination Site (பெற்ற தளம்)">
+                                        <span class="site-chip site-to" title="Destination Site ">
                                             {{ $tr->toSite?->site_name ?? 'Site #'.$tr->to_project_site_id }}
-                                        </span>
-                                    </div>
+</span>
+</div>
                                     @if ($tr->parentTransfer)
                                         <div class="small text-muted mt-1" style="font-size:0.72rem;">
                                             <i class="bi bi-link-45deg me-1"></i>Against: <span class="fw-semibold">{{ $tr->parentTransfer->transfer_no }}</span>
-                                        </div>
+</div>
                                     @endif
                                 </td>
                                 <td>
                                     @if ($tr->items->count() > 1)
                                         <div class="fw-bold text-dark">
                                             <i class="bi bi-boxes text-primary me-1"></i>{{ $tr->items->count() }} Materials
-                                        </div>
+</div>
                                         <div class="d-flex flex-wrap gap-1 mt-1">
                                             @foreach ($tr->items->take(2) as $it)
                                                 <span class="badge bg-light text-dark border py-1" style="font-size:0.7rem;">
                                                     {{ $it->material_name }} ({{ (float) $it->quantity }} {{ $it->unit }})
-                                                </span>
+</span>
                                             @endforeach
                                             @if ($tr->items->count() > 2)
                                                 <span class="badge bg-secondary-subtle text-secondary py-1" style="font-size:0.7rem;">+{{ $tr->items->count() - 2 }} more</span>
                                             @endif
-                                        </div>
+</div>
                                     @elseif ($tr->items->count() === 1)
                                         @php $singleItem = $tr->items->first(); @endphp
                                         <div class="fw-semibold text-dark">{{ $singleItem->material_name }}</div>
                                         <div class="small text-muted mt-1" style="font-size:0.72rem;">
                                             <span class="badge {{ $singleItem->source_type === 'Own Warehouse' ? 'bg-info-subtle text-info border-info-subtle' : 'bg-primary-subtle text-primary border-primary-subtle' }} border py-0" style="font-size:0.68rem;">{{ $singleItem->source_reference ?: $singleItem->source_type }}</span>
-                                        </div>
+</div>
                                     @else
                                         <div class="fw-semibold text-dark">{{ $tr->material?->name_en ?? 'Material' }}</div>
                                         @if ($tr->material?->name_ta)
@@ -302,7 +302,7 @@
                                     <div class="dropdown table-action-dropdown">
                                         <button class="btn table-action-btn" type="button" data-bs-toggle="dropdown" data-bs-popper-config='{"strategy":"fixed"}' aria-expanded="false" title="Actions">
                                             <i class="bi bi-three-dots-vertical"></i>
-                                        </button>
+</button>
                                         <ul class="dropdown-menu dropdown-menu-end shadow-sm">
                                             <li><button class="dropdown-item view-transfer-btn" type="button"><i class="bi bi-eye text-info me-2"></i>View Details</button></li>
                                             @if ($tr->transfer_type === 'TRANSFER' && $tr->return_expected && $tr->pending_return_quantity > 0)
@@ -319,14 +319,14 @@
                                                         data-unit="{{ $tr->unit }}"
                                                         data-pending="{{ $tr->pending_return_quantity }}">
                                                         <i class="bi bi-arrow-return-left text-success me-2"></i>Record Return
-                                                    </button>
+</button>
                                                 </li>
                                             @endif
                                             <li><button class="dropdown-item edit-transfer-btn" type="button" data-id="{{ $tr->id }}"><i class="bi bi-pencil text-primary me-2"></i>Edit</button></li>
                                             <li><hr class="dropdown-divider my-1"></li>
                                             <li><button class="dropdown-item text-danger delete-transfer-btn" type="button" data-id="{{ $tr->id }}" data-tr-no="{{ $tr->transfer_no }}"><i class="bi bi-trash3 text-danger me-2"></i>Delete</button></li>
                                         </ul>
-                                    </div>
+</div>
                                 </td>
                             </tr>
                         @empty
@@ -337,7 +337,7 @@
                                     <p class="small mb-3">Click "+ New Stock Transfer" to transfer material between project sites.</p>
                                     <button type="button" class="btn btn-primary btn-sm" id="emptyStateNewBtn">
                                         <i class="bi bi-plus-circle me-1"></i> New Stock Transfer
-                                    </button>
+</button>
                                 </td>
                             </tr>
                         @endforelse
@@ -349,7 +349,7 @@
                         </tr>
                     </tbody>
                 </table>
-            </div>
+</div>
 
             <!-- Table Pagination & Footer Summary -->
             <div class="p-3 bg-white border-top d-flex flex-column flex-md-row justify-content-between align-items-center gap-3" id="tablePaginationContainer">
@@ -363,17 +363,17 @@
                     </select>
                     <span class="small text-muted ms-md-2" id="paginationSummary">
                         Showing <strong class="text-dark" id="pageStart">1</strong> &minus; <strong class="text-dark" id="pageEnd">{{ min(10, $transfers->count()) }}</strong> of <strong class="text-dark" id="pageTotal">{{ $transfers->count() }}</strong> stock transfers
-                    </span>
-                </div>
+</span>
+</div>
                 <nav aria-label="Stock transfers table pagination">
                     <ul class="pagination pagination-sm mb-0 gap-1" id="paginationNav">
                         <!-- Dynamic page links rendered by JS -->
                     </ul>
                 </nav>
-            </div>
-        </div>
+</div>
+</div>
 
-    </div>
+</div>
 
     <!-- NEW STOCK TRANSFER MODAL -->
     <div class="modal fade" id="newTransferModal" tabindex="-1" aria-hidden="true">
@@ -381,10 +381,10 @@
             <div class="modal-content border-0 shadow">
                 <div class="modal-header bg-primary text-white py-2 px-3">
                     <h5 class="modal-title fs-6 fw-bold">
-                        <i class="bi bi-arrow-left-right me-1"></i> Record New Stock Transfer (பொருள் பரிமாற்றம்)
-                    </h5>
+                        <i class="bi bi-arrow-left-right me-1"></i> Record New Stock Transfer 
+</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
+</div>
                 <form id="newTransferForm" novalidate>
                     @csrf
                     <div class="modal-body p-3 p-md-4">
@@ -392,43 +392,43 @@
                             <i class="bi bi-info-circle-fill me-2 fs-5"></i>
                             <div>
                                 Transfer materials from one project site to another. Only materials recorded in Material Usage for the selected Source Site can be transferred.
-                            </div>
-                        </div>
+</div>
+</div>
 
                         <div class="row g-3">
                             <!-- Transfer No & Date -->
                             <div class="col-12 col-md-6">
-                                <label class="form-label small fw-semibold">Transfer No (பரிமாற்ற எண்) *</label>
+                                <label class="form-label small fw-semibold">Transfer No  *</label>
                                 <input type="text" class="form-control form-control-sm bg-light fw-bold font-monospace"
                                     id="transferNo" name="transfer_no" value="{{ $nextTransferNo }}" readonly>
-                            </div>
+</div>
                             <div class="col-12 col-md-6">
-                                <label class="form-label small fw-semibold">Transfer Date (தேதி) *</label>
+                                <label class="form-label small fw-semibold">Transfer Date  *</label>
                                 <input type="date" class="form-control form-control-sm" id="transferDate" name="transfer_date"
                                     value="{{ date('Y-m-d') }}" max="{{ date('Y-m-d') }}" required>
-                            </div>
+</div>
 
                             <!-- Source Site -> Destination Site -->
                             <div class="col-12 col-md-6">
-                                <label class="form-label small fw-semibold" for="fromSiteSelect">Source Site (வழங்கும் தளம் - Site A) <span class="text-danger">*</span></label>
+                                <label class="form-label small fw-semibold" for="fromSiteSelect">Source Site  <span class="text-danger">*</span></label>
                                 <select class="form-select form-select-sm" id="fromSiteSelect" name="from_project_site_id" required>
                                     <option value="" disabled selected>-- Select Source Site --</option>
                                     @foreach ($sites as $site)
                                         <option value="{{ $site->id }}">{{ $site->name }}@if(!empty($site->location)) ({{ $site->location }})@endif</option>
                                     @endforeach
                                 </select>
-                                <div class="invalid-feedback" id="errFromSite">Please select the source site (வழங்கும் தளத்தை தேர்வு செய்யவும்).</div>
-                            </div>
+                                <div class="invalid-feedback" id="errFromSite">Please select the source site .</div>
+</div>
                             <div class="col-12 col-md-6">
-                                <label class="form-label small fw-semibold" for="toSiteSelect">Destination Site (பெறும் தளம் - Site B) <span class="text-danger">*</span></label>
+                                <label class="form-label small fw-semibold" for="toSiteSelect">Destination Site  <span class="text-danger">*</span></label>
                                 <select class="form-select form-select-sm" id="toSiteSelect" name="to_project_site_id" required>
                                     <option value="" disabled selected>-- Select Destination Site --</option>
                                     @foreach ($sites as $site)
                                         <option value="{{ $site->id }}">{{ $site->name }}@if(!empty($site->location)) ({{ $site->location }})@endif</option>
                                     @endforeach
                                 </select>
-                                <div class="invalid-feedback" id="errToSite">Please select the destination site (பெறும் தளத்தை தேர்வு செய்யவும்).</div>
-                            </div>
+                                <div class="invalid-feedback" id="errToSite">Please select the destination site .</div>
+</div>
 
                             <!-- Material Selection Box (Filtered by Source Site) -->
                             <div class="col-12">
@@ -436,31 +436,31 @@
                                     <div class="d-flex justify-content-between align-items-center mb-2 flex-wrap gap-2">
                                         <div>
                                             <label class="form-label small fw-bold mb-0 text-dark">
-                                                <i class="bi bi-box-seam text-primary me-1"></i>Select Materials from Available On-Site Stock (தளத்தில் உள்ள இருப்பு பொருட்கள்) <span class="text-danger">*</span>
-                                            </label>
+                                                <i class="bi bi-box-seam text-primary me-1"></i>Select Materials from Available On-Site Stock  <span class="text-danger">*</span>
+</label>
                                             <div class="text-muted" style="font-size: 0.74rem;">
                                                 Only materials recorded in Material Usage for the source site are available to transfer.
-                                            </div>
-                                        </div>
+</div>
+</div>
                                         <span class="badge bg-primary-subtle text-primary border" id="siteAvailableCountBadge" style="display:none;">0 Materials In Stock</span>
-                                    </div>
+</div>
 
                                     <!-- Prompt before site is picked -->
                                     <div id="noSiteSelectedMsg" class="text-muted small py-2 px-3 text-center border rounded bg-white">
                                         <i class="bi bi-arrow-up-circle me-1 text-primary"></i> Please select a <strong>Source Site</strong> above to view and add materials in stock.
-                                    </div>
+</div>
 
                                     <!-- Loading Spinner -->
                                     <div id="materialsLoadingSpinner" class="text-center py-2 d-none">
                                         <div class="spinner-border spinner-border-sm text-primary me-1"></div>
                                         <span class="small text-muted">Checking on-site materials &amp; stock balances...</span>
-                                    </div>
+</div>
 
                                     <!-- No Materials In Stock Alert -->
                                     <div id="noMaterialsAlert" class="alert alert-warning py-2 px-3 small mb-0 d-none">
                                         <i class="bi bi-exclamation-triangle-fill me-1"></i>
                                         <strong>No materials recorded in Material Usage for this site yet.</strong> First record Material Usage for this site from Purchases &amp; Inward, then transfer available stock.
-                                    </div>
+</div>
 
                                     <!-- Available Materials Picker -->
                                     <div id="materialSelectContainer" class="d-none">
@@ -470,30 +470,30 @@
                                                 <select class="form-select form-select-sm" id="siteMaterialPicker">
                                                     <option value="" selected>-- Select Material from On-Site Stock --</option>
                                                 </select>
-                                            </div>
+</div>
                                             <div class="col-12 col-md-3">
                                                 <button type="button" class="btn btn-primary btn-sm w-100 fw-semibold" id="addMaterialToTransferBtn">
                                                     <i class="bi bi-plus-circle me-1"></i> Add to List
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+</button>
+</div>
+</div>
+</div>
+</div>
+</div>
 
                             <!-- Selected Materials Table View (Material, Quantity, Price, Total) -->
                             <div class="col-12">
                                 <div class="d-flex justify-content-between align-items-center mb-1">
                                     <label class="form-label small fw-bold mb-0 text-dark">
-                                        <i class="bi bi-table text-primary me-1"></i>Materials to Transfer (பரிமாற்றப்படும் பொருட்கள் பட்டியல்) <span class="text-danger">*</span>
-                                    </label>
+                                        <i class="bi bi-table text-primary me-1"></i>Materials to Transfer  <span class="text-danger">*</span>
+</label>
                                     <span class="small text-muted" id="selectedItemsCountLabel">0 materials added</span>
-                                </div>
+</div>
                                 <div class="table-responsive border rounded bg-white shadow-sm">
                                     <table class="table table-sm table-bordered align-middle mb-0" id="transferItemsTable">
                                         <thead class="table-light small">
                                             <tr class="text-muted text-uppercase" style="font-size: 0.74rem;">
-                                                <th class="ps-2" style="min-width: 220px;">Material &amp; Stock Source (பொருள் &amp; ஆதாரம்)</th>
+                                                <th class="ps-2" style="min-width: 220px;">Material &amp; Stock Source</th>
                                                 <th class="text-center" style="width: 100px;">Available</th>
                                                 <th class="text-center" style="min-width: 130px;">Transfer Qty *</th>
                                                 <th class="text-end" style="min-width: 110px;">Price (₹)</th>
@@ -511,46 +511,46 @@
                                         </tbody>
                                         <tfoot class="table-light small fw-bold border-top" id="transferItemsTableFoot" style="display: none;">
                                             <tr>
-                                                <td colspan="4" class="text-end pe-2">Estimated Total Transfer Value (மொத்த மதிப்பு):</td>
+                                                <td colspan="4" class="text-end pe-2">Estimated Total Transfer Value :</td>
                                                 <td class="text-end pe-2 text-primary fs-6 fw-bold" id="transferGrandTotal">₹0.00</td>
                                                 <td></td>
                                             </tr>
                                         </tfoot>
                                     </table>
-                                </div>
+</div>
                                 <div class="invalid-feedback d-block" id="errItemsTable" style="display:none !important;"></div>
-                            </div>
+</div>
 
                             <!-- Transport / Logistics Details -->
                             <div class="col-12 col-md-6">
                                 <label class="form-label small fw-semibold">Vehicle / Transport No</label>
                                 <input type="text" class="form-control form-control-sm" name="vehicle_no"
                                     placeholder="e.g. TN 45 AB 1234 / Auto / Tractor">
-                            </div>
+</div>
                             <div class="col-12 col-md-6">
                                 <label class="form-label small fw-semibold">Driver / Carrier Name</label>
                                 <input type="text" class="form-control form-control-sm" name="driver_name"
                                     placeholder="e.g. Murugan / Driver">
-                            </div>
+</div>
 
                             <!-- Remarks -->
                             <div class="col-12">
-                                <label class="form-label small fw-semibold">Remarks / Reason (குறிப்புகள்)</label>
+                                <label class="form-label small fw-semibold">Remarks / Reason</label>
                                 <textarea class="form-control form-control-sm" name="remarks" rows="2"
                                     placeholder="e.g. Urgent slab casting requirement at Site B. To be returned on next cement truck arrival."></textarea>
-                            </div>
-                        </div>
-                    </div>
+</div>
+</div>
+</div>
                     <div class="modal-footer py-2 px-3 bg-light">
                         <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
                         <button type="submit" class="btn btn-primary btn-sm fw-semibold" id="saveTransferBtn">
                             <i class="bi bi-check2-circle me-1"></i> Record Transfer
-                        </button>
-                    </div>
+</button>
+</div>
                 </form>
-            </div>
-        </div>
-    </div>
+</div>
+</div>
+</div>
 
     <!-- RECORD RETURN MODAL -->
     <div class="modal fade" id="returnModal" tabindex="-1" aria-hidden="true">
@@ -558,10 +558,10 @@
             <div class="modal-content border-0 shadow">
                 <div class="modal-header bg-success text-white py-2 px-3">
                     <h5 class="modal-title fs-6 fw-bold">
-                        <i class="bi bi-arrow-return-left me-1"></i> Return Stock to Source Site (பொருள் திரும்ப கொடுத்தல்)
-                    </h5>
+                        <i class="bi bi-arrow-return-left me-1"></i> Return Stock to Source Site 
+</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
+</div>
                 <form id="returnTransferForm">
                     @csrf
                     <input type="hidden" id="returnParentTransferId" value="">
@@ -573,53 +573,53 @@
                                 <span class="badge bg-danger bg-opacity-10 text-danger" id="returnFromSiteBadge">Site B</span>
                                 <i class="bi bi-arrow-right"></i>
                                 <span class="badge bg-success bg-opacity-10 text-success" id="returnToSiteBadge">Site A</span>
-                            </div>
+</div>
                             <div class="mt-2 small">
                                 Material: <strong class="text-dark" id="returnMaterialName">Cement</strong>
                                 (<span class="text-muted" id="returnUnitName">Bags</span>)
-                            </div>
+</div>
                             <div class="mt-1 small text-warning fw-semibold">
                                 Pending to Return: <span id="returnPendingQty">10</span> <span id="returnPendingUnit">Bags</span>
-                            </div>
-                        </div>
+</div>
+</div>
 
                         <div class="row g-2">
                             <div class="col-12 col-md-6">
-                                <label class="form-label small fw-semibold">Return Date (தேதி) *</label>
+                                <label class="form-label small fw-semibold">Return Date  *</label>
                                 <input type="date" class="form-control form-control-sm" id="returnDate" name="transfer_date"
                                     value="{{ date('Y-m-d') }}" max="{{ date('Y-m-d') }}" required>
-                            </div>
+</div>
                             <div class="col-12 col-md-6">
-                                <label class="form-label small fw-semibold">Quantity Returned (அளவு) *</label>
+                                <label class="form-label small fw-semibold">Quantity Returned  *</label>
                                 <div class="input-group input-group-sm">
                                     <input type="number" min="0.01" step="any" class="form-control fw-bold"
                                         id="returnQuantityInput" name="quantity" required>
                                     <span class="input-group-text bg-light text-muted" id="returnUnitSpan">Units</span>
-                                </div>
+</div>
                                 <div class="form-text small" style="font-size:0.72rem;">Max returnable: <span id="returnMaxHint">10</span></div>
-                            </div>
+</div>
                             <div class="col-12 col-md-6">
-                                <label class="form-label small fw-semibold">Vehicle No (வண்டி எண்)</label>
+                                <label class="form-label small fw-semibold">Vehicle No</label>
                                 <input type="text" class="form-control form-control-sm" name="vehicle_no"
                                     placeholder="e.g. TN 45 AB 1234">
-                            </div>
+</div>
                             <div class="col-12">
                                 <label class="form-label small fw-semibold">Remarks</label>
                                 <input type="text" class="form-control form-control-sm" name="remarks"
                                     placeholder="e.g. Returned from new cement truck load received today">
-                            </div>
-                        </div>
-                    </div>
+</div>
+</div>
+</div>
                     <div class="modal-footer py-2 px-3 bg-light">
                         <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
                         <button type="submit" class="btn btn-success btn-sm fw-semibold" id="saveReturnBtn">
                             <i class="bi bi-arrow-return-left me-1"></i> Confirm Stock Return
-                        </button>
-                    </div>
+</button>
+</div>
                 </form>
-            </div>
-        </div>
-    </div>
+</div>
+</div>
+</div>
 
     <!-- VIEW DETAILS MODAL -->
     <div class="modal fade" id="viewTransferModal" tabindex="-1" aria-hidden="true">
@@ -628,18 +628,18 @@
                 <div class="modal-header bg-dark text-white py-2 px-3">
                     <h5 class="modal-title fs-6 fw-bold">
                         <i class="bi bi-info-circle me-1"></i> Stock Transfer Details
-                    </h5>
+</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
+</div>
                 <div class="modal-body p-3" id="viewModalBody">
                     <!-- Populated via JS -->
-                </div>
+</div>
                 <div class="modal-footer py-2 px-3 bg-light">
                     <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
-                </div>
-            </div>
-        </div>
-    </div>
+</div>
+</div>
+</div>
+</div>
 
     <!-- Edit Transfer Modal -->
     <div class="modal fade" id="editTransferModal" tabindex="-1" aria-labelledby="editTransferModalLabel" aria-hidden="true">
@@ -648,90 +648,90 @@
                 <div class="modal-header bg-dark text-white py-2 px-3">
                     <h5 class="modal-title fs-6 fw-bold" id="editTransferModalLabel">
                         <i class="bi bi-pencil-square me-2 text-warning"></i>Edit Stock Transfer: <span id="editTransferNoTitle" class="text-warning"></span>
-                    </h5>
+</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
+</div>
                 <div class="modal-body p-3">
                     <form id="editTransferForm">
                         <input type="hidden" id="editTransferId">
 
                         <div class="row g-2 mb-3">
                             <div class="col-12 col-md-4">
-                                <label class="form-label small fw-semibold mb-1">Transfer Date (தேதி) <span class="text-danger">*</span></label>
+                                <label class="form-label small fw-semibold mb-1">Transfer Date  <span class="text-danger">*</span></label>
                                 <input type="date" class="form-control form-control-sm" id="editTransferDate" max="{{ date('Y-m-d') }}" required>
-                            </div>
+</div>
                             <div class="col-12 col-md-4">
-                                <label class="form-label small fw-semibold mb-1">Source Site (வழங்கிய தளம்)</label>
+                                <label class="form-label small fw-semibold mb-1">Source Site</label>
                                 <input type="text" class="form-control form-control-sm bg-light fw-semibold" id="editTransferFromSite" readonly>
-                            </div>
+</div>
                             <div class="col-12 col-md-4">
-                                <label class="form-label small fw-semibold mb-1">Destination Site (பெற்ற தளம்)</label>
+                                <label class="form-label small fw-semibold mb-1">Destination Site</label>
                                 <input type="text" class="form-control form-control-sm bg-light fw-semibold" id="editTransferToSite" readonly>
-                            </div>
-                        </div>
+</div>
+</div>
 
                         <div class="row g-2 mb-3">
                             <div class="col-12 col-md-4">
-                                <label class="form-label small fw-semibold mb-1">Vehicle No (வாகன எண்)</label>
+                                <label class="form-label small fw-semibold mb-1">Vehicle No</label>
                                 <input type="text" class="form-control form-control-sm" id="editTransferVehicleNo" placeholder="e.g. TN-58-AB-1234">
-                            </div>
+</div>
                             <div class="col-12 col-md-4">
-                                <label class="form-label small fw-semibold mb-1">Driver Name (ஓட்டுநர் பெயர்)</label>
+                                <label class="form-label small fw-semibold mb-1">Driver Name</label>
                                 <input type="text" class="form-control form-control-sm" id="editTransferDriverName" placeholder="Driver name">
-                            </div>
+</div>
                             <div class="col-12 col-md-4">
                                 <label class="form-label small fw-semibold mb-1">Delivery Challan No</label>
                                 <input type="text" class="form-control form-control-sm" id="editTransferChallanNo" placeholder="Challan / Slip No">
-                            </div>
-                        </div>
+</div>
+</div>
 
                         <div class="mb-3">
                             <div class="d-flex justify-content-between align-items-center mb-2">
                                 <div>
                                     <h6 class="fw-semibold mb-0 small text-uppercase text-muted">
-                                        <i class="bi bi-boxes text-primary me-1"></i>Transferred Materials (பரிமாற்ற பொருட்கள்)
-                                    </h6>
+                                        <i class="bi bi-boxes text-primary me-1"></i>Transferred Materials 
+</h6>
                                     <span class="text-muted small">Update quantity or price below. Live stocks and linked PO will update automatically.</span>
-                                </div>
+</div>
                                 <button type="button" class="btn btn-sm btn-outline-primary fw-semibold" id="toggleEditTransferAddMaterialBtn">
                                     <i class="bi bi-plus-circle me-1"></i> Add Material
-                                </button>
-                            </div>
+</button>
+</div>
 
                             {{-- Add Material Inline Box in Edit Modal --}}
                             <div id="editTransferAddMaterialBox" class="p-2 mb-3 border rounded bg-light-subtle shadow-sm" style="display: none;">
                                 <div class="row g-2 align-items-end">
                                     <div class="col-12 col-md-7">
                                         <label class="form-label small fw-semibold text-dark mb-1">
-                                            <i class="bi bi-boxes text-primary me-1"></i>Select Material from Source Site (தள இருப்பு பொருள்)
-                                        </label>
+                                            <i class="bi bi-boxes text-primary me-1"></i>Select Material from Source Site 
+</label>
                                         <select class="form-select form-select-sm" id="editTransferMaterialPicker">
                                             <option value="">-- Choose Material to Transfer --</option>
                                         </select>
-                                    </div>
+</div>
                                     <div class="col-6 col-md-3">
-                                        <label class="form-label small fw-semibold text-dark mb-1">Transfer Qty (அளவு) <span class="text-danger">*</span></label>
+                                        <label class="form-label small fw-semibold text-dark mb-1">Transfer Qty  <span class="text-danger">*</span></label>
                                         <input type="number" step="0.01" min="0.01" class="form-control form-control-sm text-center fw-semibold" id="editTransferNewItemQty" placeholder="Qty">
-                                    </div>
+</div>
                                     <div class="col-6 col-md-2 d-flex gap-1">
                                         <button type="button" class="btn btn-primary btn-sm flex-grow-1 fw-semibold" id="confirmAddTransferMaterialBtn">
                                             <i class="bi bi-plus-lg me-1"></i> Add
-                                        </button>
+</button>
                                         <button type="button" class="btn btn-outline-secondary btn-sm" id="cancelAddTransferMaterialBtn" title="Close">
                                             <i class="bi bi-x-lg"></i>
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
+</button>
+</div>
+</div>
+</div>
 
                             <div class="table-responsive border rounded">
                                 <table class="table table-sm table-bordered align-middle mb-0" id="editTransferItemsTable">
                                     <thead class="table-light">
                                         <tr>
                                             <th style="width:34px" class="text-center">#</th>
-                                            <th>Material (பொருள்)</th>
+                                            <th>Material</th>
                                             <th>Source / Reference</th>
-                                            <th class="text-center" style="width:130px">Quantity (அளவு) <span class="text-danger">*</span></th>
+                                            <th class="text-center" style="width:130px">Quantity  <span class="text-danger">*</span></th>
                                             <th class="text-center" style="width:80px">Unit</th>
                                             <th class="text-end" style="width:140px">Unit Price (₹) <span class="text-danger">*</span></th>
                                             <th class="text-end" style="width:140px">Total (₹)</th>
@@ -752,26 +752,26 @@
                                         </tr>
                                     </tfoot>
                                 </table>
-                            </div>
-                        </div>
+</div>
+</div>
 
                         <div class="row g-2 mb-2">
                             <div class="col-12">
-                                <label class="form-label small fw-semibold mb-1">Remarks (குறிப்புகள்)</label>
+                                <label class="form-label small fw-semibold mb-1">Remarks</label>
                                 <textarea class="form-control form-control-sm" id="editTransferRemarks" rows="2" placeholder="Optional notes..."></textarea>
-                            </div>
-                        </div>
+</div>
+</div>
                     </form>
-                </div>
+</div>
                 <div class="modal-footer py-2 px-3 bg-light">
                     <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
                     <button type="button" class="btn btn-primary btn-sm px-3" id="saveEditTransferBtn">
                         <i class="bi bi-check-circle me-1"></i> Update Stock Transfer
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
+</button>
+</div>
+</div>
+</div>
+</div>
 @endsection
 
 @push('scripts')
@@ -821,7 +821,7 @@
 
                 const toId = $('#toSiteSelect').val();
                 if (siteId && toId && siteId === toId) {
-                    showToast('Source site and destination site cannot be the same (வழங்கும் தளம் மற்றும் பெறும் தளம் ஒன்றாக இருக்க முடியாது).', 'warning');
+                    showToast('Source site and destination site cannot be the same .', 'warning');
                     $('#toSiteSelect').val('').addClass('is-invalid');
                 }
 
@@ -853,11 +853,11 @@
                         return;
                     }
 
-                    picker.append('<option value="" selected disabled>-- Select Material from On-Site Stock (பொருள் தேர்வு) --</option>');
+                    picker.append('<option value="" selected disabled>-- Select Material from On-Site Stock --</option>');
                     availableMaterialsList.forEach((it, idx) => {
                         const isWh = it.source_type === 'Own Warehouse';
                         const sourceTag = isWh ? 'Own Warehouse' : `Supplier PO: ${it.reference_no}`;
-                        const sourceDetail = isWh ? ' (மைய கிடங்கு இருப்பு)' : (it.supplier_name ? ` · Supplier: ${it.supplier_name}` : '');
+                        const sourceDetail = isWh ? '' : (it.supplier_name ? ` · Supplier: ${it.supplier_name}` : '');
                         const label = `[${sourceTag}] ${it.material_name} · Avail: ${it.available_qty} ${it.unit} @ ₹${Number(it.unit_price).toLocaleString('en-IN')}${sourceDetail}`;
                         const opt = $('<option></option>')
                             .val(it.key)
@@ -883,7 +883,7 @@
                 $('#errToSite').hide();
 
                 if (fromId && toId && fromId === toId) {
-                    showToast('Source site and destination site cannot be the same (வழங்கும் தளம் மற்றும் பெறும் தளம் ஒன்றாக இருக்க முடியாது).', 'warning');
+                    showToast('Source site and destination site cannot be the same .', 'warning');
                     $(this).val('').addClass('is-invalid');
                     $('#errToSite').text('Destination site must be different from source site.').show();
                 }
@@ -925,7 +925,7 @@
 
                 const isWarehouse = item.source_type === 'Own Warehouse';
                 const sourceBadge = isWarehouse
-                    ? `<span class="badge bg-info-subtle text-info border border-info-subtle px-2 py-1"><i class="bi bi-boxes me-1"></i>Own Warehouse (மைய கிடங்கு இருப்பு)</span>`
+                    ? `<span class="badge bg-info-subtle text-info border border-info-subtle px-2 py-1"><i class="bi bi-boxes me-1"></i>Own Warehouse</span>`
                     : `<span class="badge bg-primary-subtle text-primary border border-primary-subtle px-2 py-1" title="${item.supplier_name || ''}"><i class="bi bi-file-earmark-text me-1"></i>Supplier PO: ${item.reference_no}${item.supplier_name ? ' (' + item.supplier_name + ')' : ''}</span>`;
 
                 const rowHtml = `
@@ -945,7 +945,7 @@
                                 <input type="number" min="0.01" max="${item.available_qty}" step="any" value="1"
                                     class="form-control text-end fw-bold tr-item-qty" required>
                                 <span class="input-group-text bg-light text-muted px-1" style="font-size:0.72rem;">${item.unit}</span>
-                            </div>
+</div>
                             <div class="invalid-feedback small d-none item-qty-err" style="font-size:0.7rem;">Exceeds stock (${item.available_qty})</div>
                         </td>
                         <td class="text-end">
@@ -953,7 +953,7 @@
                                 <span class="input-group-text bg-light px-1" style="font-size:0.75rem;">₹</span>
                                 <input type="number" min="0" step="0.01" value="${item.unit_price}"
                                     class="form-control text-end fw-semibold tr-item-price">
-                            </div>
+</div>
                         </td>
                         <td class="text-end pe-2">
                             <div class="fw-bold text-dark tr-item-total">₹${Number(item.unit_price).toLocaleString('en-IN', {minimumFractionDigits: 2})}</div>
@@ -961,7 +961,7 @@
                         <td class="text-center">
                             <button type="button" class="btn btn-outline-danger btn-sm py-0 px-2 tr-item-remove" title="Remove Item">
                                 <i class="bi bi-trash"></i>
-                            </button>
+</button>
                         </td>
                     </tr>
                 `;
@@ -1057,7 +1057,7 @@
                     $('#fromSiteSelect').addClass('is-invalid');
                     $('#errFromSite').show();
                     $('#fromSiteSelect').focus();
-                    showToast('Please select the source site (வழங்கும் தளத்தை தேர்வு செய்யவும்).', 'warning');
+                    showToast('Please select the source site .', 'warning');
                     return;
                 }
 
@@ -1066,7 +1066,7 @@
                     $('#toSiteSelect').addClass('is-invalid');
                     $('#errToSite').show();
                     $('#toSiteSelect').focus();
-                    showToast('Please select the destination site (பெறும் தளத்தை தேர்வு செய்யவும்).', 'warning');
+                    showToast('Please select the destination site .', 'warning');
                     return;
                 }
 
@@ -1075,15 +1075,15 @@
                     $('#toSiteSelect').addClass('is-invalid');
                     $('#errToSite').text('Destination site must be different from source site.').show();
                     $('#toSiteSelect').focus();
-                    showToast('Source site and destination site cannot be the same (வழங்கும் தளம் மற்றும் பெறும் தளம் ஒன்றாக இருக்க முடியாது).', 'warning');
+                    showToast('Source site and destination site cannot be the same .', 'warning');
                     return;
                 }
 
                 // Validation 4: Must have at least 1 material in table
                 const itemRows = $('#transferItemsTableBody tr[data-key]');
                 if (!itemRows.length) {
-                    $('#errItemsTable').show().text('Please add at least one material to transfer (குறைந்தது ஒரு பொருளை சேர்க்கவும்).');
-                    showToast('Please add at least one material to transfer (குறைந்தது ஒரு பொருளை சேர்க்கவும்).', 'warning');
+                    $('#errItemsTable').show().text('Please add at least one material to transfer .');
+                    showToast('Please add at least one material to transfer .', 'warning');
                     return;
                 }
 
@@ -1311,8 +1311,8 @@
                                         </tr>
                                     </tfoot>
                                 </table>
-                            </div>
-                        </div>
+</div>
+</div>
                     `;
                 }
 
@@ -1320,27 +1320,27 @@
                     <div class="mb-3 d-flex justify-content-between align-items-center">
                         <span class="badge bg-primary fs-6 font-monospace">${tr.transfer_no}</span>
                         <span class="text-muted small">${tr.transfer_date ? new Date(tr.transfer_date).toLocaleDateString('en-GB') : ''}</span>
-                    </div>
+</div>
                     <div class="p-3 border rounded bg-light mb-3">
                         <div class="row g-2">
                             <div class="col-6">
-                                <small class="text-muted d-block">Source Site (வழங்கியது)</small>
+                                <small class="text-muted d-block">Source Site</small>
                                 <strong class="text-danger">${tr.from_site ? (tr.from_site.name || tr.from_site.site_name) : 'Site #' + tr.from_project_site_id}</strong>
-                            </div>
+</div>
                             <div class="col-6">
-                                <small class="text-muted d-block">Destination Site (பெற்றது)</small>
+                                <small class="text-muted d-block">Destination Site</small>
                                 <strong class="text-success">${tr.to_site ? (tr.to_site.name || tr.to_site.site_name) : 'Site #' + tr.to_project_site_id}</strong>
-                            </div>
+</div>
                             <div class="col-6 mt-2">
                                 <small class="text-muted d-block">Total Items</small>
                                 <strong class="text-dark">${tr.total_items_count || (tr.items ? tr.items.length : 1)} Materials</strong>
-                            </div>
+</div>
                             <div class="col-6 mt-2">
                                 <small class="text-muted d-block">Estimated Value</small>
                                 <strong class="text-primary fs-6">₹${Number(tr.total_amount || 0).toLocaleString('en-IN', {minimumFractionDigits: 2})}</strong>
-                            </div>
-                        </div>
-                    </div>
+</div>
+</div>
+</div>
                     ${itemsTableHtml}
                     <ul class="list-group list-group-flush small mb-3">
                         <li class="list-group-item d-flex justify-content-between px-0">
@@ -1416,7 +1416,7 @@
 
                         editTransferAvailableMaterials.forEach(it => {
                             const sourceTag = it.source_type === 'Own Warehouse' ? 'Warehouse' : 'PO';
-                            const sourceDetail = it.source_type === 'Own Warehouse' ? ' (மைய கிடங்கு)' : (it.reference_no ? ` (${it.reference_no})` : '');
+                            const sourceDetail = it.source_type === 'Own Warehouse' ? '' : (it.reference_no ? ` (${it.reference_no})` : '');
                             const label = `[${sourceTag}] ${it.material_name} · Avail: ${it.available_qty} ${it.unit} @ ₹${Number(it.unit_price).toLocaleString('en-IN')}${sourceDetail}`;
                             const opt = $('<option></option>')
                                 .val(it.key)
@@ -1518,7 +1518,7 @@
                             <div class="input-group input-group-sm">
                                 <span class="input-group-text">₹</span>
                                 <input type="number" step="0.01" min="0" class="form-control form-control-sm text-end edit-transfer-item-price" value="${parseFloat(item.unit_price || 0).toFixed(2)}" required>
-                            </div>
+</div>
                         </td>
                         <td class="text-end fw-semibold text-success edit-transfer-item-total">
                             ₹${(qty * parseFloat(item.unit_price || 0)).toFixed(2)}
@@ -1526,7 +1526,7 @@
                         <td class="text-center">
                             <button type="button" class="btn btn-outline-danger btn-sm p-0 remove-edit-transfer-item" style="width:26px; height:26px;" title="Remove Material">
                                 <i class="bi bi-trash"></i>
-                            </button>
+</button>
                         </td>
                     </tr>
                 `;
@@ -1616,7 +1616,7 @@
                                         <div class="input-group input-group-sm">
                                             <span class="input-group-text">₹</span>
                                             <input type="number" step="0.01" min="0" class="form-control form-control-sm text-end edit-transfer-item-price" value="${parseFloat(it.unit_price || 0).toFixed(2)}" required>
-                                        </div>
+</div>
                                     </td>
                                     <td class="text-end fw-semibold text-success edit-transfer-item-total">
                                         ₹${parseFloat(it.total_price || 0).toFixed(2)}
@@ -1624,7 +1624,7 @@
                                     <td class="text-center">
                                         <button type="button" class="btn btn-outline-danger btn-sm p-0 remove-edit-transfer-item" style="width:26px; height:26px;" title="Remove Material">
                                             <i class="bi bi-trash"></i>
-                                        </button>
+</button>
                                     </td>
                                 </tr>
                             `;
@@ -1834,7 +1834,7 @@
                     <li class="page-item ${prevDisabled}">
                         <button class="page-link" type="button" data-page="${current - 1}" aria-label="Previous" title="Previous Page">
                             <i class="bi bi-chevron-left"></i>
-                        </button>
+</button>
                     </li>
                 `);
 
@@ -1871,7 +1871,7 @@
                     <li class="page-item ${nextDisabled}">
                         <button class="page-link" type="button" data-page="${current + 1}" aria-label="Next" title="Next Page">
                             <i class="bi bi-chevron-right"></i>
-                        </button>
+</button>
                     </li>
                 `);
             }

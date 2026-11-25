@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('title', 'Site Cash Handling')
-@section('page_title', 'Site Cash Handling')
+@section('page_title', 'Site Cash Handling ')
 
 @push('styles')
     <style>
@@ -44,18 +44,18 @@
             <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
                 <div>
                     <h5 class="fw-bold mb-0 text-dark">Site Manager Cash-in-Hand Book</h5>
-                </div>
+</div>
                 <div class="d-flex gap-2 flex-wrap">
                     <button class="btn btn-outline-secondary btn-sm" id="exportCashBookBtn">
                         <i class="bi bi-file-earmark-spreadsheet me-1"></i> Export Cash Book
-                    </button>
+</button>
                     <button class="btn btn-deiveni btn-sm" data-bs-toggle="modal" data-bs-target="#cashTransactionModal"
                         id="recordCashTxnBtn">
                         <i class="bi bi-plus-circle-fill me-1"></i> Add Cash Transaction
-                    </button>
-                </div>
-            </div>
-        </div>
+</button>
+</div>
+</div>
+</div>
 
         <!-- Live Cash Formula Banner -->
         <div class="card-custom p-3 p-md-4 mb-4 bg-white border-start border-4 border-success">
@@ -63,7 +63,7 @@
                 <div>
                     <span class="badge bg-success-subtle text-success border border-success-subtle fw-semibold mb-1">
                         <i class="bi bi-wallet-fill me-1"></i> Formula
-                    </span>
+</span>
                     <h6 class="fw-bold text-dark mb-1">Cash-in-Hand = Advance + Collections &minus; Purchases &minus; Wages
                         &minus; Returned</h6>
                     <p class="text-muted small mb-0 font-monospace" id="cashFormulaDisplay">
@@ -72,16 +72,15 @@
                         ₹{{ number_format($stats['wages'], 0) }} (Wage) &minus; ₹{{ number_format($stats['returned'], 0) }}
                         (Ret) = <strong class="text-success">₹{{ number_format($stats['cash_in_hand'], 0) }}</strong>
                     </p>
-                </div>
+</div>
                 <div class="bg-success bg-opacity-10 p-3 rounded-3 text-center text-lg-end border border-success border-opacity-25"
                     style="min-width: 200px;">
                     <small class="text-muted d-block fw-semibold">CURRENT CASH-IN-HAND</small>
                     <h3 class="fw-bold text-success mb-0" id="liveCashInHandTotal">
                         @amount($stats['cash_in_hand'] ?? 0)</h3>
-                    
-                </div>
-            </div>
-        </div>
+</div>
+</div>
+</div>
 
         <!-- Pending Cash Transfers Alert Banner -->
         @if (isset($pendingIncomingTransfers) && $pendingIncomingTransfers->isNotEmpty())
@@ -89,21 +88,21 @@
                 <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
                     <div>
                         <strong class="text-dark">
-                            <i class="bi bi-bell-fill text-warning me-2 fs-5"></i>Pending Cash Transfer for Acceptance:
-                        </strong>
+                            <i class="bi bi-bell-fill text-warning me-2 fs-5"></i>Pending Cash Transfer for Acceptance :
+</strong>
                         <div class="small text-dark mt-1">
                             @foreach ($pendingIncomingTransfers as $pt)
                                 <div>• <strong>{{ $pt->directionLabel() }}</strong>: <strong class="text-primary">₹{{ number_format((float) $pt->amount, 2) }}</strong> sent by {{ $pt->handed_over_by }} ({{ $pt->transfer_date ? \Carbon\Carbon::parse($pt->transfer_date)->format('d M Y') : '' }}). Site: <strong>{{ $pt->projectSite?->name ?? 'N/A' }}</strong>. Please accept to reflect in Site Cash Handling.</div>
                             @endforeach
-                        </div>
-                    </div>
+</div>
+</div>
                     <div>
                         <a href="{{ route('cash-transfer.index') }}" class="btn btn-warning btn-sm fw-bold shadow-sm">
-                            <i class="bi bi-check-circle me-1"></i>Accept Transfer
-                        </a>
-                    </div>
-                </div>
-            </div>
+                            <i class="bi bi-check-circle me-1"></i>Accept Transfer 
+</a>
+</div>
+</div>
+</div>
         @endif
 
         <!-- 6 Formula Breakdown KPI Cards -->
@@ -114,11 +113,11 @@
                     <div class="d-flex justify-content-between align-items-start mb-1">
                         <span class="text-muted small fw-semibold">1. Advance Received</span>
                         <i class="bi bi-plus-circle text-primary fs-5"></i>
-                    </div>
+</div>
                     <h4 class="fw-bold text-primary mb-0" id="kpiAdvance">@amount($stats['advance'])</h4>
                     <small class="text-muted" style="font-size:0.75rem;">From Account Manager / Owner</small>
-                </div>
-            </div>
+</div>
+</div>
 
             <!-- 2. Client Collections -->
             <div class="col-6 col-md-4 col-xl">
@@ -126,11 +125,11 @@
                     <div class="d-flex justify-content-between align-items-start mb-1">
                         <span class="text-muted small fw-semibold">2. Collections</span>
                         <i class="bi bi-cash-stack text-success fs-5"></i>
-                    </div>
+</div>
                     <h4 class="fw-bold text-success mb-0" id="kpiCollections">@amount($stats['collections'])</h4>
                     <small class="text-muted" style="font-size:0.75rem;">From Site Clients</small>
-                </div>
-            </div>
+</div>
+</div>
 
             <!-- 3. Local Purchases -->
             <div class="col-6 col-md-4 col-xl">
@@ -138,11 +137,11 @@
                     <div class="d-flex justify-content-between align-items-start mb-1">
                         <span class="text-muted small fw-semibold">3. Purchases (-)</span>
                         <i class="bi bi-cart-dash text-danger fs-5"></i>
-                    </div>
+</div>
                     <h4 class="fw-bold text-danger mb-0" id="kpiPurchases">@amount($stats['purchases'] ?? 0)</h4>
                     <small class="text-muted" style="font-size:0.75rem;">Materials & Rentals</small>
-                </div>
-            </div>
+</div>
+</div>
 
             <!-- 4. Wages Paid -->
             <div class="col-6 col-md-4 col-xl">
@@ -150,11 +149,11 @@
                     <div class="d-flex justify-content-between align-items-start mb-1">
                         <span class="text-muted small fw-semibold">4. Wages Paid (-)</span>
                         <i class="bi bi-people text-danger fs-5"></i>
-                    </div>
+</div>
                     <h4 class="fw-bold text-danger mb-0" id="kpiWages">@amount($stats['wages'] ?? 0)</h4>
                     <small class="text-muted" style="font-size:0.75rem;">Labour Daily Wages</small>
-                </div>
-            </div>
+</div>
+</div>
 
             <!-- 5. Returned to AM -->
             <div class="col-6 col-md-4 col-xl">
@@ -162,11 +161,11 @@
                     <div class="d-flex justify-content-between align-items-start mb-1">
                         <span class="text-muted small fw-semibold">5. Returned (-)</span>
                         <i class="bi bi-arrow-left-right text-warning fs-5"></i>
-                    </div>
+</div>
                     <h4 class="fw-bold text-warning mb-0" id="kpiReturned">@amount($stats['returned'] ?? 0)</h4>
                     <small class="text-muted" style="font-size:0.75rem;">Balance to Office AM</small>
-                </div>
-            </div>
+</div>
+</div>
 
             <!-- 6. Total Balance in Hand -->
             <div class="col-6 col-md-4 col-xl">
@@ -174,12 +173,12 @@
                     <div class="d-flex justify-content-between align-items-start mb-1">
                         <span class="text-muted small fw-semibold">6. Total Balance in Hand</span>
                         <i class="bi bi-wallet2 text-success fs-5"></i>
-                    </div>
+</div>
                     <h4 class="fw-bold text-success mb-0" id="kpiBalanceInHand">@amount($stats['cash_in_hand'] ?? 0)</h4>
                     <small class="text-muted" style="font-size:0.75rem;">Net Cash Available (=)</small>
-                </div>
-            </div>
-        </div>
+</div>
+</div>
+</div>
 
         <!-- Filter & Transaction Log -->
         <div class="card-custom p-3 mb-4 bg-white">
@@ -189,8 +188,8 @@
                         <span class="input-group-text bg-light border-end-0"><i class="bi bi-search text-muted"></i></span>
                         <input type="text" class="form-control border-start-0 ps-0" id="cashTxnSearch"
                             placeholder="Search description, bill no, person, site...">
-                    </div>
-                </div>
+</div>
+</div>
                 <div class="col-6 col-md-3">
                     <select class="form-select form-select-sm" id="txnTypeFilter">
                         <option value="">All Cash Flow Types</option>
@@ -203,7 +202,7 @@
                         <option value="Balance Returned">Balance Returned to Account Manager (-)</option>
                         <option value="Other Expense">Other Expense (-)</option>
                     </select>
-                </div>
+</div>
                 <div class="col-6 col-md-2">
                     <select class="form-select form-select-sm" id="siteFilter">
                         <option value="">All Project Sites</option>
@@ -211,20 +210,20 @@
                             <option value="{{ $site->id }}">{{ $site->name }}</option>
                         @endforeach
                     </select>
-                </div>
+</div>
                 <div class="col-6 col-md-1">
                     <button type="button" class="btn btn-outline-secondary btn-sm px-2 py-1" id="historyFilterResetBtn"
                     title="Reset filters">
                     <i class="bi bi-arrow-counterclockwise"></i>
-                    </button>
-                </div>
+</button>
+</div>
                 <div class="col-12 col-md-2 text-md-end">
                     <span class="small text-muted" id="txnCounter">Showing <strong
                             class="text-dark">{{ $transactions->count() }}</strong>
                         records</span>
-                </div>
-            </div>
-        </div>
+</div>
+</div>
+</div>
 
         <!-- Transactions Table -->
         <div class="card-custom overflow-hidden">
@@ -275,60 +274,60 @@
                                 <td>
                                     <span class="badge bg-light text-dark border small fw-semibold">
                                         <i class="bi bi-person me-1 text-primary"></i>{{ $txn->paid_to ?? 'Site Manager' }}
-                                    </span>
+</span>
                                     @if ($txn->transaction_type === 'Project Cash Received')
                                         <div class="mt-1">
                                             <span class="badge bg-success-subtle text-success border border-success-subtle small fw-semibold" title="Project Cash received from Account Manager">
                                                 <i class="bi bi-arrow-down-left-circle me-1"></i>From: {{ $txn->paid_by ?? 'Account Manager' }}
-                                            </span>
-                                        </div>
+</span>
+</div>
                                     @elseif ($txn->paid_by === 'Account Manager')
                                         <div class="mt-1">
                                             @if ($txn->wage_cash_source === 'project_cash')
                                                 <span class="badge bg-warning-subtle text-dark border border-warning-subtle small fw-semibold" title="Paid from Project Cash by Account Manager (Deducted from Site Cash)">
                                                     <i class="bi bi-cash-stack me-1"></i>Paid by AM (Project Cash)
-                                                </span>
+</span>
                                             @else
                                                 <span class="badge bg-info-subtle text-info border border-info-subtle small fw-semibold" title="Paid directly from Office Cash by Account Manager (Not deducted from Site Cash)">
                                                     <i class="bi bi-building me-1"></i>Paid by AM (Office Cash)
-                                                </span>
+</span>
                                             @endif
-                                        </div>
+</div>
                                     @elseif ($txn->receiver_name)
                                         <div class="small text-muted mt-1" title="Handover / Receiver Person">
                                             <i class="bi bi-person-check text-secondary me-1"></i>{{ $txn->receiver_name }}
-                                        </div>
+</div>
                                     @endif
                                 </td>
                                 <td class="fw-semibold">
                                     <a href="{{ route('sites.show', $txn->projectSite?->encrypted_id ?? \App\Services\IdCipherService::encrypt($txn->project_site_id)) }}"
                                         class="text-dark text-decoration-none">
                                         {{ $siteName }}
-                                    </a>
+</a>
                                 </td>
                                 <td>
                                     @if ($supplierName)
                                         <div>
                                             <span class="fw-semibold text-primary">
                                                 <i class="bi bi-truck-front-fill me-1"></i>{{ $supplierName }}
-                                            </span>
+</span>
                                             @if ($txn->transaction_type === 'Supplier Payment')
                                                 <div class="mt-1 d-flex align-items-center gap-1 flex-wrap">
                                                     @if ($txn->is_site_based)
                                                         <span class="badge bg-primary-subtle text-primary border border-primary-subtle" style="font-size:0.68rem;">
                                                             <i class="bi bi-building me-1"></i>Site Based
-                                                        </span>
+</span>
                                                     @else
                                                         <span class="badge bg-success-subtle text-success border border-success-subtle" style="font-size:0.68rem;">
                                                             <i class="bi bi-cash-stack me-1"></i>Total Payment
-                                                        </span>
+</span>
                                                     @endif
                                                     @if ($txn->purchase_order_no)
                                                         <span class="badge bg-light text-dark border font-monospace" style="font-size:0.68rem;">
                                                             PO: {{ $txn->purchase_order_no }}
-                                                        </span>
+</span>
                                                     @endif
-                                                </div>
+</div>
                                             @endif
                                             @if (!empty($txn->items) && is_array($txn->items))
                                                 <div class="mt-1 d-flex flex-wrap gap-1">
@@ -336,11 +335,11 @@
                                                         <span class="badge bg-light text-dark border py-1 px-2" style="font-size:0.72rem;">
                                                             <i class="bi bi-box-seam text-secondary me-1"></i>{{ $it['qty'] ?? 1 }}
                                                             {{ $it['unit'] ?? 'Unit' }} {{ $it['materialName'] ?? ($it['material'] ?? ($it['name'] ?? '')) }}
-                                                        </span>
+</span>
                                                     @endforeach
-                                                </div>
+</div>
                                             @endif
-                                        </div>
+</div>
                                     @else
                                         <span class="text-muted">-</span>
                                     @endif
@@ -355,7 +354,7 @@
                                         @endphp
                                         <div class="text-dark small text-truncate" style="max-width: 250px;" title="{{ $txn->description }}">
                                             {{ \Illuminate\Support\Str::limit($cleanDesc, 45) }}
-                                        </div>
+</div>
                                     @else
                                         <span class="text-muted small">-</span>
                                     @endif
@@ -365,47 +364,47 @@
                                         @if ($txn->payment_mode === 'Cheque')
                                             <span class="badge bg-warning-subtle text-dark border border-warning-subtle px-2 py-0" style="font-size: 0.72rem;">
                                                 <i class="bi bi-card-text me-1"></i>Cheque
-                                            </span>
+</span>
                                         @elseif ($txn->payment_mode === 'UPI')
                                             <span class="badge bg-info-subtle text-info border border-info-subtle px-2 py-0" style="font-size: 0.72rem;">
                                                 <i class="bi bi-qr-code me-1"></i>UPI
-                                            </span>
+</span>
                                         @else
                                             <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-0" style="font-size: 0.72rem;">
                                                 <i class="bi bi-cash-stack me-1"></i>Cash
-                                            </span>
+</span>
                                         @endif
                                         @if ($txn->receipt_image)
                                             <span class="badge bg-primary-subtle text-primary border border-primary-subtle"
                                                 title="Receipt image attached">
                                                 <i class="bi bi-image"></i>
-                                            </span>
+</span>
                                         @endif
-                                    </div>
+</div>
                                     @if ($txn->payment_reference)
                                         <div class="font-monospace text-dark small fw-semibold" title="Payment Reference / Cheque No / UPI ID">
                                             <i class="bi bi-hash text-muted"></i>{{ $txn->payment_reference }}
-                                        </div>
+</div>
                                     @endif
                                     @if ($txn->bank_name)
                                         <div class="small text-muted" title="Bank Name">
                                             <i class="bi bi-bank me-1"></i>{{ $txn->bank_name }}
-                                        </div>
+</div>
                                     @endif
                                     @if ($txn->upi_id)
                                         <div class="small font-monospace text-muted" title="Supplier UPI ID / Mobile">
                                             <i class="bi bi-phone me-1"></i>{{ $txn->upi_id }}
-                                        </div>
+</div>
                                     @endif
                                     @if ($txn->account_holder_name)
                                         <div class="small text-dark fw-semibold" title="UPI Account Holder Name">
                                             <i class="bi bi-person-check me-1 text-success"></i>A/C: {{ $txn->account_holder_name }}
-                                        </div>
+</div>
                                     @endif
                                     @if ($txn->bill_no)
                                         <div class="font-monospace text-secondary small" title="Bill / Voucher No">
                                             <small class="text-muted">Bill:</small> {{ $txn->bill_no }}
-                                        </div>
+</div>
                                     @endif
                                 </td>
                                 <td class="text-end fw-bold text-success">
@@ -417,9 +416,9 @@
                                 <td class="text-center">
                                     <a href="{{ route('site-cash.show', $txn->encrypted_id) }}"
                                         class="btn btn-outline-primary btn-sm px-2 py-1"
-                                        title="View Details">
+                                        title="View Details ">
                                         <i class="bi bi-eye me-1"></i>View
-                                    </a>
+</a>
                                 </td>
                             </tr>
                         @empty
@@ -439,7 +438,7 @@
                         </tr>
                     </tbody>
                 </table>
-            </div>
+</div>
 
             <!-- Table Pagination & Footer Summary -->
             <div class="p-3 bg-white border-top d-flex flex-column flex-md-row justify-content-between align-items-center gap-3"
@@ -456,17 +455,17 @@
                         Showing <strong class="text-dark" id="pageStart">1</strong> &minus; <strong class="text-dark"
                             id="pageEnd">{{ min(10, $transactions->count()) }}</strong> of <strong class="text-dark"
                             id="pageTotal">{{ $transactions->count() }}</strong> transactions
-                    </span>
-                </div>
+</span>
+</div>
                 <nav aria-label="Cash transactions table pagination">
                     <ul class="pagination pagination-sm mb-0 gap-1" id="paginationNav">
                         <!-- Dynamic page links rendered by JS -->
                     </ul>
                 </nav>
-            </div>
-        </div>
+</div>
+</div>
 
-    </div>
+</div>
 
     <!-- Record Cash Transaction Modal -->
     <div class="modal fade" id="cashTransactionModal" tabindex="-1" aria-hidden="true">
@@ -475,31 +474,31 @@
                 <div class="modal-header">
                     <h5 class="modal-title fw-bold">Add Site Cash Transaction</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
+</div>
                 <form id="cashTransactionForm" enctype="multipart/form-data" novalidate>
                     @csrf
                     <div class="modal-body">
                         <div class="row g-3">
                             <div class="col-12 col-md-6" id="siteSelectGroup">
-                                <label class="form-label small fw-semibold">Project Site <span
+                                <label class="form-label small fw-semibold">Project Site  <span
                                         class="text-danger">*</span></label>
                                 <select class="form-select" id="newTxnSite" name="project_site_id">
                                     <option value="" disabled selected>-- Select Project Site --
-                                    </option>
+</option>
                                     @foreach ($sites as $site)
                                         <option value="{{ $site->id }}" data-name="{{ $site->name }}">{{ $site->name }}</option>
                                     @endforeach
                                 </select>
                                 <div class="invalid-feedback" id="errNewTxnSite"></div>
-                            </div>
+</div>
                             <div class="col-12 col-md-6">
-                                <label class="form-label small fw-semibold">Transaction Flow Type <span
+                                <label class="form-label small fw-semibold">Transaction Flow Type  <span
                                         class="text-danger">*</span></label>
                                 <select class="form-select" id="newTxnType" name="transaction_type">
                                     <option value="" disabled selected>-- Select Flow Type --</option>
                                     <option value="Owner Advance">Advance Received from Owner (+)</option>
                                     <option value="Client Advance">Advance Received from Client (+)</option>
-                                    <option value="Client Direct to Supplier">Client Direct to Supplier (-)</option>
+                                    <option value="Client Direct to Supplier">Client Direct to Supplier  (-)</option>
                                     <option value="Tool Rental">Tool Rental Purchase (-)</option>
                                     <option value="Supplier Payment">Supplier Payment (-)</option>
                                     <option value="Daily Wage Payment">Daily Worker Wage Payment (-)</option>
@@ -507,10 +506,10 @@
                                     <option value="Other Expense">Other Expense (-)</option>
                                 </select>
                                 <div class="invalid-feedback" id="errNewTxnType"></div>
-                            </div>
+</div>
 
                             <div class="col-12 col-md-6">
-                                <label class="form-label small fw-semibold">Paid To / Handled By <span
+                                <label class="form-label small fw-semibold">Paid To / Handled By  <span
                                         class="text-danger">*</span></label>
                                 <select class="form-select" id="newTxnPaidTo" name="paid_to">
                                     <option value="Site Manager" selected>Site Manager</option>
@@ -520,108 +519,108 @@
                                     <option value="Other">Other</option>
                                 </select>
                                 <div class="invalid-feedback" id="errNewTxnPaidTo"></div>
-                            </div>
+</div>
 
                             <div class="col-12 col-md-6">
-                                <label class="form-label small fw-semibold">Payment Mode <span
+                                <label class="form-label small fw-semibold">Payment Mode  <span
                                         class="text-danger">*</span></label>
                                 <div class="d-flex gap-3 align-items-center flex-wrap pt-2">
                                     <div class="form-check">
                                         <input class="form-check-input" type="radio" name="payment_mode" id="payModeCash"
                                             value="Cash" checked>
                                         <label class="form-check-label small fw-semibold text-success" for="payModeCash">
-                                            <i class="bi bi-cash-stack me-1"></i>Cash
-                                        </label>
-                                    </div>
+                                            <i class="bi bi-cash-stack me-1"></i>Cash 
+</label>
+</div>
                                     <div class="form-check">
                                         <input class="form-check-input" type="radio" name="payment_mode" id="payModeCheque"
                                             value="Cheque">
                                         <label class="form-check-label small fw-semibold text-warning-emphasis" for="payModeCheque">
-                                            <i class="bi bi-card-text me-1"></i>Cheque
-                                        </label>
-                                    </div>
+                                            <i class="bi bi-card-text me-1"></i>Cheque 
+</label>
+</div>
                                     <div class="form-check">
                                         <input class="form-check-input" type="radio" name="payment_mode" id="payModeUPI"
                                             value="UPI">
                                         <label class="form-check-label small fw-semibold text-info-emphasis" for="payModeUPI">
-                                            <i class="bi bi-qr-code me-1"></i>UPI
-                                        </label>
-                                    </div>
-                                </div>
+                                            <i class="bi bi-qr-code me-1"></i>UPI 
+</label>
+</div>
+</div>
                                 <div class="invalid-feedback" id="errNewTxnPaymentMode"></div>
-                            </div>
+</div>
 
                             <!-- Cheque Extended Details Group -->
                             <div class="col-12" id="chequeDetailsGroup" style="display: none;">
                                 <div class="p-3 rounded-3 border bg-warning-subtle bg-opacity-25">
                                     <div class="d-flex align-items-center justify-content-between mb-2">
                                         <span class="small fw-bold text-dark">
-                                            <i class="bi bi-card-text text-warning me-1"></i>Cheque Payment Details
-                                        </span>
+                                            <i class="bi bi-card-text text-warning me-1"></i>Cheque Payment Details 
+</span>
                                         <span class="badge bg-warning text-dark small">Cheque Mode</span>
-                                    </div>
+</div>
                                     <div class="row g-2">
                                         <div class="col-12 col-md-4">
-                                            <label class="form-label small fw-semibold">Cheque Number <span class="text-danger">*</span></label>
+                                            <label class="form-label small fw-semibold">Cheque Number  <span class="text-danger">*</span></label>
                                             <div class="input-group">
                                                 <span class="input-group-text bg-white"><i class="bi bi-hash"></i></span>
                                                 <input type="text" class="form-control font-monospace fw-bold" id="newTxnChequeNo" placeholder="e.g. CHQ-981245">
-                                            </div>
+</div>
                                             <div class="invalid-feedback" id="errNewTxnChequeNo"></div>
-                                        </div>
+</div>
                                         <div class="col-12 col-md-4">
                                             <label class="form-label small fw-semibold">Bank Name</label>
                                             <div class="input-group">
                                                 <span class="input-group-text bg-white"><i class="bi bi-bank"></i></span>
                                                 <input type="text" class="form-control" id="newTxnBankName" name="bank_name" placeholder="e.g. SBI, Indian Bank, HDFC">
-                                            </div>
-                                        </div>
+</div>
+</div>
                                         <div class="col-12 col-md-4">
                                             <label class="form-label small fw-semibold">Cheque Handed Over To / Received By</label>
                                             <div class="input-group">
                                                 <span class="input-group-text bg-white"><i class="bi bi-person"></i></span>
                                                 <input type="text" class="form-control" id="newTxnChequeReceiver" placeholder="e.g. Site Manager, Account Manager, Supplier Contact">
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+</div>
+</div>
+</div>
+</div>
+</div>
 
                             <!-- UPI Extended Details Group -->
                             <div class="col-12" id="upiDetailsGroup" style="display: none;">
                                 <div class="p-3 rounded-3 border bg-info-subtle bg-opacity-25">
                                     <div class="d-flex align-items-center justify-content-between mb-2">
                                         <span class="small fw-bold text-dark">
-                                            <i class="bi bi-qr-code text-info me-1"></i>UPI Transaction Details
-                                        </span>
+                                            <i class="bi bi-qr-code text-info me-1"></i>UPI Transaction Details 
+</span>
                                         <span class="badge bg-info text-white small">UPI Mode</span>
-                                    </div>
+</div>
                                     <div class="row g-2">
                                         <div class="col-12 col-md-4">
-                                            <label class="form-label small fw-semibold">UPI Ref / UTR No <span class="text-danger">*</span></label>
+                                            <label class="form-label small fw-semibold">UPI Ref / UTR No  <span class="text-danger">*</span></label>
                                             <div class="input-group">
                                                 <span class="input-group-text bg-white"><i class="bi bi-hash"></i></span>
                                                 <input type="text" class="form-control font-monospace fw-bold" id="newTxnUpiRef" placeholder="e.g. 438920194821">
-                                            </div>
+</div>
                                             <div class="invalid-feedback" id="errNewTxnUpiRef"></div>
-                                        </div>
+</div>
                                         <div class="col-12 col-md-4">
                                             <label class="form-label small fw-semibold">Supplier UPI ID / Mobile</label>
                                             <div class="input-group">
                                                 <span class="input-group-text bg-white"><i class="bi bi-phone"></i></span>
                                                 <input type="text" class="form-control font-monospace" id="newTxnUpiId" name="upi_id" placeholder="e.g. 9444111222@upi / GPay No">
-                                            </div>
-                                        </div>
+</div>
+</div>
                                         <div class="col-12 col-md-4">
                                             <label class="form-label small fw-semibold">UPI Account Holder Name</label>
                                             <div class="input-group">
                                                 <span class="input-group-text bg-white"><i class="bi bi-person-check"></i></span>
                                                 <input type="text" class="form-control fw-semibold" id="newTxnAccountHolder" name="account_holder_name" placeholder="e.g. Bala Murugan / Balaji Metals">
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+</div>
+</div>
+</div>
+</div>
+</div>
 
                             <!-- Hidden inputs for synchronized submission -->
                             <input type="hidden" name="payment_reference" id="newTxnPaymentReference">
@@ -633,59 +632,59 @@
                                     <div class="mb-2">
                                         <label class="form-label small fw-semibold text-dark mb-1">
                                             <i class="bi bi-box-arrow-in-down text-primary me-1"></i>Material / Supplier
-                                            Source
-                                        </label>
+                                            Source 
+</label>
                                         <div class="d-flex gap-3">
                                             <div class="form-check">
                                                 <input class="form-check-input" type="radio" name="material_source"
                                                     id="sourceThirdParty" value="third_party" checked>
                                                 <label class="form-check-label small fw-semibold" for="sourceThirdParty">
-                                                    Third-Party Supplier
-                                                </label>
-                                            </div>
+                                                    Third-Party Supplier 
+</label>
+</div>
                                             <div class="form-check">
                                                 <input class="form-check-input" type="radio" name="material_source"
                                                     id="sourceWarehouse" value="own_warehouse">
                                                 <label class="form-check-label small fw-semibold text-primary"
                                                     for="sourceWarehouse">
-                                                    Own Warehouse
-                                                </label>
-                                            </div>
-                                        </div>
-                                    </div>
+                                                    Own Warehouse 
+</label>
+</div>
+</div>
+</div>
 
                                     <!-- Third Party Supplier Selection -->
                                     <div id="thirdPartySupplierBox">
                                         <!-- Payment Basis (Site Based vs Total) - Only shown if supplier in master is NOT site-based -->
                                         <div class="mb-3" id="supplierPaymentScopeBox" style="display: none;">
                                             <label class="form-label small fw-semibold text-dark mb-1">
-                                                <i class="bi bi-diagram-3 text-primary me-1"></i>Payment Basis
-                                            </label>
+                                                <i class="bi bi-diagram-3 text-primary me-1"></i>Payment Basis 
+</label>
                                             <div class="d-flex gap-4">
                                                 <div class="form-check">
                                                     <input class="form-check-input" type="radio" name="supplier_payment_scope"
                                                         id="scopeSiteBased" value="site_based" checked>
                                                     <label class="form-check-label small fw-semibold" for="scopeSiteBased">
-                                                        <i class="bi bi-building me-1 text-primary"></i>Site Based
-                                                    </label>
-                                                </div>
+                                                        <i class="bi bi-building me-1 text-primary"></i>Site Based 
+</label>
+</div>
                                                 <div class="form-check">
                                                     <input class="form-check-input" type="radio" name="supplier_payment_scope"
                                                         id="scopeTotal" value="total">
                                                     <label class="form-check-label small fw-semibold text-primary" for="scopeTotal">
-                                                        <i class="bi bi-cash-stack me-1 text-success"></i>Total
-                                                    </label>
-                                                </div>
-                                            </div>
-                                        </div>
+                                                        <i class="bi bi-cash-stack me-1 text-success"></i>Total 
+</label>
+</div>
+</div>
+</div>
 
                                         <label class="form-label small fw-semibold text-dark">
-                                            <i class="bi bi-truck text-primary me-1"></i>Select Supplier
+                                            <i class="bi bi-truck text-primary me-1"></i>Select Supplier 
                                             <span class="text-danger">*</span>
-                                        </label>
+</label>
                                         <select class="form-select fw-semibold mb-2" id="newTxnSupplier" name="supplier_id">
                                             <option value="" disabled selected>-- Select Supplier --
-                                            </option>
+</option>
                                             @foreach ($suppliers as $supplier)
                                                 <option value="{{ $supplier->id }}"
                                                     data-name="{{ $supplier->name }}"
@@ -696,7 +695,7 @@
                                                     @if ($supplier->contact_person)
                                                         ({{ $supplier->contact_person }})
                                                     @endif
-                                                </option>
+</option>
                                             @endforeach
                                         </select>
                                         <div class="invalid-feedback" id="errNewTxnSupplier"></div>
@@ -704,36 +703,36 @@
                                         <!-- Cash Handover Person (ONLY for Supplier Option in Cash Mode) -->
                                         <div class="mt-2" id="cashReceiverGroup" style="display: none;">
                                             <label class="form-label small fw-semibold text-dark mb-1">
-                                                <i class="bi bi-person-check text-primary me-1"></i>Received By
-                                            </label>
+                                                <i class="bi bi-person-check text-primary me-1"></i>Received By 
+</label>
                                             <div class="input-group">
                                                 <span class="input-group-text bg-white"><i class="bi bi-person"></i></span>
                                                 <input type="text" class="form-control" id="newTxnCashReceiver" placeholder="Person Name">
-                                            </div>
-                                        </div>
+</div>
+</div>
 
                                         <!-- Purchase Orders Select Section (Shown ONLY when Site Based) -->
                                         <div id="poListSection" class="mt-3">
                                             <label class="form-label small fw-semibold text-dark mb-1"
                                                 for="newTxnPurchaseOrder">
                                                 <i class="bi bi-file-earmark-ruled text-primary me-1"></i>Select
-                                                Purchase Order
-                                            </label>
+                                                Purchase Order 
+</label>
                                             <select class="form-select fw-semibold" id="newTxnPurchaseOrder"
                                                 name="purchase_order_no">
                                                 <option value="" selected>-- Select Purchase Order --
-                                                </option>
+</option>
                                             </select>
                                             <div class="invalid-feedback" id="errNewTxnPurchaseOrder"></div>
-                                        </div>
-                                    </div>
+</div>
+</div>
 
                                     <!-- Warehouse In-Stock Material Selection -->
                                     <div id="warehouseMaterialBox" style="display: none;">
                                         <label class="form-label small fw-semibold text-dark mb-1">
                                             <i class="bi bi-boxes text-primary me-1"></i>Select In-Stock Materials from
-                                            Central Warehouse
-                                        </label>
+                                            Central Warehouse 
+</label>
                                         <div class="table-responsive">
                                             <table class="table table-sm table-bordered bg-white mb-2" id="siteCashWhTable">
                                                 <thead class="table-light small">
@@ -750,43 +749,43 @@
                                                     <!-- Dynamic rows -->
                                                 </tbody>
                                             </table>
-                                        </div>
+</div>
                                         <button type="button" class="btn btn-outline-primary btn-sm py-1"
                                             id="addSiteCashWhRowBtn">
                                             <i class="bi bi-plus-circle me-1"></i> Add Material
-                                        </button>
+</button>
                                         <input type="hidden" name="items" id="newTxnItemsJson">
-                                    </div>
-                                </div>
-                            </div>
+</div>
+</div>
+</div>
 
                             <!-- Daily Worker Allocation Section (When Flow Type is Daily Worker Wage Payment) -->
                             <div class="col-12 col-md-6" id="dailyAllocationDateGroup" style="display: none;">
                                 <div class="d-flex justify-content-between align-items-center mb-1">
                                     <label class="form-label small fw-semibold text-dark mb-0" for="newTxnDailyAllocation">
-                                        <i class="bi bi-calendar-event text-primary me-1"></i>Allocation Date <span class="text-danger">*</span>
-                                    </label>
+                                        <i class="bi bi-calendar-event text-primary me-1"></i>Allocation Date  <span class="text-danger">*</span>
+</label>
                                     <span class="badge bg-primary-subtle text-primary border small" id="allocationCountBadge" style="display:none;">0 Days</span>
-                                </div>
+</div>
                                 <select class="form-select fw-semibold" id="newTxnDailyAllocation">
                                     <option value="" selected>-- Select Project Site above --</option>
                                 </select>
-                            </div>
+</div>
 
                             <div class="col-12" id="dailyAllocationWorkersGroup" style="display: none;">
                                 <div class="d-flex justify-content-between align-items-center mb-1">
                                     <label class="form-label small fw-semibold text-dark mb-0">
-                                        <i class="bi bi-people-fill text-primary me-1"></i>Work Details
-                                    </label>
+                                        <i class="bi bi-people-fill text-primary me-1"></i>Work Details 
+</label>
                                     <span class="badge bg-primary-subtle text-primary border small" id="workersTotalCountBadge" style="display:none;">0 Workers</span>
-                                </div>
+</div>
                                 <div id="newTxnWorkersContainer" class="p-2 rounded border bg-light d-flex flex-wrap gap-2 align-items-center" style="min-height: 44px;">
                                     <span class="text-muted small fst-italic" id="newTxnWorkersPlaceholder">
-                                        <i class="bi bi-info-circle me-1"></i>Worker details will appear here once an allocation date is selected.
-                                    </span>
-                                </div>
+                                        <i class="bi bi-info-circle me-1"></i>Worker allocation details will appear here once an allocation date is selected.
+</span>
+</div>
                                 <input type="hidden" id="newTxnWorkersDisplay" name="workers_summary">
-                            </div>
+</div>
 
                             <!-- Balance Returned to Account Manager Section (Office Cash Wage & Cash Transfer Details) -->
                             <div class="col-12" id="balanceReturnedOfficeCashGroup" style="display: none;">
@@ -794,36 +793,36 @@
                                     <div class="card-header bg-primary-subtle py-2 px-2 px-md-3 d-flex justify-content-between align-items-center flex-wrap gap-2">
                                         <div class="d-flex align-items-center gap-2">
                                             <span class="small fw-bold text-primary">
-                                                <i class="bi bi-wallet2 me-1"></i>Balance to Return
-                                            </span>
-                                        </div>
+                                                <i class="bi bi-wallet2 me-1"></i>Balance to Return 
+</span>
+</div>
                                         <div class="btn-group btn-group-sm" role="group" id="returnSourceToggleGroup">
                                             <button type="button" class="btn btn-primary active py-0 px-2 small" id="returnTabWagesBtn" style="font-size: 0.76rem;">
-                                                <i class="bi bi-people me-1"></i>Office Cash Wages
-                                            </button>
+                                                <i class="bi bi-people me-1"></i>Office Cash Wages 
+</button>
                                             <button type="button" class="btn btn-outline-primary py-0 px-2 small" id="returnTabTransfersBtn" style="font-size: 0.76rem;">
-                                                <i class="bi bi-arrow-left-right me-1"></i>Cash Transfer
-                                            </button>
-                                        </div>
-                                    </div>
+                                                <i class="bi bi-arrow-left-right me-1"></i>Cash Transfer 
+</button>
+</div>
+</div>
                                     <div class="card-body p-2 p-md-3" id="balanceReturnedOfficeCashBody">
                                         <div class="text-muted small py-1">
                                             <i class="bi bi-arrow-up-circle text-primary me-1"></i>
                                             Select a Project Site above to display returnable Office Cash wages or cash transfer details.
-                                        </div>
-                                    </div>
+</div>
+</div>
                                     <div class="card-body p-2 p-md-3 d-none" id="balanceReturnedCashTransferBody">
                                         <div class="text-muted small py-1">
                                             <i class="bi bi-arrow-up-circle text-primary me-1"></i>
                                             Select a Project Site above to display returnable Cash Transfer details.
-                                        </div>
-                                    </div>
-                                </div>
+</div>
+</div>
+</div>
                                 <input type="hidden" name="wage_cash_source" id="newTxnWageCashSource" value="">
                                 <input type="hidden" name="returned_wage_ids" id="newTxnReturnedWageIds" value="[]">
                                 <input type="hidden" name="cash_transfer_id" id="newTxnCashTransferId" value="">
                                 <input type="hidden" name="ledger_id" id="newTxnLedgerId" value="">
-                            </div>
+</div>
 
                             <div class="col-12 col-md-6">
                                 <label class="form-label small fw-semibold" id="txnAmountLabel">Cash Amount (₹) <span
@@ -833,17 +832,17 @@
                                     <input type="number" step="any" class="form-control fw-bold" id="newTxnAmount"
                                         name="amount" placeholder="e.g. 5000">
                                     <div class="invalid-feedback" id="errNewTxnAmount"></div>
-                                </div>
+</div>
                                 <div class="form-text small text-success fw-semibold" id="labourWageHint" style="display: none;">
                                     <i class="bi bi-cash me-1"></i>Labour Wage: <span id="labourWageHintText">₹0.00</span>
-                                </div>
-                            </div>
+</div>
+</div>
                             <div class="col-12 col-md-6">
                                 <label class="form-label small fw-semibold">Bill / Voucher / Ref No</label>
                                 <input type="text" class="form-control font-monospace" id="newTxnBill" name="bill_no"
                                     placeholder="e.g. BILL-1234">
                                 <div class="invalid-feedback" id="errNewTxnBill"></div>
-                            </div>
+</div>
                             <div class="col-12">
                                 <label class="form-label small fw-semibold">Bill / Receipt Image <span
                                         class="text-muted fw-normal">(Optional)</span></label>
@@ -860,34 +859,34 @@
                                             <div class="small fw-semibold text-truncate" id="newTxnImageName"
                                                 style="max-width: 240px;"></div>
                                             <small class="text-muted" id="newTxnImageSize"></small>
-                                        </div>
-                                    </div>
+</div>
+</div>
                                     <button type="button" class="btn btn-sm btn-outline-danger py-0 px-2"
                                         id="newTxnImageClearBtn" title="Remove attached image">
                                         <i class="bi bi-x-circle me-1"></i>Remove
-                                    </button>
-                                </div>
-                            </div>
+</button>
+</div>
+</div>
                             <div class="col-12">
                                 <label class="form-label small fw-semibold">Description / Notes <span
                                         class="text-muted fw-normal">(Optional)</span></label>
                                 <textarea class="form-control" id="newTxnDesc" name="description" rows="2"
                                     placeholder="e.g. Urgent plumbing pipe purchase & transport (optional)"></textarea>
                                 <div class="invalid-feedback" id="errNewTxnDesc"></div>
-                            </div>
-                        </div>
-                    </div>
+</div>
+</div>
+</div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-light btn-sm" data-bs-dismiss="modal">Cancel</button>
                         <button type="submit" class="btn btn-deiveni btn-sm" id="saveCashTxnBtn">
                             <span class="spinner-border spinner-border-sm me-1 d-none" id="saveSpinner"></span>
                             Record Transaction
-                        </button>
-                    </div>
+</button>
+</div>
                 </form>
-            </div>
-        </div>
-    </div>
+</div>
+</div>
+</div>
 @endsection
 
 @push('scripts')
@@ -967,7 +966,7 @@
                     $('#dailyAllocationWorkersGroup').slideUp(200);
                     $('#newTxnWorkersDisplay').val('');
                     $('#workersTotalCountBadge').hide();
-                    $('#newTxnWorkersContainer').html('<span class="text-muted small fst-italic"><i class="bi bi-info-circle me-1"></i>Worker details will appear here once an allocation date is selected.</span>');
+                    $('#newTxnWorkersContainer').html('<span class="text-muted small fst-italic"><i class="bi bi-info-circle me-1"></i>Worker allocation details will appear here once an allocation date is selected.</span>');
                     $('#labourWageHint').hide();
                     $('#txnAmountLabel').html('Cash Amount (₹) <span class="text-danger">*</span>');
                 }
@@ -1086,7 +1085,7 @@
                     allocSelect.empty().append('<option value="" selected>-- Select Project Site above --</option>');
                     $('#newTxnWorkersDisplay').val('');
                     $('#workersTotalCountBadge').hide();
-                    $('#newTxnWorkersContainer').html('<span class="text-muted small fst-italic"><i class="bi bi-info-circle me-1"></i>Worker details will appear here once an allocation date is selected.</span>');
+                    $('#newTxnWorkersContainer').html('<span class="text-muted small fst-italic"><i class="bi bi-info-circle me-1"></i>Worker allocation details will appear here once an allocation date is selected.</span>');
                     $('#labourWageHint').hide();
                     return;
                 }
@@ -1190,7 +1189,7 @@
                 if (!allocId) {
                     $('#newTxnWorkersDisplay').val('');
                     totalCountBadge.hide();
-                    workersContainer.html('<span class="text-muted small fst-italic"><i class="bi bi-info-circle me-1"></i>Worker details will appear here once an allocation date is selected.</span>');
+                    workersContainer.html('<span class="text-muted small fst-italic"><i class="bi bi-info-circle me-1"></i>Worker allocation details will appear here once an allocation date is selected.</span>');
                     $('#labourWageHint').hide();
                     return;
                 }
@@ -1236,7 +1235,7 @@
                                     <strong class="${isAmPaid ? 'text-info' : 'text-primary'} fs-6">${count}</strong>
                                     ${dailyWage > 0 ? `<span class="text-muted small ps-1 border-start">₹${dailyWage.toLocaleString('en-IN')}/day</span>` : ''}
                                     ${isAmPaid ? `<span class="badge bg-info text-white ms-1" style="font-size:0.7rem;">Paid by AM</span>` : ''}
-                                </span>
+</span>
                             `);
                         });
 
@@ -1463,8 +1462,8 @@
                     $container.html(`
                         <div class="text-muted small py-1">
                             <i class="bi bi-arrow-up-circle text-primary me-1"></i>
-                            Select a Project Site above to view pending Office Cash wage details.
-                        </div>
+                            Select a Project Site above to display pending Office Cash wage details.
+</div>
                     `);
                     return;
                 }
@@ -1473,7 +1472,7 @@
                     <div class="text-center py-2 text-muted small">
                         <span class="spinner-border spinner-border-sm me-1 text-primary"></span>
                         Checking office cash wage payments for this site...
-                    </div>
+</div>
                 `);
 
                 $.ajax({
@@ -1499,9 +1498,9 @@
                                     <i class="bi bi-info-circle text-secondary fs-5 me-2"></i>
                                     <div>
                                         <strong class="text-dark">No pending Office Cash wages to return for this site.</strong>
-                                        <div class="text-secondary" style="font-size: 0.78rem;">Painter/electrician wages paid via Project Cash do not need to be returned. You can enter regular advance balance if any.</div>
-                                    </div>
-                                </div>
+                                        <div class="text-secondary" style="font-size: 0.78rem;">Painter/electrician wages paid via Project Cash do not need to be returned. You can enter any regular advance balance.</div>
+</div>
+</div>
                             `);
                             return;
                         }
@@ -1514,35 +1513,35 @@
                                 <div class="d-flex justify-content-between align-items-center mb-1">
                                     <span class="text-muted" style="font-size: 0.78rem;">Total Office Cash:</span>
                                     <strong class="text-dark" style="font-size: 0.85rem;">₹${totalOfficeWages.toLocaleString('en-IN')}</strong>
-                                </div>
+</div>
                                 ${totalReturned > 0 ? `
                                 <div class="d-flex justify-content-between align-items-center mb-1">
                                     <span class="text-muted" style="font-size: 0.78rem;">Already Returned:</span>
                                     <span class="text-success fw-semibold" style="font-size: 0.82rem;">₹${totalReturned.toLocaleString('en-IN')}</span>
-                                </div>
+</div>
                                 ` : ''}
                                 <div class="d-flex justify-content-between align-items-center mb-2 pb-1 border-bottom">
                                     <span class="text-muted" style="font-size: 0.78rem;">Pending to Return:</span>
                                     <span class="badge ${netPending > 0 ? 'bg-danger' : 'bg-success'}" style="font-size: 0.78rem;">
                                         ₹${netPending.toLocaleString('en-IN')}
-                                    </span>
-                                </div>
+</span>
+</div>
                                 ${payments.length > 0 ? `
                                 <div class="d-flex justify-content-between align-items-center flex-wrap gap-1">
                                     <div class="btn-group btn-group-sm" role="group" aria-label="Selection Controls">
                                         <button type="button" class="btn btn-outline-primary py-0 px-2 btn-select-all-wages" style="font-size: 0.72rem;">
                                             <i class="bi bi-check-all"></i> All
-                                        </button>
+</button>
                                         <button type="button" class="btn btn-outline-secondary py-0 px-2 btn-clear-all-wages" style="font-size: 0.72rem;">
                                             <i class="bi bi-x"></i> Clear
-                                        </button>
-                                    </div>
+</button>
+</div>
                                     <span class="badge bg-primary py-1 px-2" id="wageReturnSelectedBadge" style="font-size: 0.75rem;">
                                         Selected: ₹0 (0 items)
-                                    </span>
-                                </div>
+</span>
+</div>
                                 ` : ''}
-                            </div>
+</div>
                         `;
 
                         if (payments.length === 0) {
@@ -1552,8 +1551,8 @@
                                     <div>
                                         <strong>All Office Cash wages have been returned to the account manager!</strong>
                                         <div class="text-muted" style="font-size: 0.76rem;">All office cash wage payments for this site have been fully returned.</div>
-                                    </div>
-                                </div>
+</div>
+</div>
                             `;
                         } else {
                             // List of pending selectable payments
@@ -1582,12 +1581,12 @@
                                                 <div class="d-flex align-items-center text-truncate me-1" style="max-width: 60%;">
                                                     ${icon}
                                                     <span class="text-dark fw-medium text-truncate" title="${it.trade}">${it.trade}</span>
-                                                </div>
+</div>
                                                 <div class="text-end text-nowrap" style="font-size: 0.75rem;">
                                                     ${calcText}
                                                     <strong class="text-dark">₹${Number(it.subtotal).toLocaleString('en-IN')}</strong>
-                                                </div>
-                                            </div>
+</div>
+</div>
                                         `;
                                     });
                                 } else {
@@ -1612,12 +1611,12 @@
                                                     checked>
                                                 <label class="form-check-label cursor-pointer mb-0 fw-semibold text-dark" for="chk_wage_${p.id}" style="font-size: 0.82rem;">
                                                     <i class="bi bi-calendar3 text-muted me-1"></i>${dateStr}
-                                                </label>
-                                            </div>
+</label>
+</div>
                                             <div class="text-end">
                                                 <span class="fw-bold text-success" style="font-size: 0.95rem;">₹${amt.toLocaleString('en-IN')}</span>
-                                            </div>
-                                        </div>
+</div>
+</div>
 
                                         <!-- Row 2: Status & Source Badges -->
                                         <div class="d-flex justify-content-between align-items-center mb-2 flex-wrap gap-1">
@@ -1625,22 +1624,22 @@
                                             <div class="d-flex align-items-center gap-1">
                                                 <span class="badge bg-primary-subtle text-primary border border-primary-subtle" style="font-size: 0.68rem;">AM Paid</span>
                                                 <span class="badge bg-warning-subtle text-dark border border-warning-subtle" style="font-size: 0.68rem;">🏢 Office Cash</span>
-                                            </div>
-                                        </div>
+</div>
+</div>
 
                                         <!-- Row 3: Structured Worker Breakdown (Mobile-optimized) -->
                                         <div class="bg-white rounded-2 p-2 border mb-2">
                                             ${itemsRowsHtml}
-                                        </div>
+</div>
 
                                         <!-- Row 4: Description note & Click instruction -->
                                         <div class="d-flex justify-content-between align-items-center pt-1 border-top" style="font-size: 0.72rem;">
                                             <span class="text-muted text-truncate me-2 fst-italic" style="max-width: 65%;" title="${p.description}">
                                                 ${p.description || ''}
-                                            </span>
+</span>
                                             <span class="text-primary text-nowrap" style="font-size: 0.7rem;"><i class="bi bi-hand-index-thumb me-1"></i>Tap to toggle</span>
-                                        </div>
-                                    </div>
+</div>
+</div>
                                 `;
                             });
                         }
@@ -1654,7 +1653,7 @@
                                         <i class="bi bi-clock-history text-success me-1"></i>
                                         <span style="font-size: 0.78rem;">View Previously Returned (${returnedPayments.length} records - ₹${totalReturned.toLocaleString('en-IN')})</span>
                                         <i class="bi bi-chevron-down ms-1" style="font-size: 0.75rem;"></i>
-                                    </button>
+</button>
                                     <div class="collapse mt-2" id="returnedWagesHistory">
                             `;
 
@@ -1666,18 +1665,18 @@
                                         <div class="d-flex justify-content-between align-items-center mb-1">
                                             <span class="small fw-semibold text-dark"><i class="bi bi-calendar3 text-muted me-1"></i>${dateStr}</span>
                                             <span class="fw-bold text-success small">₹${amt.toLocaleString('en-IN')}</span>
-                                        </div>
+</div>
                                         <div class="d-flex justify-content-between align-items-center flex-wrap gap-1">
                                             <span class="badge bg-success-subtle text-success border border-success-subtle" style="font-size: 0.7rem;">✓ Returned to AM</span>
                                             <span class="text-muted fst-italic text-truncate" style="max-width: 180px; font-size: 0.72rem;">${rp.description || ''}</span>
-                                        </div>
-                                    </div>
+</div>
+</div>
                                 `;
                             });
 
                             html += `
-                                    </div>
-                                </div>
+</div>
+</div>
                             `;
                         }
 
@@ -1806,7 +1805,7 @@
                         <div class="text-muted small py-1">
                             <i class="bi bi-arrow-up-circle text-primary me-1"></i>
                             Select a Project Site above to view Cash Transfer details.
-                        </div>
+</div>
                     `);
                     return;
                 }
@@ -1815,7 +1814,7 @@
                     <div class="text-center py-2 text-muted small">
                         <span class="spinner-border spinner-border-sm me-1 text-primary"></span>
                         Checking pending cash transfers for this site...
-                    </div>
+</div>
                 `);
 
                 $.ajax({
@@ -1839,8 +1838,8 @@
                                     <div>
                                         <strong class="text-dark">No pending Cash Transfer balance to return for this site.</strong>
                                         <div class="text-secondary" style="font-size: 0.78rem;">All cash transfers have already been settled.</div>
-                                    </div>
-                                </div>
+</div>
+</div>
                             `);
                             return;
                         }
@@ -1850,7 +1849,7 @@
                             <div class="p-2 mb-2 rounded bg-light border d-flex justify-content-between align-items-center flex-wrap gap-1">
                                 <span class="text-muted small">Total Pending Transfers: <strong class="text-danger">₹${totalPending.toLocaleString('en-IN')}</strong> (${transfers.length} transfers)</span>
                                 <span class="badge bg-danger-subtle text-danger border border-danger-subtle small">Return Pending</span>
-                            </div>
+</div>
                             <div class="d-flex flex-column gap-2" id="pendingCashTransfersList">
                         `;
 
@@ -1865,29 +1864,29 @@
                                         <div class="d-flex align-items-center gap-1 flex-wrap">
                                             <span class="badge ${dirBadgeClass} border px-2 py-0" style="font-size: 0.73rem;">
                                                 <i class="bi ${dirIcon} me-1"></i>${ct.direction_label}
-                                            </span>
+</span>
                                             <span class="font-monospace fw-bold text-dark" style="font-size: 0.75rem;">${ct.ref}</span>
                                             <span class="text-muted" style="font-size: 0.72rem;">&bull; ${ct.date}</span>
-                                        </div>
+</div>
                                         <span class="fw-bold text-danger fs-6">${ct.amount_formatted}</span>
-                                    </div>
+</div>
                                     <div class="p-2 rounded bg-light border-start border-3 border-primary small mb-1">
                                         <div class="text-muted" style="font-size: 0.72rem;">Purpose:</div>
                                         <strong class="text-dark" style="font-size: 0.82rem;">
                                             <i class="bi bi-chat-left-quote text-primary me-1"></i>${escapeHtml(ct.purpose)}
-                                        </strong>
-                                    </div>
+</strong>
+</div>
                                     <div class="d-flex justify-content-between align-items-center flex-wrap gap-1 text-muted" style="font-size: 0.72rem;">
                                         <div>
                                             <span>Handed over by: <strong class="text-dark">${escapeHtml(ct.handed_over_by || '-')}</strong></span>
                                             <span class="mx-1">&bull;</span>
                                             <span>Received by: <strong class="text-dark">${escapeHtml(ct.received_by || '-')}</strong></span>
-                                        </div>
+</div>
                                         <button type="button" class="btn btn-sm btn-outline-primary py-0 px-2 select-ct-return-btn" data-id="${ct.id}" style="font-size: 0.75rem;">
                                             <i class="bi bi-check-circle me-1"></i>Select to Return
-                                        </button>
-                                    </div>
-                                </div>
+</button>
+</div>
+</div>
                             `;
                         });
 
@@ -2143,7 +2142,7 @@
                 $('#newTxnDailyAllocation').empty().append('<option value="" selected>-- Select Project Site above --</option>');
                 $('#newTxnWorkersDisplay').val('');
                 $('#workersTotalCountBadge').hide();
-                $('#newTxnWorkersContainer').html('<span class="text-muted small fst-italic"><i class="bi bi-info-circle me-1"></i>Worker details will appear here once an allocation date is selected.</span>');
+                $('#newTxnWorkersContainer').html('<span class="text-muted small fst-italic"><i class="bi bi-info-circle me-1"></i>Worker allocation details will appear here once an allocation date is selected.</span>');
                 $('#labourWageHint').hide();
                 $('#txnAmountLabel').html('Cash Amount (₹) <span class="text-danger">*</span>');
                 $('#allocationCountBadge').hide();
@@ -2196,7 +2195,7 @@
 
                     if (!chq) {
                         $('#newTxnChequeNo').addClass('is-invalid');
-                        $('#errNewTxnChequeNo').text('Please enter the Cheque Number.').show();
+                        $('#errNewTxnChequeNo').text('Please enter the Cheque Number .').show();
                         showToast('Please enter the Cheque Number.', 'warning');
                         return;
                     }
@@ -2409,7 +2408,7 @@
                         <li class="page-item ${prevDisabled}">
                             <button class="page-link" type="button" data-page="${current - 1}" aria-label="Previous" title="Previous Page">
                                 <i class="bi bi-chevron-left"></i>
-                            </button>
+</button>
                         </li>
                     `);
 
@@ -2446,7 +2445,7 @@
                         <li class="page-item ${nextDisabled}">
                             <button class="page-link" type="button" data-page="${current + 1}" aria-label="Next" title="Next Page">
                                 <i class="bi bi-chevron-right"></i>
-                            </button>
+</button>
                         </li>
                     `);
             }

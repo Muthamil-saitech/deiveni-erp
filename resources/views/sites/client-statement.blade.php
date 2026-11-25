@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('title', 'Client Statement - ' . $site->name)
-@section('page_title', 'Client Statement & Print (கிளையண்ட் அறிக்கை & அச்சு விவரம்)')
+@section('page_title', 'Client Statement & Print ')
 
 @push('styles')
     <style>
@@ -44,35 +44,35 @@
                     <a href="{{ route('sites.show', $site->encrypted_id) }}"
                         class="btn btn-outline-secondary btn-sm d-inline-flex align-items-center"
                         title="Back to Project Site Details">
-                        <i class="bi bi-arrow-left me-1"></i> Back to Site (தளத்திற்கு திரும்பு)
-                    </a>
+                        <i class="bi bi-arrow-left me-1"></i> Back to Site 
+</a>
                     <div class="vr d-none d-md-block"></div>
                     <div>
                         <div class="d-flex align-items-center gap-2 flex-wrap">
                             <h5 class="fw-bold mb-0 text-dark">
-                                Client Project Statement (கிளையண்ட் திட்ட அறிக்கை)
-                            </h5>
+                                Client Project Statement 
+</h5>
                             <span class="badge bg-primary-subtle text-primary border border-primary-subtle font-monospace">
                                 {{ $site->name }}
-                            </span>
-                        </div>
+</span>
+</div>
                         <small class="text-muted">
                             Client: <strong class="text-dark">{{ $client?->name ?? 'Direct Client' }}</strong>
                             &bull; Location: <span>{{ $site->location ?? 'Site' }}</span>
-                        </small>
-                    </div>
-                </div>
+</small>
+</div>
+</div>
 
                 <div class="d-flex align-items-center gap-2 flex-wrap">
                     <button type="button" class="btn btn-outline-success btn-sm d-inline-flex align-items-center gap-1 shadow-sm px-3" id="btnSaveOnly">
-                        <i class="bi bi-floppy"></i> Save Draft (சேமிக்க)
-                    </button>
+                        <i class="bi bi-floppy"></i> Save Draft 
+</button>
                     <button type="button" class="btn btn-primary btn-sm d-inline-flex align-items-center gap-1 shadow-sm px-3" id="btnSaveAndPrint">
-                        <i class="bi bi-printer-fill"></i> Print & Save A4 (அச்சிடு & சேமி)
-                    </button>
-                </div>
-            </div>
-        </div>
+                        <i class="bi bi-printer-fill"></i> Print & Save A4 
+</button>
+</div>
+</div>
+</div>
 
         <form id="clientStatementForm">
             @csrf
@@ -81,32 +81,32 @@
             <div class="statement-card p-4 mb-4">
                 <div class="row g-3">
                     <div class="col-12 col-md-3">
-                        <label class="form-label small fw-bold text-dark">Statement No (அறிக்கை எண்) <span class="text-danger">*</span></label>
+                        <label class="form-label small fw-bold text-dark">Statement No  <span class="text-danger">*</span></label>
                         <input type="text" class="form-control form-control-sm font-monospace fw-bold" name="statement_number" id="statement_number" value="{{ $nextStatementNumber }}" required>
-                    </div>
+</div>
                     <div class="col-12 col-md-3">
-                        <label class="form-label small fw-bold text-dark">Statement Date (தேதி) <span class="text-danger">*</span></label>
+                        <label class="form-label small fw-bold text-dark">Statement Date  <span class="text-danger">*</span></label>
                         <input type="date" class="form-control form-control-sm" name="statement_date" id="statement_date" value="{{ $todayDate }}" required>
-                    </div>
+</div>
                     <div class="col-12 col-md-6">
-                        <label class="form-label small fw-bold text-dark">Statement Title / Subject (தலைப்பு)</label>
+                        <label class="form-label small fw-bold text-dark">Statement Title / Subject</label>
                         <input type="text" class="form-control form-control-sm" name="title" id="statement_title" value="Project Expense & Construction Work Statement — {{ $site->name }}">
-                    </div>
+</div>
 
                     <div class="col-12 col-md-4">
-                        <label class="form-label small fw-bold text-dark">Client Name (கிளையண்ட் பெயர்)</label>
+                        <label class="form-label small fw-bold text-dark">Client Name</label>
                         <input type="text" class="form-control form-control-sm" name="client_name" id="client_name" value="{{ $client?->name ?? 'Client' }}">
-                    </div>
+</div>
                     <div class="col-12 col-md-4">
-                        <label class="form-label small fw-bold text-dark">Client Phone (தொலைபேசி)</label>
+                        <label class="form-label small fw-bold text-dark">Client Phone</label>
                         <input type="text" class="form-control form-control-sm" name="client_phone" id="client_phone" value="{{ $client?->phone ?? '' }}">
-                    </div>
+</div>
                     <div class="col-12 col-md-4">
-                        <label class="form-label small fw-bold text-dark">Client Address / Site Location (முகவரி)</label>
+                        <label class="form-label small fw-bold text-dark">Client Address / Site Location</label>
                         <input type="text" class="form-control form-control-sm" name="client_address" id="client_address" value="{{ $client?->address ?: $site->location }}">
-                    </div>
-                </div>
-            </div>
+</div>
+</div>
+</div>
 
             <!-- 1. Date-Wise Expense Items Table Card -->
             <div class="statement-card p-4 mb-4">
@@ -114,21 +114,21 @@
                     <div>
                         <h6 class="fw-bold mb-1 text-dark d-flex align-items-center gap-2">
                             <i class="bi bi-calendar-date text-primary"></i>
-                            Date-Wise Material & Work Expenses (தேதி வாரியான பொருட்கள் & பணிகள்)
-                        </h6>
+                            Date-Wise Material & Work Expenses 
+</h6>
                         <small class="text-muted">
-                            தேதி வாரியாக வரிசைப்படுத்தப்பட்டுள்ளது. கிளையண்ட்டிற்கு ஏற்ப தொகையை நேரடியாக <strong>திருத்தம் (Edit)</strong> செய்து கொள்ளலாம்.
-                        </small>
-                    </div>
+                            Sorted chronologically. You can <strong>Edit</strong> amounts directly as needed for the client statement.
+</small>
+</div>
                     <div class="d-flex align-items-center gap-2">
                         <span class="badge bg-light text-dark border px-2 py-1" id="itemsCountBadge">
                             {{ count($expenseItems) }} Items
-                        </span>
+</span>
                         <button type="button" class="btn btn-outline-primary btn-sm d-inline-flex align-items-center gap-1" id="btnAddCustomItem">
-                            <i class="bi bi-plus-circle"></i> + Add Date Item (கூடுதல் பொருள்)
-                        </button>
-                    </div>
-                </div>
+                            <i class="bi bi-plus-circle"></i> + Add Date Item 
+</button>
+</div>
+</div>
 
                 <div class="table-responsive">
                     <table class="table table-bordered table-hover align-middle table-statement mb-0" id="statementItemsTable">
@@ -179,7 +179,7 @@
                                                 name="items[{{ $index }}][quantity]" value="{{ $item['quantity'] }}">
                                             <input type="text" class="form-control text-center item-unit" style="max-width: 60px;"
                                                 name="items[{{ $index }}][unit]" value="{{ $item['unit'] }}">
-                                        </div>
+</div>
                                     </td>
                                     <td class="text-end text-muted small">
                                         ₹{{ number_format($item['original_amount'], 2) }}
@@ -190,12 +190,12 @@
                                             <span class="input-group-text fw-bold">₹</span>
                                             <input type="number" step="0.01" min="0" class="form-control text-end editable-amt-input item-amount"
                                                 name="items[{{ $index }}][billed_amount]" value="{{ (float) $item['billed_amount'] }}" required>
-                                        </div>
+</div>
                                     </td>
                                     <td class="text-center">
                                         <button type="button" class="btn btn-outline-danger btn-sm p-1 btn-remove-row" title="Remove line item">
                                             <i class="bi bi-trash"></i>
-                                        </button>
+</button>
                                     </td>
                                 </tr>
                             @empty
@@ -207,8 +207,8 @@
                             @endforelse
                         </tbody>
                     </table>
-                </div>
-            </div>
+</div>
+</div>
 
             <!-- 2. Weekly Site & Operational Expenses Table Card (Placed Separately Below) -->
             <div class="statement-card p-4 mb-4">
@@ -216,21 +216,21 @@
                     <div>
                         <h6 class="fw-bold mb-1 text-dark d-flex align-items-center gap-2">
                             <i class="bi bi-calendar-week text-success"></i>
-                            Weekly Site & Operational Expenses (வாரம் வாரியாக செலவுகள்)
-                        </h6>
+                            Weekly Site & Operational Expenses 
+</h6>
                         <small class="text-muted">
-                            அன்றாட தளச் செலவுகள் (Daily site cash / expenses) வாராந்திர அடிப்படையில் இங்கு கணக்கிடப்பட்டுள்ளது. தொகையை நேரடியாக <strong>திருத்தம் (Edit)</strong> செய்து கொள்ளலாம்.
-                        </small>
-                    </div>
+                            Daily site cash and expenses are summarized weekly here. You can <strong>Edit</strong> amounts directly.
+</small>
+</div>
                     <div class="d-flex align-items-center gap-2">
                         <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1" id="weeklyCountBadge">
                             {{ count($weeklyExpenses) }} Weeks
-                        </span>
+</span>
                         <button type="button" class="btn btn-outline-success btn-sm d-inline-flex align-items-center gap-1" id="btnAddWeeklyItem">
-                            <i class="bi bi-plus-circle"></i> + Add Weekly Expense (கூடுதல் வாரம் சேர்)
-                        </button>
-                    </div>
-                </div>
+                            <i class="bi bi-plus-circle"></i> + Add Weekly Expense 
+</button>
+</div>
+</div>
 
                 <div class="table-responsive">
                     <table class="table table-bordered table-hover align-middle table-statement mb-0" id="weeklyExpensesTable">
@@ -257,7 +257,7 @@
                                             <span class="text-muted fw-bold">~</span>
                                             <input type="date" class="form-control form-control-sm weekly-end-date font-monospace"
                                                 name="weekly[{{ $wIdx }}][end_date]" value="{{ $week['end_date'] }}">
-                                        </div>
+</div>
                                     </td>
                                     <td>
                                         <input type="text" class="form-control form-control-sm weekly-desc"
@@ -278,12 +278,12 @@
                                             <span class="input-group-text fw-bold">₹</span>
                                             <input type="number" step="0.01" min="0" class="form-control text-end editable-amt-input weekly-amount"
                                                 name="weekly[{{ $wIdx }}][billed_amount]" value="{{ (float) $week['billed_amount'] }}" required>
-                                        </div>
+</div>
                                     </td>
                                     <td class="text-center">
                                         <button type="button" class="btn btn-outline-danger btn-sm p-1 btn-remove-weekly-row" title="Remove weekly expense">
                                             <i class="bi bi-trash"></i>
-                                        </button>
+</button>
                                     </td>
                                 </tr>
                             @empty
@@ -295,110 +295,110 @@
                             @endforelse
                         </tbody>
                     </table>
-                </div>
-            </div>
+</div>
+</div>
 
             <!-- Statement Summary & Notes Box -->
             <div class="row g-4 mb-4">
                 <div class="col-12 col-lg-7">
                     <div class="statement-card p-4 h-100">
                         <h6 class="fw-bold mb-2 text-dark">
-                            <i class="bi bi-card-text text-primary me-1"></i> Notes & Terms / Payment Instructions (குறிப்புகள்)
-                        </h6>
+                            <i class="bi bi-card-text text-primary me-1"></i> Notes & Terms / Payment Instructions 
+</h6>
                         <textarea class="form-control form-control-sm" name="notes" id="statement_notes" rows="6"
                             placeholder="Enter payment instructions, bank details, or remarks for client...">1. All work carried out as per project specifications and approved standards.
 2. Please make payment via Cheque / Bank Transfer to the authorized company account.
 3. Thank you for your business!</textarea>
                         <small class="text-muted mt-2 d-block">
                             These notes will appear at the bottom of the client's printed statement.
-                        </small>
-                    </div>
-                </div>
+</small>
+</div>
+</div>
 
                 <div class="col-12 col-lg-5">
                     <div class="statement-card p-4 h-100 bg-light border-2">
                         <h6 class="fw-bold mb-3 text-dark border-bottom pb-2">
-                            <i class="bi bi-calculator text-primary me-1"></i> Statement Summary (தொகை சுருக்கம்)
-                        </h6>
+                            <i class="bi bi-calculator text-primary me-1"></i> Statement Summary 
+</h6>
 
                         <!-- Items Subtotal -->
                         <div class="d-flex justify-content-between align-items-center mb-2">
-                            <span class="text-muted small">Date Items Subtotal (பொருட்கள் மொத்தம்):</span>
+                            <span class="text-muted small">Date Items Subtotal :</span>
                             <span class="fw-bold text-dark" id="dispItemsSubtotal">₹0.00</span>
-                        </div>
+</div>
 
                         <!-- Weekly Subtotal -->
                         <div class="d-flex justify-content-between align-items-center mb-2">
-                            <span class="text-muted small">Weekly Expenses Subtotal (வாராந்திர செலவு):</span>
+                            <span class="text-muted small">Weekly Expenses Subtotal :</span>
                             <span class="fw-bold text-dark" id="dispWeeklySubtotal">₹0.00</span>
-                        </div>
+</div>
 
                         <hr class="my-2">
 
                         <!-- Combined Subtotal -->
                         <div class="d-flex justify-content-between align-items-center mb-2">
-                            <span class="fw-semibold text-dark small">Combined Subtotal (துணை மொத்தம்):</span>
+                            <span class="fw-semibold text-dark small">Combined Subtotal :</span>
                             <span class="fw-bold text-primary fs-6" id="dispSubtotal">₹0.00</span>
                             <input type="hidden" name="subtotal" id="inpSubtotal" value="0">
-                        </div>
+</div>
 
                         <div class="row g-2 align-items-center mb-2">
                             <div class="col-6">
                                 <span class="text-muted small">Tax / GST (%):</span>
-                            </div>
+</div>
                             <div class="col-6">
                                 <div class="input-group input-group-sm">
                                     <input type="number" step="0.01" min="0" max="100" class="form-control text-end"
                                         name="tax_percent" id="inpTaxPercent" value="0">
                                     <span class="input-group-text">%</span>
-                                </div>
-                            </div>
-                        </div>
+</div>
+</div>
+</div>
 
                         <div class="d-flex justify-content-between align-items-center mb-2">
-                            <span class="text-muted small">Tax Amount (வரித் தொகை):</span>
+                            <span class="text-muted small">Tax Amount :</span>
                             <span class="fw-semibold text-dark" id="dispTaxAmount">₹0.00</span>
                             <input type="hidden" name="tax_amount" id="inpTaxAmount" value="0">
-                        </div>
+</div>
 
                         <div class="row g-2 align-items-center mb-3">
                             <div class="col-6">
-                                <span class="text-muted small">Discount / Adjustment (தள்ளுபடி ₹):</span>
-                            </div>
+                                <span class="text-muted small">Discount / Adjustment :</span>
+</div>
                             <div class="col-6">
                                 <div class="input-group input-group-sm">
                                     <span class="input-group-text">₹</span>
                                     <input type="number" step="0.01" min="0" class="form-control text-end"
                                         name="discount_amount" id="inpDiscountAmount" value="0">
-                                </div>
-                            </div>
-                        </div>
+</div>
+</div>
+</div>
 
                         <hr class="my-3">
 
                         <div class="p-3 bg-white rounded border border-success-subtle mb-3">
                             <div class="d-flex justify-content-between align-items-center">
-                                <span class="fw-bold text-dark">Grand Total (மொத்தத் தொகை):</span>
+                                <span class="fw-bold text-dark">Grand Total :</span>
                                 <span class="fw-bold text-success fs-4" id="dispGrandTotal">₹0.00</span>
                                 <input type="hidden" name="total_amount" id="inpGrandTotal" value="0">
-                            </div>
+</div>
                             <div class="mt-2 text-muted small font-monospace" id="dispWordsTotal" style="font-size:0.75rem;">
                                 Rupees Zero Only
-                            </div>
-                        </div>
+</div>
+</div>
 
                         <div class="d-grid gap-2">
                             <button type="button" class="btn btn-primary btn-lg shadow-sm d-flex align-items-center justify-content-center gap-2" id="btnBigPrint">
-                                <i class="bi bi-printer-fill fs-5"></i> Print & Save A4 (அச்சிடு & சேமி)
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
+                                <i class="bi bi-printer-fill fs-5"></i> Print & Save A4 
+</button>
+</div>
+</div>
+</div>
+</div>
 
         </form>
 
-    </div>
+</div>
 @endsection
 
 @push('scripts')
@@ -591,7 +591,7 @@ document.addEventListener('DOMContentLoaded', function () {
                         name="items[${idx}][quantity]" value="1">
                     <input type="text" class="form-control text-center item-unit" style="max-width: 60px;"
                         name="items[${idx}][unit]" value="Job">
-                </div>
+</div>
             </td>
             <td class="text-end text-muted small">
                 ₹0.00
@@ -602,12 +602,12 @@ document.addEventListener('DOMContentLoaded', function () {
                     <span class="input-group-text fw-bold">₹</span>
                     <input type="number" step="0.01" min="0" class="form-control text-end editable-amt-input item-amount"
                         name="items[${idx}][billed_amount]" value="0.00" required>
-                </div>
+</div>
             </td>
             <td class="text-center">
                 <button type="button" class="btn btn-outline-danger btn-sm p-1 btn-remove-row" title="Remove line item">
                     <i class="bi bi-trash"></i>
-                </button>
+</button>
             </td>
         `;
         tableBody.appendChild(newRow);
@@ -632,7 +632,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     <span class="text-muted fw-bold">~</span>
                     <input type="date" class="form-control form-control-sm weekly-end-date font-monospace"
                         name="weekly[${wIdx}][end_date]" value="{{ $todayDate }}">
-                </div>
+</div>
             </td>
             <td>
                 <input type="text" class="form-control form-control-sm weekly-desc"
@@ -653,12 +653,12 @@ document.addEventListener('DOMContentLoaded', function () {
                     <span class="input-group-text fw-bold">₹</span>
                     <input type="number" step="0.01" min="0" class="form-control text-end editable-amt-input weekly-amount"
                         name="weekly[${wIdx}][billed_amount]" value="0.00" required>
-                </div>
+</div>
             </td>
             <td class="text-center">
                 <button type="button" class="btn btn-outline-danger btn-sm p-1 btn-remove-weekly-row" title="Remove weekly expense">
                     <i class="bi bi-trash"></i>
-                </button>
+</button>
             </td>
         `;
         weeklyBody.appendChild(newRow);
@@ -802,7 +802,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     window.location.href = data.site_url;
                 }, 1000);
             } else {
-                alert('Client Statement saved successfully! (அறிக்கை சேமிக்கப்பட்டது)');
+                alert('Client Statement saved successfully!');
                 window.location.href = data.site_url;
             }
 

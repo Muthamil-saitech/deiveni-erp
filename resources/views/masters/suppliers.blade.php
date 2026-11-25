@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('title', 'Suppliers Master')
-@section('page_title', 'Suppliers Master')
+@section('page_title', 'Suppliers Master ')
 
 @push('styles')
     <style>
@@ -47,15 +47,15 @@
                     <p class="text-muted small mb-0">Suppliers for Cement, Steel, Blue Metal, Sand, Bricks, Tiles & Hardware
                         with material grades & rates.
                     </p>
-                </div>
+</div>
                 <div class="d-flex gap-2">
                     <button class="btn btn-deiveni btn-sm" data-bs-toggle="modal" data-bs-target="#supplierModal"
                         id="addSupplierBtn">
                         <i class="bi bi-truck-front-fill me-1"></i> Add New Supplier
-                    </button>
-                </div>
-            </div>
-        </div>
+</button>
+</div>
+</div>
+</div>
 
         <!-- Search & Status Filter Row -->
         <div class="card-custom p-3 mb-4 bg-white">
@@ -65,34 +65,34 @@
                         <span class="input-group-text bg-light border-end-0"><i class="bi bi-search text-muted"></i></span>
                         <input type="text" class="form-control border-start-0 ps-0" id="supplierSearchInput"
                             placeholder="Search by Supplier Name, GST No, Location, Material, Grade...">
-                    </div>
-                </div>
+</div>
+</div>
                 <div class="col-6 col-md-2">
                     <select class="form-select form-select-sm" id="supplierStatusFilter">
                         <option value="">All Status</option>
                         <option value="Active">Active</option>
                         <option value="Inactive">Inactive</option>
                     </select>
-                </div>
+</div>
                 <div class="col-6 col-md-2">
                     <select class="form-select form-select-sm" id="supplierScopeFilter">
                         <option value="">All Payment Scope</option>
                         <option value="1">Site Based</option>
                         <option value="0">Total</option>
                     </select>
-                </div>
+</div>
                 <div class="col-6 col-md-1">
                     <button type="button" class="btn btn-outline-secondary btn-sm px-2 py-1" id="historyFilterResetBtn"
                         title="Reset filters">
                         <i class="bi bi-arrow-counterclockwise"></i>
-                    </button>
-                </div>
+</button>
+</div>
                 <div class="col-12 col-md-3 text-md-end">
                     <span class="small text-muted" id="supplierCountBadge">Showing <strong
                             class="text-dark">{{ $suppliers->count() }}</strong> suppliers</span>
-                </div>
-            </div>
-        </div>
+</div>
+</div>
+</div>
 
         <!-- Suppliers Table -->
         <div class="card-custom overflow-hidden">
@@ -141,16 +141,16 @@
                                     <div class="d-flex align-items-center gap-1 flex-wrap mt-0.5">
                                         <small class="text-muted row-supplier-contact">
                                             <i class="bi bi-person me-1"></i>{{ $supplier->contact_person ?: '—' }}
-                                        </small>
+</small>
                                         @if ($inUse)
                                             <span class="badge bg-light text-secondary border border-secondary-subtle"
                                                 style="font-size: 0.68rem;"
                                                 title="Used in {{ $purchaseOrdersCount }} {{ $purchaseOrdersCount === 1 ? 'purchase order' : 'purchase orders' }}">
                                                 <i class="bi bi-receipt me-0.5"></i>{{ $purchaseOrdersCount }}
                                                 {{ $purchaseOrdersCount === 1 ? 'purchase order' : 'purchase orders' }}
-                                            </span>
+</span>
                                         @endif
-                                    </div>
+</div>
                                 </td>
                                 <td class="row-supplier-phone">
                                     <i class="bi bi-telephone text-muted me-1"></i>{{ $supplier->phone }}
@@ -179,12 +179,12 @@
                                             id="toggleSiteBased_{{ $supplier->id }}"
                                             {{ $isSiteBased ? 'checked' : '' }}
                                             style="cursor: pointer; width: 2.2em; height: 1.15em;"
-                                            title="Toggle Site Based vs Total">
+                                            title="Toggle Site Based  vs Total ">
                                         <label class="form-check-label small fw-semibold cursor-pointer text-nowrap toggle-site-label-{{ $supplier->id }} {{ $isSiteBased ? 'text-primary' : 'text-muted' }}"
                                             for="toggleSiteBased_{{ $supplier->id }}" style="font-size: 0.75rem;">
                                             {{ $isSiteBased ? 'Site Based' : 'Total' }}
-                                        </label>
-                                    </div>
+</label>
+</div>
                                 </td>
                                 <td class="row-supplier-status">
                                     @if ($supplier->status === 'Active')
@@ -199,7 +199,7 @@
                                             <button class="btn table-action-btn" type="button" data-bs-toggle="dropdown"
                                                 aria-expanded="false" title="Actions">
                                                 <i class="bi bi-three-dots-vertical"></i>
-                                            </button>
+</button>
                                             <ul class="dropdown-menu dropdown-menu-end shadow-sm">
                                                 <li><a class="dropdown-item view-supplier-btn"
                                                         href="{{ route('suppliers.show', $supplier->encrypted_id) }}"><i
@@ -217,7 +217,7 @@
                                                             <i class="bi bi-lock-fill text-muted me-2"></i>Delete <span
                                                                 class="badge bg-secondary-subtle text-secondary ms-1"
                                                                 style="font-size: 0.65rem;">In Use</span>
-                                                        </button>
+</button>
                                                     </li>
                                                 @else
                                                     <li><button class="dropdown-item text-danger delete-supplier-btn"
@@ -225,8 +225,8 @@
                                                                 class="bi bi-trash3 text-danger me-2"></i>Delete</button></li>
                                                 @endif
                                             </ul>
-                                        </div>
-                                    </div>
+</div>
+</div>
                                 </td>
                             </tr>
                         @empty
@@ -246,7 +246,7 @@
                         </tr>
                     </tbody>
                 </table>
-            </div>
+</div>
 
             <!-- Table Pagination & Footer Summary -->
             <div class="p-3 bg-white border-top d-flex flex-column flex-md-row justify-content-between align-items-center gap-3"
@@ -263,17 +263,17 @@
                         Showing <strong class="text-dark" id="pageStart">1</strong> &minus; <strong class="text-dark"
                             id="pageEnd">{{ min(5, $suppliers->count()) }}</strong> of <strong class="text-dark"
                             id="pageTotal">{{ $suppliers->count() }}</strong> suppliers
-                    </span>
-                </div>
+</span>
+</div>
                 <nav aria-label="Suppliers table pagination">
                     <ul class="pagination pagination-sm mb-0 gap-1" id="paginationNav">
                         <!-- Dynamic page links rendered by JS -->
                     </ul>
                 </nav>
-            </div>
-        </div>
+</div>
+</div>
 
-    </div>
+</div>
 
     <!-- Supplier Add / Edit Modal -->
     <div class="modal fade" id="supplierModal" tabindex="-1" aria-hidden="true">
@@ -282,7 +282,7 @@
                 <div class="modal-header">
                     <h5 class="modal-title fw-bold" id="supplierModalTitle">Add New Supplier</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
+</div>
                 <form id="supplierForm" novalidate>
                     @csrf
                     <div class="modal-body">
@@ -294,32 +294,32 @@
                                 <input type="text" class="form-control" id="supplierName" name="name"
                                     placeholder="e.g. Sri Balaji Blue Metals" required>
                                 <div class="invalid-feedback" id="errSupplierName"></div>
-                            </div>
+</div>
                             <div class="col-12 col-md-6">
                                 <label class="form-label small fw-semibold" for="supplierContact">Contact Person</label>
                                 <input type="text" class="form-control" id="supplierContact" name="contact_person"
                                     placeholder="e.g. Bala Murugan">
                                 <div class="invalid-feedback" id="errSupplierContact"></div>
-                            </div>
+</div>
                             <div class="col-12 col-md-6">
                                 <label class="form-label small fw-semibold" for="supplierPhone">Phone Number <span
                                         class="text-danger">*</span></label>
                                 <input type="tel" class="form-control" id="supplierPhone" name="phone"
                                     placeholder="94440 00000" required>
                                 <div class="invalid-feedback" id="errSupplierPhone"></div>
-                            </div>
+</div>
                             <div class="col-12 col-md-6">
                                 <label class="form-label small fw-semibold" for="supplierGst">GSTIN / Tax No</label>
                                 <input type="text" class="form-control font-monospace" id="supplierGst" name="gst_number"
                                     placeholder="33AAAAA0000A1Z5">
                                 <div class="invalid-feedback" id="errSupplierGst"></div>
-                            </div>
+</div>
                             <div class="col-12">
                                 <label class="form-label small fw-semibold" for="supplierAddress">Address / Location</label>
                                 <input type="text" class="form-control" id="supplierAddress" name="address"
                                     placeholder="e.g. GST Road, Tambaram, Chennai">
                                 <div class="invalid-feedback" id="errSupplierAddress"></div>
-                            </div>
+</div>
                             <div class="col-12 col-md-6">
                                 <label class="form-label small fw-semibold" for="supplierStatus">Status</label>
                                 <select class="form-select" id="supplierStatus" name="status">
@@ -327,19 +327,19 @@
                                     <option value="Inactive">Inactive</option>
                                 </select>
                                 <div class="invalid-feedback" id="errSupplierStatus"></div>
-                            </div>
+</div>
                             <div class="col-12 col-md-6">
                                 <label class="form-label small fw-semibold" for="supplierSiteBased">Payment Basis / Scope</label>
                                 <div class="d-flex align-items-center gap-2 mt-1">
                                     <div class="form-check form-switch mb-0">
                                         <input class="form-check-input" type="checkbox" role="switch" id="supplierSiteBased" name="is_site_based" value="1" checked style="cursor: pointer; width: 2.2em; height: 1.2em;">
                                         <label class="form-check-label small fw-semibold" for="supplierSiteBased" id="supplierSiteBasedLabel">
-                                            Site Based
-                                        </label>
-                                    </div>
-                                </div>
+                                            Site Based 
+</label>
+</div>
+</div>
                                 <div class="text-muted" style="font-size: 0.72rem;">Enabled: Settle per Site PO. Disabled: Settle in Total across sites.</div>
-                            </div>
+</div>
 
                             <!-- Materials, Grade and Price Section (Dynamic Rows) -->
                             <div class="col-12">
@@ -347,22 +347,23 @@
                                     <div>
                                         <label class="form-label small fw-bold mb-0 text-dark">
                                             <i class="bi bi-boxes text-primary me-1"></i>Materials Supplied, Grade & Price
-                                             <span class="text-danger">*</span>
-                                        </label>
+ <span class="text-danger">*</span>
+</label>
                                         <div class="text-muted" style="font-size: 0.75rem;">Select at least one material and
                                             rate per unit (grade is optional)</div>
-                                    </div>
+</div>
                                     <button type="button" class="btn btn-outline-primary btn-sm px-2 py-1"
                                         id="addMaterialRowBtn">
                                         <i class="bi bi-plus-circle me-1"></i>Add Material
-                                    </button>
-                                </div>
+</button>
+</div>
 
                                 <div id="materialRowsContainer" class="d-flex flex-column gap-2">
                                     <div class="card p-2 border bg-light-subtle material-row shadow-none">
                                         <div class="row g-2 align-items-start">
                                             <div class="col-12 col-md-5">
-                                                <label class="form-label small text-muted mb-1 d-md-none">Material <span class="text-danger">*</span></label>
+                                                <label class="form-label small text-muted mb-1 d-md-none">Material
+ <span class="text-danger">*</span></label>
                                                 <select class="form-select form-select-sm material-select">
                                                     <option value="">-- Select Material --</option>
                                                     @foreach ($materials as $material)
@@ -372,14 +373,15 @@
                                                             data-name="{{ $material->name_en }}">
                                                             {{ $material->name_en }}
                                                             {{ $material->name_ta ? '- ' . $material->name_ta : '' }}
-                                                        </option>
+</option>
                                                     @endforeach
                                                 </select>
                                                 <div class="invalid-feedback material-select-feedback"
                                                     style="display: none;"></div>
-                                            </div>
+</div>
                                             <div class="col-12 col-md-3">
-                                                <label class="form-label small text-muted mb-1 d-md-none">Grade</label>
+                                                <label class="form-label small text-muted mb-1 d-md-none">Grade
+</label>
                                                 <select class="form-select form-select-sm material-grade-select">
                                                     <option value="" selected>-- Select Grade --</option>
                                                     <option value="1st Quality">1st Quality</option>
@@ -390,9 +392,10 @@
                                                 </select>
                                                 <div class="invalid-feedback material-grade-feedback"
                                                     style="display: none;"></div>
-                                            </div>
+</div>
                                             <div class="col-12 col-md-4">
-                                                <label class="form-label small text-muted mb-1 d-md-none">Price / Rate <span class="text-danger">*</span></label>
+                                                <label class="form-label small text-muted mb-1 d-md-none">Price / Rate
+ <span class="text-danger">*</span></label>
                                                 <div class="input-group input-group-sm">
                                                     <span class="input-group-text bg-white text-muted">₹</span>
                                                     <input type="number" step="0.01" min="0"
@@ -402,32 +405,32 @@
                                                         class="btn btn-outline-danger remove-material-row-btn"
                                                         title="Remove">
                                                         <i class="bi bi-trash3"></i>
-                                                    </button>
-                                                </div>
+</button>
+</div>
                                                 <div class="invalid-feedback material-price-feedback"
                                                     style="display: none;"></div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
+</div>
+</div>
+</div>
+</div>
                                 <div class="invalid-feedback d-block" id="errSupplierMaterials"
                                     style="display: none !important;"></div>
-                            </div>
+</div>
 
-                        </div>
-                    </div>
+</div>
+</div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-light btn-sm" data-bs-dismiss="modal">Cancel</button>
                         <button type="submit" class="btn btn-deiveni btn-sm" id="saveSupplierBtn">
                             <span class="spinner-border spinner-border-sm me-1 d-none" id="saveSupplierSpinner"
                                 role="status" aria-hidden="true"></span>
                             <span id="saveSupplierBtnText">Save Supplier</span>
-                        </button>
-                    </div>
+</button>
+</div>
                 </form>
-            </div>
-        </div>
-    </div>
+</div>
+</div>
+</div>
 @endsection
 
 @push('scripts')
@@ -461,7 +464,7 @@
                                                     @foreach ($materials as $material)
                                                         <option value="{{ $material->id }}" data-unit="{{ $material->unit?->name_en ?? (string) $material->unit }}" data-tamil="{{ $material->name_ta }}" data-name="{{ $material->name_en }}">
                                                             {{ $material->name_en }} {{ $material->name_ta ? '- ' . $material->name_ta : '' }}
-                                                        </option>
+</option>
                                                     @endforeach
                                                 `;
 
@@ -491,12 +494,12 @@
                                         <div class="card p-2 border bg-light-subtle material-row shadow-none">
                                             <div class="row g-2 align-items-start">
                                                 <div class="col-12 col-md-5">
-                                                    <label class="form-label small text-muted mb-1 d-md-none">Material <span class="text-danger">*</span></label>
+                                                    <label class="form-label small text-muted mb-1 d-md-none">Material  <span class="text-danger">*</span></label>
                                                     <select class="form-select form-select-sm material-select">
                                                         ${materialOptionsHtml}
                                                     </select>
                                                     <div class="invalid-feedback material-select-feedback" style="display: none;"></div>
-                                                </div>
+</div>
                                                 <div class="col-12 col-md-3">
                                                     <label class="form-label small text-muted mb-1 d-md-none">Grade</label>
                                                     <select class="form-select form-select-sm material-grade-select">
@@ -508,9 +511,9 @@
                                                         <option value="Premium" ${grade === 'Premium' ? 'selected' : ''}>Premium</option>
                                                     </select>
                                                     <div class="invalid-feedback material-grade-feedback" style="display: none;"></div>
-                                                </div>
+</div>
                                                 <div class="col-12 col-md-4">
-                                                    <label class="form-label small text-muted mb-1 d-md-none">Price / Rate <span class="text-danger">*</span></label>
+                                                    <label class="form-label small text-muted mb-1 d-md-none">Price / Rate  <span class="text-danger">*</span></label>
                                                     <div class="input-group input-group-sm">
                                                         <span class="input-group-text bg-white text-muted">₹</span>
                                                         <input type="number" step="0.01" min="0" class="form-control material-price-input" 
@@ -518,12 +521,12 @@
                                                             placeholder="Rate per ${escapeHtml(unitLabel)}">
                                                         <button type="button" class="btn btn-outline-danger remove-material-row-btn" title="Remove row">
                                                             <i class="bi bi-trash3"></i>
-                                                        </button>
-                                                    </div>
+</button>
+</div>
                                                     <div class="invalid-feedback material-price-feedback" style="display: none;"></div>
-                                                </div>
-                                            </div>
-                                        </div>
+</div>
+</div>
+</div>
                                     `);
 
                 if (strId) {
@@ -842,7 +845,7 @@
                                 <li class="page-item ${prevDisabled}">
                                     <button class="page-link" type="button" data-page="${current - 1}" aria-label="Previous" title="Previous Page">
                                         <i class="bi bi-chevron-left"></i>
-                                    </button>
+</button>
                                 </li>
                             `);
 
@@ -879,7 +882,7 @@
                                 <li class="page-item ${nextDisabled}">
                                     <button class="page-link" type="button" data-page="${current + 1}" aria-label="Next" title="Next Page">
                                         <i class="bi bi-chevron-right"></i>
-                                    </button>
+</button>
                                 </li>
                             `);
             }
@@ -941,10 +944,10 @@
                             $row.data('is-site-based', isChecked ? '1' : '0').attr('data-is-site-based', isChecked ? '1' : '0');
                             if (isChecked) {
                                 $label.text('Site Based').removeClass('text-muted').addClass('text-primary');
-                                showToast(`${supplierName} is now set to Site Based payment mode.`, 'success');
+                                showToast(`${supplierName} is now set to Site Based  payment mode.`, 'success');
                             } else {
                                 $label.text('Total').removeClass('text-primary').addClass('text-muted');
-                                showToast(`${supplierName} is now set to Total payment mode.`, 'info');
+                                showToast(`${supplierName} is now set to Total  payment mode.`, 'info');
                             }
                         } else {
                             $switch.prop('checked', !isChecked);
@@ -961,13 +964,13 @@
 
             // Open Add Modal
             $('#addSupplierBtn').on('click', function () {
-                $('#supplierModalTitle').text('Add New Supplier');
+                $('#supplierModalTitle').text('Add New Supplier ');
                 $('#saveSupplierBtnText').text('Save Supplier');
                 $('#supplierEditId').val('');
                 $('#supplierForm')[0].reset();
                 $('#supplierStatus').val('Active');
                 $('#supplierSiteBased').prop('checked', true);
-                $('#supplierSiteBasedLabel').text('Site Based');
+                $('#supplierSiteBasedLabel').text('Site Based ');
                 resetMaterialRows();
                 clearFormErrors();
             });
@@ -975,7 +978,7 @@
             // Open Edit Modal
             $(document).on('click', '.edit-supplier-btn', function () {
                 const tr = $(this).closest('tr');
-                $('#supplierModalTitle').text('Edit Supplier');
+                $('#supplierModalTitle').text('Edit Supplier ');
                 $('#saveSupplierBtnText').text('Update Supplier');
                 $('#supplierEditId').val(tr.data('id'));
                 $('#supplierName').val(tr.data('name') || '');
@@ -988,7 +991,7 @@
                 const isSiteBased = tr.data('is-site-based');
                 const isSb = (isSiteBased === undefined || isSiteBased === null || String(isSiteBased) === '1' || isSiteBased === true);
                 $('#supplierSiteBased').prop('checked', isSb);
-                $('#supplierSiteBasedLabel').text(isSb ? 'Site Based' : 'Total');
+                $('#supplierSiteBasedLabel').text(isSb ? 'Site Based ' : 'Total ');
 
                 let mats = tr.data('materials') || [];
                 if (typeof mats === 'string') {
@@ -1018,7 +1021,7 @@
 
             // Modal Site Based Switch Label Update
             $('#supplierSiteBased').on('change', function () {
-                $('#supplierSiteBasedLabel').text($(this).is(':checked') ? 'Site Based' : 'Total');
+                $('#supplierSiteBasedLabel').text($(this).is(':checked') ? 'Site Based ' : 'Total ');
             });
 
             // Form Submit (Create or Update)
@@ -1117,12 +1120,12 @@
                                         id="toggleSiteBased_${supplier.id}"
                                         ${isSb ? 'checked' : ''}
                                         style="cursor: pointer; width: 2.2em; height: 1.15em;"
-                                        title="Toggle Site Based vs Total">
+                                        title="Toggle Site Based  vs Total ">
                                     <label class="form-check-label small fw-semibold cursor-pointer text-nowrap toggle-site-label-${supplier.id} ${isSb ? 'text-primary' : 'text-muted'}"
                                         for="toggleSiteBased_${supplier.id}" style="font-size: 0.75rem;">
                                         ${isSb ? 'Site Based' : 'Total'}
-                                    </label>
-                                </div>
+</label>
+</div>
                             `;
 
                             if (isEdit) {
@@ -1177,15 +1180,15 @@
                                                 <div class="dropdown table-action-dropdown">
                                                     <button class="btn table-action-btn" type="button" data-bs-toggle="dropdown" data-bs-popper-config='{"strategy":"fixed"}' aria-expanded="false" title="Actions">
                                                         <i class="bi bi-three-dots-vertical"></i>
-                                                    </button>
+</button>
                                                     <ul class="dropdown-menu dropdown-menu-end shadow-sm">
                                                         <li><a class="dropdown-item" href="${'{{ route("suppliers.show", ":id") }}'.replace(':id', supplier.encrypted_id)}"><i class="bi bi-eye text-info me-2"></i>View Details</a></li>
                                                         <li><button class="dropdown-item edit-supplier-btn" type="button"><i class="bi bi-pencil text-primary me-2"></i>Edit</button></li>
                                                         <li><hr class="dropdown-divider my-1"></li>
                                                         <li><button class="dropdown-item text-danger delete-supplier-btn" type="button"><i class="bi bi-trash3 text-danger me-2"></i>Delete</button></li>
                                                     </ul>
-                                                </div>
-                                            </div>
+</div>
+</div>
                                         </td>
                                     </tr>
                                 `;

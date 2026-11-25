@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('title', 'Units Master')
-@section('page_title', 'Units of Measurement (அளவீட்டு அலகுகள்)')
+@section('page_title', 'Units of Measurement ')
 
 @push('styles')
     <style>
@@ -43,16 +43,16 @@
         <div class="card-custom p-3 mb-3 mb-md-4 bg-white">
             <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
                 <div>
-                    <h5 class="fw-bold mb-0 text-dark">Units of Measurement Directory (அளவீடுகள் முதன்மை பட்டியல்)</h5>
-                </div>
+                    <h5 class="fw-bold mb-0 text-dark">Units of Measurement Directory</h5>
+</div>
                 <div class="d-flex gap-2">
                     <button class="btn btn-deiveni btn-sm" data-bs-toggle="modal" data-bs-target="#unitModal"
                         id="addUnitBtn">
                         <i class="bi bi-plus-circle-fill me-1"></i> Add Measurement Unit
-                    </button>
-                </div>
-            </div>
-        </div>
+</button>
+</div>
+</div>
+</div>
 
         <!-- Filter & Search Card -->
         <div class="card-custom p-3 mb-3 mb-md-4 bg-white">
@@ -61,28 +61,28 @@
                     <div class="input-group input-group-sm">
                         <span class="input-group-text bg-light border-end-0"><i class="bi bi-search text-muted"></i></span>
                         <input type="text" class="form-control border-start-0 ps-0" id="unitSearchInput"
-                            placeholder="Search Unit Name (English / தமிழ்), Short Code...">
-                    </div>
-                </div>
+                            placeholder="Search Unit Name , Short Code...">
+</div>
+</div>
                 <div class="col-6 col-md-3">
                     <select class="form-select form-select-sm" id="unitStatusFilter">
-                        <option value="">All Status (அனைத்து நிலை)</option>
-                        <option value="Active">Active (செயலில் உள்ளது)</option>
-                        <option value="Inactive">Inactive (நிறுத்தப்பட்டது)</option>
+                        <option value="">All Status</option>
+                        <option value="Active">Active</option>
+                        <option value="Inactive">Inactive</option>
                     </select>
-                </div>
+</div>
                 <div class="col-6 col-md-1">
                     <button type="button" class="btn btn-outline-secondary btn-sm px-2 py-1" id="historyFilterResetBtn"
                     title="Reset filters">
                     <i class="bi bi-arrow-counterclockwise"></i>
-                    </button>
-                </div>
+</button>
+</div>
                 <div class="col-12 col-md-3 text-md-end">
                     <span class="small text-muted" id="unitCountBadge">Showing <strong class="text-dark">{{ $units->count() }}</strong>
                         units</span>
-                </div>
-            </div>
-        </div>
+</div>
+</div>
+</div>
 
         <!-- Units Table -->
         <div class="card-custom overflow-hidden">
@@ -91,7 +91,7 @@
                     <thead>
                         <tr>
                             <th style="width: 60px;">#</th>
-                            <th>Unit Name (English & தமிழ்)</th>
+                            <th>Unit Name</th>
                             <th>Short Symbol / Code</th>
                             <th>Standard Usage Example</th>
                             <th>Status</th>
@@ -120,9 +120,9 @@
                                         @if ($inUse)
                                             <span class="badge bg-light text-secondary border border-secondary-subtle" style="font-size: 0.68rem;" title="Used by {{ $materialsCount }} material(s) in Material Master">
                                                 <i class="bi bi-link-45deg me-0.5"></i>{{ $materialsCount }} {{ $materialsCount === 1 ? 'material' : 'materials' }}
-                                            </span>
+</span>
                                         @endif
-                                    </div>
+</div>
                                 </td>
                                 <td>
                                     <span class="font-monospace badge bg-primary-subtle text-primary border border-primary-subtle fs-6 row-code">{{ $unit->code }}</span>
@@ -141,7 +141,7 @@
                                     <div class="dropdown table-action-dropdown">
                                         <button class="btn table-action-btn" type="button" data-bs-toggle="dropdown" data-bs-popper-config='{"strategy":"fixed"}' aria-expanded="false" title="Actions">
                                             <i class="bi bi-three-dots-vertical"></i>
-                                        </button>
+</button>
                                         <ul class="dropdown-menu dropdown-menu-end shadow-sm">
                                             <li><button class="dropdown-item edit-unit-btn" type="button"><i class="bi bi-pencil text-primary me-2"></i>Edit</button></li>
                                             <li><hr class="dropdown-divider my-1"></li>
@@ -149,13 +149,13 @@
                                                 <li>
                                                     <button class="dropdown-item text-muted disabled" type="button" disabled title="Cannot delete: unit is currently in use in Material Master" style="cursor: not-allowed; opacity: 0.6;">
                                                         <i class="bi bi-lock-fill text-muted me-2"></i>Delete <span class="badge bg-secondary-subtle text-secondary ms-1" style="font-size: 0.65rem;">In Use</span>
-                                                    </button>
+</button>
                                                 </li>
                                             @else
                                                 <li><button class="dropdown-item text-danger delete-unit-btn" type="button"><i class="bi bi-trash3 text-danger me-2"></i>Delete</button></li>
                                             @endif
                                         </ul>
-                                    </div>
+</div>
                                 </td>
                             </tr>
                         @empty
@@ -174,7 +174,7 @@
                         </tr>
                     </tbody>
                 </table>
-            </div>
+</div>
 
             <!-- Table Pagination & Footer Summary -->
             <div class="p-3 bg-white border-top d-flex flex-column flex-md-row justify-content-between align-items-center gap-3" id="tablePaginationContainer">
@@ -188,26 +188,26 @@
                     </select>
                     <span class="small text-muted ms-md-2" id="paginationSummary">
                         Showing <strong class="text-dark" id="pageStart">1</strong> &minus; <strong class="text-dark" id="pageEnd">{{ min(5, $units->count()) }}</strong> of <strong class="text-dark" id="pageTotal">{{ $units->count() }}</strong> units
-                    </span>
-                </div>
+</span>
+</div>
                 <nav aria-label="Units table pagination">
                     <ul class="pagination pagination-sm mb-0 gap-1" id="paginationNav">
                         <!-- Dynamic page links rendered by JS -->
                     </ul>
                 </nav>
-            </div>
-        </div>
+</div>
+</div>
 
-    </div>
+</div>
 
     <!-- Unit Add / Edit Modal -->
     <div class="modal fade" id="unitModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title fw-bold" id="unitModalTitle">Add Measurement Unit (அளவீட்டு அலகு)</h5>
+                    <h5 class="modal-title fw-bold" id="unitModalTitle">Add Measurement Unit</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
+</div>
                 <form id="unitForm" novalidate>
                     @csrf
                     <div class="modal-body">
@@ -219,48 +219,48 @@
                                 <input type="text" class="form-control" id="unitNameEn" name="name_en"
                                     placeholder="e.g. Kilograms / Litres / Bags" required>
                                 <div class="invalid-feedback" id="errNameEn"></div>
-                            </div>
+</div>
                             <div class="col-12">
-                                <label class="form-label small fw-semibold" for="unitNameTa">Unit Name in தமிழ் (Tamil) <span
+                                <label class="form-label small fw-semibold" for="unitNameTa">Unit Name in Tamil (Tamil) <span
                                         class="text-danger">*</span></label>
                                 <input type="text" class="form-control ta-text" id="unitNameTa" name="name_ta"
                                     placeholder="எ.கா. கிலோகிராம் / லிட்டர் / மூட்டை" required>
                                 <div class="invalid-feedback" id="errNameTa"></div>
-                            </div>
+</div>
                             <div class="col-12 col-md-6">
                                 <label class="form-label small fw-semibold" for="unitCode">Short Symbol / Code <span
                                         class="text-danger">*</span></label>
                                 <input type="text" class="form-control font-monospace text-uppercase" id="unitCode" name="code"
                                     placeholder="e.g. KG / LTR / BAG" required>
                                 <div class="invalid-feedback" id="errCode"></div>
-                            </div>
+</div>
                             <div class="col-12 col-md-6">
                                 <label class="form-label small fw-semibold" for="unitStatus">Status</label>
                                 <select class="form-select" id="unitStatus" name="status">
-                                    <option value="Active">Active (செயலில் உள்ளது)</option>
-                                    <option value="Inactive">Inactive (நிறுத்தப்பட்டது)</option>
+                                    <option value="Active">Active</option>
+                                    <option value="Inactive">Inactive</option>
                                 </select>
                                 <div class="invalid-feedback" id="errStatus"></div>
-                            </div>
+</div>
                             <div class="col-12">
                                 <label class="form-label small fw-semibold" for="unitUsage">Standard Usage Examples</label>
                                 <input type="text" class="form-control" id="unitUsage" name="usage"
                                     placeholder="e.g. Cement, Steel, Paints, Sand">
                                 <div class="invalid-feedback" id="errUsage"></div>
-                            </div>
-                        </div>
-                    </div>
+</div>
+</div>
+</div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-light btn-sm" data-bs-dismiss="modal">Cancel</button>
                         <button type="submit" class="btn btn-deiveni btn-sm" id="saveUnitBtn">
                             <span class="spinner-border spinner-border-sm me-1 d-none" id="saveSpinner" role="status" aria-hidden="true"></span>
                             <span id="saveBtnText">Save Measurement Unit</span>
-                        </button>
-                    </div>
+</button>
+</div>
                 </form>
-            </div>
-        </div>
-    </div>
+</div>
+</div>
+</div>
 @endsection
 
 @push('scripts')
@@ -387,7 +387,7 @@
                     <li class="page-item ${prevDisabled}">
                         <button class="page-link" type="button" data-page="${current - 1}" aria-label="Previous" title="Previous Page">
                             <i class="bi bi-chevron-left"></i>
-                        </button>
+</button>
                     </li>
                 `);
 
@@ -424,7 +424,7 @@
                     <li class="page-item ${nextDisabled}">
                         <button class="page-link" type="button" data-page="${current + 1}" aria-label="Next" title="Next Page">
                             <i class="bi bi-chevron-right"></i>
-                        </button>
+</button>
                     </li>
                 `);
             }
@@ -502,7 +502,7 @@
 
             // Open Add Modal
             $('#addUnitBtn').on('click', function () {
-                $('#unitModalTitle').text('Add Measurement Unit (அளவீட்டு அலகு)');
+                $('#unitModalTitle').text('Add Measurement Unit ');
                 $('#saveBtnText').text('Save Measurement Unit');
                 $('#unitEditId').val('');
                 $('#unitForm')[0].reset();
@@ -513,7 +513,7 @@
             // Open Edit Modal
             $(document).on('click', '.edit-unit-btn', function () {
                 const tr = $(this).closest('tr');
-                $('#unitModalTitle').text('Edit Measurement Unit (அளவீட்டு அலகு திருத்து)');
+                $('#unitModalTitle').text('Edit Measurement Unit ');
                 $('#saveBtnText').text('Update Measurement Unit');
                 $('#unitEditId').val(tr.data('id'));
                 $('#unitNameEn').val(tr.data('name-en'));
@@ -601,7 +601,7 @@
                                             <div class="fw-bold text-dark fs-6 row-name-en">${unit.name_en}</div>
                                             <div class="d-flex align-items-center gap-1 mt-0.5">
                                                 <span class="ta-badge row-name-ta">${unit.name_ta}</span>
-                                            </div>
+</div>
                                         </td>
                                         <td>
                                             <span class="font-monospace badge bg-primary-subtle text-primary border border-primary-subtle fs-6 row-code">${unit.code}</span>
@@ -612,19 +612,19 @@
                                         <td>
                                             <span class="badge ${unit.status === 'Active' ? 'bg-success-subtle text-success' : 'bg-secondary-subtle text-muted'} row-status-badge">
                                                 ${unit.status}
-                                            </span>
+</span>
                                         </td>
                                         <td class="text-end">
                                             <div class="dropdown table-action-dropdown">
                                                 <button class="btn table-action-btn" type="button" data-bs-toggle="dropdown" data-bs-popper-config='{"strategy":"fixed"}' aria-expanded="false" title="Actions">
                                                     <i class="bi bi-three-dots-vertical"></i>
-                                                </button>
+</button>
                                                 <ul class="dropdown-menu dropdown-menu-end shadow-sm">
                                                     <li><button class="dropdown-item edit-unit-btn" type="button"><i class="bi bi-pencil text-primary me-2"></i>Edit</button></li>
                                                     <li><hr class="dropdown-divider my-1"></li>
                                                     <li><button class="dropdown-item text-danger delete-unit-btn" type="button"><i class="bi bi-trash3 text-danger me-2"></i>Delete</button></li>
                                                 </ul>
-                                            </div>
+</div>
                                         </td>
                                     </tr>
                                 `;
@@ -669,7 +669,7 @@
                     return;
                 }
 
-                confirmDelete(`Are you sure you want to remove unit "${nameEn} (${code})"? (அளவீட்டு அலகு நீக்க வேண்டுமா?)`, function () {
+                confirmDelete(`Are you sure you want to remove unit "${nameEn} (${code})"?`, function () {
                     $.ajax({
                         url: '{{ route("units.destroy", ":id") }}'.replace(':id', unitId),
                         method: 'POST',

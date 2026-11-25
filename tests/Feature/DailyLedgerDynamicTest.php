@@ -214,8 +214,7 @@ test('daily ledger opening balance shows yesterdays income and per-date income e
     $response = $this->actingAs($this->accountManager)->get('/ledger');
     $response->assertStatus(200);
     $response->assertSee('₹25,000.00');
-    $response->assertSee('முந்தைய வரவு (நேற்றைய வரவு)');
-    $response->assertSee('அன்றைய மொத்த கணக்கு (Day Total)');
+    $response->assertSee('Day Total');
     $response->assertSee('+₹25,000.00');
     $response->assertSee('−₹7,000.00');
     $response->assertSee('date-summary-row');

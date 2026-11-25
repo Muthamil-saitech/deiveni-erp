@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('title', 'Purchases & Material Inward')
-@section('page_title', 'Purchases & Inward (பொருட்கள் கொள்முதல் & வரவு)')
+@section('page_title', 'Purchases & Inward ')
 
 @push('styles')
     <style>
@@ -87,17 +87,17 @@
         <div class="card-custom p-3 mb-3 mb-md-4 bg-white">
             <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
                 <div>
-                    <h5 class="fw-bold mb-1 text-dark">Material Purchases & Inwards (பொருட்கள் கொள்முதல் மேலாண்மை)</h5>
+                    <h5 class="fw-bold mb-1 text-dark">Material Purchases & Inwards</h5>
                     <p class="text-muted small mb-0">Manage purchase orders, material dispatches, inward deliveries, and suppliers.</p>
-                </div>
+</div>
                 <div class="d-flex gap-2">
                     <button class="btn btn-deiveni btn-sm" data-bs-toggle="modal" data-bs-target="#purchaseModal"
                         id="addPurchaseBtn">
                         <i class="bi bi-plus-circle-fill me-1"></i> Add New Purchase
-                    </button>
-                </div>
-            </div>
-        </div>
+</button>
+</div>
+</div>
+</div>
 
         <!-- Summary Stat Cards -->
         <div class="row g-3 mb-3 mb-md-4">
@@ -107,49 +107,49 @@
                         <span class="text-muted small fw-semibold">Total Purchases</span>
                         <div class="stat-icon-wrapper bg-income-subtle">
                             <i class="bi bi-cart-check-fill"></i>
-                        </div>
-                    </div>
+</div>
+</div>
                     <h4 class="fw-bold mb-0 text-dark" id="statTotalPurchases">₹{{ number_format((float) ($stats['total_value'] ?? 0), 2) }}</h4>
                     <div class="small text-muted mt-1" id="statOrderSubtitle">Across {{ (int) ($stats['total_count'] ?? 0) }} purchase orders</div>
-                </div>
-            </div>
+</div>
+</div>
             <div class="col-6 col-lg-3">
                 <div class="card-stat h-100">
                     <div class="d-flex align-items-center justify-content-between mb-2">
                         <span class="text-muted small fw-semibold">Purchase Orders</span>
                         <div class="stat-icon-wrapper bg-cash-subtle">
                             <i class="bi bi-receipt-cutoff"></i>
-                        </div>
-                    </div>
+</div>
+</div>
                     <h4 class="fw-bold mb-0 text-success" id="statTotalCount">{{ (int) ($stats['total_count'] ?? 0) }} Orders</h4>
                     <div class="small text-success mt-1"><i class="bi bi-check2-circle me-1"></i>Recorded & Inwarded</div>
-                </div>
-            </div>
+</div>
+</div>
             <div class="col-6 col-lg-3">
                 <div class="card-stat h-100">
                     <div class="d-flex align-items-center justify-content-between mb-2">
                         <span class="text-muted small fw-semibold">Destination Sites</span>
                         <div class="stat-icon-wrapper bg-expense-subtle">
                             <i class="bi bi-geo-alt-fill"></i>
-                        </div>
-                    </div>
+</div>
+</div>
                     <h4 class="fw-bold mb-0 text-primary" id="statTotalSites">{{ (int) ($stats['distinct_sites_count'] ?? 0) }} Sites</h4>
                     <div class="small text-muted mt-1"><i class="bi bi-buildings me-1"></i>Active project sites</div>
-                </div>
-            </div>
+</div>
+</div>
             <div class="col-6 col-lg-3">
                 <div class="card-stat h-100">
                     <div class="d-flex align-items-center justify-content-between mb-2">
                         <span class="text-muted small fw-semibold">Suppliers Involved</span>
                         <div class="stat-icon-wrapper bg-workers-subtle">
                             <i class="bi bi-truck-flatbed"></i>
-                        </div>
-                    </div>
+</div>
+</div>
                     <h4 class="fw-bold mb-0 text-dark" id="statTotalSuppliers">{{ (int) ($stats['distinct_suppliers_count'] ?? 0) }} Suppliers</h4>
                     <div class="small text-muted mt-1">Active supplier partners</div>
-                </div>
-            </div>
-        </div>
+</div>
+</div>
+</div>
 
         <!-- Filter & Search Toolbar -->
         <div class="card-custom p-3 mb-3 mb-md-4 bg-white">
@@ -159,38 +159,38 @@
                         <span class="input-group-text bg-light border-end-0"><i class="bi bi-search text-muted"></i></span>
                         <input type="text" class="form-control border-start-0 ps-0" id="purchaseSearchInput"
                             placeholder="Search Bill No, Material, Supplier...">
-                    </div>
-                </div>
+</div>
+</div>
                 <!-- Site Filter -->
                 <div class="col-6 col-md-3">
                     <select class="form-select form-select-sm" id="siteFilter">
-                        <option value="">All Project Sites (அனைத்து தளங்கள்)</option>
+                        <option value="">All Project Sites</option>
                         @foreach ($sites as $site)
                             <option value="{{ $site->name }}">{{ $site->name }}</option>
                         @endforeach
                     </select>
-                </div>
+</div>
                 <!-- Supplier Filter -->
                 <div class="col-6 col-md-3">
                     <select class="form-select form-select-sm" id="supplierFilter">
-                        <option value="">All Suppliers (அனைத்து சப்ளையர்கள்)</option>
+                        <option value="">All Suppliers</option>
                         @foreach ($suppliers as $supplierOption)
                             <option value="{{ $supplierOption->name }}">{{ $supplierOption->name }}</option>
                         @endforeach
                     </select>
-                </div>
+</div>
                 <div class="col-6 col-md-1">
                     <button type="button" class="btn btn-outline-secondary btn-sm px-2 py-1" id="historyFilterResetBtn"
                     title="Reset filters">
                     <i class="bi bi-arrow-counterclockwise"></i>
-                    </button>
-                </div>
+</button>
+</div>
                 <!-- Counter Badge -->
                 <div class="col-6 col-md-2">
                     <span class="small text-muted" id="purchaseCountBadge">Showing <strong class="text-dark" id="visiblePurchaseCount">{{ $purchases->count() }}</strong> orders</span>
-                </div>
-            </div>
-        </div>
+</div>
+</div>
+</div>
 
         <!-- Purchases Table -->
         <div class="card-custom overflow-hidden">
@@ -200,11 +200,11 @@
                         <tr>
                             <th style="width: 50px;">#</th>
                             <th>Bill No & Date</th>
-                            <th>Project Site (தளம்)</th>
-                            <th>Supplier (சப்ளையர்)</th>
-                            <th>Material & Quantity (பொருள் & அளவு)</th>
-                            <th>Total Bill (ரூ.)</th>
-                            <th>Status (நிலை)</th>
+                            <th>Project Site</th>
+                            <th>Supplier</th>
+                            <th>Material & Quantity</th>
+                            <th>Total Bill (₹)</th>
+                            <th>Status</th>
                             <th class="text-end" style="width: 70px;">Actions</th>
                         </tr>
                     </thead>
@@ -271,7 +271,7 @@
                                             @foreach($po->items as $it)
                                                 <span class="badge bg-light text-dark border"><i class="bi bi-box me-1"></i>{{ (float) $it->quantity }} {{ $it->unit }} {{ $it->material_name }}</span>
                                             @endforeach
-                                        </div>
+</div>
                                     @endif
                                 </td>
                                 <td>
@@ -280,41 +280,41 @@
                                 <td>
                                     @if($po->status === 'Order Received')
                                         <span class="badge bg-success-subtle text-success border border-success-subtle py-1 px-2 d-inline-flex align-items-center gap-1"
-                                              id="statusBadge_{{ $po->id }}" title="Order Confirmed (ஆர்டர் உறுதி செய்யப்பட்டது)">
+                                              id="statusBadge_{{ $po->id }}" title="Order Confirmed ">
                                             <i class="bi bi-check-circle-fill text-success"></i>
                                             <span class="status-text fw-semibold">Order Received</span>
-                                        </span>
+</span>
                                     @else
                                         <div class="dropdown po-status-dropdown d-inline-block">
                                             <button class="btn btn-sm py-1 px-2 rounded-2 dropdown-toggle d-inline-flex align-items-center gap-1 bg-warning-subtle text-warning-emphasis border border-warning-subtle"
                                                     type="button" data-bs-toggle="dropdown" data-bs-popper-config='{"strategy":"fixed"}' aria-expanded="false"
-                                                    id="statusBtn_{{ $po->id }}" title="Click to change status (நிலை மாற்ற கிளிக் செய்க)">
+                                                    id="statusBtn_{{ $po->id }}" title="Click to change status ">
                                                 <i class="bi bi-clock-history text-warning"></i>
                                                 <span class="status-text fw-semibold">Ordered</span>
-                                            </button>
+</button>
                                             <ul class="dropdown-menu shadow-sm">
-                                                <li><h6 class="dropdown-header text-uppercase" style="font-size: 0.68rem;">Change Status (நிலை மாற்றம்)</h6></li>
+                                                <li><h6 class="dropdown-header text-uppercase" style="font-size: 0.68rem;">Change Status</h6></li>
                                                 <li>
                                                     <button class="dropdown-item py-1 d-flex align-items-center gap-2 po-change-status-btn active"
                                                             type="button" data-id="{{ $po->id }}" data-status="Ordered">
-                                                        <i class="bi bi-clock-history text-warning"></i> Ordered (ஆர்டர் செய்யப்பட்டது)
-                                                    </button>
+                                                        <i class="bi bi-clock-history text-warning"></i> Ordered 
+</button>
                                                 </li>
                                                 <li>
                                                     <button class="dropdown-item py-1 d-flex align-items-center gap-2 po-change-status-btn text-success fw-bold"
                                                             type="button" data-id="{{ $po->id }}" data-status="Order Received">
-                                                        <i class="bi bi-check2-circle text-success"></i> Order Received (உறுதி / பெறப்பட்டது)
-                                                    </button>
+                                                        <i class="bi bi-check2-circle text-success"></i> Order Received 
+</button>
                                                 </li>
                                             </ul>
-                                        </div>
+</div>
                                     @endif
                                 </td>
                                 <td class="text-end">
                                     <div class="dropdown table-action-dropdown">
                                         <button class="btn table-action-btn" type="button" data-bs-toggle="dropdown" data-bs-popper-config='{"strategy":"fixed"}' aria-expanded="false" title="Actions">
                                             <i class="bi bi-three-dots-vertical"></i>
-                                        </button>
+</button>
                                         <ul class="dropdown-menu dropdown-menu-end shadow-sm">
                                             <li><a class="dropdown-item" href="{{ route('purchases.show', $po->encrypted_id) }}"><i class="bi bi-eye text-info me-2"></i>View Details</a></li>
                                             <li><button class="dropdown-item edit-purchase-btn" type="button"><i class="bi bi-pencil text-primary me-2"></i>Edit</button></li>
@@ -322,13 +322,13 @@
                                                 <li class="action-confirm-po-item">
                                                     <button class="dropdown-item text-success po-change-status-btn" type="button" data-id="{{ $po->id }}" data-status="Order Received">
                                                         <i class="bi bi-check2-circle text-success me-2"></i>Confirm as Order Received
-                                                    </button>
+</button>
                                                 </li>
                                             @endif
                                             <li><hr class="dropdown-divider my-1"></li>
                                             <li><button class="dropdown-item text-danger delete-purchase-btn" type="button"><i class="bi bi-trash3 text-danger me-2"></i>Delete</button></li>
                                         </ul>
-                                    </div>
+</div>
                                 </td>
                             </tr>
                         @empty
@@ -344,7 +344,7 @@
                         </tr>
                     </tbody>
                 </table>
-            </div>
+</div>
 
             <!-- Table Pagination & Footer Summary -->
             <div class="p-3 bg-white border-top d-flex flex-column flex-md-row justify-content-between align-items-center gap-3" id="tablePaginationContainer">
@@ -358,17 +358,17 @@
                     </select>
                     <span class="small text-muted ms-md-2" id="paginationSummary">
                         Showing <strong class="text-dark" id="pageStart">1</strong> &minus; <strong class="text-dark" id="pageEnd">{{ min(10, $purchases->count()) }}</strong> of <strong class="text-dark" id="pageTotal">{{ $purchases->count() }}</strong> purchase orders
-                    </span>
-                </div>
+</span>
+</div>
                 <nav aria-label="Purchases table pagination">
                     <ul class="pagination pagination-sm mb-0 gap-1" id="paginationNav">
                         <!-- Dynamic page links rendered by JS -->
                     </ul>
                 </nav>
-            </div>
-        </div>
+</div>
+</div>
 
-    </div>
+</div>
 
     <!-- Purchase Add / Edit Modal -->
     <div class="modal fade" id="purchaseModal" tabindex="-1" aria-hidden="true">
@@ -377,34 +377,34 @@
                 <div class="modal-header">
                     <h5 class="modal-title fw-bold" id="purchaseModalTitle">Add New Purchase</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
+</div>
                 <form id="purchaseForm" novalidate>
                     <div class="modal-body">
                         <input type="hidden" id="purchaseEditId">
                         <div class="row g-3">
                             <!-- Date & Bill No -->
                             <div class="col-12 col-md-6">
-                                <label class="form-label small fw-semibold" for="purDate">Purchase Date (தேதி) <span
+                                <label class="form-label small fw-semibold" for="purDate">Purchase Date  <span
                                         class="text-danger">*</span></label>
                                 <input type="date" class="form-control" id="purDate" value="{{ date('Y-m-d') }}" min="{{ date('Y-m-d', strtotime('-1 day')) }}" max="{{ date('Y-m-d') }}">
                                 <div class="invalid-feedback" id="errDate"></div>
-                                <div class="form-text small mt-1 text-primary fw-semibold" style="font-size: 0.75rem;"><i class="bi bi-calendar-check me-1"></i>Allowed: <strong>Yesterday ({{ date('d-m-Y', strtotime('-1 day')) }})</strong> & <strong>Today ({{ date('d-m-Y') }})</strong> <span class="text-muted">(நேற்று அல்லது இன்று மட்டும்)</span></div>
-                            </div>
+                                <div class="form-text small mt-1 text-primary fw-semibold" style="font-size: 0.75rem;"><i class="bi bi-calendar-check me-1"></i>Allowed: <strong>Yesterday ({{ date('d-m-Y', strtotime('-1 day')) }})</strong> & <strong>Today ({{ date('d-m-Y') }})</strong> <span class="text-muted"></span></div>
+</div>
                             <div class="col-12 col-md-6">
-                                <label class="form-label small fw-semibold" for="purBillNo">PO / Invoice No. (கொள்முதல் ஆணை எண்) <span
+                                <label class="form-label small fw-semibold" for="purBillNo">PO / Invoice No.  <span
                                         class="text-danger">*</span></label>
                                 <div class="input-group">
                                     <span class="input-group-text bg-light text-muted font-monospace"><i class="bi bi-hash"></i></span>
                                     <input type="text" class="form-control font-monospace fw-bold bg-light" id="purBillNo"
                                         placeholder="PO-{{ date('Y') }}-001" readonly>
-                                </div>
+</div>
                                 <div class="invalid-feedback" id="errBillNo"></div>
                                 <small class="text-muted" style="font-size: 0.72rem;"><i class="bi bi-lock me-1"></i>Auto-generated unique invoice / PO number (Read-only)</small>
-                            </div>
+</div>
 
                             <!-- Site & Supplier -->
                             <div class="col-12 col-md-6">
-                                <label class="form-label small fw-semibold" for="purSite">Destination Project Site (தளம்) <span
+                                <label class="form-label small fw-semibold" for="purSite">Destination Project Site  <span
                                         class="text-danger">*</span></label>
                                 <select class="form-select fw-semibold" id="purSite">
                                     <option value="" disabled selected>-- Select Project Site --</option>
@@ -413,116 +413,116 @@
                                     @endforeach
                                 </select>
                                 <div class="invalid-feedback" id="errSite"></div>
-                            </div>
+</div>
                             <div class="col-12 col-md-6">
-                                <label class="form-label small fw-semibold" for="purSupplier">Supplier (சப்ளையர்) <span
+                                <label class="form-label small fw-semibold" for="purSupplier">Supplier  <span
                                         class="text-danger">*</span></label>
                                 <select class="form-select fw-semibold" id="purSupplier" name="supplier_id">
-                                    <option value="" disabled selected>-- Select Supplier (சப்ளையரை தேர்வு செய்க) --</option>
+                                    <option value="" disabled selected>-- Select Supplier --</option>
                                     @foreach ($suppliers as $supplierOption)
                                         <option value="{{ $supplierOption->id }}" data-id="{{ $supplierOption->id }}" data-name="{{ $supplierOption->name }}">{{ $supplierOption->name }}</option>
                                     @endforeach
                                 </select>
                                 <div class="invalid-feedback" id="errSupplier"></div>
-                            </div>
+</div>
 
                             <!-- Purchase Order Status & Reason Input -->
                             <div class="col-12 col-md-6">
-                                <label class="form-label small fw-semibold" for="purStatus">Purchase Order Status (ஆர்டர் நிலை) <span
+                                <label class="form-label small fw-semibold" for="purStatus">Purchase Order Status  <span
                                         class="text-danger">*</span></label>
                                 <select class="form-select fw-semibold" id="purStatus">
-                                    <option value="Ordered" selected>Ordered (ஆர்டர் செய்யப்பட்டது)</option>
-                                    <option value="Order Received">Order Received (உறுதி / பெறப்பட்டது)</option>
+                                    <option value="Ordered" selected>Ordered</option>
+                                    <option value="Order Received">Order Received</option>
                                 </select>
                                 <div class="invalid-feedback" id="errStatus"></div>
-                            </div>
+</div>
                             <div class="col-12 col-md-6" id="purReasonContainer" style="display: none;">
                                 <label class="form-label small fw-semibold text-danger" id="purReasonLabel" for="purReason">
-                                    <i class="bi bi-exclamation-triangle-fill me-1"></i>Reason (காரணம்) <span class="text-danger">*</span>
-                                </label>
+                                    <i class="bi bi-exclamation-triangle-fill me-1"></i>Reason  <span class="text-danger">*</span>
+</label>
                                 <input type="text" class="form-control border-danger" id="purReason"
                                     placeholder="Enter reason for return / cancellation">
                                 <div class="invalid-feedback" id="errReason"></div>
-                            </div>
+</div>
 
                             <!-- Material, Quantity & Unit Section (Multiple sets with Add and Delete buttons) -->
                             <div class="col-12">
                                 <div class="d-flex justify-content-between align-items-center mb-2 pb-1 border-bottom">
                                     <div>
                                         <label class="form-label small fw-bold mb-0 text-dark">
-                                            <i class="bi bi-box-seam text-primary me-1"></i>Materials, Quantity & Units (பொருட்கள், அளவு & அளவீட்டு அலகு) <span class="text-danger">*</span>
-                                        </label>
+                                            <i class="bi bi-box-seam text-primary me-1"></i>Materials, Quantity & Units  <span class="text-danger">*</span>
+</label>
                             <div class="text-muted" style="font-size: 0.75rem;">All Material Master items are available for any selected supplier.</div>
-                                    </div>
+</div>
                                     <div class="d-flex gap-2">
                                         <button type="button" class="btn btn-outline-success btn-sm px-2 py-1" id="quickAddMaterialBtn" title="Create new material in Material Master without leaving this page">
-                                            <i class="bi bi-plus-circle-fill me-1"></i> + New Material (+ புதிய பொருள்)
-                                        </button>
+                                            <i class="bi bi-plus-circle-fill me-1"></i> + New Material 
+</button>
                                         <button type="button" class="btn btn-outline-primary btn-sm px-2 py-1" id="addMaterialUnitRowBtn">
                                             <i class="bi bi-plus-circle me-1"></i> Add Material Item
-                                        </button>
-                                    </div>
-                                </div>
+</button>
+</div>
+</div>
 
                                 <div class="row g-2 text-muted small fw-semibold px-2 mb-1 d-none d-md-flex" style="font-size: 0.78rem;">
-                                    <div class="col-md-4">Material / Item (பொருள்) <span class="text-danger">*</span></div>
-                                    <div class="col-md-2">Quantity (அளவு) <span class="text-danger">*</span></div>
-                                    <div class="col-md-2">Unit of Measurement (அளவீட்டு அலகு) <span class="text-danger">*</span></div>
-                                    <div class="col-md-3">Rate / Price (விலை ₹) <span class="text-danger">*</span></div>
+                                    <div class="col-md-4">Material / Item  <span class="text-danger">*</span></div>
+                                    <div class="col-md-2">Quantity  <span class="text-danger">*</span></div>
+                                    <div class="col-md-2">Unit of Measurement  <span class="text-danger">*</span></div>
+                                    <div class="col-md-3">Rate / Price (₹) <span class="text-danger">*</span></div>
                                     <div class="col-md-1 text-end">Action</div>
-                                </div>
+</div>
 
                                 <div id="materialUnitRowsContainer" class="d-flex flex-column gap-2 mb-2">
                                     <!-- Dynamic material, quantity and unit sets appended here -->
-                                </div>
+</div>
                                 <div class="invalid-feedback d-block" id="errMaterials" style="display:none !important;"></div>
-                            </div>
+</div>
 
                             <!-- Total Amount (editable; auto-filled from material rows) -->
                             <div class="col-12">
                                 <div class="d-flex justify-content-between align-items-center mb-1">
                                     <label class="form-label small fw-semibold mb-0" for="purTotal">
-                                        Total Amount (மொத்த தொகை) <span class="text-danger">*</span>
-                                    </label>
+                                        Total Amount  <span class="text-danger">*</span>
+</label>
                                     <div class="d-flex align-items-center gap-2">
                                         <button type="button" class="btn btn-link btn-sm p-0 text-decoration-none text-primary" id="recalcPurTotalBtn" style="font-size: 0.75rem;" title="Auto-calculate from Quantity × Master Price">
                                             <i class="bi bi-arrow-clockwise me-1"></i>Auto-calculate
-                                        </button>
+</button>
                                         <span class="badge bg-primary-subtle text-primary border border-primary-subtle" style="font-size: 0.72rem;">
                                             <i class="bi bi-pencil me-1"></i>Editable
-                                        </span>
-                                    </div>
-                                </div>
+</span>
+</div>
+</div>
                                 <div class="input-group">
                                     <span class="input-group-text bg-light fw-bold text-dark">₹</span>
                                     <input type="number" min="0" step="any"
                                            class="form-control fw-bold text-dark fs-5 bg-white" id="purTotal"
                                            placeholder="0.00" value="0.00">
-                                </div>
+</div>
                                 <small class="text-muted" style="font-size: 0.72rem;">
-                                    <i class="bi bi-info-circle me-1"></i>Total amount is editable. You can type or change the final bill amount manually (மொத்த தொகையை நேரடியாக மாற்றலாம்).
-                                </small>
+                                    <i class="bi bi-info-circle me-1"></i>Total amount is editable. You can type or change the final bill amount manually .
+</small>
                                 <div class="invalid-feedback d-block" id="errPurTotal" style="display:none !important;"></div>
-                            </div>
+</div>
 
                             <div class="col-12">
-                                <label class="form-label small fw-semibold">Delivery Notes / Remarks (குறிப்புகள்)</label>
+                                <label class="form-label small fw-semibold">Delivery Notes / Remarks</label>
                                 <textarea class="form-control" id="purNotes" rows="2"
                                     placeholder="e.g. Checked weight slip, received materials at site."></textarea>
-                            </div>
-                        </div>
-                    </div>
+</div>
+</div>
+</div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-light btn-sm" data-bs-dismiss="modal">Cancel</button>
                         <button type="submit" class="btn btn-deiveni btn-sm" id="savePurBtn">
                             <span class="spinner-border spinner-border-sm me-1 d-none" id="savePurSpinner" role="status" aria-hidden="true"></span>
                             <span id="savePurBtnText">Save Purchase Entry</span>
-                        </button>
-                    </div>
+</button>
+</div>
                 </form>
-            </div>
-        </div>
-    </div>
+</div>
+</div>
+</div>
 
     <!-- Quick Add Material Modal (Overlay on top of Purchases Modal) -->
     <div class="modal fade" id="quickAddMaterialModal" tabindex="-1" aria-labelledby="quickAddMaterialModalLabel" aria-hidden="true" style="z-index: 10600;">
@@ -530,26 +530,26 @@
             <div class="modal-content shadow-lg border-0">
                 <div class="modal-header py-2 px-3 text-white" style="background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%);">
                     <h6 class="modal-title fw-bold text-white d-flex align-items-center mb-0" id="quickAddMaterialModalLabel">
-                        <i class="bi bi-plus-circle-fill me-2"></i>Quick Add Material to Master (புதிய பொருள் சேர்த்தல்)
-                    </h6>
+                        <i class="bi bi-plus-circle-fill me-2"></i>Quick Add Material to Master 
+</h6>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
+</div>
                 <form id="quickAddMaterialForm">
                     <div class="modal-body p-3">
                         <div class="alert alert-info py-2 px-3 small mb-3 border-0 bg-primary-subtle text-primary-emphasis">
                             <i class="bi bi-info-circle-fill me-1"></i>
                             This material will automatically be saved to <strong>Material Master</strong> and available immediately here and for future purchases.
-                        </div>
+</div>
                         <div class="mb-3">
                             <label class="form-label small fw-semibold" for="qmNameEn">Material Name (English) <span class="text-danger">*</span></label>
                             <input type="text" class="form-control form-control-sm" id="qmNameEn" placeholder="e.g. PVC Pipe 2 inch, Asian Paint Apex" required autocomplete="off">
                             <div class="invalid-feedback" id="qmErrNameEn">Please enter material name.</div>
-                        </div>
+</div>
                         <div class="mb-3">
-                            <label class="form-label small fw-semibold" for="qmNameTa">Material Name (Tamil / தமிழ்) <span class="text-muted fw-normal">(Optional)</span></label>
+                            <label class="form-label small fw-semibold" for="qmNameTa">Material Name  <span class="text-muted fw-normal">(Optional)</span></label>
                             <input type="text" class="form-control form-control-sm" id="qmNameTa" placeholder="e.g. பிவிசி பைப் 2 இன்ச் (Optional)" autocomplete="off">
                             <div class="invalid-feedback" id="qmErrNameTa"></div>
-                        </div>
+</div>
                         <div class="row g-2 mb-2">
                             <div class="col-6">
                                 <label class="form-label small fw-semibold" for="qmUnit">Unit of Measurement <span class="text-danger">*</span></label>
@@ -559,27 +559,27 @@
                                     @endforeach
                                 </select>
                                 <div class="invalid-feedback" id="qmErrUnit">Please select unit.</div>
-                            </div>
+</div>
                             <div class="col-6">
                                 <label class="form-label small fw-semibold" for="qmPrice">Unit Rate / Price (₹) <span class="text-muted fw-normal">(Optional)</span></label>
                                 <input type="number" step="any" min="0" class="form-control form-control-sm" id="qmPrice" placeholder="0.00">
-                            </div>
-                        </div>
+</div>
+</div>
                         <div class="mb-0 alert alert-light border py-1 px-2 small text-muted">
                             <i class="bi bi-globe2 text-success me-1"></i>
                             <span>Saved globally to Material Master and available for every supplier.</span>
-                        </div>
-                    </div>
+</div>
+</div>
                     <div class="modal-footer py-2 px-3 bg-light">
                         <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
                         <button type="submit" class="btn btn-sm btn-primary" id="btnSaveQuickMaterial">
                             <i class="bi bi-check-circle me-1"></i> Save to Master & Select
-                        </button>
-                    </div>
+</button>
+</div>
                 </form>
-            </div>
-        </div>
-    </div>
+</div>
+</div>
+</div>
 @endsection
 
 @push('scripts')
@@ -629,7 +629,7 @@
                     return '<option value="" disabled selected>-- No materials available --</option>';
                 }
 
-                let html = '<option value="" disabled ' + (!selectedId ? 'selected' : '') + '>-- Select Material (பொருளை தேர்வு செய்க) --</option>';
+                let html = '<option value="" disabled ' + (!selectedId ? 'selected' : '') + '>-- Select Material --</option>';
                 materials.forEach(function (m) {
                     const isSel = Boolean(selectedId && String(selectedId) === String(m.id));
                     const label = m.name + (m.tamil ? ' - ' + m.tamil : '');
@@ -659,44 +659,44 @@
                     <div class="material-unit-row card p-2 bg-light-subtle border shadow-none" id="${rowUid}">
                         <div class="row g-2 align-items-center">
                             <div class="col-12 col-md-4">
-                                <label class="form-label small text-muted mb-1 d-md-none">Material / Item (பொருள்) <span class="text-danger">*</span></label>
+                                <label class="form-label small text-muted mb-1 d-md-none">Material / Item  <span class="text-danger">*</span></label>
                                 <select class="form-select form-select-sm pur-material-select">
                                     ${optionsHtml}
                                 </select>
                                 <div class="invalid-feedback">Please select a material.</div>
-                            </div>
+</div>
                             <div class="col-6 col-md-2">
-                                <label class="form-label small text-muted mb-1 d-md-none">Quantity (அளவு) <span class="text-danger">*</span></label>
+                                <label class="form-label small text-muted mb-1 d-md-none">Quantity  <span class="text-danger">*</span></label>
                                 <input type="number" step="any" min="0" class="form-control form-control-sm pur-qty-input" placeholder="Quantity" value="${selectedQty || ''}">
                                 <div class="invalid-feedback">Enter valid quantity (> 0).</div>
-                            </div>
+</div>
                             <div class="col-6 col-md-2">
-                                <label class="form-label small text-muted mb-1 d-md-none">Unit of Measurement (அளவீட்டு அலகு) <span class="text-danger">*</span></label>
+                                <label class="form-label small text-muted mb-1 d-md-none">Unit of Measurement  <span class="text-danger">*</span></label>
                                 <select class="form-select form-select-sm pur-unit-select">
                                     ${unitOptionsHtml}
                                 </select>
                                 <div class="invalid-feedback">Select unit.</div>
-                            </div>
+</div>
                             <div class="col-8 col-md-3">
-                                <label class="form-label small text-muted mb-1 d-md-none">Rate / Price (விலை ₹) <span class="text-danger">*</span></label>
+                                <label class="form-label small text-muted mb-1 d-md-none">Rate / Price (₹) <span class="text-danger">*</span></label>
                                 <div class="input-group input-group-sm">
                                     <span class="input-group-text py-0 px-2 bg-light text-muted" style="font-size:0.75rem;">₹</span>
-                                    <input type="number" step="any" min="0" class="form-control form-control-sm pur-rate-input" placeholder="Rate (விலை)" value="${initRate !== '' && initRate !== null && initRate !== undefined ? initRate : ''}">
-                                </div>
+                                    <input type="number" step="any" min="0" class="form-control form-control-sm pur-rate-input" placeholder="Rate " value="${initRate !== '' && initRate !== null && initRate !== undefined ? initRate : ''}">
+</div>
                                 <div class="d-flex justify-content-between align-items-center mt-1">
                                     <small class="text-muted" style="font-size:0.68rem;">Unit Price</small>
                                     <small class="pur-line-total-display fw-semibold text-primary" style="font-size: 0.72rem; line-height: 1;">
                                         Total: ₹0.00
-                                    </small>
-                                </div>
-                            </div>
+</small>
+</div>
+</div>
                             <div class="col-4 col-md-1 text-end">
                                 <button type="button" class="btn btn-outline-danger btn-sm p-1 remove-material-unit-row-btn" title="Delete set of input" style="line-height: 1;">
                                     <i class="bi bi-trash3"></i>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
+</button>
+</div>
+</div>
+</div>
                 `;
 
                 $('#materialUnitRowsContainer').append(rowHtml);
@@ -718,7 +718,7 @@
 
                 if (typeof window.makeSearchableSelect === 'function') {
                     window.makeSearchableSelect(newRow.find('.pur-material-select'), {
-                        placeholder: '-- Select Material (பொருளை தேர்வு செய்க) --',
+                        placeholder: '-- Select Material --',
                         type: 'material',
                         allowNew: true,
                         onAddNew: function (query, select, container, closeMenu) {
@@ -1037,10 +1037,10 @@
 
                 if (status === 'Order Return' || status === 'Order Canceled') {
                     if (status === 'Order Return') {
-                        reasonLabel.html('<i class="bi bi-arrow-return-left text-danger me-1"></i>Return Reason (திரும்பியதற்கான காரணம்) <span class="text-danger">*</span>');
+                        reasonLabel.html('<i class="bi bi-arrow-return-left text-danger me-1"></i>Return Reason  <span class="text-danger">*</span>');
                         reasonInput.attr('placeholder', 'e.g. Quality defect, damaged items, rejected at site');
                     } else {
-                        reasonLabel.html('<i class="bi bi-x-circle text-danger me-1"></i>Cancellation Reason (ரத்து செய்ததற்கான காரணம்) <span class="text-danger">*</span>');
+                        reasonLabel.html('<i class="bi bi-x-circle text-danger me-1"></i>Cancellation Reason  <span class="text-danger">*</span>');
                         reasonInput.attr('placeholder', 'e.g. Order canceled by site engineer, supplier unavailable');
                     }
                     reasonContainer.stop(true, true).slideDown(200);
@@ -1062,8 +1062,8 @@
 
                 if (newStatus === 'Order Return' || newStatus === 'Order Canceled') {
                     const promptMsg = newStatus === 'Order Return'
-                        ? 'Please enter return reason (பொருட்கள் திருப்பியதற்கான காரணம்):'
-                        : 'Please enter cancellation reason (ஆர்டர் ரத்து செய்ததற்கான காரணம்):';
+                        ? 'Please enter return reason :'
+                        : 'Please enter cancellation reason :';
                     reason = prompt(promptMsg);
                     if (reason === null) {
                         return; // User cancelled prompt
@@ -1108,10 +1108,10 @@
                                 // 2. Disable dropdown by replacing it with the static confirmed badge
                                 const confirmedBadgeHtml = `
                                     <span class="badge bg-success-subtle text-success border border-success-subtle py-1 px-2 d-inline-flex align-items-center gap-1"
-                                          id="statusBadge_${poId}" title="Order Confirmed (ஆர்டர் உறுதி செய்யப்பட்டது)">
+                                          id="statusBadge_${poId}" title="Order Confirmed ">
                                         <i class="bi bi-check-circle-fill text-success"></i>
                                         <span class="status-text fw-semibold">Order Received</span>
-                                    </span>
+</span>
                                 `;
                                 const dropdown = row.find('.po-status-dropdown');
                                 if (dropdown.length) {
@@ -1288,7 +1288,7 @@
                     <li class="page-item ${prevDisabled}">
                         <button class="page-link" type="button" data-page="${current - 1}" aria-label="Previous" title="Previous Page">
                             <i class="bi bi-chevron-left"></i>
-                        </button>
+</button>
                     </li>
                 `);
 
@@ -1325,7 +1325,7 @@
                     <li class="page-item ${nextDisabled}">
                         <button class="page-link" type="button" data-page="${current + 1}" aria-label="Next" title="Next Page">
                             <i class="bi bi-chevron-right"></i>
-                        </button>
+</button>
                     </li>
                 `);
             }
@@ -1523,10 +1523,10 @@
                     $('#purReasonContainer').show();
                     $('#purReason').val(currentReason);
                     if (currentStatus === 'Order Return') {
-                        $('#purReasonLabel').html('<i class="bi bi-arrow-return-left text-danger me-1"></i>Return Reason (திரும்பியதற்கான காரணம்) <span class="text-danger">*</span>');
+                        $('#purReasonLabel').html('<i class="bi bi-arrow-return-left text-danger me-1"></i>Return Reason  <span class="text-danger">*</span>');
                         $('#purReason').attr('placeholder', 'e.g. Quality defect, damaged items, rejected at site');
                     } else {
-                        $('#purReasonLabel').html('<i class="bi bi-x-circle text-danger me-1"></i>Cancellation Reason (ரத்து செய்ததற்கான காரணம்) <span class="text-danger">*</span>');
+                        $('#purReasonLabel').html('<i class="bi bi-x-circle text-danger me-1"></i>Cancellation Reason  <span class="text-danger">*</span>');
                         $('#purReason').attr('placeholder', 'e.g. Order canceled by site engineer, supplier unavailable');
                     }
                 } else {
@@ -1603,10 +1603,10 @@
                 const maxD = '{{ date('Y-m-d') }}';
                 if (val > maxD) {
                     $(this).val(maxD);
-                    showToast('Purchase date cannot be a future date (தேதி எதிர்காலமாக இருக்க முடியாது).', 'danger');
+                    showToast('Purchase date cannot be a future date .', 'danger');
                 } else if (val < minD) {
                     $(this).val(minD);
-                    showToast('Purchase date can only be today or yesterday (கொள்முதல் தேதி நேற்று அல்லது இன்று மட்டுமே இருக்க வேண்டும்).', 'danger');
+                    showToast('Purchase date can only be today or yesterday .', 'danger');
                 }
             });
 
@@ -1622,13 +1622,13 @@
                 const maxDate = '{{ date('Y-m-d') }}';
                 if (!date) {
                     $('#purDate').addClass('is-invalid');
-                    $('#errDate').text('Please select a purchase date (கொள்முதல் தேதியை தேர்வு செய்க).').show();
+                    $('#errDate').text('Please select a purchase date .').show();
                     return;
                 }
                 if (date < minDate || date > maxDate) {
                     $('#purDate').addClass('is-invalid');
-                    $('#errDate').text('Purchase date can only be today or yesterday (கொள்முதல் தேதி நேற்று அல்லது இன்று மட்டுமே இருக்க வேண்டும்).').show();
-                    showToast('Purchase date can only be today or yesterday (கொள்முதல் தேதி நேற்று அல்லது இன்று மட்டுமே இருக்க வேண்டும்).', 'danger');
+                    $('#errDate').text('Purchase date can only be today or yesterday .').show();
+                    showToast('Purchase date can only be today or yesterday .', 'danger');
                     return;
                 }
                 const billNo = $('#purBillNo').val().trim();
@@ -1748,7 +1748,7 @@
                 const tr = $(this).closest('tr');
                 const id = tr.data('id');
                 const billNo = tr.data('bill-no');
-                confirmDelete(`Delete purchase bill "${billNo}"? (கொள்முதல் ரசீதை நீக்க விரும்புகிறீர்களா?)`, function () {
+                confirmDelete(`Delete purchase bill "${billNo}"?`, function () {
                     $.ajax({
                         url: '{{ route("purchases.destroy", ":id") }}'.replace(':id', id),
                         type: 'POST',

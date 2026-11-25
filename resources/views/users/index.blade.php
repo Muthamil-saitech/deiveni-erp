@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('title', 'User Management & Dynamic RBAC')
-@section('page_title', 'User Management & Dynamic RBAC (பயனாளர் நிர்வாகம் & RBAC)')
+@section('page_title', 'User Management & Dynamic RBAC ')
 
 @section('content')
     <div class="container-fluid px-0">
@@ -11,19 +11,19 @@
             <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
                 <div>
                     <h5 class="fw-bold mb-0 text-dark">Dynamic Role-Based Access Control (RBAC) & System Users</h5>
-                </div>
+</div>
                 <div class="d-flex gap-2">
                     <button class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#roleModal"
                         id="addRoleBtn">
                         <i class="bi bi-shield-plus me-1"></i> Create New Role
-                    </button>
+</button>
                     <button class="btn btn-deiveni btn-sm" data-bs-toggle="modal" data-bs-target="#userModal"
                         id="addUserBtn">
                         <i class="bi bi-person-plus-fill me-1"></i> Add System User
-                    </button>
-                </div>
-            </div>
-        </div>
+</button>
+</div>
+</div>
+</div>
 
         <!-- SECTION 1: Role Creation & Roles List (First Section) -->
         <div class="card-custom overflow-hidden mb-4">
@@ -31,11 +31,11 @@
                 <div>
                     <h6 class="fw-bold mb-0 text-dark">
                         <i class="bi bi-shield-lock-fill text-primary me-2"></i>1. System Roles & Menu Permissions
-                        (பாத்திரங்கள் & மெனு அணுகல்)
-                    </h6>
-                </div>
+
+</h6>
+</div>
                 <span class="badge bg-primary" id="rolesCountBadge">{{ count($roles) }} Defined Roles</span>
-            </div>
+</div>
 
             <div class="table-responsive">
                 <table class="table table-custom table-hover align-middle mb-0" id="rolesTable">
@@ -44,7 +44,7 @@
                             <th style="min-width: 170px;">Role Name</th>
                             <th>Type</th>
                             <th>Description</th>
-                            <th style="min-width: 320px;">Accessible Menus (அனுமதிக்கப்பட்ட மெனுக்கள்)</th>
+                            <th style="min-width: 320px;">Accessible Menus</th>
                             <th class="text-center" style="width: 100px;">Assigned Users</th>
                             <th class="text-end" style="width: 80px;">Actions</th>
                         </tr>
@@ -61,8 +61,8 @@
                                     <div class="d-flex align-items-center">
                                         <span class="badge {{ $role->badgeClass() }} me-2 px-2 py-1 fs-6">
                                             <i class="bi bi-shield-shaded me-1"></i>{{ $role->name }}
-                                        </span>
-                                    </div>
+</span>
+</div>
                                 </td>
                                 <td>
                                     @if($role->is_system)
@@ -85,7 +85,7 @@
                                                     title="{{ $allMenus[$mKey]['name'] }}">
                                                     <i
                                                         class="{{ $allMenus[$mKey]['icon'] }} me-1 text-primary"></i>{{ $allMenus[$mKey]['name'] }}
-                                                </span>
+</span>
                                                 @php $shownCount++; @endphp
                                             @endif
                                         @endforeach
@@ -93,30 +93,30 @@
                                             <span class="badge bg-primary-subtle text-primary border border-primary-subtle"
                                                 title="{{ count($roleMenuKeys) }} total menus">
                                                 +{{ count($roleMenuKeys) - 4 }} more ({{ count($roleMenuKeys) }} total)
-                                            </span>
+</span>
                                         @elseif(count($roleMenuKeys) === 0)
                                             <span class="badge bg-danger-subtle text-danger">No Menus Assigned</span>
                                         @endif
-                                    </div>
+</div>
                                 </td>
                                 <td class="text-center">
                                     <span class="badge rounded-pill bg-light text-dark border fw-semibold px-2 py-1">
                                         <i
                                             class="bi bi-people me-1 text-muted"></i>{{ $role->users_count ?? $role->users->count() }}
-                                    </span>
+</span>
                                 </td>
                                 <td class="text-end">
                                     <div class="dropdown table-action-dropdown">
                                         <button class="btn table-action-btn" type="button" data-bs-toggle="dropdown"
                                             aria-expanded="false" title="Actions">
                                             <i class="bi bi-three-dots-vertical"></i>
-                                        </button>
+</button>
                                         <ul class="dropdown-menu dropdown-menu-end shadow-sm">
                                             <li>
                                                 <button class="dropdown-item edit-role-btn" type="button"
                                                     data-id="{{ $role->id }}">
                                                     <i class="bi bi-pencil text-primary me-2"></i>Edit Role & Menus
-                                                </button>
+</button>
                                             </li>
                                             @if(!$role->is_system)
                                                 <li>
@@ -126,11 +126,11 @@
                                                     <button class="dropdown-item text-danger delete-role-btn" type="button"
                                                         data-id="{{ $role->id }}" data-name="{{ $role->name }}">
                                                         <i class="bi bi-trash3 text-danger me-2"></i>Delete Role
-                                                    </button>
+</button>
                                                 </li>
                                             @endif
                                         </ul>
-                                    </div>
+</div>
                                 </td>
                             </tr>
                         @empty
@@ -141,26 +141,26 @@
                         @endforelse
                     </tbody>
                 </table>
-            </div>
-        </div>
+</div>
+</div>
 
         <!-- SECTION 2: User Creation & Accounts List (Second Section - Replaces Static Matrix) -->
         <div class="card-custom overflow-hidden mb-4">
             <div class="p-3 bg-light border-bottom d-flex justify-content-between align-items-center">
                 <div>
                     <h6 class="fw-bold mb-0 text-dark">
-                        <i class="bi bi-people-fill text-primary me-2"></i>2. System User Accounts (பயனாளர் கணக்குகள்)
-                    </h6>
-                </div>
+                        <i class="bi bi-people-fill text-primary me-2"></i>2. System User Accounts 
+</h6>
+</div>
                 <span class="badge bg-primary" id="usersCountBadge">{{ count($users) }} Registered Users</span>
-            </div>
+</div>
             <div class="table-responsive">
                 <table class="table table-custom table-hover align-middle mb-0" id="usersTable">
                     <thead>
                         <tr>
                             <th>User Name</th>
                             <th>Email</th>
-                            <th>Role (பங்கு)</th>
+                            <th>Role</th>
                             <th>Phone</th>
                             <th>Status</th>
                             <th>Joined Date</th>
@@ -182,12 +182,12 @@
                                         <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center fw-bold me-2"
                                             style="width: 34px; height: 34px; font-size: 0.82rem;">
                                             {{ $initials }}
-                                        </div>
+</div>
                                         <div>
                                             <div class="fw-bold text-dark">{{ $user->name }}</div>
                                             <small class="text-muted">{{ $roleName }}</small>
-                                        </div>
-                                    </div>
+</div>
+</div>
                                 </td>
                                 <td>
                                     <span class="text-dark font-monospace small">{{ $user->email }}</span>
@@ -213,19 +213,19 @@
                                         <button class="btn table-action-btn" type="button" data-bs-toggle="dropdown"
                                             aria-expanded="false" title="Actions">
                                             <i class="bi bi-three-dots-vertical"></i>
-                                        </button>
+</button>
                                         <ul class="dropdown-menu dropdown-menu-end shadow-sm">
                                             <li>
                                                 <button class="dropdown-item reset-pwd-btn" type="button"
                                                     data-id="{{ $user->id }}" data-name="{{ $user->name }}">
                                                     <i class="bi bi-key-fill text-warning me-2"></i>Reset Password
-                                                </button>
+</button>
                                             </li>
                                             <li>
                                                 <button class="dropdown-item edit-user-btn" type="button"
                                                     data-id="{{ $user->id }}">
                                                     <i class="bi bi-pencil text-primary me-2"></i>Edit User
-                                                </button>
+</button>
                                             </li>
                                             @if($user->email !== 'owner@deiveni.com')
                                                 <li>
@@ -235,11 +235,11 @@
                                                     <button class="dropdown-item text-danger delete-user-btn" type="button"
                                                         data-id="{{ $user->id }}" data-name="{{ $user->name }}">
                                                         <i class="bi bi-trash3 text-danger me-2"></i>Delete User
-                                                    </button>
+</button>
                                                 </li>
                                             @endif
                                         </ul>
-                                    </div>
+</div>
                                 </td>
                             </tr>
                         @empty
@@ -250,10 +250,10 @@
                         @endforelse
                     </tbody>
                 </table>
-            </div>
-        </div>
+</div>
+</div>
 
-    </div>
+</div>
 
     <!-- Role Add / Edit Modal -->
     <div class="modal fade" id="roleModal" tabindex="-1" aria-hidden="true">
@@ -264,9 +264,9 @@
                         <h5 class="modal-title fw-bold" id="roleModalTitle">Create New Role & Assign Menus</h5>
                         <small class="text-muted">Enter role name and select the menus this role should have access
                             to.</small>
-                    </div>
+</div>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
+</div>
                 <div class="modal-body" style="overflow-y: auto; max-height: calc(85vh - 130px);">
                     <input type="hidden" id="roleEditId">
 
@@ -278,32 +278,31 @@
                             <input type="text" class="form-control" id="formRoleName" name="name"
                                 placeholder="e.g. Site Supervisor, Junior Accountant" required>
                             <div class="invalid-feedback" id="errRoleName"></div>
-                        </div>
+</div>
                         <div class="col-12 col-md-5">
                             <label class="form-label small fw-semibold" for="formRoleDescription">Description</label>
                             <input type="text" class="form-control" id="formRoleDescription" name="description"
                                 placeholder="Brief note on duties">
                             <div class="invalid-feedback" id="errRoleDescription"></div>
-                        </div>
-                    </div>
+</div>
+</div>
 
                     <!-- Menu Permissions Checkboxes -->
                     <div class="d-flex justify-content-between align-items-center mb-2 pb-2 border-bottom">
                         <h6 class="fw-bold mb-0 text-dark">
-                            <i class="bi bi-check2-square text-primary me-2"></i>Menu Access Permissions (மெனு
-                            அனுமதி தேர்வு)
-                        </h6>
+                            <i class="bi bi-check2-square text-primary me-2"></i>Menu Access Permissions 
+</h6>
                         <div class="d-flex gap-2">
                             <button type="button" class="btn btn-outline-secondary btn-sm py-0 px-2" id="selectAllMenusBtn"
                                 style="font-size: 0.78rem;">
                                 Select All
-                            </button>
+</button>
                             <button type="button" class="btn btn-outline-secondary btn-sm py-0 px-2"
                                 id="deselectAllMenusBtn" style="font-size: 0.78rem;">
                                 Deselect All
-                            </button>
-                        </div>
-                    </div>
+</button>
+</div>
+</div>
                     <div class="invalid-feedback d-block mb-2" id="errRoleMenus" style="display: none;"></div>
 
                     @foreach($menuSections as $sectionName => $sectionMenus)
@@ -311,13 +310,13 @@
                             <div class="d-flex justify-content-between align-items-center mb-2">
                                 <span class="fw-bold small text-uppercase text-secondary tracking-wide">
                                     <i class="bi bi-folder2-open me-1 text-primary"></i>{{ $sectionName }}
-                                </span>
+</span>
                                 <button type="button"
                                     class="btn btn-link btn-sm text-decoration-none p-0 toggle-section-btn text-muted"
                                     data-section="{{ Str::slug($sectionName) }}" style="font-size: 0.75rem;">
                                     Toggle Section
-                                </button>
-                            </div>
+</button>
+</div>
                             <div class="row g-2 section-checkbox-group" data-section="{{ Str::slug($sectionName) }}">
                                 @foreach($sectionMenus as $menuKey => $menu)
                                     <div class="col-12 col-sm-6 col-md-4">
@@ -334,31 +333,31 @@
                                                         <span class="badge bg-secondary-subtle text-secondary border ms-1"
                                                             style="font-size: 0.65rem;">Owner Only</span>
                                                     @endif
-                                                </span>
+</span>
                                                 @if(!empty($menu['name_ta']))
                                                     <span class="ta-text text-muted"
                                                         style="font-size: 0.72rem;">{{ $menu['name_ta'] }}</span>
                                                 @endif
-                                            </label>
-                                        </div>
-                                    </div>
+</label>
+</div>
+</div>
                                 @endforeach
-                            </div>
-                        </div>
+</div>
+</div>
                     @endforeach
 
-                </div>
+</div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-light btn-sm" data-bs-dismiss="modal">Cancel</button>
                     <button type="submit" class="btn btn-deiveni btn-sm" id="saveRoleSubmitBtn">
                         <span class="spinner-border spinner-border-sm me-1 d-none" id="saveRoleSpinner" role="status"
                             aria-hidden="true"></span>
                         <span id="saveRoleBtnText">Save Role</span>
-                    </button>
-                </div>
+</button>
+</div>
             </form>
-        </div>
-    </div>
+</div>
+</div>
 
     <!-- User Add / Edit Modal -->
     <div class="modal fade" id="userModal" tabindex="-1" aria-hidden="true">
@@ -368,9 +367,9 @@
                     <div>
                         <h5 class="modal-title fw-bold" id="userModalTitle">Add System User</h5>
                         <small class="text-muted">Create an account and assign a role.</small>
-                    </div>
+</div>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
+</div>
                 <form id="userForm" novalidate autocomplete="off">
                     <div class="modal-body">
                         <input type="hidden" id="userEditId">
@@ -381,23 +380,23 @@
                                 <input type="text" class="form-control" id="formUserName" name="name"
                                     placeholder="e.g. Ramesh Kumar" required>
                                 <div class="invalid-feedback" id="errUserName"></div>
-                            </div>
+</div>
                             <div class="col-12 col-md-6">
                                 <label class="form-label small fw-semibold" for="formUserEmail">Email Address <span
                                         class="text-danger">*</span></label>
                                 <input type="email" class="form-control" id="formUserEmail" name="email"
                                     placeholder="user@deiveni.com" required>
                                 <div class="invalid-feedback" id="errUserEmail"></div>
-                            </div>
+</div>
                             <div class="col-12 col-md-6">
                                 <label class="form-label small fw-semibold" for="formUserPhone">Phone Number <span
                                         class="text-danger">*</span></label>
                                 <input type="tel" class="form-control" id="formUserPhone" name="phone"
                                     placeholder="98400 00000" required>
                                 <div class="invalid-feedback" id="errUserPhone"></div>
-                            </div>
+</div>
                             <div class="col-12 col-md-6">
-                                <label class="form-label small fw-semibold" for="formUserRole">Assigned Role (பங்கு) <span
+                                <label class="form-label small fw-semibold" for="formUserRole">Assigned Role  <span
                                         class="text-danger">*</span></label>
                                 <select class="form-select" id="formUserRole" name="role_id" required>
                                     <option value="" disabled selected>-- Select Dynamic Role --</option>
@@ -406,7 +405,7 @@
                                     @endforeach
                                 </select>
                                 <div class="invalid-feedback" id="errUserRole"></div>
-                            </div>
+</div>
                             <div class="col-12 col-md-6">
                                 <label class="form-label small fw-semibold" for="formUserStatus">Account Status</label>
                                 <select class="form-select" id="formUserStatus" name="status">
@@ -414,7 +413,7 @@
                                     <option value="Inactive">Inactive</option>
                                 </select>
                                 <div class="invalid-feedback" id="errUserStatus"></div>
-                            </div>
+</div>
                             <div class="col-12" id="passwordFieldGroup">
                                 <label class="form-label small fw-semibold" for="formUserPassword">Password <span
                                         class="text-muted">(Default:
@@ -425,24 +424,24 @@
                                     <button class="btn btn-outline-secondary" type="button" id="toggleUserPasswordBtn"
                                         title="Show/Hide Password" tabindex="-1">
                                         <i class="bi bi-eye" id="toggleUserPasswordIcon"></i>
-                                    </button>
+</button>
                                     <div class="invalid-feedback" id="errUserPassword"></div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+</div>
+</div>
+</div>
+</div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-light btn-sm" data-bs-dismiss="modal">Cancel</button>
                         <button type="submit" class="btn btn-deiveni btn-sm" id="saveUserSubmitBtn">
                             <span class="spinner-border spinner-border-sm me-1 d-none" id="saveUserSpinner" role="status"
                                 aria-hidden="true"></span>
                             <span id="saveUserBtnText">Save User</span>
-                        </button>
-                    </div>
+</button>
+</div>
                 </form>
-            </div>
-        </div>
-    </div>
+</div>
+</div>
+</div>
 
     <!-- Password Reset Modal -->
     <div class="modal fade" id="passwordResetModal" tabindex="-1" aria-hidden="true">
@@ -451,7 +450,7 @@
                 <div class="modal-header">
                     <h6 class="modal-title fw-bold">Reset Password</h6>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
+</div>
                 <form id="passwordResetForm" novalidate autocomplete="off">
                     <input type="hidden" id="resetUserId">
                     <div class="modal-body">
@@ -465,11 +464,11 @@
                                 <button class="btn btn-outline-secondary" type="button" id="toggleResetPasswordBtn"
                                     title="Show/Hide Password" tabindex="-1">
                                     <i class="bi bi-eye" id="toggleResetPasswordIcon"></i>
-                                </button>
+</button>
                                 <div class="invalid-feedback" id="errResetPassword"></div>
-                            </div>
-                        </div>
-                    </div>
+</div>
+</div>
+</div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-light btn-sm" data-bs-dismiss="modal">Cancel</button>
                         <button type="submit" class="btn btn-warning btn-sm text-dark fw-semibold"
@@ -477,12 +476,12 @@
                             <span class="spinner-border spinner-border-sm me-1 d-none" id="resetPasswordSpinner"
                                 role="status" aria-hidden="true"></span>
                             <span id="resetPasswordBtnText">Reset Password</span>
-                        </button>
-                    </div>
+</button>
+</div>
                 </form>
-            </div>
-        </div>
-    </div>
+</div>
+</div>
+</div>
 @endsection
 
 @push('scripts')

@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('title', 'Site Cash Transaction Details')
-@section('page_title', 'Site Cash Transaction Details (தள ரொக்க பரிவர்த்தனை விவரம்)')
+@section('page_title', 'Site Cash Transaction Details ')
 
 @php
     $isInflow = in_array($transaction->transaction_type, ['Owner Advance', 'Advance Received', 'Client Advance', 'Client Collection'], true);
@@ -30,30 +30,30 @@
                         class="btn btn-outline-secondary btn-sm d-inline-flex align-items-center"
                         title="Back to Site Cash Book">
                         <i class="bi bi-arrow-left me-1"></i> Back to Site Cash
-                    </a>
+</a>
                     <div class="vr d-none d-md-block"></div>
                     <div>
                         <div class="d-flex align-items-center gap-2 flex-wrap">
                             <h5 class="fw-bold mb-0 text-dark">{{ $transaction->transaction_type }} ({{ $siteName }})</h5>
                             <span class="badge {{ $badgeClass }}">{{ $transaction->transaction_type }}</span>
-                        </div>
+</div>
                         <small class="text-muted">Transaction ID: <span
                                 class="font-monospace text-primary fw-semibold">#{{ $transaction->id }}</span> &bull;
                             <span>{{ $formattedDateTime }}</span></small>
-                    </div>
-                </div>
+</div>
+</div>
                 <div class="d-flex align-items-center gap-2">
                     <button type="button" class="btn btn-warning btn-sm d-inline-flex align-items-center shadow-sm"
                         data-bs-toggle="modal" data-bs-target="#editSiteCashModal">
-                        <i class="bi bi-pencil-square me-1"></i> Edit Entry (பதிவை திருத்து)
-                    </button>
+                        <i class="bi bi-pencil-square me-1"></i> Edit Entry 
+</button>
                     <button type="button" class="btn btn-outline-secondary btn-sm d-inline-flex align-items-center"
                         onclick="window.print()">
                         <i class="bi bi-printer me-1"></i> Print
-                    </button>
-                </div>
-            </div>
-        </div>
+</button>
+</div>
+</div>
+</div>
 
         <div id="detailContentBox">
             <div class="row g-3 mb-4">
@@ -62,15 +62,15 @@
                     <div class="card-custom p-3 bg-white h-100 border-start border-4 border-primary">
                         <div class="d-flex justify-content-between align-items-center">
                             <div>
-                                <span class="text-muted small fw-semibold d-block text-uppercase">Flow Type (வகை)</span>
+                                <span class="text-muted small fw-semibold d-block text-uppercase">Flow Type</span>
                                 <h6 class="fw-bold mb-0 text-dark mt-1">{{ $transaction->transaction_type }}</h6>
-                            </div>
+</div>
                             <div class="bg-primary-subtle text-primary p-2 rounded-3">
                                 <i class="bi bi-arrow-left-right fs-5"></i>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+</div>
+</div>
+</div>
+</div>
 
                 <!-- 2. Transaction Amount -->
                 <div class="col-12 col-sm-6 col-xl-3">
@@ -78,39 +78,39 @@
                         class="card-custom p-3 bg-white h-100 border-start border-4 {{ $isInflow ? 'border-success' : 'border-danger' }}">
                         <div class="d-flex justify-content-between align-items-center">
                             <div>
-                                <span class="text-muted small fw-semibold d-block text-uppercase">Amount (தொகை)</span>
+                                <span class="text-muted small fw-semibold d-block text-uppercase">Amount</span>
                                 <h5 class="fw-bold mb-0 {{ $isInflow ? 'text-success' : 'text-danger' }} mt-1">
                                     ₹{{ number_format((float) $transaction->amount, 2) }}
-                                </h5>
-                            </div>
+</h5>
+</div>
                             <div
                                 class="{{ $isInflow ? 'bg-success-subtle text-success' : 'bg-danger-subtle text-danger' }} p-2 rounded-3">
                                 <i class="bi bi-cash-stack fs-5"></i>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+</div>
+</div>
+</div>
+</div>
 
                 <!-- 3. Project Site -->
                 <div class="col-12 col-sm-6 col-xl-3">
                     <div class="card-custom p-3 bg-white h-100 border-start border-4 border-info">
                         <div class="d-flex justify-content-between align-items-center">
                             <div>
-                                <span class="text-muted small fw-semibold d-block text-uppercase">Project Site (தளம்)</span>
+                                <span class="text-muted small fw-semibold d-block text-uppercase">Project Site</span>
                                 <h6 class="fw-bold mb-0 text-dark mt-1 text-truncate" style="max-width: 170px;">
                                     {{ $siteName }}
-                                </h6>
+</h6>
                                 <button type="button" class="btn btn-link btn-sm p-0 text-decoration-none mt-1 small text-info fw-semibold"
                                     data-bs-toggle="modal" data-bs-target="#editSiteCashModal" title="Change Project Site">
-                                    <i class="bi bi-pencil-square me-1"></i>Change Site (மாற்ற)
-                                </button>
-                            </div>
+                                    <i class="bi bi-pencil-square me-1"></i>Change Site 
+</button>
+</div>
                             <div class="bg-info-subtle text-info p-2 rounded-3">
                                 <i class="bi bi-building fs-5"></i>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+</div>
+</div>
+</div>
+</div>
 
                 <!-- 4. Bill / Voucher No -->
                 <div class="col-12 col-sm-6 col-xl-3">
@@ -119,15 +119,15 @@
                             <div>
                                 <span class="text-muted small fw-semibold d-block text-uppercase">Bill / Voucher No</span>
                                 <h6 class="fw-bold font-monospace mb-0 text-dark mt-1">{{ $transaction->bill_no ?: 'None' }}
-                                </h6>
-                            </div>
+</h6>
+</div>
                             <div class="bg-light text-secondary p-2 rounded-3 border">
                                 <i class="bi bi-receipt fs-5"></i>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+</div>
+</div>
+</div>
+</div>
+</div>
 
             <div class="row g-4 mb-4">
                 <!-- Left Column: Full Details -->
@@ -135,12 +135,12 @@
                     <div class="card-custom p-4 bg-white h-100">
                         <div class="d-flex align-items-center justify-content-between border-bottom pb-3 mb-3">
                             <h6 class="fw-bold mb-0 text-dark">
-                                <i class="bi bi-card-text text-primary me-2"></i>Transaction Specifications (முழு விவரம்)
-                            </h6>
+                                <i class="bi bi-card-text text-primary me-2"></i>Transaction Specifications 
+</h6>
                             <span class="badge bg-light text-secondary border font-monospace small">
                                 {{ $transaction->bill_no ? 'REF: ' . $transaction->bill_no : 'ID: #' . $transaction->id }}
-                            </span>
-                        </div>
+</span>
+</div>
                         <div class="table-responsive">
                             <table class="table table-sm table-borderless align-middle mb-0">
                                 <tbody>
@@ -159,20 +159,20 @@
                                         <td class="fw-semibold text-dark py-2">
                                             <span class="badge bg-light text-dark border">
                                                 <i class="bi bi-person me-1 text-primary"></i>{{ $transaction->paid_to ?? 'Site Manager' }}
-                                            </span>
+</span>
                                         </td>
                                     </tr>
                                     @if ($transaction->paid_by)
                                         <tr>
-                                            <td class="text-muted small py-2">Paid By (வழங்கியவர்):</td>
+                                            <td class="text-muted small py-2">Paid By :</td>
                                             <td class="fw-semibold text-dark py-2">
                                                 <span class="badge bg-primary-subtle text-primary border border-primary-subtle">
                                                     <i class="bi bi-person-badge me-1"></i>{{ $transaction->paid_by }}
-                                                </span>
+</span>
                                                 @if ($transaction->wage_cash_source)
                                                     <span class="badge {{ $transaction->wage_cash_source === 'project_cash' ? 'bg-warning-subtle text-dark border border-warning-subtle' : 'bg-info-subtle text-info border border-info-subtle' }} ms-1">
-                                                        {{ $transaction->wage_cash_source === 'project_cash' ? 'Project Cash (திட்ட ரொக்கம்)' : 'Office Cash (அலுவலக ரொக்கம்)' }}
-                                                    </span>
+                                                        {{ $transaction->wage_cash_source === 'project_cash' ? 'Project Cash ' : 'Office Cash ' }}
+</span>
                                                 @endif
                                             </td>
                                         </tr>
@@ -182,23 +182,23 @@
                                         <td class="py-2">
                                             @if ($transaction->payment_mode === 'Cheque')
                                                 <span class="badge bg-warning-subtle text-dark border border-warning-subtle px-2 py-1">
-                                                    <i class="bi bi-card-text me-1"></i>Cheque (காசோலை)
-                                                </span>
+                                                    <i class="bi bi-card-text me-1"></i>Cheque 
+</span>
                                             @elseif ($transaction->payment_mode === 'UPI')
                                                 <span class="badge bg-info-subtle text-info border border-info-subtle px-2 py-1">
-                                                    <i class="bi bi-qr-code me-1"></i>UPI (யுபிஐ)
-                                                </span>
+                                                    <i class="bi bi-qr-code me-1"></i>UPI 
+</span>
                                             @else
                                                 <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1">
-                                                    <i class="bi bi-cash-stack me-1"></i>Cash (ரொக்கம்)
-                                                </span>
+                                                    <i class="bi bi-cash-stack me-1"></i>Cash 
+</span>
                                             @endif
                                         </td>
                                     </tr>
                                     @if ($transaction->payment_reference)
                                         <tr>
                                             <td class="text-muted small py-2">
-                                                {{ $transaction->payment_mode === 'Cheque' ? 'Cheque Number (காசோலை எண்):' : 'UPI Reference / UTR No:' }}
+                                                {{ $transaction->payment_mode === 'Cheque' ? 'Cheque Number :' : 'UPI Reference / UTR No:' }}
                                             </td>
                                             <td class="font-monospace text-primary fw-bold py-2">
                                                 {{ $transaction->payment_reference }}
@@ -207,7 +207,7 @@
                                     @endif
                                     @if ($transaction->bank_name)
                                         <tr>
-                                            <td class="text-muted small py-2">Bank Name (வங்கி பெயர்):</td>
+                                            <td class="text-muted small py-2">Bank Name :</td>
                                             <td class="fw-semibold text-dark py-2">
                                                 <i class="bi bi-bank me-1 text-primary"></i>{{ $transaction->bank_name }}
                                             </td>
@@ -244,7 +244,7 @@
                                                 <a href="{{ route('sites.show', $transaction->projectSite?->encrypted_id ?? \App\Services\IdCipherService::encrypt($transaction->project_site_id)) }}"
                                                     class="text-primary text-decoration-none">
                                                     {{ $siteName }}
-                                                </a>
+</a>
                                             @else
                                                 {{ $siteName }}
                                             @endif
@@ -265,21 +265,21 @@
                                     </tr>
                                     @if ($transaction->transaction_type === 'Supplier Payment')
                                         <tr>
-                                            <td class="text-muted small py-2">Payment Basis (பட்டுவாடா வகை):</td>
+                                            <td class="text-muted small py-2">Payment Basis :</td>
                                             <td class="fw-semibold py-2">
                                                 @if ($transaction->is_site_based)
                                                     <span class="badge bg-primary-subtle text-primary border border-primary-subtle">
-                                                        <i class="bi bi-building me-1"></i>Site Based (தள வாரியாக)
-                                                    </span>
+                                                        <i class="bi bi-building me-1"></i>Site Based 
+</span>
                                                 @else
                                                     <span class="badge bg-success-subtle text-success border border-success-subtle">
-                                                        <i class="bi bi-cash-stack me-1"></i>Total Supplier Payment (சப்ளையர் மொத்த பட்டுவாடா)
-                                                    </span>
+                                                        <i class="bi bi-cash-stack me-1"></i>Total Supplier Payment 
+</span>
                                                 @endif
                                                 @if ($transaction->purchase_order_no)
                                                     <span class="badge bg-light text-dark border ms-1 font-monospace">
                                                         PO: {{ $transaction->purchase_order_no }}
-                                                    </span>
+</span>
                                                 @endif
                                             </td>
                                         </tr>
@@ -309,7 +309,7 @@
                                     </tr>
                                 </tbody>
                             </table>
-                        </div>
+</div>
                         @php
                             $linkedTransfer = $transaction->cashTransfer ?? ($transaction->cash_transfer_id ? \App\Models\CashTransfer::find($transaction->cash_transfer_id) : null);
                             if (! $linkedTransfer && $transaction->bill_no && (str_starts_with($transaction->bill_no, 'XFER-') || str_starts_with($transaction->bill_no, 'CTR-'))) {
@@ -326,86 +326,86 @@
                                         <div class="d-flex align-items-center gap-2">
                                             <i class="bi bi-arrow-left-right text-primary fs-5"></i>
                                             <strong class="text-primary small text-uppercase">
-                                                Connected Cash Transfer Details (பணப் பரிமாற்ற இணைப்பு விவரம்)
-                                            </strong>
-                                        </div>
+                                                Connected Cash Transfer Details 
+</strong>
+</div>
                                         <div class="d-flex align-items-center gap-2">
                                             <span class="badge {{ $linkedTransfer->directionBadgeClass() }} border" style="font-size: 0.75rem;">
                                                 <i class="bi {{ $linkedTransfer->directionIcon() }} me-1"></i>{{ $linkedTransfer->directionLabel() }}
-                                            </span>
+</span>
                                             <span class="badge {{ $linkedTransfer->settlementBadgeClass() }} border" style="font-size: 0.75rem;">
                                                 {{ $linkedTransfer->settlementLabel() }}
-                                            </span>
-                                        </div>
-                                    </div>
+</span>
+</div>
+</div>
                                     <div class="card-body p-3">
                                         <!-- Purpose Callout -->
                                         <div class="p-3 mb-3 rounded-3 bg-light border-start border-4 border-primary">
                                             <div class="text-muted small fw-semibold text-uppercase mb-1">
-                                                <i class="bi bi-chat-left-quote text-primary me-1"></i>காரணம் / Purpose of Transfer:
-                                            </div>
+                                                <i class="bi bi-chat-left-quote text-primary me-1"></i>Purpose of Transfer:
+</div>
                                             <h6 class="fw-bold text-dark mb-0">
                                                 {{ $linkedTransfer->purpose ?: 'General site expenses / Office requirements' }}
-                                            </h6>
-                                        </div>
+</h6>
+</div>
 
                                         <div class="row g-3 small">
                                             <div class="col-12 col-sm-6 col-md-3">
                                                 <span class="text-muted d-block">Transfer Ref:</span>
                                                 <strong class="font-monospace text-primary">#CTR-{{ $linkedTransfer->id }}</strong>
-                                            </div>
+</div>
                                             <div class="col-12 col-sm-6 col-md-3">
                                                 <span class="text-muted d-block">Transfer Amount:</span>
                                                 <strong class="text-dark">₹{{ number_format((float) $linkedTransfer->amount, 2) }}</strong>
-                                            </div>
+</div>
                                             <div class="col-12 col-sm-6 col-md-3">
                                                 <span class="text-muted d-block">Handed Over By:</span>
                                                 <strong class="text-dark">{{ $linkedTransfer->handed_over_by ?: '—' }}</strong>
-                                            </div>
+</div>
                                             <div class="col-12 col-sm-6 col-md-3">
                                                 <span class="text-muted d-block">Received By:</span>
                                                 <strong class="text-dark">{{ $linkedTransfer->received_by ?: '—' }}</strong>
-                                            </div>
+</div>
                                             <div class="col-12 col-sm-6 col-md-3">
                                                 <span class="text-muted d-block">Transfer Date:</span>
                                                 <span class="text-dark">{{ $linkedTransfer->transfer_date ? $linkedTransfer->transfer_date->format('d M Y') : '—' }} ({{ $linkedTransfer->transfer_time ?: 'N/A' }})</span>
-                                            </div>
+</div>
                                             <div class="col-12 col-sm-6 col-md-3">
                                                 <span class="text-muted d-block">Payment Mode:</span>
                                                 <span class="badge bg-light text-dark border">{{ $linkedTransfer->payment_mode ?: 'Cash' }}</span>
-                                            </div>
+</div>
                                             <div class="col-12 col-sm-6 col-md-3">
                                                 <span class="text-muted d-block">Expected Return Date:</span>
                                                 <span class="text-dark">{{ $linkedTransfer->expected_return_date ? $linkedTransfer->expected_return_date->format('d M Y') : 'N/A' }}</span>
-                                            </div>
+</div>
                                             <div class="col-12 col-sm-6 col-md-3">
                                                 <span class="text-muted d-block">Linked Daily Ledger:</span>
                                                 @if ($linkedTransfer->ledger_id)
                                                     <a href="{{ route('ledger.index') }}?search=CTR-{{ $linkedTransfer->id }}" class="text-decoration-none fw-semibold">
                                                         <i class="bi bi-book-half me-1"></i>Ledger #{{ $linkedTransfer->ledger_id }}
-                                                    </a>
+</a>
                                                 @else
                                                     <span class="text-muted">Direct Sync</span>
                                                 @endif
-                                            </div>
-                                        </div>
+</div>
+</div>
 
                                         @if ($linkedTransfer->settlement_notes)
                                             <div class="mt-2 pt-2 border-top small text-muted">
                                                 <strong>Settlement Notes:</strong> {{ $linkedTransfer->settlement_notes }}
-                                            </div>
+</div>
                                         @endif
-                                    </div>
+</div>
                                     <div class="card-footer bg-white py-2 px-3 border-top d-flex justify-content-between align-items-center">
                                         <small class="text-muted">
                                             <i class="bi bi-info-circle me-1"></i>Connected via Cash Transfer Module & Daily Ledger.
-                                        </small>
+</small>
                                         <a href="{{ route('cash-transfer.index') }}?search={{ $linkedTransfer->id }}" class="btn btn-outline-primary btn-sm py-0 px-2" style="font-size: 0.78rem;">
                                             <i class="bi bi-box-arrow-up-right me-1"></i>Open in Cash Transfer Module
-                                        </a>
-                                    </div>
-                                </div>
-                            </div>
+</a>
+</div>
+</div>
+</div>
                         @endif
 
                         @php
@@ -425,86 +425,86 @@
                                         <div class="d-flex align-items-center gap-2">
                                             <i class="bi bi-arrow-left-right text-primary fs-5"></i>
                                             <strong class="text-primary small text-uppercase">
-                                                Connected Cash Transfer Details (பணப் பரிமாற்ற இணைப்பு விவரம்)
-                                            </strong>
-                                        </div>
+                                                Connected Cash Transfer Details 
+</strong>
+</div>
                                         <div class="d-flex align-items-center gap-2">
                                             <span class="badge {{ $linkedTransfer->directionBadgeClass() }} border" style="font-size: 0.75rem;">
                                                 <i class="bi {{ $linkedTransfer->directionIcon() }} me-1"></i>{{ $linkedTransfer->directionLabel() }}
-                                            </span>
+</span>
                                             <span class="badge {{ $linkedTransfer->settlementBadgeClass() }} border" style="font-size: 0.75rem;">
                                                 {{ $linkedTransfer->settlementLabel() }}
-                                            </span>
-                                        </div>
-                                    </div>
+</span>
+</div>
+</div>
                                     <div class="card-body p-3">
                                         <!-- Purpose Callout -->
                                         <div class="p-3 mb-3 rounded-3 bg-light border-start border-4 border-primary">
                                             <div class="text-muted small fw-semibold text-uppercase mb-1">
-                                                <i class="bi bi-chat-left-quote text-primary me-1"></i>காரணம் / Purpose of Transfer:
-                                            </div>
+                                                <i class="bi bi-chat-left-quote text-primary me-1"></i>Purpose of Transfer:
+</div>
                                             <h6 class="fw-bold text-dark mb-0">
                                                 {{ $linkedTransfer->purpose ?: 'General site expenses / Office requirements' }}
-                                            </h6>
-                                        </div>
+</h6>
+</div>
 
                                         <div class="row g-3 small">
                                             <div class="col-12 col-sm-6 col-md-3">
                                                 <span class="text-muted d-block">Transfer Ref:</span>
                                                 <strong class="font-monospace text-primary">#CTR-{{ $linkedTransfer->id }}</strong>
-                                            </div>
+</div>
                                             <div class="col-12 col-sm-6 col-md-3">
                                                 <span class="text-muted d-block">Transfer Amount:</span>
                                                 <strong class="text-dark">₹{{ number_format((float) $linkedTransfer->amount, 2) }}</strong>
-                                            </div>
+</div>
                                             <div class="col-12 col-sm-6 col-md-3">
                                                 <span class="text-muted d-block">Handed Over By:</span>
                                                 <strong class="text-dark">{{ $linkedTransfer->handed_over_by ?: '—' }}</strong>
-                                            </div>
+</div>
                                             <div class="col-12 col-sm-6 col-md-3">
                                                 <span class="text-muted d-block">Received By:</span>
                                                 <strong class="text-dark">{{ $linkedTransfer->received_by ?: '—' }}</strong>
-                                            </div>
+</div>
                                             <div class="col-12 col-sm-6 col-md-3">
                                                 <span class="text-muted d-block">Transfer Date:</span>
                                                 <span class="text-dark">{{ $linkedTransfer->transfer_date ? $linkedTransfer->transfer_date->format('d M Y') : '—' }} ({{ $linkedTransfer->transfer_time ?: 'N/A' }})</span>
-                                            </div>
+</div>
                                             <div class="col-12 col-sm-6 col-md-3">
                                                 <span class="text-muted d-block">Payment Mode:</span>
                                                 <span class="badge bg-light text-dark border">{{ $linkedTransfer->payment_mode ?: 'Cash' }}</span>
-                                            </div>
+</div>
                                             <div class="col-12 col-sm-6 col-md-3">
                                                 <span class="text-muted d-block">Expected Return Date:</span>
                                                 <span class="text-dark">{{ $linkedTransfer->expected_return_date ? $linkedTransfer->expected_return_date->format('d M Y') : 'N/A' }}</span>
-                                            </div>
+</div>
                                             <div class="col-12 col-sm-6 col-md-3">
                                                 <span class="text-muted d-block">Linked Daily Ledger:</span>
                                                 @if ($linkedTransfer->ledger_id)
                                                     <a href="{{ route('ledger.index') }}?search=CTR-{{ $linkedTransfer->id }}" class="text-decoration-none fw-semibold">
                                                         <i class="bi bi-book-half me-1"></i>Ledger #{{ $linkedTransfer->ledger_id }}
-                                                    </a>
+</a>
                                                 @else
                                                     <span class="text-muted">Direct Sync</span>
                                                 @endif
-                                            </div>
-                                        </div>
+</div>
+</div>
 
                                         @if ($linkedTransfer->settlement_notes)
                                             <div class="mt-2 pt-2 border-top small text-muted">
                                                 <strong>Settlement Notes:</strong> {{ $linkedTransfer->settlement_notes }}
-                                            </div>
+</div>
                                         @endif
-                                    </div>
+</div>
                                     <div class="card-footer bg-white py-2 px-3 border-top d-flex justify-content-between align-items-center">
                                         <small class="text-muted">
                                             <i class="bi bi-info-circle me-1"></i>Connected via Cash Transfer Module & Daily Ledger.
-                                        </small>
+</small>
                                         <a href="{{ route('cash-transfer.index') }}?search={{ $linkedTransfer->id }}" class="btn btn-outline-primary btn-sm py-0 px-2" style="font-size: 0.78rem;">
                                             <i class="bi bi-box-arrow-up-right me-1"></i>Open in Cash Transfer Module
-                                        </a>
-                                    </div>
-                                </div>
-                            </div>
+</a>
+</div>
+</div>
+</div>
                         @endif
 
                         <!-- Material / Worker Items Breakdown -->
@@ -515,17 +515,17 @@
                             <div id="itemsSection" class="mt-4 pt-3 border-top">
                                 <h6 class="fw-bold text-dark mb-2">
                                     @if ($isWageTxn)
-                                        <i class="bi bi-people-fill text-primary me-2"></i>Worker Details Breakdown (தொழிலாளர்கள் விவரம்)
+                                        <i class="bi bi-people-fill text-primary me-2"></i>Worker Details Breakdown 
                                     @else
-                                        <i class="bi bi-boxes text-primary me-2"></i>Material Items Breakdown (பொருட்கள் பட்டியல்)
+                                        <i class="bi bi-boxes text-primary me-2"></i>Material Items Breakdown 
                                     @endif
-                                </h6>
+</h6>
                                 <div class="table-responsive">
                                     <table class="table table-sm table-bordered align-middle small mb-0">
                                         <thead class="table-light">
                                             <tr>
                                                 <th style="width: 40px;">#</th>
-                                                <th>{{ $isWageTxn ? 'Worker Category (தொழிலாளர் பிரிவு)' : 'Material (பொருள்)' }}</th>
+                                                <th>{{ $isWageTxn ? 'Worker Category ' : 'Material ' }}</th>
                                                 <th class="text-center" style="width: 80px;">{{ $isWageTxn ? 'Workers' : 'Qty' }}</th>
                                                 <th class="text-center" style="width: 90px;">Unit</th>
                                                 <th class="text-end" style="width: 120px;">{{ $isWageTxn ? 'Daily Wage (₹)' : 'Rate (₹)' }}</th>
@@ -548,27 +548,26 @@
                                             @endforeach
                                         </tbody>
                                     </table>
-                                </div>
-                            </div>
+</div>
+</div>
                         @endif
-                    </div>
-                </div>
+</div>
+</div>
 
                 <!-- Right Column: Receipt / Voucher Image Section -->
                 <div class="col-12 col-lg-5">
                     <div class="card-custom p-4 bg-white h-100">
                         <div class="d-flex align-items-center justify-content-between border-bottom pb-3 mb-3">
                             <h6 class="fw-bold mb-0 text-dark">
-                                <i class="bi bi-image text-primary me-2"></i>Attached Receipt / Bill Image (ரசீது
-                                புகைப்படம்)
-                            </h6>
+                                <i class="bi bi-image text-primary me-2"></i>Attached Receipt / Bill Image 
+</h6>
                             @if ($transaction->receipt_image)
                                 <span class="badge bg-success-subtle text-success border border-success-subtle">Receipt
                                     Attached</span>
                             @else
                                 <span class="badge bg-secondary-subtle text-muted">Not Attached</span>
                             @endif
-                        </div>
+</div>
 
                         @if ($transaction->receipt_image)
                             <div>
@@ -578,34 +577,34 @@
                                         <img src="{{ asset($transaction->receipt_image) }}" alt="Receipt Image"
                                             class="img-fluid rounded border shadow-sm"
                                             style="max-height: 280px; object-fit: contain; cursor: zoom-in;">
-                                    </a>
-                                </div>
+</a>
+</div>
                                 <div class="d-flex gap-2 justify-content-center">
                                     <button type="button" class="btn btn-outline-primary btn-sm" data-bs-toggle="modal"
                                         data-bs-target="#receiptZoomModal">
                                         <i class="bi bi-arrows-fullscreen me-1"></i> Full Size View
-                                    </button>
+</button>
                                     <a href="{{ asset($transaction->receipt_image) }}"
                                         download="cash_receipt_{{ $transaction->id }}.png"
                                         class="btn btn-outline-secondary btn-sm">
                                         <i class="bi bi-download me-1"></i> Download Image
-                                    </a>
-                                </div>
-                            </div>
+</a>
+</div>
+</div>
                         @else
                             <div class="p-5 text-center text-muted border border-dashed rounded-3 bg-light">
                                 <i class="bi bi-image text-secondary fs-1 d-block mb-2"></i>
                                 <h6 class="fw-semibold text-dark mb-1">No Receipt Image Uploaded</h6>
                                 <small class="text-muted">No bill photo or cash voucher was attached when recording this
                                     transaction.</small>
-                            </div>
+</div>
                         @endif
-                    </div>
-                </div>
-            </div>
-        </div>
+</div>
+</div>
+</div>
+</div>
 
-    </div>
+</div>
 
     @if ($transaction->receipt_image)
         <!-- Full Size Receipt Image Modal -->
@@ -615,23 +614,23 @@
                     <div class="modal-header">
                         <h6 class="modal-title fw-bold">
                             <i class="bi bi-receipt text-primary me-2"></i>Attached Receipt / Bill Document
-                        </h6>
+</h6>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
+</div>
                     <div class="modal-body text-center p-3 bg-light">
                         <img src="{{ asset($transaction->receipt_image) }}" alt="Full Receipt"
                             class="img-fluid rounded shadow border" style="max-height: 80vh;">
-                    </div>
+</div>
                     <div class="modal-footer">
                         <a href="{{ asset($transaction->receipt_image) }}" download="cash_receipt_{{ $transaction->id }}.png"
                             class="btn btn-primary btn-sm">
                             <i class="bi bi-download me-1"></i> Download
-                        </a>
+</a>
                         <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
-                    </div>
-                </div>
-            </div>
-        </div>
+</div>
+</div>
+</div>
+</div>
     @endif
 
     <!-- Edit Site Cash Transaction Modal -->
@@ -640,10 +639,10 @@
             <div class="modal-content shadow border-0">
                 <div class="modal-header bg-light">
                     <h6 class="modal-title fw-bold" id="editSiteCashModalLabel">
-                        <i class="bi bi-pencil-square text-warning me-2"></i>Edit Site Cash Transaction (தள ரொக்க பதிவை திருத்து)
-                    </h6>
+                        <i class="bi bi-pencil-square text-warning me-2"></i>Edit Site Cash Transaction 
+</h6>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
+</div>
                 <form id="editSiteCashForm" enctype="multipart/form-data">
                     @csrf
                     <div class="modal-body p-4">
@@ -653,56 +652,56 @@
                             <!-- Project Site Dropdown -->
                             <div class="col-12 col-md-6">
                                 <label class="form-label fw-semibold small text-dark">
-                                    Project Site (திட்ட தளம்) <span class="text-danger">*</span>
-                                </label>
+                                    Project Site  <span class="text-danger">*</span>
+</label>
                                 <select class="form-select form-select-sm" name="project_site_id" id="edit_project_site_id" required>
                                     <option value="">-- Select Project Site --</option>
                                     @if(isset($sites))
                                         @foreach($sites as $site)
                                             <option value="{{ $site->id }}" {{ $transaction->project_site_id == $site->id ? 'selected' : '' }}>
                                                 {{ $site->name }} ({{ $site->location ?? 'Site' }})
-                                            </option>
+</option>
                                         @endforeach
                                     @endif
                                 </select>
                                 <div class="form-text small text-muted">
-                                    Wrong site-ல் entry போடப்பட்டிருந்தால் இங்கிருந்து சரியான தளத்தை மாற்றிக்கொள்ளலாம்.
-                                </div>
-                            </div>
+                                    If recorded under the wrong site, you can change to the correct site here.
+</div>
+</div>
 
                             <!-- Transaction Type Dropdown -->
                             <div class="col-12 col-md-6">
                                 <label class="form-label fw-semibold small text-dark">
-                                    Transaction Type (பரிவர்த்தனை வகை) <span class="text-danger">*</span>
-                                </label>
+                                    Transaction Type  <span class="text-danger">*</span>
+</label>
                                 <select class="form-select form-select-sm" name="transaction_type" id="edit_transaction_type" required>
-                                    <optgroup label="Expense (செலவு)">
-                                        <option value="Material Purchase" {{ $transaction->transaction_type === 'Material Purchase' ? 'selected' : '' }}>Material Purchase (பொருள் கொள்முதல்)</option>
-                                        <option value="Supplier Payment" {{ $transaction->transaction_type === 'Supplier Payment' ? 'selected' : '' }}>Supplier Payment (சப்ளையர் பட்டுவாடா)</option>
-                                        <option value="Daily Wage Payment" {{ $transaction->transaction_type === 'Daily Wage Payment' ? 'selected' : '' }}>Daily Wage Payment (தினக்கூலி பட்டுவாடா)</option>
-                                        <option value="Tool Rental" {{ $transaction->transaction_type === 'Tool Rental' ? 'selected' : '' }}>Tool Rental (உபகரண வாடகை)</option>
-                                        <option value="Other Expense" {{ $transaction->transaction_type === 'Other Expense' ? 'selected' : '' }}>Other Expense (இதர செலவு)</option>
-                                        <option value="Balance Returned" {{ $transaction->transaction_type === 'Balance Returned' ? 'selected' : '' }}>Balance Returned (மீத ரொக்கம் திரும்ப ஒப்படைப்பு)</option>
+                                    <optgroup label="Expense ">
+                                        <option value="Material Purchase" {{ $transaction->transaction_type === 'Material Purchase' ? 'selected' : '' }}>Material Purchase</option>
+                                        <option value="Supplier Payment" {{ $transaction->transaction_type === 'Supplier Payment' ? 'selected' : '' }}>Supplier Payment</option>
+                                        <option value="Daily Wage Payment" {{ $transaction->transaction_type === 'Daily Wage Payment' ? 'selected' : '' }}>Daily Wage Payment</option>
+                                        <option value="Tool Rental" {{ $transaction->transaction_type === 'Tool Rental' ? 'selected' : '' }}>Tool Rental</option>
+                                        <option value="Other Expense" {{ $transaction->transaction_type === 'Other Expense' ? 'selected' : '' }}>Other Expense</option>
+                                        <option value="Balance Returned" {{ $transaction->transaction_type === 'Balance Returned' ? 'selected' : '' }}>Balance Returned</option>
                                     </optgroup>
-                                    <optgroup label="Inflow (வரவு)">
-                                        <option value="Owner Advance" {{ $transaction->transaction_type === 'Owner Advance' ? 'selected' : '' }}>Owner Advance (உரிமையாளர் முன்பணம்)</option>
-                                        <option value="Advance Received" {{ $transaction->transaction_type === 'Advance Received' ? 'selected' : '' }}>Advance Received (முன்பணம் வரவு)</option>
-                                        <option value="Client Advance" {{ $transaction->transaction_type === 'Client Advance' ? 'selected' : '' }}>Client Advance (கிளையண்ட் அட்வான்ஸ்)</option>
-                                        <option value="Client Collection" {{ $transaction->transaction_type === 'Client Collection' ? 'selected' : '' }}>Client Collection (கிளையண்ட் வரவு)</option>
+                                    <optgroup label="Inflow ">
+                                        <option value="Owner Advance" {{ $transaction->transaction_type === 'Owner Advance' ? 'selected' : '' }}>Owner Advance</option>
+                                        <option value="Advance Received" {{ $transaction->transaction_type === 'Advance Received' ? 'selected' : '' }}>Advance Received</option>
+                                        <option value="Client Advance" {{ $transaction->transaction_type === 'Client Advance' ? 'selected' : '' }}>Client Advance</option>
+                                        <option value="Client Collection" {{ $transaction->transaction_type === 'Client Collection' ? 'selected' : '' }}>Client Collection</option>
                                     </optgroup>
                                 </select>
-                            </div>
+</div>
 
                             <!-- Amount -->
                             <div class="col-12 col-md-6">
                                 <label class="form-label fw-semibold small text-dark d-flex justify-content-between align-items-center">
-                                    <span>Amount (தொகை ₹) <span class="text-danger">*</span></span>
+                                    <span>Amount  <span class="text-danger">*</span></span>
                                     @if ($transaction->isFromAccountManager())
                                         <span class="badge bg-warning-subtle text-dark border border-warning-subtle" style="font-size: 0.72rem;">
                                             <i class="bi bi-lock-fill me-1"></i>From Account Manager (Read-Only)
-                                        </span>
+</span>
                                     @endif
-                                </label>
+</label>
                                 <div class="input-group input-group-sm">
                                     <span class="input-group-text fw-bold">₹</span>
                                     <input type="number" step="0.01" min="0.01" class="form-control {{ $transaction->isFromAccountManager() ? 'bg-light text-muted' : '' }}" 
@@ -713,104 +712,104 @@
                                     @if ($transaction->isFromAccountManager())
                                         <span class="input-group-text bg-light text-warning" title="Amount is locked because it came from Account Manager">
                                             <i class="bi bi-lock-fill"></i>
-                                        </span>
+</span>
                                     @endif
-                                </div>
+</div>
                                 @if ($transaction->isFromAccountManager())
                                     <div class="form-text small text-danger mt-1">
-                                        <i class="bi bi-shield-lock me-1"></i>இந்தத் தொகை Account Manager / Accountant-ஆல் வழங்கப்பட்டது என்பதால் தொகையை மாற்ற முடியாது (Read-Only). தளம், தேதி அல்லது குறிப்புகளை மட்டுமே திருத்த முடியும்.
-                                    </div>
+                                        <i class="bi bi-shield-lock me-1"></i>This amount was issued by the Account Manager / Accountant and cannot be modified (Read-Only). Only site, date, or notes can be edited.
+</div>
                                 @endif
-                            </div>
+</div>
 
                             <!-- Payment Date -->
                             <div class="col-12 col-md-6">
                                 <label class="form-label fw-semibold small text-dark">
-                                    Payment Date (தேதி) <span class="text-danger">*</span>
-                                </label>
+                                    Payment Date  <span class="text-danger">*</span>
+</label>
                                 <input type="date" class="form-control form-control-sm" name="payment_date" id="edit_payment_date"
                                     value="{{ \Carbon\Carbon::parse($transaction->payment_date)->format('Y-m-d') }}" required>
-                            </div>
+</div>
 
                             <!-- Payment Mode -->
                             <div class="col-12 col-md-4">
                                 <label class="form-label fw-semibold small text-dark">
-                                    Payment Mode (கட்டண முறை)
-                                </label>
+                                    Payment Mode 
+</label>
                                 <select class="form-select form-select-sm" name="payment_mode" id="edit_payment_mode">
-                                    <option value="Cash" {{ ($transaction->payment_mode ?? 'Cash') === 'Cash' ? 'selected' : '' }}>Cash (ரொக்கம்)</option>
-                                    <option value="Cheque" {{ ($transaction->payment_mode ?? '') === 'Cheque' ? 'selected' : '' }}>Cheque (காசோலை)</option>
+                                    <option value="Cash" {{ ($transaction->payment_mode ?? 'Cash') === 'Cash' ? 'selected' : '' }}>Cash</option>
+                                    <option value="Cheque" {{ ($transaction->payment_mode ?? '') === 'Cheque' ? 'selected' : '' }}>Cheque</option>
                                     <option value="UPI" {{ ($transaction->payment_mode ?? '') === 'UPI' ? 'selected' : '' }}>UPI / Online Transfer</option>
                                 </select>
-                            </div>
+</div>
 
                             <!-- Payment Reference (UTR / Cheque No) -->
                             <div class="col-12 col-md-4">
                                 <label class="form-label fw-semibold small text-dark">
                                     Ref / Cheque / UTR No
-                                </label>
+</label>
                                 <input type="text" class="form-control form-control-sm" name="payment_reference" id="edit_payment_reference"
                                     value="{{ $transaction->payment_reference ?? '' }}" placeholder="Cheque / UTR / Txn No">
-                            </div>
+</div>
 
                             <!-- Bill / Voucher No -->
                             <div class="col-12 col-md-4">
                                 <label class="form-label fw-semibold small text-dark">
-                                    Bill / Voucher No (ரசீது எண்)
-                                </label>
+                                    Bill / Voucher No 
+</label>
                                 <input type="text" class="form-control form-control-sm" name="bill_no" id="edit_bill_no"
                                     value="{{ $transaction->bill_no ?? '' }}" placeholder="e.g. VCH-0012">
-                            </div>
+</div>
 
                             <!-- Paid To / Receiver Name -->
                             <div class="col-12 col-md-6">
                                 <label class="form-label fw-semibold small text-dark">
-                                    Paid To / Receiver Name (பெறுபவர் பெயர்)
-                                </label>
+                                    Paid To / Receiver Name 
+</label>
                                 <input type="text" class="form-control form-control-sm" name="receiver_name" id="edit_receiver_name"
                                     value="{{ $transaction->receiver_name ?: $transaction->paid_to }}" placeholder="e.g. Electrician Kumar / Driver">
-                            </div>
+</div>
 
                             <!-- Paid By / Issuer -->
                             <div class="col-12 col-md-6">
                                 <label class="form-label fw-semibold small text-dark">
-                                    Paid By (வழங்கியவர்)
-                                </label>
+                                    Paid By 
+</label>
                                 <input type="text" class="form-control form-control-sm {{ $transaction->isFromAccountManager() ? 'bg-light' : '' }}" name="paid_by" id="edit_paid_by"
                                     value="{{ $transaction->paid_by ?? '' }}" placeholder="e.g. Site Manager" {{ $transaction->isFromAccountManager() ? 'readonly tabindex=-1' : '' }}>
-                            </div>
+</div>
 
                             <!-- Description / Remarks -->
                             <div class="col-12">
                                 <label class="form-label fw-semibold small text-dark">
-                                    Description / Remarks (குறிப்புகள்)
-                                </label>
+                                    Description / Remarks 
+</label>
                                 <textarea class="form-control form-control-sm" name="description" id="edit_description" rows="3"
                                     placeholder="Enter details or reasons for adjustment...">{{ $transaction->description ?? '' }}</textarea>
-                            </div>
+</div>
 
                             <!-- Receipt Image Replacement -->
                             <div class="col-12">
                                 <label class="form-label fw-semibold small text-dark">
-                                    Update Receipt Image (ரசீது படம் மாற்ற)
-                                </label>
+                                    Update Receipt Image 
+</label>
                                 <input type="file" class="form-control form-control-sm" name="receipt_image" id="edit_receipt_image" accept="image/*">
                                 <div class="form-text small text-muted">
                                     Leave blank to keep existing receipt image. Allowed formats: PNG, JPG, JPEG, WEBP (Max 5MB).
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+</div>
+</div>
+</div>
+</div>
                     <div class="modal-footer bg-light">
-                        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel (ரத்து)</button>
+                        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
                         <button type="submit" class="btn btn-primary btn-sm d-inline-flex align-items-center" id="saveEditBtn">
-                            <i class="bi bi-check-circle me-1"></i> Save Changes (சேமிக்கவும்)
-                        </button>
-                    </div>
+                            <i class="bi bi-check-circle me-1"></i> Save Changes 
+</button>
+</div>
                 </form>
-            </div>
-        </div>
-    </div>
+</div>
+</div>
+</div>
 @endsection
 
 @push('scripts')

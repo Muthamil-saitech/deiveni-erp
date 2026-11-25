@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('title', 'Warehouse Store')
-@section('page_title', 'Warehouse Store & Tools (கிடங்கு & உபகரணங்கள்)')
+@section('page_title', 'Warehouse Store & Tools ')
 
 @push('styles')
     <style>
@@ -51,19 +51,19 @@
         <div class="card-custom p-3 mb-4 bg-white">
             <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
                 <div>
-                    <h5 class="fw-bold mb-0 text-dark">Owner Central Store & Tool Inventory (மைய கிடங்கு இருப்பு)</h5>
-                </div>
+                    <h5 class="fw-bold mb-0 text-dark">Owner Central Store & Tool Inventory</h5>
+</div>
                 <div class="d-flex gap-2">
                     <button class="btn btn-outline-secondary btn-sm" id="exportWarehouseBtn">
                         <i class="bi bi-file-earmark-spreadsheet me-1"></i> Export Inventory
-                    </button>
+</button>
                     <button class="btn btn-deiveni btn-sm" data-bs-toggle="modal" data-bs-target="#warehouseItemModal"
                         id="addNewItemBtn">
                         <i class="bi bi-plus-circle-fill me-1"></i> Add Inventory Item
-                    </button>
-                </div>
-            </div>
-        </div>
+</button>
+</div>
+</div>
+</div>
 
         <!-- Inventory KPI Summary Cards -->
         <div class="row g-3 mb-4">
@@ -72,47 +72,47 @@
                     <div class="d-flex justify-content-between align-items-start mb-1">
                         <span class="text-muted small fw-semibold">Total Catalog Items</span>
                         <i class="bi bi-boxes text-primary fs-5"></i>
-                    </div>
+</div>
                     <h4 class="fw-bold text-primary mb-0" id="statTotalItems">{{ $stats['total_items'] ?? count($items) }}
                         Items</h4>
                     <small class="text-muted" style="font-size:0.75rem;">Materials & Tools</small>
-                </div>
-            </div>
+</div>
+</div>
 
             <div class="col-6 col-md-3">
                 <div class="card-stat h-100 bg-white">
                     <div class="d-flex justify-content-between align-items-start mb-1">
                         <span class="text-muted small fw-semibold">Total Stock Valuation</span>
                         <i class="bi bi-currency-rupee text-success fs-5"></i>
-                    </div>
+</div>
                     <h4 class="fw-bold text-success mb-0">₹{{ number_format($stats['total_valuation'] ?? 0, 2) }}</h4>
                     <small class="text-muted" style="font-size:0.75rem;">Current Store Value</small>
-                </div>
-            </div>
+</div>
+</div>
 
             <div class="col-6 col-md-3">
                 <div class="card-stat h-100 bg-white border-danger border-opacity-50">
                     <div class="d-flex justify-content-between align-items-start mb-1">
                         <span class="text-muted small fw-semibold">Low Stock Items</span>
                         <i class="bi bi-exclamation-triangle-fill text-danger fs-5"></i>
-                    </div>
+</div>
                     <h4 class="fw-bold text-danger mb-0" id="statLowStockCount">{{ $stats['low_stock_count'] ?? 0 }} Items
-                    </h4>
+</h4>
                     <small class="text-danger fw-semibold" style="font-size:0.75rem;">Below Minimum Threshold</small>
-                </div>
-            </div>
+</div>
+</div>
 
             <div class="col-6 col-md-3">
                 <div class="card-stat h-100 bg-white">
                     <div class="d-flex justify-content-between align-items-start mb-1">
                         <span class="text-muted small fw-semibold">Items Issued Today</span>
                         <i class="bi bi-truck text-warning fs-5"></i>
-                    </div>
+</div>
                     <h4 class="fw-bold text-warning mb-0">{{ $stats['issued_sites_today'] ?? 0 }} Sites</h4>
                     <small class="text-muted" style="font-size:0.75rem;">Dispatched from store</small>
-                </div>
-            </div>
-        </div>
+</div>
+</div>
+</div>
 
         <!-- Filter & Search Bar -->
         <div class="card-custom p-3 mb-4 bg-white">
@@ -121,31 +121,31 @@
                     <div class="input-group input-group-sm">
                         <span class="input-group-text bg-light border-end-0"><i class="bi bi-search text-muted"></i></span>
                         <input type="text" class="form-control border-start-0 ps-0" id="warehouseSearchInput"
-                            placeholder="Search by SKU, Item Name (EN / தமிழ்), Category...">
-                    </div>
-                </div>
+                            placeholder="Search by SKU, Item Name, Category...">
+</div>
+</div>
                 <div class="col-6 col-md-3">
                     <select class="form-select form-select-sm" id="stockStatusFilter">
-                        <option value="">All Stock Levels (அனைத்து இருப்பு நிலை)</option>
-                        <option value="low">Low Stock Only (குறைந்த இருப்பு - எச்சரிக்கை)</option>
-                        <option value="normal">Normal In-Stock (போதுமான இருப்பு)</option>
+                        <option value="">All Stock Levels</option>
+                        <option value="low">Low Stock Only</option>
+                        <option value="normal">Normal In-Stock</option>
                     </select>
-                </div>
+</div>
                 <div class="col-6 col-md-1">
                     <button type="button" class="btn btn-outline-secondary btn-sm px-2 py-1" id="historyFilterResetBtn"
                     title="Reset filters">
                     <i class="bi bi-arrow-counterclockwise"></i>
-                    </button>
-                </div>
+</button>
+</div>
                 <div class="col-6 col-md-4 text-md-end d-flex align-items-center justify-content-end gap-2 flex-wrap">
                     <button class="btn btn-outline-danger btn-sm" id="quickFilterLowStockBtn">
                         <i class="bi bi-funnel me-1"></i> Show Low Stock ({{ $stats['low_stock_count'] ?? 0 }})
-                    </button>
+</button>
                     <span class="small text-muted" id="warehouseCountBadge">Showing <strong class="text-dark"
                             id="visibleWarehouseCount">{{ count($items) }}</strong> items</span>
-                </div>
-            </div>
-        </div>
+</div>
+</div>
+</div>
 
         <!-- Inventory Table -->
         <div class="card-custom overflow-hidden mb-4">
@@ -154,11 +154,11 @@
                     <thead>
                         <tr>
                             <th>SKU / Code</th>
-                            <th>Item Name (English & தமிழ்)</th>
+                            <th>Item Name</th>
                             <th>Category</th>
                             <th>Current Stock</th>
                             <th>Unit</th>
-                            <th>Cash Amount (விலை ₹)</th>
+                            <th>Cash Amount (₹)</th>
                             <th>Min. Threshold</th>
                             <th>Stock Status</th>
                             <th class="text-end" style="width: 70px;">Actions</th>
@@ -197,7 +197,7 @@
                                         <button class="btn table-action-btn" type="button" data-bs-toggle="dropdown"
                                             data-bs-popper-config='{"strategy":"fixed"}' aria-expanded="false" title="Actions">
                                             <i class="bi bi-three-dots-vertical"></i>
-                                        </button>
+</button>
                                         <ul class="dropdown-menu dropdown-menu-end shadow-sm">
                                             <li><button class="dropdown-item edit-warehouse-item-btn" type="button"
                                                     data-id="{{ $it->id }}" data-sku="{{ $it->sku }}"
@@ -219,7 +219,7 @@
                                                     type="button" data-id="{{ $it->id }}" data-name="{{ $it->name_en }}"><i
                                                         class="bi bi-trash3 text-danger me-2"></i>Delete</button></li>
                                         </ul>
-                                    </div>
+</div>
                                 </td>
                             </tr>
                         @empty
@@ -235,7 +235,7 @@
                         </tr>
                     </tbody>
                 </table>
-            </div>
+</div>
 
             <!-- Table Pagination & Footer Summary -->
             <div class="p-3 bg-white border-top d-flex flex-column flex-md-row justify-content-between align-items-center gap-3"
@@ -252,15 +252,15 @@
                         Showing <strong class="text-dark" id="pageStart">1</strong> &minus; <strong class="text-dark"
                             id="pageEnd">{{ min(10, count($items)) }}</strong> of <strong class="text-dark"
                             id="pageTotal">{{ count($items) }}</strong> items
-                    </span>
-                </div>
+</span>
+</div>
                 <nav aria-label="Warehouse table pagination">
                     <ul class="pagination pagination-sm mb-0 gap-1" id="paginationNav">
                         <!-- Dynamic page links rendered by JS -->
                     </ul>
                 </nav>
-            </div>
-        </div>
+</div>
+</div>
 
         <!-- Recent Stock Movements Log (Stock In / Stock Out / Issue to Site) -->
         <div class="card-custom p-3 p-md-4 bg-white">
@@ -306,20 +306,19 @@
                         @endforelse
                     </tbody>
                 </table>
-            </div>
-        </div>
+</div>
+</div>
 
-    </div>
+</div>
 
     <!-- Restock Modal -->
     <div class="modal fade" id="stockMovementModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title fw-bold"><i class="bi bi-box-seam text-success me-2"></i>Restock Item (சரக்கு
-                        வரவு)</h5>
+                    <h5 class="modal-title fw-bold"><i class="bi bi-box-seam text-success me-2"></i>Restock Item</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
+</div>
                 <form id="stockMovementForm" novalidate>
                     <input type="hidden" id="restockItemId" value="">
                     <div class="modal-body">
@@ -327,47 +326,47 @@
                             <i class="bi bi-info-circle-fill text-primary me-2 fs-6"></i>
                             <div>Restocking Item: <strong id="restockItemName" class="text-dark">-</strong> <span
                                     id="restockItemUnit" class="badge bg-secondary-subtle text-dark ms-1"></span></div>
-                        </div>
+</div>
                         <div class="row g-3">
                             <div class="col-12">
-                                <label class="form-label small fw-semibold" for="moveQty">Quantity (அளவு) <span
+                                <label class="form-label small fw-semibold" for="moveQty">Quantity  <span
                                         class="text-danger">*</span></label>
                                 <input type="number" step="any" class="form-control fw-bold" id="moveQty"
                                     placeholder="e.g. 10">
                                 <div class="invalid-feedback" id="errMoveQty"></div>
-                            </div>
+</div>
                             <div class="col-12">
                                 <label class="form-label small fw-semibold" for="moveCashAmount">Cash Amount / Unit Price
-                                    (விலை / அலகுத் தொகை ₹)</label>
+                                    (Rate / Unit ₹)</label>
                                 <div class="input-group">
                                     <span class="input-group-text bg-light text-muted">₹</span>
                                     <input type="number" step="any" min="0" class="form-control fw-bold" id="moveCashAmount"
                                         placeholder="e.g. 450.00">
-                                </div>
+</div>
                                 <div class="form-text small text-muted">
                                     Current rate: <strong class="text-primary font-monospace"
                                         id="restockCurrentRate">₹0.00</strong>. Updates warehouse valuation if restocked
                                     with new rate.
-                                </div>
+</div>
                                 <div class="invalid-feedback" id="errMoveCashAmount"></div>
-                            </div>
+</div>
                             <div class="col-12">
-                                <label class="form-label small fw-semibold" for="moveRemarks">Remark (குறிப்பு)</label>
+                                <label class="form-label small fw-semibold" for="moveRemarks">Remark</label>
                                 <input type="text" class="form-control" id="moveRemarks"
                                     placeholder="e.g. Restocked from supplier or factory delivery">
                                 <div class="invalid-feedback" id="errMoveRemarks"></div>
-                            </div>
-                        </div>
-                    </div>
+</div>
+</div>
+</div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-light btn-sm" data-bs-dismiss="modal">Cancel</button>
                         <button type="submit" class="btn btn-success btn-sm" id="btnConfirmRestock"><i
                                 class="bi bi-check-lg me-1"></i>Confirm Restock</button>
-                    </div>
+</div>
                 </form>
-            </div>
-        </div>
-    </div>
+</div>
+</div>
+</div>
 
     <!-- Add / Edit Inventory Item Modal -->
     <div class="modal fade" id="warehouseItemModal" tabindex="-1" aria-hidden="true">
@@ -376,7 +375,7 @@
                 <div class="modal-header">
                     <h5 class="modal-title fw-bold" id="warehouseItemModalTitle">Add Inventory Item</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
+</div>
                 <form id="warehouseItemForm" novalidate>
                     <input type="hidden" id="editItemId" value="">
                     <div class="modal-body">
@@ -387,7 +386,7 @@
                                 <input type="text" class="form-control font-monospace text-uppercase" id="newItemSku"
                                     placeholder="e.g. WH-EQP-05">
                                 <div class="invalid-feedback" id="errItemSku"></div>
-                            </div>
+</div>
                             <div class="col-12 col-md-6">
                                 <label class="form-label small fw-semibold" for="newItemCat">Category <span
                                         class="text-danger">*</span></label>
@@ -401,29 +400,29 @@
                                     <option value="Chemicals">Chemicals</option>
                                 </select>
                                 <div class="invalid-feedback" id="errItemCat"></div>
-                            </div>
+</div>
                             <div class="col-12 col-md-6">
                                 <label class="form-label small fw-semibold" for="newItemNameEn">Item Name (English) <span
                                         class="text-danger">*</span></label>
                                 <input type="text" class="form-control" id="newItemNameEn"
                                     placeholder="e.g. Measuring Tape 50m">
                                 <div class="invalid-feedback" id="errItemNameEn"></div>
-                            </div>
+</div>
                             <div class="col-12 col-md-6">
-                                <label class="form-label small fw-semibold" for="newItemNameTa">Name in தமிழ் <span
+                                <label class="form-label small fw-semibold" for="newItemNameTa">Name in Tamil <span
                                         class="text-danger">*</span></label>
                                 <input type="text" class="form-control ta-text" id="newItemNameTa"
                                     placeholder="எ.கா. அளக்கும் டேப்">
                                 <div class="invalid-feedback" id="errItemNameTa"></div>
-                            </div>
+</div>
                             <div class="col-12 col-md-3">
                                 <label class="form-label small fw-semibold" for="newItemStock">Initial Stock <span
                                         class="text-danger">*</span></label>
                                 <input type="number" step="any" class="form-control" id="newItemStock" placeholder="20">
                                 <div class="invalid-feedback" id="errItemStock"></div>
-                            </div>
+</div>
                             <div class="col-12 col-md-3">
-                                <label class="form-label small fw-semibold" for="newItemUnit">Unit of Measure (அளவீடு) <span
+                                <label class="form-label small fw-semibold" for="newItemUnit">Unit of Measure  <span
                                         class="text-danger">*</span></label>
                                 <select class="form-select" id="newItemUnit" name="unit" required>
                                     <option value="" disabled selected>-- Select Unit --</option>
@@ -432,39 +431,39 @@
                                             <option value="{{ $unit->id }}" data-code="{{ $unit->code }}"
                                                 data-name="{{ $unit->name_en }}">
                                                 {{ $unit->name_en }} ({{ $unit->name_ta }})
-                                            </option>
+</option>
                                         @endforeach
                                     @endisset
                                 </select>
                                 <div class="invalid-feedback" id="errItemUnit"></div>
-                            </div>
+</div>
                             <div class="col-12 col-md-3">
                                 <label class="form-label small fw-semibold" for="newItemThreshold">Min. Low Threshold <span
                                         class="text-danger">*</span></label>
                                 <input type="number" step="any" class="form-control" id="newItemThreshold" placeholder="5">
                                 <div class="invalid-feedback" id="errItemThreshold"></div>
-                            </div>
+</div>
                             <div class="col-12 col-md-3">
-                                <label class="form-label small fw-semibold" for="newItemCashAmount">Cash Amount (விலை ₹)
+                                <label class="form-label small fw-semibold" for="newItemCashAmount">Cash Amount (₹)
                                     <span class="text-danger">*</span></label>
                                 <div class="input-group">
                                     <span class="input-group-text bg-light text-muted px-2">₹</span>
                                     <input type="number" step="any" min="0" class="form-control fw-bold"
                                         id="newItemCashAmount" placeholder="450.00">
-                                </div>
+</div>
                                 <div class="invalid-feedback" id="errItemCashAmount"></div>
-                            </div>
-                        </div>
-                    </div>
+</div>
+</div>
+</div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-light btn-sm" data-bs-dismiss="modal">Cancel</button>
                         <button type="submit" class="btn btn-deiveni btn-sm" id="btnSaveWarehouseItem">Save Item to
                             Store</button>
-                    </div>
+</div>
                 </form>
-            </div>
-        </div>
-    </div>
+</div>
+</div>
+</div>
 @endsection
 
 @push('scripts')
@@ -574,7 +573,7 @@
                             <li class="page-item ${prevDisabled}">
                                 <button class="page-link" type="button" data-page="${current - 1}" aria-label="Previous" title="Previous Page">
                                     <i class="bi bi-chevron-left"></i>
-                                </button>
+</button>
                             </li>
                         `);
 
@@ -611,7 +610,7 @@
                             <li class="page-item ${nextDisabled}">
                                 <button class="page-link" type="button" data-page="${current + 1}" aria-label="Next" title="Next Page">
                                     <i class="bi bi-chevron-right"></i>
-                                </button>
+</button>
                             </li>
                         `);
             }
@@ -869,7 +868,7 @@
                 const id = $(this).data('id');
                 const name = $(this).data('name') || 'Item';
 
-                if (confirm(`Are you sure you want to delete "${name}" from the warehouse? (இந்த பொருளை நீக்க விரும்புகிறீர்களா?)`)) {
+                if (confirm(`Are you sure you want to delete "${name}" from the warehouse?`)) {
                     $.ajax({
                         url: '{{ route("warehouse.items.destroy", ":id") }}'.replace(':id', id),
                         type: 'POST',

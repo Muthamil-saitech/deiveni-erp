@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('title', 'Admin Ledger')
-@section('page_title', 'Admin Ledger')
+@section('page_title', 'Admin Ledger ')
 
 @push('styles')
     <style>
@@ -49,13 +49,13 @@
         <ul class="nav nav-tabs mb-3 border-bottom">
             <li class="nav-item">
                 <a class="nav-link" href="{{ route('ledger.index') }}">
-                    <i class="bi bi-book-half me-1"></i> Daily Ledger
-                </a>
+                    <i class="bi bi-book-half me-1"></i> Daily Ledger 
+</a>
             </li>
             <li class="nav-item">
                 <a class="nav-link active" href="{{ route('admin-ledger.index') }}">
-                    <i class="bi bi-journal-bookmark-fill me-1 text-primary"></i> Admin Ledger
-                </a>
+                    <i class="bi bi-journal-bookmark-fill me-1 text-primary"></i> Admin Ledger 
+</a>
             </li>
         </ul>
 
@@ -64,18 +64,18 @@
             <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
                 <div>
                     <h5 class="fw-bold mb-0 text-dark">
-                        <i class="bi bi-journal-check text-primary me-2"></i>Admin Ledger
-                    </h5>
+                        <i class="bi bi-journal-check text-primary me-2"></i>Admin Ledger 
+</h5>
                     <small class="text-muted">Client Payments (Income +) & Supplier Payments (Expense -)</small>
-                </div>
+</div>
                 <div class="d-flex gap-2">
                     <button class="btn btn-deiveni btn-sm" data-bs-toggle="modal" data-bs-target="#adminLedgerModal"
                         id="openAddAdminLedgerBtn">
                         <i class="bi bi-plus-circle-fill me-1"></i> Add Admin Ledger Entry
-                    </button>
-                </div>
-            </div>
-        </div>
+</button>
+</div>
+</div>
+</div>
 
         <!-- Notebook Balance Summary Bar -->
         <div class="card-custom p-3 p-md-4 mb-4 text-white"
@@ -85,39 +85,36 @@
                 <div class="col-6 col-md-4 border-end border-secondary border-opacity-25">
                     <div class="text-white-50 small text-uppercase fw-semibold" style="font-size: 0.72rem;">
                         <i class="bi bi-arrow-down-left-circle text-success me-1"></i>Total Client Payments (Income Dr)
-                    </div>
+</div>
                     <h3 class="fw-bold text-success mb-0" id="summaryTotalIncome">
                         +₹{{ number_format($summary['total_income'] ?? 0, 2) }}
-                    </h3>
-                    
-                </div>
+</h3>
+</div>
 
                 <!-- Total Expense -->
                 <div class="col-6 col-md-4 border-end border-secondary border-opacity-25">
                     <div class="text-white-50 small text-uppercase fw-semibold" style="font-size: 0.72rem;">
                         <i class="bi bi-arrow-up-right-circle text-danger me-1"></i>Total Supplier Payments (Expense Cr)
-                    </div>
+</div>
                     <h3 class="fw-bold text-danger mb-0" id="summaryTotalExpense">
                         -₹{{ number_format($summary['total_expense'] ?? 0, 2) }}
-                    </h3>
-                    
-                </div>
+</h3>
+</div>
 
                 <!-- Net Running Balance -->
                 <div class="col-12 col-md-4">
                     <div class="text-white-50 small text-uppercase fw-semibold" style="font-size: 0.72rem;">
-                        <i class="bi bi-wallet2 text-warning me-1"></i>Net Running Balance
-                    </div>
+                        <i class="bi bi-wallet2 text-warning me-1"></i>Net Running Balance 
+</div>
                     @php
                         $net = (float) ($summary['net_balance'] ?? 0);
                     @endphp
                     <h2 class="fw-bold {{ $net >= 0 ? 'text-info' : 'text-warning' }} mb-0" id="summaryNetBalance">
                         {{ $net >= 0 ? '₹' . number_format($net, 2) : '-₹' . number_format(abs($net), 2) }}
-                    </h2>
-                    
-                </div>
-            </div>
-        </div>
+</h2>
+</div>
+</div>
+</div>
 
         <!-- Filter & Search Bar -->
         <div class="card-custom p-3 mb-4 bg-white">
@@ -127,39 +124,39 @@
                         <span class="input-group-text bg-light border-end-0"><i class="bi bi-search text-muted"></i></span>
                         <input type="text" class="form-control border-start-0 ps-0" id="adminLedgerSearch"
                             placeholder="Search Client, Supplier, Project, Ref, Description...">
-                    </div>
-                </div>
+</div>
+</div>
                 <div class="col-6 col-md-2">
                     <select class="form-select form-select-sm" id="categoryFilter">
                         <option value="">All Categories</option>
                         <option value="client_payment">Client Payment (+ Income)</option>
                         <option value="supplier_payment">Supplier Payment (- Expense)</option>
                     </select>
-                </div>
+</div>
                 <div class="col-6 col-md-2">
                     <select class="form-select form-select-sm" id="dateFilter">
                         <option value="all" selected>All Dates</option>
                         <option value="today">Today</option>
                         <option value="yesterday">Yesterday</option>
-                        <option value="custom">Pick Date...</option>
+                        <option value="custom">Pick Date ...</option>
                     </select>
-                </div>
+</div>
                 <div class="col-6 col-md-2 d-none" id="customDateCol">
                     <input type="date" class="form-control form-control-sm" id="customDateInput"
                         value="{{ date('Y-m-d') }}">
-                </div>
+</div>
                 <div class="col-6 col-md-1">
                     <button type="button" class="btn btn-outline-secondary btn-sm px-2 py-1" id="filterResetBtn"
                         title="Reset Filters">
                         <i class="bi bi-arrow-counterclockwise"></i> Reset
-                    </button>
-                </div>
+</button>
+</div>
                 <div class="col-12 col-md-3 text-md-end">
                     <span class="small text-muted">Showing <strong class="text-dark"
                             id="entryCountDisplay">{{ $entries->count() }}</strong> entries</span>
-                </div>
-            </div>
-        </div>
+</div>
+</div>
+</div>
 
         <!-- Admin Ledger Table -->
         <div class="card-custom overflow-hidden bg-white shadow-xs">
@@ -195,18 +192,18 @@
                                     @if ($entry->category === 'client_payment')
                                         <span class="badge bg-success-subtle text-success border border-success-subtle">
                                             <i class="bi bi-person-check me-1"></i>Client Payment (+)
-                                        </span>
+</span>
                                     @else
                                         <span class="badge bg-danger-subtle text-danger border border-danger-subtle">
                                             <i class="bi bi-truck me-1"></i>Supplier Payment (-)
-                                        </span>
+</span>
                                     @endif
                                 </td>
                                 <td>
                                     @if ($isIncome)
-                                        <span class="badge bg-success text-white" style="font-size:0.7rem;">Dr (Income)</span>
+                                        <span class="badge bg-success text-white" style="font-size:0.7rem;">Dr</span>
                                     @else
-                                        <span class="badge bg-danger text-white" style="font-size:0.7rem;">Cr (Expense)</span>
+                                        <span class="badge bg-danger text-white" style="font-size:0.7rem;">Cr</span>
                                     @endif
                                 </td>
                                 <td>
@@ -228,7 +225,7 @@
                                         @else
                                             <span class="badge bg-primary-subtle text-primary border border-primary-subtle">
                                                 <i class="bi bi-collection me-1"></i>Total (All Sites)
-                                            </span>
+</span>
                                         @endif
                                     @endif
                                 </td>
@@ -241,7 +238,7 @@
                                 <td>
                                     <small class="text-muted d-inline-block text-truncate" style="max-width: 180px;" title="{{ $entry->description }}">
                                         {{ $entry->description ?: '—' }}
-                                    </small>
+</small>
                                 </td>
                                 <td class="text-end font-monospace fw-semibold text-success">
                                     {{ $isIncome ? '+₹' . number_format((float) $entry->amount, 2) : '—' }}
@@ -257,12 +254,12 @@
                                         <a href="{{ route('admin-ledger.show', $entry->encrypted_id) }}"
                                             class="btn btn-outline-primary btn-sm py-0 px-2" title="View details">
                                             <i class="bi bi-eye"></i>
-                                        </a>
+</a>
                                         <button class="btn btn-outline-danger btn-sm py-0 px-2 btn-delete-entry"
                                             data-id="{{ $entry->id }}" title="Delete entry">
                                             <i class="bi bi-trash"></i>
-                                        </button>
-                                    </div>
+</button>
+</div>
                                 </td>
                             </tr>
                         @empty
@@ -283,7 +280,7 @@
                         </tr>
                     </tbody>
                 </table>
-            </div>
+</div>
 
             <!-- Table Pagination & Footer Summary -->
             <div class="p-3 bg-white border-top d-flex flex-column flex-md-row justify-content-between align-items-center gap-3"
@@ -300,17 +297,17 @@
                         Showing <strong class="text-dark" id="pageStart">1</strong> &minus; <strong class="text-dark"
                             id="pageEnd">{{ min(10, count($entries)) }}</strong> of <strong class="text-dark"
                             id="pageTotal">{{ count($entries) }}</strong> entries
-                    </span>
-                </div>
+</span>
+</div>
                 <nav aria-label="Admin ledger table pagination">
                     <ul class="pagination pagination-sm mb-0 gap-1" id="paginationNav">
                         <!-- Dynamic page links rendered by JS -->
                     </ul>
                 </nav>
-            </div>
-        </div>
+</div>
+</div>
 
-    </div>
+</div>
 
     <!-- Record Admin Ledger Entry Modal -->
     <div class="modal fade" id="adminLedgerModal" tabindex="-1" aria-hidden="true">
@@ -318,70 +315,70 @@
             <div class="modal-content border-0 shadow">
                 <div class="modal-header bg-primary text-white">
                     <h5 class="modal-title fw-bold">
-                        <i class="bi bi-journal-plus me-2"></i>Add Admin Ledger Entry
-                    </h5>
+                        <i class="bi bi-journal-plus me-2"></i>Add Admin Ledger Entry 
+</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
                         aria-label="Close"></button>
-                </div>
+</div>
                 <form id="adminLedgerForm" enctype="multipart/form-data" novalidate>
                     @csrf
                     <div class="modal-body">
                         <div class="row g-3">
                             <!-- Entry Date -->
                             <div class="col-12 col-md-6">
-                                <label class="form-label small fw-semibold">Entry Date <span
+                                <label class="form-label small fw-semibold">Entry Date  <span
                                         class="text-danger">*</span></label>
                                 <input type="date" class="form-control" id="entryDate" name="entry_date"
                                     value="{{ date('Y-m-d') }}" required>
                                 <div class="invalid-feedback" id="errEntryDate"></div>
-                            </div>
+</div>
 
                             <!-- Category Selection -->
                             <div class="col-12 col-md-6">
-                                <label class="form-label small fw-semibold">Payment Category <span
+                                <label class="form-label small fw-semibold">Payment Category  <span
                                         class="text-danger">*</span></label>
                                 <select class="form-select fw-semibold" id="categorySelect" name="category" required>
                                     <option value="supplier_payment" selected>Supplier Payment (-) [Expense]</option>
                                     <option value="client_payment">Client Payment (+) [Income]</option>
                                 </select>
                                 <div class="invalid-feedback" id="errCategory"></div>
-                            </div>
+</div>
 
                             <!-- CLIENT PAYMENT SECTION -->
                             <div class="col-12" id="clientPaymentSection" style="display: none;">
                                 <div class="p-3 bg-success-subtle bg-opacity-25 rounded-3 border border-success-subtle">
                                     <h6 class="fw-bold text-success mb-3">
-                                        <i class="bi bi-person-check me-1"></i>Client Payment Details
-                                    </h6>
+                                        <i class="bi bi-person-check me-1"></i>Client Payment Details 
+</h6>
                                     <div class="row g-3">
                                         <!-- Select Client -->
                                         <div class="col-12 col-md-6">
-                                            <label class="form-label small fw-semibold text-dark">Select Client <span
+                                            <label class="form-label small fw-semibold text-dark">Select Client  <span
                                                     class="text-danger">*</span></label>
                                             <select class="form-select fw-semibold" id="clientSelect" name="client_id">
                                                 <option value="" disabled selected>-- Select Client --</option>
                                                 @foreach ($clients as $client)
                                                     <option value="{{ $client->id }}" data-name="{{ $client->name }}">
                                                         {{ $client->name }} {{ $client->phone ? "({$client->phone})" : '' }}
-                                                    </option>
+</option>
                                                 @endforeach
                                             </select>
                                             <div class="invalid-feedback" id="errClientId"></div>
-                                        </div>
+</div>
 
                                         <!-- Select Project Site (under that client) -->
                                         <div class="col-12 col-md-6">
-                                            <label class="form-label small fw-semibold text-dark">Select Project <span
+                                            <label class="form-label small fw-semibold text-dark">Select Project  <span
                                                     class="text-danger">*</span></label>
                                             <select class="form-select fw-semibold" id="clientProjectSelect"
                                                 name="project_site_id">
                                                 <option value="" disabled selected>-- Select Client First --</option>
                                             </select>
                                             <div class="invalid-feedback" id="errClientProjectSiteId"></div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+</div>
+</div>
+</div>
+</div>
 
                             <!-- SUPPLIER PAYMENT SECTION -->
                             <div class="col-12" id="supplierPaymentSection">
@@ -389,32 +386,32 @@
                                     <!-- Payment Basis Radio: Site Based vs Total - Only shown if supplier in master is NOT site-based -->
                                     <div class="mb-3" id="adminSupplierPaymentScopeBox" style="display: none;">
                                         <label class="form-label small fw-semibold text-dark mb-1">
-                                            <i class="bi bi-diagram-3 text-primary me-1"></i>Payment Basis <span
+                                            <i class="bi bi-diagram-3 text-primary me-1"></i>Payment Basis  <span
                                                 class="text-danger">*</span>
-                                        </label>
+</label>
                                         <div class="d-flex gap-4 pt-1">
                                             <div class="form-check">
                                                 <input class="form-check-input" type="radio" name="supplier_payment_scope"
                                                     id="adminScopeSiteBased" value="site_based" checked>
                                                 <label class="form-check-label small fw-semibold" for="adminScopeSiteBased">
-                                                    <i class="bi bi-building me-1 text-primary"></i>Site Based
-                                                </label>
-                                            </div>
+                                                    <i class="bi bi-building me-1 text-primary"></i>Site Based 
+</label>
+</div>
                                             <div class="form-check">
                                                 <input class="form-check-input" type="radio" name="supplier_payment_scope"
                                                     id="adminScopeTotal" value="total">
                                                 <label class="form-check-label small fw-semibold text-primary"
                                                     for="adminScopeTotal">
-                                                    <i class="bi bi-cash-stack me-1 text-success"></i>Total
-                                                </label>
-                                            </div>
-                                        </div>
-                                    </div>
+                                                    <i class="bi bi-cash-stack me-1 text-success"></i>Total 
+</label>
+</div>
+</div>
+</div>
 
                                     <div class="row g-3">
                                         <!-- Select Supplier -->
                                         <div class="col-12 col-md-6">
-                                            <label class="form-label small fw-semibold text-dark">Select Supplier <span
+                                            <label class="form-label small fw-semibold text-dark">Select Supplier  <span
                                                     class="text-danger">*</span></label>
                                             <select class="form-select fw-semibold" id="supplierSelect" name="supplier_id">
                                                 <option value="" disabled selected>-- Select Supplier --</option>
@@ -424,15 +421,15 @@
                                                         data-phone="{{ $supplier->phone }}"
                                                         data-is-site-based="{{ $supplier->is_site_based ? '1' : '0' }}">
                                                         {{ $supplier->name }} {{ $supplier->contact_person ? "({$supplier->contact_person})" : '' }}
-                                                    </option>
+</option>
                                                 @endforeach
                                             </select>
                                             <div class="invalid-feedback" id="errSupplierId"></div>
-                                        </div>
+</div>
 
                                         <!-- Select Site (Shown ONLY when Site Based) -->
                                         <div class="col-12 col-md-6" id="supplierSiteGroup">
-                                            <label class="form-label small fw-semibold text-dark">Project Site <span
+                                            <label class="form-label small fw-semibold text-dark">Project Site  <span
                                                     class="text-danger">*</span></label>
                                             <select class="form-select fw-semibold" id="supplierSiteSelect"
                                                 name="project_site_id">
@@ -440,26 +437,26 @@
                                                 @foreach ($sites as $site)
                                                     <option value="{{ $site->id }}" data-name="{{ $site->name }}">
                                                         {{ $site->name }}
-                                                    </option>
+</option>
                                                 @endforeach
                                             </select>
                                             <div class="invalid-feedback" id="errSupplierProjectSiteId"></div>
-                                        </div>
+</div>
 
                                         <!-- Purchase Order Selection (Shown ONLY when Site Based) -->
                                         <div class="col-12" id="supplierPoGroup">
                                             <label class="form-label small fw-semibold text-dark mb-1">
                                                 <i class="bi bi-file-earmark-text text-primary me-1"></i>Purchase Order (Optional)
-                                            </label>
+</label>
                                             <select class="form-select font-monospace" id="purchaseOrderSelect"
                                                 name="purchase_order_no">
                                                 <option value="" selected>-- Select Site & Supplier above --</option>
                                             </select>
                                             <div class="invalid-feedback" id="errPurchaseOrderNo"></div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+</div>
+</div>
+</div>
+</div>
 
                             <!-- Amount -->
                             <div class="col-12 col-md-6">
@@ -470,12 +467,12 @@
                                     <input type="number" step="0.01" class="form-control fw-bold" id="adminAmount"
                                         name="amount" placeholder="e.g. 25000" required>
                                     <div class="invalid-feedback" id="errAmount"></div>
-                                </div>
-                            </div>
+</div>
+</div>
 
                             <!-- Payment Mode -->
                             <div class="col-12 col-md-6">
-                                <label class="form-label small fw-semibold">Payment Mode <span
+                                <label class="form-label small fw-semibold">Payment Mode  <span
                                         class="text-danger">*</span></label>
                                 <select class="form-select fw-semibold" id="paymentModeSelect" name="payment_mode" required>
                                     <option value="Cash" selected>Cash</option>
@@ -484,7 +481,7 @@
                                     <option value="Bank Transfer">Bank Transfer / NEFT / RTGS</option>
                                 </select>
                                 <div class="invalid-feedback" id="errPaymentMode"></div>
-                            </div>
+</div>
 
                             <!-- Cheque / Bank Extended Fields -->
                             <div class="col-12" id="bankChequeDetailsGroup" style="display: none;">
@@ -494,15 +491,15 @@
                                             <label class="form-label small fw-semibold">Cheque / Ref No</label>
                                             <input type="text" class="form-control font-monospace" id="chequeNo"
                                                 name="cheque_no" placeholder="e.g. CHQ-991204">
-                                        </div>
+</div>
                                         <div class="col-12 col-md-6">
                                             <label class="form-label small fw-semibold">Bank Name</label>
                                             <input type="text" class="form-control" id="bankName" name="bank_name"
                                                 placeholder="e.g. SBI, HDFC, ICICI">
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+</div>
+</div>
+</div>
+</div>
 
                             <!-- Description -->
                             <div class="col-12">
@@ -510,7 +507,7 @@
                                 <textarea class="form-control" id="adminDescription" name="description" rows="2"
                                     placeholder="Enter payment details, stage info, or notes..."></textarea>
                                 <div class="invalid-feedback" id="errDescription"></div>
-                            </div>
+</div>
 
                             <!-- Receipt Image Upload -->
                             <div class="col-12">
@@ -518,20 +515,20 @@
                                 <input type="file" class="form-control form-control-sm" id="adminReceiptImage"
                                     name="receipt_image" accept="image/*,application/pdf">
                                 <div class="invalid-feedback" id="errReceiptImage"></div>
-                            </div>
-                        </div>
-                    </div>
+</div>
+</div>
+</div>
                     <div class="modal-footer bg-light">
                         <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
                         <button type="submit" class="btn btn-primary btn-sm px-3 fw-bold" id="saveAdminLedgerBtn">
                             <span class="spinner-border spinner-border-sm me-1 d-none" id="saveSpinner"></span>
                             <i class="bi bi-check-circle me-1"></i> Save Entry
-                        </button>
-                    </div>
+</button>
+</div>
                 </form>
-            </div>
-        </div>
-    </div>
+</div>
+</div>
+</div>
 @endsection
 
 @push('scripts')
@@ -984,7 +981,7 @@
                     <li class="page-item ${prevDisabled}">
                         <button class="page-link" type="button" data-page="${current - 1}" aria-label="Previous" title="Previous Page">
                             <i class="bi bi-chevron-left"></i>
-                        </button>
+</button>
                     </li>
                 `);
 
@@ -1021,7 +1018,7 @@
                     <li class="page-item ${nextDisabled}">
                         <button class="page-link" type="button" data-page="${current + 1}" aria-label="Next" title="Next Page">
                             <i class="bi bi-chevron-right"></i>
-                        </button>
+</button>
                     </li>
                 `);
             }

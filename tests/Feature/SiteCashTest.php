@@ -188,7 +188,7 @@ test('site cash detail page allows editing transaction and changing project site
     $detailResponse = $this->actingAs($this->siteManager)->get("/site-cash/{$txn->encrypted_id}");
     $detailResponse->assertStatus(200);
     $detailResponse->assertSee('editSiteCashModal');
-    $detailResponse->assertSee('Edit Entry (பதிவை திருத்து)');
+    $detailResponse->assertSee('Edit Entry');
 
     // Update transaction to site2 with new amount
     $updateResponse = $this->actingAs($this->siteManager)->postJson("/site-cash/{$txn->id}/update", [

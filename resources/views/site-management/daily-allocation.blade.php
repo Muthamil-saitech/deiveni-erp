@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('title', 'Daily Allocation')
-@section('page_title', 'Daily Allocation (தள தினசரி ஒதுக்கீடு)')
+@section('page_title', 'Daily Allocation ')
 
 @section('content')
     <div class="container-fluid px-0">
@@ -11,22 +11,20 @@
             <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
                 <div>
                     <div class="d-flex align-items-center gap-2 flex-wrap">
-                        <h5 class="fw-bold mb-0 text-dark">Daily Labour & Expense Allocation (தள தினசரி ஒதுக்கீடு)</h5>
+                        <h5 class="fw-bold mb-0 text-dark">Daily Labour & Expense Allocation</h5>
                         <span class="badge bg-primary">Daily Entry Flow</span>
                         <span class="badge bg-success-subtle text-success border border-success-subtle">Rolls into Weekly
                             Wages</span>
                     </div>
-                    <p class="text-muted small mb-0 mt-1">Select entry date, choose project site, allocate worker
-                        categories with headcount, and record same-day site expenses.</p>
                 </div>
                 <div class="d-flex gap-2 flex-wrap">
                     <button class="btn btn-deiveni btn-sm d-flex align-items-center gap-1" id="saveDailyAllocBtn">
                         <i class="bi bi-floppy2-fill"></i>
                         <span>Save Daily Allocation</span>
-                    </button>
-                </div>
-            </div>
-        </div>
+</button>
+</div>
+</div>
+</div>
 
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
         <style>
@@ -93,9 +91,9 @@
                 <!-- Date Selector -->
                 <div class="col-12 col-md-6">
                     <label class="form-label fw-bold text-dark mb-1" for="dailyAllocDate">
-                        <i class="bi bi-calendar-event text-primary me-1"></i> 1. Entry Date (தேதி) <span
+                        <i class="bi bi-calendar-event text-primary me-1"></i> 1. Entry Date  <span
                             class="text-danger">*</span>
-                    </label>
+</label>
                     <div class="input-group">
                         <span class="input-group-text bg-light text-primary"><i class="bi bi-calendar3"></i></span>
                         <input type="text" class="form-control form-control-md fw-bold bg-white" id="dailyAllocDate"
@@ -103,36 +101,34 @@
                         <button class="btn btn-outline-secondary btn-sm" type="button" id="dailyAllocDateTodayBtn"
                             title="Select Today">
                             Today
-                        </button>
-                    </div>
+</button>
+</div>
                     <div class="d-flex align-items-center justify-content-between mt-1">
                         <small class="text-muted fw-semibold" id="dayNameDisplay">Loading...</small>
                         <span class="badge bg-primary-subtle text-primary border border-primary-subtle"
                             id="dateStatusBadge">Current Week</span>
-                    </div>
-                </div>
+</div>
+</div>
 
                 <!-- Site Selector -->
                 <div class="col-12 col-md-6">
                     <label class="form-label fw-bold text-dark mb-1">
-                        <i class="bi bi-building-gear text-primary me-1"></i> 2. Project Site (கட்டுமான தளம்) <span
+                        <i class="bi bi-building-gear text-primary me-1"></i> 2. Project Site  <span
                             class="text-danger">*</span>
-                    </label>
+</label>
                     <select class="form-select form-select-md fw-bold text-primary border-primary border-opacity-50"
                         id="dailyAllocSiteSelect">
                         @forelse($sites as $site)
                             <option value="{{ $site->id }}" data-name="{{ $site->name }}" {{ $loop->first ? 'selected' : '' }}>
                                 {{ $site->name }} &bull; {{ $site->work_type ?? 'Construction' }} ({{ $site->location }})
-                            </option>
+</option>
                         @empty
                             <option value="" disabled selected>No project sites found (Add sites in Project Sites module)
-                            </option>
+</option>
                         @endforelse
                     </select>
-                    <small class="text-muted d-block mt-1">Select project site to allocate daily headcount and
-                        expenses</small>
                 </div>
-            </div>
+</div>
 
             <!-- Current Week Day Selector Strip -->
             <div class="mt-3 pt-3 border-top">
@@ -140,20 +136,20 @@
                     <div class="d-flex align-items-center gap-2">
                         <span class="small fw-bold text-secondary text-uppercase"
                             style="letter-spacing: 0.5px; font-size: 0.75rem;">
-                            <i class="bi bi-calendar-week me-1 text-primary"></i> Current Week Working Days (நடப்பு வாரம்)
-                        </span>
+                            <i class="bi bi-calendar-week me-1 text-primary"></i> Current Week Working Days 
+</span>
                         <span class="badge bg-light text-muted border" id="weekRangeLabel"></span>
-                    </div>
+</div>
                     <small class="text-muted" style="font-size: 0.78rem;">
                         <i class="bi bi-info-circle me-1 text-primary"></i>Data entry allowed for <strong>Today & Previous
                             Dates</strong>. Future dates and Sundays are disabled.
-                    </small>
-                </div>
+</small>
+</div>
                 <div class="d-flex gap-2 flex-wrap" id="currentWeekDaysStrip">
                     <!-- Populated dynamically: Mon to Sun (Sun disabled) -->
-                </div>
-            </div>
-        </div>
+</div>
+</div>
+</div>
 
         <!-- Read-Only Notice Banner (Shown when selected date is a future date or Sunday) -->
         <div id="readOnlyNoticeBanner"
@@ -164,35 +160,33 @@
                     <strong class="text-dark">View-Only Mode:</strong>
                     <span class="text-dark small ms-1" id="readOnlyNoticeText">Future date entry is not allowed. Only today
                         and previous dates can be added or edited.</span>
-                </div>
-            </div>
+</div>
+</div>
             <button type="button" class="btn btn-warning btn-sm text-dark fw-bold ms-2 shadow-sm" id="jumpToTodayBtn">
-                <i class="bi bi-arrow-return-left me-1"></i> Go to Today (இன்றைய தேதி)
-            </button>
-        </div>
+                <i class="bi bi-arrow-return-left me-1"></i> Go to Today 
+</button>
+</div>
 
         <!-- 2. Core Section: Multiple Worker Categories & Headcount Allocation -->
         <div class="card-custom p-3 p-md-4 mb-3 mb-md-4 bg-white">
             <div
                 class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-2 mb-3 pb-2 border-bottom">
                 <div>
-                    <h6 class="fw-bold mb-1 text-dark">
-                        <i class="bi bi-people-fill text-primary me-2"></i>Worker Categories & Headcount Entry (பணியாளர்
-                        பிரிவுகள் மற்றும் எண்ணிக்கை)
+                    <h6 class="fw-bold mb-0 text-dark">
+                        <i class="bi bi-people-fill text-primary me-2"></i>Worker Categories & Headcount Entry
                     </h6>
-                    <small class="text-muted">Enter the count present for each trade category for this shift.</small>
                 </div>
                 <div class="d-flex align-items-center gap-2">
                     <div class="dropdown">
                         <button class="btn btn-outline-primary btn-sm dropdown-toggle py-1" type="button"
                             data-bs-toggle="dropdown" aria-expanded="false" id="workersCategoryDropdownBtn">
                             <i class="bi bi-plus-circle me-1"></i> Workers Category
-                        </button>
+</button>
                         <ul class="dropdown-menu dropdown-menu-end shadow border-0" id="tradeAddDropdown"
                             style="min-width: 320px; max-height: 380px; overflow-y: auto;">
                             <li>
                                 <h6 class="dropdown-header text-uppercase small fw-bold text-muted">Select Worker Category
-                                    (பிரிவு)</h6>
+</h6>
                             </li>
                             @forelse($workerCategories as $category)
                                 <li>
@@ -204,11 +198,11 @@
                                             <div>
                                                 <div class="fw-bold text-dark ta-text">+ {{ $category->name_ta }}</div>
                                                 <small class="text-muted">{{ $category->name_en }}</small>
-                                            </div>
+</div>
                                             <span
                                                 class="badge bg-light text-dark border ms-2">₹{{ number_format((float) $category->daily_wage) }}</span>
-                                        </div>
-                                    </a>
+</div>
+</a>
                                 </li>
                             @empty
                                 <li class="px-3 py-2 text-muted small">No active worker categories found</li>
@@ -220,32 +214,32 @@
                                         <div class="avatar-circle bg-primary bg-opacity-10 text-primary fw-bold me-2"
                                             style="width:32px; height:32px; border-radius:50%; display:flex; align-items:center; justify-content:center;">
                                             <i class="bi bi-plus-circle-dotted fs-5"></i>
-                                        </div>
+</div>
                                         <div>
-                                            <div class="fw-bold text-primary ta-text">+ மற்றவை (Others)</div>
+                                            <div class="fw-bold text-primary">+ Others</div>
                                             <small class="text-muted fw-normal">Add custom / new worker category</small>
-                                        </div>
-                                    </div>
-                                </a>
+</div>
+</div>
+</a>
                             </li>
                         </ul>
-                    </div>
+</div>
                     <button type="button" class="btn btn-outline-secondary btn-sm py-1" id="resetLabourCountsBtn"
                         title="Reset counts to 0">
                         <i class="bi bi-arrow-counterclockwise me-1"></i> Reset
-                    </button>
-                </div>
-            </div>
+</button>
+</div>
+</div>
 
             <!-- Worker Category Allocation Table -->
             <div class="table-responsive mb-3">
                 <table class="table table-custom table-hover align-middle text-center mb-0" id="workerAllocationTable">
                     <thead class="table-light">
                         <tr>
-                            <th class="text-start" style="min-width: 200px;">Worker Category (பிரிவு)</th>
-                            <th style="min-width: 140px;">Daily Wage Rate (தினக்கூலி)</th>
-                            <th style="min-width: 180px;">Worker Count (எண்ணிக்கை)</th>
-                            <th class="text-end" style="min-width: 140px;">Est. Wage (ரூ.)</th>
+                            <th class="text-start" style="min-width: 200px;">Worker Category</th>
+                            <th style="min-width: 140px;">Daily Wage Rate</th>
+                            <th style="min-width: 180px;">Worker Count</th>
+                            <th class="text-end" style="min-width: 140px;">Est. Wage (₹)</th>
                             <th style="width: 60px;">Action</th>
                         </tr>
                     </thead>
@@ -271,18 +265,18 @@
                         </tr>
                     </tfoot>
                 </table>
-            </div>
+</div>
 
             <div class="alert alert-light border py-2 px-3 small d-flex align-items-center justify-content-between mb-0">
                 <div class="text-muted">
                     <i class="bi bi-info-circle text-primary me-1"></i>
                     Click <strong>"Workers Category"</strong> to add labour categories (Mestri, Mason, Helper, etc.) for
                     today's shift.
-                </div>
+</div>
                 <span class="fw-semibold text-dark">Active Categories: <span id="activeCategoriesCount"
                         class="text-primary">0 Categories</span></span>
-            </div>
-        </div>
+</div>
+</div>
 
         <!-- 3. Core Section: Same-Day Site Expenses & Purchases -->
         <div class="card-custom p-3 p-md-4 mb-3 mb-md-4 bg-white border-start border-4 border-warning">
@@ -291,20 +285,17 @@
                 <div>
                     <div class="d-flex align-items-center gap-2">
                         <h6 class="fw-bold mb-0 text-dark">
-                            <i class="bi bi-cup-hot-fill text-warning me-2"></i>Same-Day Site Expenses & Purchases (அன்றைய
-                            கூடுதல் செலவுகள் & கொள்முதல்)
+                            <i class="bi bi-cup-hot-fill text-warning me-2"></i>Same-Day Site Expenses & Purchases
                         </h6>
                         <span class="badge bg-warning text-dark">Same-Day Purchase</span>
                     </div>
-                    <small class="text-muted">Record daily extra site purchases occurring on the same day (water cans,
-                        tea/snacks, emergency local hardware).</small>
                 </div>
                 <div class="d-flex align-items-center gap-2">
                     <button type="button" class="btn btn-warning btn-sm text-dark fw-semibold" id="addCustomExpenseBtn">
                         <i class="bi bi-plus-lg me-1"></i> Add Expense
-                    </button>
-                </div>
-            </div>
+</button>
+</div>
+</div>
 
             <!-- Expenses Table -->
             <div class="table-responsive mb-2" id="dailyExpensesTableWrap" style="overflow: visible !important;">
@@ -312,10 +303,10 @@
                     <thead class="bg-light text-muted small">
                         <tr>
                             <th class="text-start" style="min-width: 250px;">Expense Item / Extra Purchase Description
-                                (விவரம்)</th>
-                            <th style="width: 140px;">Quantity / Hours (அளவு)</th>
-                            <th style="width: 160px;">Unit Price (விலை)</th>
-                            <th class="text-end" style="width: 160px;">Final Price (ரூ.)</th>
+</th>
+                            <th style="width: 140px;">Quantity / Hours</th>
+                            <th style="width: 160px;">Unit Price</th>
+                            <th class="text-end" style="width: 160px;">Final Price (₹)</th>
                             <th style="width: 60px;" class="text-center">Action</th>
                         </tr>
                     </thead>
@@ -330,8 +321,8 @@
                         </tr>
                     </tfoot>
                 </table>
-            </div>
-        </div>
+</div>
+</div>
 
         <!-- 4. Financial Summary KPI Cards -->
         <div class="row g-3 g-md-4 mb-3 mb-md-4">
@@ -340,33 +331,33 @@
                     <span class="text-muted small fw-semibold">Total Workers Today</span>
                     <h3 class="fw-bold text-primary mb-1 mt-2" id="statTodayWorkers">0</h3>
                     <small class="text-muted text-truncate d-block" id="statTodayTradesDesc" title="No workers allocated">No workers allocated</small>
-                </div>
-            </div>
+</div>
+</div>
             <div class="col-12 col-sm-6 col-xl-3">
                 <div class="card-stat bg-white h-100 border">
                     <span class="text-muted small fw-semibold">Labour Wages Total</span>
                     <h3 class="fw-bold text-success mb-1 mt-2" id="statLabourTotal">₹0</h3>
                     <small class="text-muted text-truncate d-block" id="statLabourSubtext" title="Calculated daily wage total">Calculated daily wage total</small>
-                </div>
-            </div>
+</div>
+</div>
             <div class="col-12 col-sm-6 col-xl-3">
                 <div class="card-stat bg-white h-100 border">
                     <div class="d-flex justify-content-between align-items-center">
                         <span class="text-muted small fw-semibold">Painter & Electrician (AM Paid)</span>
                         <span id="statAmWageStatusBadge"><span class="badge bg-light text-muted border px-2 py-1">₹0 Paid by AM</span></span>
-                    </div>
+</div>
                     <h3 class="fw-bold mb-1 mt-2" id="statAmWageTotal">₹0</h3>
                     <small class="text-muted text-truncate d-block" id="statAmWageDesc" title="No Painter & Electrician payment made by Account Manager for this date">No Painter & Electrician payment made by Account Manager for this date</small>
-                </div>
-            </div>
+</div>
+</div>
             <div class="col-12 col-sm-6 col-xl-3">
                 <div class="card-stat bg-white h-100 border">
                     <span class="text-muted small fw-semibold">Same-Day Expenses</span>
                     <h3 class="fw-bold text-warning mb-1 mt-2" id="statExpensesTotal">₹0</h3>
                     <small class="text-muted">Water, tea & local purchases</small>
-                </div>
-            </div>
-        </div>
+</div>
+</div>
+</div>
 
         <!-- 5. Day-by-Day Historical Log / Continuity View -->
         <div class="card-custom p-3 p-md-4 bg-white">
@@ -376,14 +367,12 @@
                         <i class="bi bi-clock-history text-primary me-2"></i>Recent Daily Allocations for <span
                             id="historySiteTitle">Project Site</span>
                     </h6>
-                    <small class="text-muted">Day-by-day records saved here automatically roll into the Weekly Wages
-                        sheet.</small>
                 </div>
                 <div class="d-flex gap-2 align-items-center">
                     <span class="badge bg-light text-dark border px-2 py-1 align-self-center" id="historyDaysBadge">0 Days
                         Recorded</span>
-                </div>
-            </div>
+</div>
+</div>
 
             <!-- Date Range Filter Toolbar (Task 4) -->
             <div class="bg-light p-3 rounded-3 border mb-3">
@@ -391,35 +380,35 @@
                     <div class="col-12 col-lg-auto d-flex align-items-center gap-1">
                         <i class="bi bi-funnel-fill text-primary"></i>
                         <span class="fw-bold text-dark small">Filter Range:</span>
-                    </div>
+</div>
                     <div class="col-6 col-sm-auto">
                         <div class="input-group input-group-sm">
                             <span class="input-group-text bg-white text-muted">From</span>
                             <input type="date" class="form-control form-control-sm" id="historyFromDate"
                                 title="Filter From Date">
-                        </div>
-                    </div>
+</div>
+</div>
                     <div class="col-6 col-sm-auto">
                         <div class="input-group input-group-sm">
                             <span class="input-group-text bg-white text-muted">To</span>
                             <input type="date" class="form-control form-control-sm" id="historyToDate"
                                 title="Filter To Date">
-                        </div>
-                    </div>
+</div>
+</div>
                     <div class="col-12 col-sm-auto d-flex gap-2 flex-wrap ms-lg-auto">
                         <button type="button" class="btn btn-primary btn-sm px-2 py-1" id="historyFilterThisWeekBtn">
                             <i class="bi bi-calendar-week me-1"></i> Current Week
-                        </button>
+</button>
                         <button type="button" class="btn btn-outline-secondary btn-sm px-2 py-1" id="historyFilterAllBtn">
                             <i class="bi bi-calendar3 me-1"></i> All Dates
-                        </button>
+</button>
                         <button type="button" class="btn btn-outline-secondary btn-sm px-2 py-1" id="historyFilterResetBtn"
                             title="Reset filter to current week">
                             <i class="bi bi-arrow-counterclockwise"></i>
-                        </button>
-                    </div>
-                </div>
-            </div>
+</button>
+</div>
+</div>
+</div>
 
             <div class="table-responsive">
                 <table class="table table-custom table-hover align-middle mb-0">
@@ -438,10 +427,10 @@
                         <!-- Populated dynamically from saved records in database -->
                     </tbody>
                 </table>
-            </div>
-        </div>
+</div>
+</div>
 
-    </div>
+</div>
 @endsection
 
 @push('scripts')
@@ -581,10 +570,10 @@
                                     <div class="d-flex justify-content-between align-items-center gap-1 mb-1">
                                         <span class="fw-bold pill-day">${daysShort[i]}</span>
                                         ${badgeHtml}
-                                    </div>
+</div>
                                     <div class="small fw-semibold pill-sub">${curDate.getDate()} ${curDate.toLocaleString('en-US', { month: 'short' })}</div>
                                     <div class="small text-muted ta-text pill-sub" style="font-size: 0.7rem;">${daysTaShort[i]}</div>
-                                </div>
+</div>
                             `);
 
                     if (!isSunday && !isFuture) {
@@ -708,7 +697,7 @@
                 const chosen = new Date(val + 'T00:00:00');
                 // Check Sunday
                 if (chosen.getDay() === 0) {
-                    showToast('Sundays are disabled (Non-working day / விடுமுறை). Please select a working day.', 'warning');
+                    showToast('Sundays are disabled . Please select a working day.', 'warning');
                     $(this).val(todayStr);
                     if (fpInstance) fpInstance.setDate(todayStr, false);
                 } else if (val > todayStr) {
@@ -1015,15 +1004,15 @@
                                         <div class="avatar-circle ${visuals.badge} fw-bold"
                                             style="width:36px; height:36px; border-radius:50%; display:flex; align-items:center; justify-content:center;">
                                             <i class="bi ${visuals.icon}"></i>
-                                        </div>
+</div>
                                         <div>
                                             <div class="fw-bold text-dark ta-text d-flex align-items-center flex-wrap gap-1">
                                                 <span>${ta}</span>
                                                 ${paidBadgeHtml}
-                                            </div>
+</div>
                                             <small class="text-muted">${en || ''}</small>
-                                        </div>
-                                    </div>
+</div>
+</div>
                                 </td>
                                 <td class="text-center">
                                     <div class="input-group input-group-sm justify-content-center mx-auto" style="max-width: 140px;">
@@ -1034,11 +1023,11 @@
                                             data-master-rate="${defaultRate}"
                                             placeholder="Rate"
                                             title="Daily Wage Rate (Master: ₹${defaultRate.toLocaleString('en-IN')}). You can edit this rate optionally.">
-                                    </div>
+</div>
                                     <div class="d-flex justify-content-center align-items-center gap-1 mt-1">
                                         <small class="text-muted rate-master-label" style="font-size: 0.72rem;">Master: ₹${defaultRate.toLocaleString('en-IN')}</small>
                                         <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle rate-edited-badge ${isRateCustomized ? '' : 'd-none'}">Custom</span>
-                                    </div>
+</div>
                                 </td>
                                 <td>
                                     <div class="d-flex align-items-center justify-content-center gap-1"
@@ -1050,7 +1039,7 @@
                                             value="${countVal}" style="width: 70px;">
                                         <button type="button" class="btn btn-outline-secondary btn-sm px-2 step-btn"
                                             data-step="1"><i class="bi bi-plus"></i></button>
-                                    </div>
+</div>
                                 </td>
                                 <td class="text-end fw-bold text-dark labour-subtotal">₹${subtotal.toLocaleString('en-IN')}</td>
                                 <td>
@@ -1164,19 +1153,19 @@
                                 <div class="avatar-circle bg-warning bg-opacity-10 text-dark fw-bold mt-1"
                                     style="width:36px; height:36px; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
                                     <i class="bi bi-person-plus-fill text-warning"></i>
-                                </div>
+</div>
                                 <div class="flex-grow-1">
                                     <div class="d-flex align-items-center justify-content-between mb-1">
                                         <input type="text" class="form-control form-control-sm fw-semibold other-worker-cat-en"
                                             placeholder="Category Name in English * (e.g. Brick Mason / Helper)" required>
                                         ${paidBadgeHtml}
-                                    </div>
+</div>
                                     <div class="mt-1">
                                         <input type="text" class="form-control form-control-sm ta-text other-worker-cat-ta"
-                                               placeholder="Category Name in தமிழ் * (எ.கா. கொத்தனார் / மேஸ்திரி / சித்தாள்)" required style="font-size: 0.82rem;">
-                                    </div>
-                                </div>
-                            </div>
+                                               placeholder="Category Name in Tamil *" required style="font-size: 0.82rem;">
+</div>
+</div>
+</div>
                         </td>
                         <td class="text-center">
                             <div class="input-group input-group-sm justify-content-center mx-auto" style="max-width: 140px;">
@@ -1187,10 +1176,10 @@
                                     data-master-rate="0"
                                     placeholder="Rate"
                                     title="Daily Wage Rate for this new category.">
-                            </div>
+</div>
                             <div class="d-flex justify-content-center align-items-center gap-1 mt-1">
                                 <small class="text-muted" style="font-size: 0.72rem;">Master Wage</small>
-                            </div>
+</div>
                         </td>
                         <td>
                             <div class="d-flex align-items-center justify-content-center gap-1"
@@ -1202,7 +1191,7 @@
                                     value="1" style="width: 70px;">
                                 <button type="button" class="btn btn-outline-secondary btn-sm px-2 step-btn"
                                     data-step="1"><i class="bi bi-plus"></i></button>
-                            </div>
+</div>
                         </td>
                         <td class="text-end fw-bold text-dark labour-subtotal">₹0</td>
                         <td>
@@ -1231,11 +1220,11 @@
                                            value="${titleVal}"
                                            placeholder="e.g. Drinking Water Cans / Tea / Binding Wire"
                                            autocomplete="off">
-                                </div>
+</div>
                                 <div class="expense-suggestions-dropdown shadow rounded border d-none"
                                      style="background: #fff; max-height: 220px; overflow-y: auto;">
-                                </div>
-                            </div>
+</div>
+</div>
                         </td>
                         <td>
                             <input type="number" min="0" step="any" class="form-control form-control-sm text-center expense-qty"
@@ -1246,7 +1235,7 @@
                                 <span class="input-group-text">₹</span>
                                 <input type="number" min="0" step="any" class="form-control text-end fw-semibold expense-unit-price"
                                        value="${priceVal}" placeholder="Price">
-                            </div>
+</div>
                         </td>
                         <td class="text-end">
                             <span class="fw-bold text-dark fs-6 expense-subtotal-text">${formattedAmount}</span>
@@ -1295,7 +1284,7 @@
                         let emptyHtml = `
                             <div class="p-2 small text-muted text-center">
                                 <i class="bi bi-info-circle me-1"></i>No matching materials found in Master.
-                            </div>
+</div>
                         `;
                         if (trimmedQ) {
                             emptyHtml += `
@@ -1304,8 +1293,8 @@
                                             data-name="${escapeHtml(trimmedQ)}">
                                         <span class="text-truncate small"><i class="bi bi-plus-circle-fill text-success me-1"></i>Add "<strong>${escapeHtml(trimmedQ)}</strong>" to Master</span>
                                         <span class="badge bg-primary-subtle text-primary ms-1" style="font-size:0.65rem;">+ Add Master</span>
-                                    </button>
-                                </div>
+</button>
+</div>
                             `;
                         }
                         $dropdown.html(emptyHtml).removeClass('d-none');
@@ -1314,7 +1303,7 @@
                     }
 
                     let html = '<div class="py-1">';
-                    html += '<div class="px-2 py-1 small fw-bold text-uppercase text-muted" style="font-size:0.7rem; background:#f8fafc;"><i class="bi bi-box-seam me-1"></i>Materials Master (பொருட்கள்)</div>';
+                    html += '<div class="px-2 py-1 small fw-bold text-uppercase text-muted" style="font-size:0.7rem; background:#f8fafc;"><i class="bi bi-box-seam me-1"></i>Materials Master</div>';
                     matches.slice(0, 20).forEach(function (m) {
                         const unitName = (m.unit && typeof m.unit === 'object') ? (m.unit.name_en || m.unit.code || '') : (m.unit || '');
                         const unitBadge = unitName ? `<span class="badge bg-light text-secondary border ms-1" style="font-size:0.7rem;">${escapeHtml(unitName)}</span>` : '';
@@ -1325,9 +1314,9 @@
                                 <div class="text-truncate me-2">
                                     <span class="fw-semibold text-dark">${escapeHtml(m.name_en)}</span>
                                     ${taText}
-                                </div>
+</div>
                                 ${unitBadge}
-                            </a>
+</a>
                         `;
                     });
 
@@ -1343,8 +1332,8 @@
                                         data-name="${escapeHtml(trimmedQ)}">
                                     <span class="text-truncate small"><i class="bi bi-plus-circle text-success me-1"></i>Add "<strong>${escapeHtml(trimmedQ)}</strong>" to Materials Master</span>
                                     <span class="badge bg-secondary-subtle text-secondary" style="font-size:0.65rem;">New</span>
-                                </button>
-                            </div>
+</button>
+</div>
                         `;
                     }
 
@@ -1433,7 +1422,7 @@
                 list.empty();
                 list.append(`
                     <li>
-                        <h6 class="dropdown-header text-uppercase small fw-bold text-muted">Select Worker Category (பிரிவு)</h6>
+                        <h6 class="dropdown-header text-uppercase small fw-bold text-muted">Select Worker Category</h6>
                     </li>
                 `);
                 categories.forEach(function (category) {
@@ -1447,10 +1436,10 @@
                                     <div>
                                         <div class="fw-bold text-dark ta-text">+ ${category.name_ta}</div>
                                         <small class="text-muted">${category.name_en}</small>
-                                    </div>
+</div>
                                     <span class="badge bg-light text-dark border ms-2">₹${Math.round(category.daily_wage).toLocaleString('en-IN')}</span>
-                                </div>
-                            </a>
+</div>
+</a>
                         </li>
                     `);
                 });
@@ -1462,13 +1451,13 @@
                                 <div class="avatar-circle bg-primary bg-opacity-10 text-primary fw-bold me-2"
                                     style="width:32px; height:32px; border-radius:50%; display:flex; align-items:center; justify-content:center;">
                                     <i class="bi bi-plus-circle-dotted fs-5"></i>
-                                </div>
+</div>
                                 <div>
                                     <div class="fw-bold text-primary ta-text">+ மற்றவை (Others)</div>
                                     <small class="text-muted fw-normal">Add custom / new worker category</small>
-                                </div>
-                            </div>
-                        </a>
+</div>
+</div>
+</a>
                     </li>
                 `);
             }
@@ -1622,11 +1611,11 @@
                             let statusBadge = '';
 
                             if (isSunday) {
-                                badgeHtml = '<span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle me-1">Sunday Holiday (விடுமுறை)</span>';
+                                badgeHtml = '<span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle me-1">Sunday Holiday</span>';
                                 categoryText = 'Site holiday / No labour';
                                 statusBadge = '<span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle">Holiday</span>';
                             } else {
-                                badgeHtml = '<span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle me-1"><i class="bi bi-person-x me-1"></i>No Labour (தொழிலாளர்கள் இல்லை)</span>';
+                                badgeHtml = '<span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle me-1"><i class="bi bi-person-x me-1"></i>No Labour</span>';
                                 categoryText = 'Not allocated';
                                 statusBadge = '<span class="badge bg-light text-secondary border">No Labour</span>';
                             }
@@ -1880,13 +1869,13 @@
                         nameEn = $(this).find('.other-worker-cat-en').val().trim();
                         nameTa = $(this).find('.other-worker-cat-ta').val().trim();
                         if (!nameEn) {
-                            showToast('Category Name in English is required (ஆங்கில பெயர் அவசியம்).', 'warning');
+                            showToast('Category Name in English is required .', 'warning');
                             $(this).find('.other-worker-cat-en').focus();
                             hasValidationErr = true;
                             return false;
                         }
                         if (!nameTa) {
-                            showToast('Category Name in தமிழ் is required (தமிழ் பெயர் அவசியம்).', 'warning');
+                            showToast('Category Name in Tamil is required .', 'warning');
                             $(this).find('.other-worker-cat-ta').focus();
                             hasValidationErr = true;
                             return false;

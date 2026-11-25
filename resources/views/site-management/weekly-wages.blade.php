@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('title', 'Weekly Wages')
-@section('page_title', 'Weekly Wages Sheet (வாராந்திர கூலி அறிக்கை & தீர்வு)')
+@section('page_title', 'Weekly Wages Sheet ')
 
 @push('styles')
     <style>
@@ -50,95 +50,94 @@
             <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
                 <div>
                     <div class="d-flex align-items-center gap-2 flex-wrap">
-                        <h5 class="fw-bold mb-0 text-dark">Weekly Wages Sheet & Settlement (வாராந்திர கூலி கணக்கு)</h5>
-                        <span class="badge bg-secondary"><i class="bi bi-lock-fill me-1"></i>Labour Data: Read-Only (படிக்க
-                            மட்டும்)</span>
+                        <h5 class="fw-bold mb-0 text-dark">Weekly Wages Sheet & Settlement</h5>
+                        <span class="badge bg-secondary"><i class="bi bi-lock-fill me-1"></i>Labour Data: Read-Only</span>
                         <span class="badge bg-success-subtle text-success border border-success-subtle">Synced from Daily
                             Allocation</span>
-                    </div>
-                </div>
+</div>
+</div>
                 <div class="d-flex gap-2 flex-wrap">
                     <a href="{{ url('/daily-allocation') }}"
                         class="btn btn-outline-primary btn-sm d-flex align-items-center gap-1">
                         <i class="bi bi-calendar-plus"></i>
                         <span>Go to Daily Allocation</span>
-                    </a>
+</a>
                     <button class="btn btn-deiveni btn-sm d-flex align-items-center gap-1" id="saveWeeklySettlementBtn" {{ !$isWeekend ? 'disabled' : '' }}
                         title="{{ !$isWeekend ? 'Approve & Settle is only enabled on weekends (Saturday & Sunday)' : 'Approve & Settle Weekly Wages' }}">
                         <i class="bi bi-check2-all"></i>
                         <span>Approve & Settle Weekly Wages</span>
-                    </button>
-                </div>
-            </div>
-        </div>
+</button>
+</div>
+</div>
+</div>
 
         <!-- 1. Site Selector & Week Cycle Filter -->
         <div class="card-custom p-3 p-md-4 mb-3 mb-md-4 bg-white border-start border-4 border-primary">
             <div class="row g-3 align-items-center">
                 <div class="col-12 col-md-6">
                     <label class="form-label fw-bold text-dark mb-1">
-                        <i class="bi bi-building-gear text-primary me-1"></i> 1. Select Project Site (கட்டுமான தளம்) <span
+                        <i class="bi bi-building-gear text-primary me-1"></i> 1. Select Project Site  <span
                             class="text-danger">*</span>
-                    </label>
+</label>
                     <select class="form-select form-select-md fw-bold text-primary border-primary border-opacity-50"
                         id="weeklySiteSelect">
                         @forelse($sites as $site)
                             <option value="{{ $site->id }}" data-name="{{ $site->name }}" {{ $loop->first ? 'selected' : '' }}>
                                 {{ $site->name }} &bull; {{ $site->work_type ?? 'Construction' }} ({{ $site->location }})
-                            </option>
+</option>
                         @empty
                             <option value="" disabled selected>No project sites found</option>
                         @endforelse
                     </select>
-                </div>
+</div>
 
                 <div class="col-12 col-md-6">
                     <label class="form-label fw-bold text-dark mb-1 d-flex justify-content-between align-items-center">
-                        <span><i class="bi bi-calendar3-range text-primary me-1"></i> 2. Wage Week Cycle (வாரம்)</span>
+                        <span><i class="bi bi-calendar3-range text-primary me-1"></i> 2. Wage Week Cycle</span>
                         <span class="badge bg-primary-subtle text-primary border border-primary-subtle fw-semibold"
                             id="activeWeekBadge">Current Week</span>
-                    </label>
+</label>
                     <div class="input-group">
                         <button class="btn btn-outline-secondary btn-sm px-2" type="button" id="prevWeekBtn"
-                            title="Previous Week (முந்தைய வாரம்)">
+                            title="Previous Week ">
                             <i class="bi bi-chevron-left"></i>
-                        </button>
+</button>
                         <select class="form-select form-select-md fw-bold" id="weeklyCycleSelect">
                             <!-- Populated dynamically: Current week default, recent weeks, custom date selection -->
                         </select>
                         <button class="btn btn-outline-secondary btn-sm px-2" type="button" id="nextWeekBtn"
-                            title="Next Week (அடுத்த வாரம்)">
+                            title="Next Week ">
                             <i class="bi bi-chevron-right"></i>
-                        </button>
+</button>
                         <button class="btn btn-outline-primary btn-sm fw-semibold" type="button" id="currentWeekQuickBtn"
                             title="Go to Current Active Week">
                             Current
-                        </button>
+</button>
                         <button class="btn btn-outline-secondary btn-sm fw-semibold" type="button" id="customDateToggleBtn"
-                            title="Select any date or previous year (பிற தேதி / ஆண்டு தேர்வு)">
+                            title="Select any date or previous year ">
                             <i class="bi bi-calendar-date"></i> Custom
-                        </button>
-                    </div>
+</button>
+</div>
 
                     <!-- Custom Date Selection Drawer -->
                     <div id="customDateSection" class="p-2 mt-2 border rounded bg-light" style="display: none;">
                         <div class="d-flex flex-wrap align-items-center gap-2">
                             <label for="customWeekDatePicker" class="form-label small fw-bold mb-0 text-muted">
-                                <i class="bi bi-calendar-event text-primary me-1"></i> Select Any Date (தேதி):
-                            </label>
+                                <i class="bi bi-calendar-event text-primary me-1"></i> Select Any Date :
+</label>
                             <input type="date" class="form-control form-control-sm" id="customWeekDatePicker" style="max-width: 170px;" value="{{ date('Y-m-d') }}">
                             <button type="button" class="btn btn-sm btn-primary" id="loadCustomWeekBtn">
-                                <i class="bi bi-arrow-right-circle me-1"></i> Go to Week (செல்க)
-                            </button>
+                                <i class="bi bi-arrow-right-circle me-1"></i> Go to Week 
+</button>
                             <button type="button" class="btn btn-sm btn-outline-secondary" id="closeCustomWeekBtn" title="Close">
                                 <i class="bi bi-x-lg"></i>
-                            </button>
+</button>
                             <span class="small text-muted ms-auto" id="customWeekPreviewText"></span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+</div>
+</div>
+</div>
+</div>
+</div>
 
         <!-- 3. Day-by-Day Aggregated Table (READ-ONLY DISPLAY) -->
         <div class="card-custom p-3 p-md-4 mb-3 mb-md-4 bg-white">
@@ -149,23 +148,23 @@
                         <i class="bi bi-table text-primary me-2"></i>Day-by-Day Allocation & Daily Wage Records for <span
                             id="siteTitleDisplay" class="text-primary">Project Site</span>
                         <span class="badge bg-primary ms-2" id="tableWeekCycleBadge">Current Week</span>
-                    </h6>
+</h6>
                     <small class="text-muted" id="tableWeekRangeText">Updated from Daily Allocation entries for the selected
                         week period.</small>
-                </div>
+</div>
                 <div class="d-flex align-items-center gap-2">
                     <span class="badge bg-light text-dark border px-2 py-1" id="weekRangeDisplayBadge">Loading
                         Week...</span>
-                </div>
-            </div>
+</div>
+</div>
 
             <!-- Read Only Attendance Sheet (Client Understanding Level) -->
             <div class="table-responsive mb-3">
                 <table class="table table-custom table-bordered align-middle text-center mb-0" id="weeklyWageDisplayTable">
                     <thead class="table-light">
                         <tr class="text-nowrap">
-                            <th class="text-start" style="min-width: 140px;">DATE & DAY (தேதி)</th>
-                            <th class="text-start" style="min-width: 320px;">WORKER CATEGORY BREAKDOWN (பிரிவு விவரம்)</th>
+                            <th class="text-start" style="min-width: 140px;">DATE & DAY</th>
+                            <th class="text-start" style="min-width: 320px;">WORKER CATEGORY BREAKDOWN</th>
                             <th class="text-center" style="min-width: 130px;">TOTAL LABOUR</th>
                             <th class="text-end" style="min-width: 130px;">DAILY LABOUR WAGE</th>
                             <th class="text-end" style="min-width: 130px;">DAILY SITE EXPENSES</th>
@@ -195,35 +194,35 @@
                         </tr>
                     </tfoot>
                 </table>
-            </div>
+</div>
 
             <div class="d-flex align-items-center justify-content-between p-2 bg-light rounded-3 small">
                 <span class="text-muted"><i class="bi bi-info-circle text-primary me-1"></i> Working days strictly Monday to Saturday. Entries are saved in <a href="{{ url('/daily-allocation') }}" class="fw-bold text-primary">Daily Allocation</a>.</span>
                 <span class="fw-semibold text-dark">Active Work Days: <strong id="footRecordedDaysCount">0 of 6 Days Recorded</strong></span>
-            </div>
-        </div>
+</div>
+</div>
 
-        <!-- 3.1 Weekly Category-Wise Salary Calculation (பிரிவு வாரியாக கூலி கணக்கீடு) -->
+        <!-- 3.1 Weekly Category-Wise Salary Calculation -->
         <div class="card-custom p-3 p-md-4 mb-3 mb-md-4 bg-white border-start border-4 border-success">
             <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-2 mb-3 pb-2 border-bottom">
                 <div>
                     <h6 class="fw-bold mb-0 text-dark">
-                        <i class="bi bi-calculator-fill text-success me-2"></i>Weekly Labour Wage Calculation by Trade (பிரிவு வாரியாக கூலி கணக்கீடு)
-                    </h6>
-                </div>
+                        <i class="bi bi-calculator-fill text-success me-2"></i>Weekly Labour Wage Calculation by Trade 
+</h6>
+</div>
                 <div>
                     <span class="badge bg-success-subtle text-success border border-success-subtle fs-6 fw-bold px-3 py-2" id="badgeTotalLabourWages">₹0</span>
-                </div>
-            </div>
+</div>
+</div>
 
             <div class="table-responsive mb-0">
                 <table class="table table-custom table-bordered align-middle mb-0" id="weeklyCategorySalaryTable">
                     <thead class="table-light">
                         <tr>
-                            <th class="text-start" style="min-width: 220px;">Worker Category (தொழிலாளர் பிரிவு)</th>
-                            <th class="text-center" style="min-width: 140px;">Total Workers (மொத்த ஆட்கள்)</th>
-                            <th class="text-end" style="min-width: 160px;">Daily Wage Rate (ஒரு ஆள் கூலி)</th>
-                            <th class="text-end" style="min-width: 180px;">Total Salary (மொத்த கூலி)</th>
+                            <th class="text-start" style="min-width: 220px;">Worker Category</th>
+                            <th class="text-center" style="min-width: 140px;">Total Workers</th>
+                            <th class="text-end" style="min-width: 160px;">Daily Wage Rate</th>
+                            <th class="text-end" style="min-width: 180px;">Total Salary</th>
                         </tr>
                     </thead>
                     <tbody id="weeklyCategorySalaryTbody">
@@ -231,15 +230,15 @@
                     </tbody>
                     <tfoot class="table-light fw-bold">
                         <tr>
-                            <td class="text-start">Total Labour Salary (தொழிலாளர் மொத்த கூலி):</td>
+                            <td class="text-start">Total Labour Salary :</td>
                             <td class="text-center text-primary" id="catSalaryTotalWorkers">0 Workers</td>
                             <td></td>
                             <td class="text-end fs-6 text-success fw-bold" id="catSalaryTotalAmount">₹0</td>
                         </tr>
                     </tfoot>
                 </table>
-            </div>
-        </div>
+</div>
+</div>
 
         <!-- 4. ADDITIONAL & DAILY WEEKLY EXPENSES SECTION -->
         <div class="card-custom p-3 p-md-4 mb-3 mb-md-4 bg-white border-start border-4 border-warning">
@@ -249,17 +248,17 @@
                     <div class="d-flex align-items-center gap-2">
                         <h6 class="fw-bold mb-0 text-dark">
                             <i class="bi bi-cup-hot-fill text-warning me-2"></i>Weekly Site Expenses & Settlement
-                            Adjustments (வாராந்திர & தினசரி தள செலவுகள்)
-                        </h6>
+                            Adjustments 
+</h6>
                         <span class="badge bg-warning text-dark">Weekly Settlement Expenses</span>
-                    </div>
-                </div>
+</div>
+</div>
                 <div class="d-flex align-items-center gap-2">
                     <button type="button" class="btn btn-warning btn-sm text-dark fw-semibold" id="addWeeklyExpenseBtn">
                         <i class="bi bi-plus-lg me-1"></i> Add Expense
-                    </button>
-                </div>
-            </div>
+</button>
+</div>
+</div>
 
             <!-- Common expense suggestions datalist -->
             <datalist id="expenseCommonSuggestions">
@@ -278,10 +277,10 @@
                     <thead class="bg-light text-muted small">
                         <tr>
                             <th class="text-start" style="min-width: 250px;">Expense Item / Extra Purchase Description
-                                (செலவு விவரம்)</th>
-                            <th style="width: 140px;" class="text-center">Quantity / Hours (அளவு)</th>
-                            <th style="width: 160px;" class="text-end">Unit Price (விலை)</th>
-                            <th class="text-end" style="width: 160px;">Final Price (ரூ.)</th>
+</th>
+                            <th style="width: 140px;" class="text-center">Quantity / Hours</th>
+                            <th style="width: 160px;" class="text-end">Unit Price</th>
+                            <th class="text-end" style="width: 160px;">Final Price (₹)</th>
                             <th style="width: 120px;" class="text-center">Type / Action</th>
                         </tr>
                     </thead>
@@ -290,24 +289,24 @@
                     </tbody>
                     <tfoot class="bg-light">
                         <tr class="text-muted small">
-                            <td colspan="3" class="fw-semibold text-end">Daily Allocation Expenses (தள தினசரி செலவுகள்):</td>
+                            <td colspan="3" class="fw-semibold text-end">Daily Allocation Expenses :</td>
                             <td class="text-end fw-bold text-dark" id="footDailyExpensesSubtotal">₹0</td>
                             <td class="text-center"><span class="badge bg-success-subtle text-success">Daily Synced</span></td>
                         </tr>
                         <tr class="text-muted small">
-                            <td colspan="3" class="fw-semibold text-end">Additional Weekly Expenses (கூடுதல் வாராந்திர செலவுகள்):</td>
+                            <td colspan="3" class="fw-semibold text-end">Additional Weekly Expenses :</td>
                             <td class="text-end fw-bold text-warning" id="totalWeeklyExtraBadge">₹0</td>
                             <td class="text-center"><span class="badge bg-warning-subtle text-warning">Manual</span></td>
                         </tr>
                         <tr class="table-warning fw-bold">
-                            <td colspan="3" class="fw-bold text-end">Total Combined Site Expenses (மொத்த தள செலவுகள்):</td>
+                            <td colspan="3" class="fw-bold text-end">Total Combined Site Expenses :</td>
                             <td class="text-end fw-bold text-dark fs-6" id="totalCombinedExpensesBadge">₹0</td>
                             <td></td>
                         </tr>
                     </tfoot>
                 </table>
-            </div>
-        </div>
+</div>
+</div>
 
         <!-- 5. Weekly Net Financial Settlement Summary -->
         <div class="row g-3 g-md-4 mb-3 mb-md-4">
@@ -316,33 +315,33 @@
                     <div class="d-flex justify-content-between align-items-start">
                         <span class="text-muted small fw-semibold">1. Cumulative Labour Wages</span>
                         <i class="bi bi-lock-fill text-muted" title="Read Only from Daily Allocation"></i>
-                    </div>
+</div>
                     <h3 class="fw-bold text-dark mb-1 mt-2" id="sumLabourWages">₹0</h3>
                     <small class="text-muted">From Daily Allocation</small>
-                </div>
-            </div>
+</div>
+</div>
 
             <div class="col-12 col-md-3">
                 <div class="card-stat bg-white h-100 border">
                     <div class="d-flex justify-content-between align-items-start">
                         <span class="text-muted small fw-semibold">2. Daily Site Expenses</span>
                         <i class="bi bi-lock-fill text-muted" title="Read Only from Daily Allocation"></i>
-                    </div>
+</div>
                     <h3 class="fw-bold text-secondary mb-1 mt-2" id="sumDailyExpenses">₹0</h3>
                     <small class="text-muted">Daily water cans, tea & petty</small>
-                </div>
-            </div>
+</div>
+</div>
 
             <div class="col-12 col-md-3">
                 <div class="card-stat bg-white h-100 border border-warning">
                     <div class="d-flex justify-content-between align-items-start">
                         <span class="text-muted small fw-semibold">3. Additional Weekly Expenses</span>
                         <span class="badge bg-warning text-dark"><i class="bi bi-pencil-fill"></i> Added</span>
-                    </div>
+</div>
                     <h3 class="fw-bold text-warning mb-1 mt-2" id="sumWeeklyExpenses">₹0</h3>
                     <small class="text-muted">Added directly on this page</small>
-                </div>
-            </div>
+</div>
+</div>
 
             <div class="col-12 col-md-3">
                 <div class="card-stat bg-primary text-white h-100"
@@ -350,12 +349,12 @@
                     <div class="d-flex justify-content-between align-items-start">
                         <span class="text-white-50 small fw-semibold">Net Weekly Settlement Total</span>
                         <i class="bi bi-wallet2 text-white-50"></i>
-                    </div>
+</div>
                     <h3 class="fw-bold text-white mb-1 mt-2" id="sumNetWeeklyPayout">₹0</h3>
                     <small class="text-white-50">Total wage & site payout</small>
-                </div>
-            </div>
-        </div>
+</div>
+</div>
+</div>
 
         <!-- Action Settlement Bar -->
         <div
@@ -365,22 +364,22 @@
                         Site</span>?</strong>
                 <small class="text-muted">Approving will confirm the ₹<span id="settleTotalText">0</span> payout for this
                     weekly period.</small>
-            </div>
+</div>
             <div class="d-flex gap-2 flex-wrap">
                 <a href="{{ url('/daily-allocation') }}"
                     class="btn btn-outline-secondary btn-sm d-flex align-items-center gap-1">
                     <i class="bi bi-arrow-left"></i>
                     <span>Back to Daily Allocation</span>
-                </a>
+</a>
                 <button type="button" class="btn btn-deiveni btn-sm d-flex align-items-center gap-1" id="btnFinalApprove" {{ !$isWeekend ? 'disabled' : '' }}
-                    title="{{ !$isWeekend ? 'Approve & Settle is only enabled on weekends (Saturday & Sunday)' : 'Approve & Settle Week (வார கூலி உறுதி)' }}">
+                    title="{{ !$isWeekend ? 'Approve & Settle is only enabled on weekends (Saturday & Sunday)' : 'Approve & Settle Week ' }}">
                     <i class="bi bi-check2-circle fs-6"></i>
-                    <span>Approve & Settle Week (வார கூலி உறுதி)</span>
-                </button>
-            </div>
-        </div>
+                    <span>Approve & Settle Week</span>
+</button>
+</div>
+</div>
 
-    </div>
+</div>
 @endsection
 
 @push('scripts')
@@ -501,7 +500,7 @@
                 });
 
                 // Add Custom Date Selection Trigger Item
-                select.append(`<option value="custom_picker_action" class="text-primary fw-bold">📅 Pick Any Date / Year (பிற தேதி/ஆண்டு தேர்வு)...</option>`);
+                select.append(`<option value="custom_picker_action" class="text-primary fw-bold">📅 Pick Any Date / Year ...</option>`);
 
                 // If previous value was a custom range not in predefined offsets, preserve it
                 if (previousVal && previousVal !== 'custom_picker_action' && !select.find(`option[value="${previousVal}"]`).length) {
@@ -751,7 +750,7 @@
                                     <td class="text-start">
                                         <div class="d-flex flex-wrap align-items-center mb-1">
                                             ${workerPills}
-                                        </div>
+</div>
                                         ${expensePills ? `<div class="d-flex flex-wrap align-items-center mt-1 pt-1 border-top border-light">${expensePills}</div>` : ''}
                                         <div class="small text-muted" style="font-size: 0.75rem;">Recorded via Daily Allocation</div>
                                     </td>
@@ -767,7 +766,7 @@
                                     <td class="text-center">
                                         <a href="{{ url('/daily-allocation') }}?site_id=${siteId}&date=${dayDateStr}" class="btn btn-outline-secondary btn-sm py-0 px-2" style="font-size: 0.75rem;" title="View in Daily Allocation">
                                             <i class="bi bi-eye me-1"></i>View
-                                        </a>
+</a>
                                     </td>
                                 </tr>
                             `;
@@ -779,14 +778,14 @@
 
                             if (isSunday) {
                                 categoryBreakdownHtml = `
-                                    <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle">Sunday Holiday (விடுமுறை)</span>
+                                    <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle">Sunday Holiday</span>
                                     <div class="small text-muted mt-1" style="font-size: 0.75rem;">Site holiday / No labour</div>
                                 `;
                                 statusBadge = `<span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle">Holiday</span>`;
                                 actionHtml = `<span class="text-muted">—</span>`;
                             } else {
                                 categoryBreakdownHtml = `
-                                    <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle"><i class="bi bi-person-x me-1"></i>No Labour (தொழிலாளர்கள் இல்லை)</span>
+                                    <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle"><i class="bi bi-person-x me-1"></i>No Labour</span>
                                     <div class="small text-muted mt-1" style="font-size: 0.75rem;">Not allocated</div>
                                 `;
                                 statusBadge = `<span class="badge bg-light text-secondary border">No Labour</span>`;
@@ -829,7 +828,7 @@
                     $('#footTotalDailyCumulative').text('₹' + Math.round(dailyCumulative).toLocaleString('en-IN'));
                     $('#footRecordedDaysCount').text(`${recordedDaysCount} of ${days.length} Days Recorded`);
 
-                    // Populate Table 2: Category Salary Calculation Table (பிரிவு வாரியாக கூலி கணக்கீடு)
+                    // Populate Table 2: Category Salary Calculation Table 
                     const catSalaryTbody = $('#weeklyCategorySalaryTbody');
                     catSalaryTbody.empty();
 
@@ -867,7 +866,7 @@
                                 <td class="text-center">
                                     <span class="badge bg-primary-subtle text-primary border border-primary-subtle fs-6 px-3 py-1 fw-bold">
                                         ${catWorkers} Workers
-                                    </span>
+</span>
                                 </td>
                                 <td class="text-end fw-semibold text-dark fs-6">
                                     ₹${Math.round(rate).toLocaleString('en-IN')} <small class="text-muted">/ Day</small>
@@ -932,7 +931,7 @@
                                     <td class="text-center">
                                         <span class="badge bg-success-subtle text-success border border-success-subtle py-1 px-2" title="Automatically synced from Daily Allocation">
                                             <i class="bi bi-check2-circle me-1"></i>Daily Synced
-                                        </span>
+</span>
                                     </td>
                                 </tr>
                             `;
@@ -959,7 +958,7 @@
                                         <div class="input-group input-group-sm">
                                             <span class="input-group-text">₹</span>
                                             <input type="number" min="0" step="any" class="form-control text-end fw-semibold weekly-exp-unit-price" value="${unitPrice}" placeholder="Price">
-                                        </div>
+</div>
                                     </td>
                                     <td class="text-end">
                                         <span class="fw-bold text-dark fs-6 weekly-exp-subtotal-text">₹${cost.toLocaleString('en-IN')}</span>
@@ -1099,7 +1098,7 @@
                             <div class="input-group input-group-sm">
                                 <span class="input-group-text">₹</span>
                                 <input type="number" min="0" step="any" class="form-control text-end fw-semibold weekly-exp-unit-price" placeholder="Price">
-                            </div>
+</div>
                         </td>
                         <td class="text-end">
                             <span class="fw-bold text-dark fs-6 weekly-exp-subtotal-text">₹0</span>

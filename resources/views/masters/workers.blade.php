@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('title', 'Workers Master')
-@section('page_title', 'Workers Master (தொழிலாளர்கள் முதன்மை பட்டியல்)')
+@section('page_title', 'Workers Master ')
 
 @section('content')
 <div class="container-fluid px-0">
@@ -10,18 +10,18 @@
     <div class="card-custom p-3 mb-4 bg-white">
         <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
             <div>
-                <h5 class="fw-bold mb-0 text-dark">Worker Directory (தொழிலாளர்கள் விவரம்)</h5>
-            </div>
+                <h5 class="fw-bold mb-0 text-dark">Worker Directory</h5>
+</div>
             <div class="d-flex gap-2">
                 <button class="btn btn-outline-secondary btn-sm" id="exportWorkersBtn">
                     <i class="bi bi-file-earmark-spreadsheet me-1"></i> Export
-                </button>
+</button>
                 <button class="btn btn-deiveni btn-sm" data-bs-toggle="modal" data-bs-target="#workerModal" id="addWorkerBtn">
                     <i class="bi bi-person-plus-fill me-1"></i> Add New Worker
-                </button>
-            </div>
-        </div>
-    </div>
+</button>
+</div>
+</div>
+</div>
 
     <!-- Filter & Search Card -->
     <div class="card-custom p-3 mb-4 bg-white">
@@ -30,11 +30,11 @@
                 <div class="input-group input-group-sm">
                     <span class="input-group-text bg-light border-end-0"><i class="bi bi-search text-muted"></i></span>
                     <input type="text" class="form-control border-start-0 ps-0" id="workerSearchInput" placeholder="Search by English / தமிழ் Name, Phone...">
-                </div>
-            </div>
+</div>
+</div>
             <div class="col-6 col-md-3">
                 <select class="form-select form-select-sm" id="categoryFilter">
-                    <option value="">All Categories (அனைத்து பிரிவுகள்)</option>
+                    <option value="">All Categories</option>
                     <option value="Mason / மேஸ்திரி">Mason / மேஸ்திரி</option>
                     <option value="Helper / சித்தாள்">Helper / சித்தாள்</option>
                     <option value="Painter / பெயிண்டர்">Painter / பெயிண்டர்</option>
@@ -43,25 +43,25 @@
                     <option value="Bar Bender / கம்பிகட்டுனர்">Bar Bender / கம்பிகட்டுனர்</option>
                     <option value="Plumber / பிளம்பர்">Plumber / பிளம்பர்</option>
                 </select>
-            </div>
+</div>
             <div class="col-6 col-md-2">
                 <select class="form-select form-select-sm" id="statusFilter">
-                    <option value="">All Status (அனைத்து நிலை)</option>
-                    <option value="Active">Active (பணியில் உள்ளவர்)</option>
-                    <option value="Inactive">Inactive (நிறுத்தப்பட்டவர்)</option>
+                    <option value="">All Status</option>
+                    <option value="Active">Active</option>
+                    <option value="Inactive">Inactive</option>
                 </select>
-            </div>
+</div>
             <div class="col-6 col-md-1">
                 <button type="button" class="btn btn-outline-secondary btn-sm px-2 py-1" id="historyFilterResetBtn"
                 title="Reset filters">
                 <i class="bi bi-arrow-counterclockwise"></i>
-                </button>
-            </div>
+</button>
+</div>
             <div class="col-6 col-md-2 text-md-end">
                 <span class="small text-muted" id="workerCountBadge">Showing <strong class="text-dark">10</strong> workers</span>
-            </div>
-        </div>
-    </div>
+</div>
+</div>
+</div>
 
     <!-- Workers Table -->
     <div class="card-custom overflow-hidden">
@@ -70,10 +70,10 @@
                 <thead>
                     <tr>
                         <th>#</th>
-                        <th>Worker Name (English & தமிழ்)</th>
-                        <th>Category (தொழில் பிரிவு)</th>
+                        <th>Worker Name</th>
+                        <th>Category</th>
                         <th>Phone No</th>
-                        <th>Default Daily Wage (ரூ.)</th>
+                        <th>Default Daily Wage (₹)</th>
                         <th>Status</th>
                         <th class="text-end" style="width: 70px;">Actions</th>
                     </tr>
@@ -94,13 +94,13 @@
                             <div class="dropdown table-action-dropdown">
                                 <button class="btn table-action-btn" type="button" data-bs-toggle="dropdown" aria-expanded="false" title="Actions">
                                     <i class="bi bi-three-dots-vertical"></i>
-                                </button>
+</button>
                                 <ul class="dropdown-menu dropdown-menu-end shadow-sm">
                                     <li><button class="dropdown-item edit-worker-btn" type="button"><i class="bi bi-pencil text-primary me-2"></i>Edit</button></li>
                                     <li><hr class="dropdown-divider my-1"></li>
                                     <li><button class="dropdown-item text-danger delete-worker-btn" type="button"><i class="bi bi-trash3 text-danger me-2"></i>Delete</button></li>
                                 </ul>
-                            </div>
+</div>
                         </td>
                     </tr>
                     <tr data-id="2" data-name-en="Venkatesan" data-name-ta="வெங்கடேசன்" data-cat="Mason / மேஸ்திரி" data-phone="98402 34567" data-wage="1200" data-status="Active">
@@ -117,13 +117,13 @@
                             <div class="dropdown table-action-dropdown">
                                 <button class="btn table-action-btn" type="button" data-bs-toggle="dropdown" aria-expanded="false" title="Actions">
                                     <i class="bi bi-three-dots-vertical"></i>
-                                </button>
+</button>
                                 <ul class="dropdown-menu dropdown-menu-end shadow-sm">
                                     <li><button class="dropdown-item edit-worker-btn" type="button"><i class="bi bi-pencil text-primary me-2"></i>Edit</button></li>
                                     <li><hr class="dropdown-divider my-1"></li>
                                     <li><button class="dropdown-item text-danger delete-worker-btn" type="button"><i class="bi bi-trash3 text-danger me-2"></i>Delete</button></li>
                                 </ul>
-                            </div>
+</div>
                         </td>
                     </tr>
                     <tr data-id="3" data-name-en="Suresh" data-name-ta="சுரேஷ்" data-cat="Helper / சித்தாள்" data-phone="98403 45678" data-wage="900" data-status="Active">
@@ -140,13 +140,13 @@
                             <div class="dropdown table-action-dropdown">
                                 <button class="btn table-action-btn" type="button" data-bs-toggle="dropdown" aria-expanded="false" title="Actions">
                                     <i class="bi bi-three-dots-vertical"></i>
-                                </button>
+</button>
                                 <ul class="dropdown-menu dropdown-menu-end shadow-sm">
                                     <li><button class="dropdown-item edit-worker-btn" type="button"><i class="bi bi-pencil text-primary me-2"></i>Edit</button></li>
                                     <li><hr class="dropdown-divider my-1"></li>
                                     <li><button class="dropdown-item text-danger delete-worker-btn" type="button"><i class="bi bi-trash3 text-danger me-2"></i>Delete</button></li>
                                 </ul>
-                            </div>
+</div>
                         </td>
                     </tr>
                     <tr data-id="4" data-name-en="Murugan" data-name-ta="முருகன்" data-cat="Helper / சித்தாள்" data-phone="98404 56789" data-wage="900" data-status="Active">
@@ -163,13 +163,13 @@
                             <div class="dropdown table-action-dropdown">
                                 <button class="btn table-action-btn" type="button" data-bs-toggle="dropdown" aria-expanded="false" title="Actions">
                                     <i class="bi bi-three-dots-vertical"></i>
-                                </button>
+</button>
                                 <ul class="dropdown-menu dropdown-menu-end shadow-sm">
                                     <li><button class="dropdown-item edit-worker-btn" type="button"><i class="bi bi-pencil text-primary me-2"></i>Edit</button></li>
                                     <li><hr class="dropdown-divider my-1"></li>
                                     <li><button class="dropdown-item text-danger delete-worker-btn" type="button"><i class="bi bi-trash3 text-danger me-2"></i>Delete</button></li>
                                 </ul>
-                            </div>
+</div>
                         </td>
                     </tr>
                     <tr data-id="5" data-name-en="Priya" data-name-ta="பிரியா" data-cat="Helper / சித்தாள்" data-phone="98405 67890" data-wage="850" data-status="Active">
@@ -186,13 +186,13 @@
                             <div class="dropdown table-action-dropdown">
                                 <button class="btn table-action-btn" type="button" data-bs-toggle="dropdown" aria-expanded="false" title="Actions">
                                     <i class="bi bi-three-dots-vertical"></i>
-                                </button>
+</button>
                                 <ul class="dropdown-menu dropdown-menu-end shadow-sm">
                                     <li><button class="dropdown-item edit-worker-btn" type="button"><i class="bi bi-pencil text-primary me-2"></i>Edit</button></li>
                                     <li><hr class="dropdown-divider my-1"></li>
                                     <li><button class="dropdown-item text-danger delete-worker-btn" type="button"><i class="bi bi-trash3 text-danger me-2"></i>Delete</button></li>
                                 </ul>
-                            </div>
+</div>
                         </td>
                     </tr>
                     <tr data-id="6" data-name-en="Karthik" data-name-ta="கார்த்திக்" data-cat="Painter / பெயிண்டர்" data-phone="98406 78901" data-wage="1100" data-status="Active">
@@ -209,13 +209,13 @@
                             <div class="dropdown table-action-dropdown">
                                 <button class="btn table-action-btn" type="button" data-bs-toggle="dropdown" aria-expanded="false" title="Actions">
                                     <i class="bi bi-three-dots-vertical"></i>
-                                </button>
+</button>
                                 <ul class="dropdown-menu dropdown-menu-end shadow-sm">
                                     <li><button class="dropdown-item edit-worker-btn" type="button"><i class="bi bi-pencil text-primary me-2"></i>Edit</button></li>
                                     <li><hr class="dropdown-divider my-1"></li>
                                     <li><button class="dropdown-item text-danger delete-worker-btn" type="button"><i class="bi bi-trash3 text-danger me-2"></i>Delete</button></li>
                                 </ul>
-                            </div>
+</div>
                         </td>
                     </tr>
                     <tr data-id="7" data-name-en="Shanmugam" data-name-ta="சண்முகம்" data-cat="Electrician / எலக்ட்ரீஷியன்" data-phone="98407 89012" data-wage="1300" data-status="Active">
@@ -232,13 +232,13 @@
                             <div class="dropdown table-action-dropdown">
                                 <button class="btn table-action-btn" type="button" data-bs-toggle="dropdown" aria-expanded="false" title="Actions">
                                     <i class="bi bi-three-dots-vertical"></i>
-                                </button>
+</button>
                                 <ul class="dropdown-menu dropdown-menu-end shadow-sm">
                                     <li><button class="dropdown-item edit-worker-btn" type="button"><i class="bi bi-pencil text-primary me-2"></i>Edit</button></li>
                                     <li><hr class="dropdown-divider my-1"></li>
                                     <li><button class="dropdown-item text-danger delete-worker-btn" type="button"><i class="bi bi-trash3 text-danger me-2"></i>Delete</button></li>
                                 </ul>
-                            </div>
+</div>
                         </td>
                     </tr>
                     <tr data-id="8" data-name-en="Arumugam" data-name-ta="ஆறுமுகம்" data-cat="Carpenter / தச்சர்" data-phone="98408 90123" data-wage="1350" data-status="Active">
@@ -255,13 +255,13 @@
                             <div class="dropdown table-action-dropdown">
                                 <button class="btn table-action-btn" type="button" data-bs-toggle="dropdown" aria-expanded="false" title="Actions">
                                     <i class="bi bi-three-dots-vertical"></i>
-                                </button>
+</button>
                                 <ul class="dropdown-menu dropdown-menu-end shadow-sm">
                                     <li><button class="dropdown-item edit-worker-btn" type="button"><i class="bi bi-pencil text-primary me-2"></i>Edit</button></li>
                                     <li><hr class="dropdown-divider my-1"></li>
                                     <li><button class="dropdown-item text-danger delete-worker-btn" type="button"><i class="bi bi-trash3 text-danger me-2"></i>Delete</button></li>
                                 </ul>
-                            </div>
+</div>
                         </td>
                     </tr>
                     <tr data-id="9" data-name-en="Mani" data-name-ta="மணி" data-cat="Bar Bender / கம்பிகட்டுனர்" data-phone="98409 01234" data-wage="1250" data-status="Active">
@@ -278,13 +278,13 @@
                             <div class="dropdown table-action-dropdown">
                                 <button class="btn table-action-btn" type="button" data-bs-toggle="dropdown" aria-expanded="false" title="Actions">
                                     <i class="bi bi-three-dots-vertical"></i>
-                                </button>
+</button>
                                 <ul class="dropdown-menu dropdown-menu-end shadow-sm">
                                     <li><button class="dropdown-item edit-worker-btn" type="button"><i class="bi bi-pencil text-primary me-2"></i>Edit</button></li>
                                     <li><hr class="dropdown-divider my-1"></li>
                                     <li><button class="dropdown-item text-danger delete-worker-btn" type="button"><i class="bi bi-trash3 text-danger me-2"></i>Delete</button></li>
                                 </ul>
-                            </div>
+</div>
                         </td>
                     </tr>
                     <tr data-id="10" data-name-en="Ganesan" data-name-ta="கணேசன்" data-cat="Plumber / பிளம்பர்" data-phone="98410 12345" data-wage="1200" data-status="Inactive">
@@ -301,19 +301,19 @@
                             <div class="dropdown table-action-dropdown">
                                 <button class="btn table-action-btn" type="button" data-bs-toggle="dropdown" aria-expanded="false" title="Actions">
                                     <i class="bi bi-three-dots-vertical"></i>
-                                </button>
+</button>
                                 <ul class="dropdown-menu dropdown-menu-end shadow-sm">
                                     <li><button class="dropdown-item edit-worker-btn" type="button"><i class="bi bi-pencil text-primary me-2"></i>Edit</button></li>
                                     <li><hr class="dropdown-divider my-1"></li>
                                     <li><button class="dropdown-item text-danger delete-worker-btn" type="button"><i class="bi bi-trash3 text-danger me-2"></i>Delete</button></li>
                                 </ul>
-                            </div>
+</div>
                         </td>
                     </tr>
                 </tbody>
             </table>
-        </div>
-    </div>
+</div>
+</div>
 
 </div>
 
@@ -322,9 +322,9 @@
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title fw-bold" id="workerModalTitle">Add New Worker (புதிய தொழிலாளி)</h5>
+                <h5 class="modal-title fw-bold" id="workerModalTitle">Add New Worker</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
+</div>
             <form id="workerForm">
                 <div class="modal-body">
                     <input type="hidden" id="workerEditId">
@@ -332,13 +332,13 @@
                         <div class="col-12 col-md-6">
                             <label class="form-label small fw-semibold">Name in English <span class="text-danger">*</span></label>
                             <input type="text" class="form-control" id="workerNameEn" placeholder="e.g. Ramesh" required>
-                        </div>
+</div>
                         <div class="col-12 col-md-6">
-                            <label class="form-label small fw-semibold">Name in தமிழ் (Tamil) <span class="text-danger">*</span></label>
+                            <label class="form-label small fw-semibold">Name in Tamil (Tamil) <span class="text-danger">*</span></label>
                             <input type="text" class="form-control ta-text" id="workerNameTa" placeholder="எ.கா. ரமேஷ்" required>
-                        </div>
+</div>
                         <div class="col-12 col-md-6">
-                            <label class="form-label small fw-semibold">Category (தொழில் பிரிவு) <span class="text-danger">*</span></label>
+                            <label class="form-label small fw-semibold">Category  <span class="text-danger">*</span></label>
                             <select class="form-select" id="workerCategory" required>
                                 <option value="Mason / மேஸ்திரி">Mason / மேஸ்திரி</option>
                                 <option value="Helper / சித்தாள்">Helper / சித்தாள்</option>
@@ -348,34 +348,34 @@
                                 <option value="Bar Bender / கம்பிகட்டுனர்">Bar Bender / கம்பிகட்டுனர்</option>
                                 <option value="Plumber / பிளம்பர்">Plumber / பிளம்பர்</option>
                             </select>
-                        </div>
+</div>
                         <div class="col-12 col-md-6">
-                            <label class="form-label small fw-semibold">Default Daily Wage (ரூ.) <span class="text-danger">*</span></label>
+                            <label class="form-label small fw-semibold">Default Daily Wage (₹) <span class="text-danger">*</span></label>
                             <div class="input-group">
                                 <span class="input-group-text">₹</span>
                                 <input type="number" class="form-control" id="workerWage" placeholder="1200" required min="100">
-                            </div>
-                        </div>
+</div>
+</div>
                         <div class="col-12 col-md-6">
                             <label class="form-label small fw-semibold">Phone Number</label>
                             <input type="tel" class="form-control" id="workerPhone" placeholder="98400 00000">
-                        </div>
+</div>
                         <div class="col-12 col-md-6">
                             <label class="form-label small fw-semibold">Status</label>
                             <select class="form-select" id="workerStatus">
-                                <option value="Active">Active (பணியில் உள்ளவர்)</option>
-                                <option value="Inactive">Inactive (நிறுத்தப்பட்டவர்)</option>
+                                <option value="Active">Active</option>
+                                <option value="Inactive">Inactive</option>
                             </select>
-                        </div>
-                    </div>
-                </div>
+</div>
+</div>
+</div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-light btn-sm" data-bs-dismiss="modal">Cancel</button>
                     <button type="submit" class="btn btn-deiveni btn-sm" id="saveWorkerBtn">Save Worker</button>
-                </div>
+</div>
             </form>
-        </div>
-    </div>
+</div>
+</div>
 </div>
 @endsection
 
@@ -425,7 +425,7 @@ $(document).ready(function() {
 
     // Reset Add Modal
     $('#addWorkerBtn').on('click', function() {
-        $('#workerModalTitle').text('Add New Worker (புதிய தொழிலாளி)');
+        $('#workerModalTitle').text('Add New Worker ');
         $('#workerEditId').val('');
         $('#workerForm')[0].reset();
         $('#workerWage').val('1200');
@@ -434,7 +434,7 @@ $(document).ready(function() {
     // Edit Worker Modal
     $(document).on('click', '.edit-worker-btn', function() {
         const tr = $(this).closest('tr');
-        $('#workerModalTitle').text('Edit Worker (தொழிலாளி திருத்து)');
+        $('#workerModalTitle').text('Edit Worker ');
         $('#workerEditId').val(tr.data('id'));
         $('#workerNameEn').val(tr.data('name-en'));
         $('#workerNameTa').val(tr.data('name-ta'));
@@ -495,13 +495,13 @@ $(document).ready(function() {
                         <div class="dropdown table-action-dropdown">
                             <button class="btn table-action-btn" type="button" data-bs-toggle="dropdown" aria-expanded="false" title="Actions">
                                 <i class="bi bi-three-dots-vertical"></i>
-                            </button>
+</button>
                             <ul class="dropdown-menu dropdown-menu-end shadow-sm">
                                 <li><button class="dropdown-item edit-worker-btn" type="button"><i class="bi bi-pencil text-primary me-2"></i>Edit</button></li>
                                 <li><hr class="dropdown-divider my-1"></li>
                                 <li><button class="dropdown-item text-danger delete-worker-btn" type="button"><i class="bi bi-trash3 text-danger me-2"></i>Delete</button></li>
                             </ul>
-                        </div>
+</div>
                     </td>
                 </tr>
             `;

@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
-@section('title', 'Material Usage (பொருள் பயன்பாடு)')
-@section('page_title', 'Material Usage (பொருட்களின் பயன்பாடு பதிவு)')
+@section('title', 'Material Usage ')
+@section('page_title', 'Material Usage ')
 
 @push('styles')
     <style>
@@ -184,18 +184,18 @@
         <div class="col-12 col-md-7">
             <h4 class="fw-bold mb-1 text-dark">
                 <i class="bi bi-clipboard2-check text-primary me-2"></i>Material Usage
-                <span class="text-muted fw-normal">(பொருள் பயன்பாடு)</span>
-            </h4>
+                <span class="text-muted fw-normal"></span>
+</h4>
             <p class="text-muted small mb-0">
                 Record material consumption at project sites from one or multiple Purchase Orders with auto-fetched quantity and pricing.
             </p>
-        </div>
+</div>
         <div class="col-12 col-md-5 text-md-end">
             <button type="button" class="btn btn-primary btn-sm px-3 shadow-sm fw-semibold" id="newUsageBtn">
                 <i class="bi bi-plus-circle me-1"></i> New Material Usage
-            </button>
-        </div>
-    </div>
+</button>
+</div>
+</div>
 
     {{-- KPI Cards --}}
     <div class="row g-3 mb-4">
@@ -205,49 +205,49 @@
                     <span class="text-muted small fw-semibold">Total Usages</span>
                     <div class="stat-icon-wrapper bg-primary bg-opacity-10 text-primary">
                         <i class="bi bi-clipboard2-data"></i>
-                    </div>
-                </div>
+</div>
+</div>
                 <h4 class="fw-bold mb-0 text-dark">{{ $stats['total_usages'] }}</h4>
                 <div class="small text-muted mt-1">All-time usage records</div>
-            </div>
-        </div>
+</div>
+</div>
         <div class="col-6 col-lg-3">
             <div class="card-stat h-100">
                 <div class="d-flex align-items-center justify-content-between mb-2">
                     <span class="text-muted small fw-semibold">This Month</span>
                     <div class="stat-icon-wrapper bg-success bg-opacity-10 text-success">
                         <i class="bi bi-calendar-check"></i>
-                    </div>
-                </div>
+</div>
+</div>
                 <h4 class="fw-bold mb-0 text-success">{{ $stats['this_month'] }}</h4>
                 <div class="small text-muted mt-1">{{ now()->format('F Y') }}</div>
-            </div>
-        </div>
+</div>
+</div>
         <div class="col-6 col-lg-3">
             <div class="card-stat h-100">
                 <div class="d-flex align-items-center justify-content-between mb-2">
                     <span class="text-muted small fw-semibold">Materials Used</span>
                     <div class="stat-icon-wrapper bg-warning bg-opacity-10 text-warning">
                         <i class="bi bi-boxes"></i>
-                    </div>
-                </div>
+</div>
+</div>
                 <h4 class="fw-bold mb-0 text-warning">{{ $stats['total_items'] }}</h4>
                 <div class="small text-muted mt-1">Material line items</div>
-            </div>
-        </div>
+</div>
+</div>
         <div class="col-6 col-lg-3">
             <div class="card-stat h-100">
                 <div class="d-flex align-items-center justify-content-between mb-2">
                     <span class="text-muted small fw-semibold">Total Qty Used</span>
                     <div class="stat-icon-wrapper bg-info bg-opacity-10 text-info">
                         <i class="bi bi-graph-up-arrow"></i>
-                    </div>
-                </div>
+</div>
+</div>
                 <h4 class="fw-bold mb-0 text-info">{{ number_format($stats['total_qty_used'], 2) }}</h4>
                 <div class="small text-muted mt-1">Total quantity consumed</div>
-            </div>
-        </div>
-    </div>
+</div>
+</div>
+</div>
 
     {{-- Filter bar --}}
     <div class="card shadow-sm border-0 mb-3">
@@ -256,36 +256,36 @@
                 <div class="col-12 col-md-4">
                     <input type="text" name="search" id="usageSearchInput" class="form-control form-control-sm"
                         placeholder="Search usage no, PO number, material…" value="{{ $filters['search'] ?? '' }}">
-                </div>
+</div>
                 <div class="col-6 col-md-3">
                     <select name="site_id" id="usageSiteFilter" class="form-select form-select-sm">
-                        <option value="">— All Sites (அனைத்து தளங்கள்) —</option>
+                        <option value="">— All Sites  —</option>
                         @foreach ($sites as $site)
                             <option value="{{ $site->id }}" {{ ($filters['site_id'] ?? '') == $site->id ? 'selected' : '' }}>
                                 {{ $site->name }}
-                            </option>
+</option>
                         @endforeach
                     </select>
-                </div>
+</div>
                 <div class="col-6 col-md-2">
                     <input type="date" name="start_date" id="usageStartDateFilter" class="form-control form-control-sm"
                         value="{{ $filters['start_date'] ?? '' }}" placeholder="From">
-                </div>
+</div>
                 <div class="col-6 col-md-2">
                     <input type="date" name="end_date" id="usageEndDateFilter" class="form-control form-control-sm"
                         value="{{ $filters['end_date'] ?? '' }}" placeholder="To">
-                </div>
+</div>
                 <div class="col-6 col-md-1 d-flex gap-1">
                     <button type="submit" class="btn btn-primary btn-sm flex-grow-1" title="Filter">
                         <i class="bi bi-funnel"></i>
-                    </button>
+</button>
                     <a href="{{ route('material-usages.index') }}" id="usageFilterResetBtn" class="btn btn-outline-secondary btn-sm" title="Reset">
                         <i class="bi bi-x-circle"></i>
-                    </a>
-                </div>
+</a>
+</div>
             </form>
-        </div>
-    </div>
+</div>
+</div>
 
     {{-- Active Site Balance Stock Banner (if site filter selected) --}}
     @if (!empty($siteStocks) && $siteStocks->isNotEmpty())
@@ -299,22 +299,22 @@
                         <i class="bi bi-stack fs-5 text-info"></i>
                         <div>
                             <strong class="text-dark">{{ $currentSite?->name ?? 'Project Site' }}</strong>
-                            <span class="text-muted small ms-1">— Current Site Balance Stock (தற்போது தளத்தில் உள்ள மீதமுள்ள இருப்பு)</span>
-                        </div>
-                    </div>
+                            <span class="text-muted small ms-1">— Current Site Balance Stock</span>
+</div>
+</div>
                     <div class="d-flex flex-wrap gap-2">
                         @foreach ($siteStocks as $sStock)
                             <span class="badge bg-light text-dark border px-2 py-1">
                                 {{ $sStock->material?->name_en ?? 'Material' }}:
                                 <strong class="{{ (float) $sStock->current_stock > 0 ? 'text-success' : 'text-danger' }}">
                                     {{ number_format((float) $sStock->current_stock, 2) }} {{ $sStock->unit ?: ($sStock->material?->unit?->name_en ?? 'Nos') }}
-                                </strong>
-                            </span>
+</strong>
+</span>
                         @endforeach
-                    </div>
-                </div>
-            </div>
-        </div>
+</div>
+</div>
+</div>
+</div>
     @endif
 
     {{-- List table --}}
@@ -326,9 +326,9 @@
                         <tr>
                             <th class="ps-3" style="width:40px">#</th>
                             <th>USAGE NO &amp; DATE</th>
-                            <th>SITE (தளம்)</th>
-                            <th>SOURCE / PO (ஆதாரம்)</th>
-                            <th>MATERIALS, SOURCE &amp; PRICE (பொருட்கள், ஆதாரம் &amp; விலை)</th>
+                            <th>SITE</th>
+                            <th>SOURCE / PO</th>
+                            <th>MATERIALS, SOURCE &amp; PRICE</th>
                             <th class="text-end">TOTAL QTY</th>
                             <th class="text-end">TOTAL COST</th>
                             <th>RECORDED BY</th>
@@ -400,15 +400,15 @@
                                                 @else
                                                     <span class="mat-item-po badge bg-light text-secondary border ms-1">{{ $item->source_reference ?: 'PO' }}</span>
                                                 @endif
-                                            </div>
+</div>
                                             <div class="text-end">
                                                 <span class="mat-item-qty">{{ number_format((float) $item->used_quantity, 2) }} {{ $item->unit }}</span>
                                                 <span class="badge bg-success-subtle text-success border border-success-subtle ms-1" style="font-size:0.68rem;" title="Balance stock remaining after this usage">
                                                     Bal: {{ number_format((float) $item->remaining_quantity, 2) }} {{ $item->unit }}
-                                                </span>
+</span>
                                                 <span class="mat-item-price ms-1 text-muted">@ ₹{{ number_format((float) $item->unit_price, 2) }}</span>
-                                            </div>
-                                        </div>
+</div>
+</div>
                                     @endforeach
                                 </td>
                                 <td class="text-end fw-semibold small text-dark">
@@ -422,14 +422,14 @@
                                     <div class="dropdown table-action-dropdown">
                                         <button class="btn table-action-btn" type="button" data-bs-toggle="dropdown" data-bs-popper-config='{"strategy":"fixed"}' aria-expanded="false" title="Actions">
                                             <i class="bi bi-three-dots-vertical"></i>
-                                        </button>
+</button>
                                         <ul class="dropdown-menu dropdown-menu-end shadow-sm">
                                             <li><button class="dropdown-item view-usage-btn" type="button" data-id="{{ $usage->id }}"><i class="bi bi-eye text-info me-2"></i>View Details</button></li>
                                             <li><button class="dropdown-item edit-usage-btn" type="button" data-id="{{ $usage->id }}"><i class="bi bi-pencil text-primary me-2"></i>Edit</button></li>
                                             <li><hr class="dropdown-divider my-1"></li>
                                             <li><button class="dropdown-item text-danger delete-usage-btn" type="button" data-id="{{ $usage->id }}" data-no="{{ $usage->usage_no }}"><i class="bi bi-trash3 text-danger me-2"></i>Delete</button></li>
                                         </ul>
-                                    </div>
+</div>
                                 </td>
                             </tr>
                         @empty
@@ -449,7 +449,7 @@
                         </tr>
                     </tbody>
                 </table>
-            </div>
+</div>
 
             <!-- Table Pagination & Footer Summary -->
             <div class="p-3 bg-white border-top d-flex flex-column flex-md-row justify-content-between align-items-center gap-3" id="tablePaginationContainer">
@@ -463,16 +463,16 @@
                     </select>
                     <span class="small text-muted ms-md-2" id="paginationSummary">
                         Showing <strong class="text-dark" id="pageStart">1</strong> &minus; <strong class="text-dark" id="pageEnd">{{ min(10, $usages->count()) }}</strong> of <strong class="text-dark" id="pageTotal">{{ $usages->count() }}</strong> material usages
-                    </span>
-                </div>
+</span>
+</div>
                 <nav aria-label="Material usage table pagination">
                     <ul class="pagination pagination-sm mb-0 gap-1" id="paginationNav">
                         <!-- Dynamic page links rendered by JS -->
                     </ul>
                 </nav>
-            </div>
-        </div>
-    </div>
+</div>
+</div>
+</div>
 
 </div>
 
@@ -485,10 +485,10 @@
 
             <div class="modal-header bg-primary text-white py-2 px-3">
                 <h6 class="modal-title fw-bold mb-0">
-                    <i class="bi bi-clipboard2-plus me-2"></i>Record Material Usage (பொருள் பயன்பாடு பதிவு)
-                </h6>
+                    <i class="bi bi-clipboard2-plus me-2"></i>Record Material Usage 
+</h6>
                 <button type="button" class="btn-close btn-close-white btn-sm" data-bs-dismiss="modal"></button>
-            </div>
+</div>
 
             <div class="modal-body px-3 py-3">
 
@@ -498,8 +498,8 @@
                         1. Select <strong>Project Site</strong>. &nbsp;|&nbsp; 
                         2. Choose <strong>Third-Party Supplier (PO)</strong> or <strong>Own Warehouse</strong> stock. &nbsp;|&nbsp; 
                         3. Add materials with auto-fetched pricing and enter the quantity <strong>actually used</strong>.
-                    </span>
-                </div>
+</span>
+</div>
 
                 <form id="usageForm" novalidate>
                     @csrf
@@ -509,110 +509,110 @@
                         <div class="col-12 col-md-4">
                             <label class="form-label small fw-semibold mb-1">
                                 Usage No <span class="text-muted fw-normal">(Auto)</span>
-                            </label>
+</label>
                             <input type="text" class="form-control form-control-sm bg-light fw-semibold"
                                 id="usageNoField" value="{{ $nextUsageNo }}" readonly>
-                        </div>
+</div>
 
                         <div class="col-12 col-md-4">
                             <label class="form-label small fw-semibold mb-1">
-                                Usage Date (தேதி) <span class="text-danger">*</span>
-                            </label>
+                                Usage Date  <span class="text-danger">*</span>
+</label>
                             <input type="date" class="form-control form-control-sm"
                                 id="usageDateField" name="usage_date"
                                 max="{{ date('Y-m-d') }}" value="{{ date('Y-m-d') }}" required>
                             <div class="invalid-feedback">Select a valid date.</div>
                             <div id="usageDateRangeHint" class="form-text small mt-1 text-primary fw-semibold" style="display:none; font-size: 0.75rem;"></div>
-                        </div>
+</div>
 
                         <div class="col-12 col-md-4">
                             <label class="form-label small fw-semibold mb-1">
-                                Project Site (தளம்) <span class="text-danger">*</span>
-                            </label>
+                                Project Site  <span class="text-danger">*</span>
+</label>
                             <select class="form-select form-select-sm" id="siteSelect" name="project_site_id" required>
-                                <option value="">— Select Site (தளம்) —</option>
+                                <option value="">— Select Site  —</option>
                                 @foreach ($sites as $site)
                                     <option value="{{ $site->id }}">{{ $site->name }}</option>
                                 @endforeach
                             </select>
                             <div class="invalid-feedback">Please select a Project Site.</div>
-                        </div>
-                    </div>
+</div>
+</div>
 
                     {{-- Site Live Balance Stock Bar --}}
                     <div id="siteLiveStockBar" class="p-2 mb-3 bg-white border rounded shadow-sm d-none">
                         <div class="d-flex align-items-center justify-content-between mb-1">
                             <span class="small fw-bold text-dark">
-                                <i class="bi bi-stack text-info me-1"></i>Site Live Balance Stock (தளத்தில் உள்ள மீதமுள்ள இருப்பு):
-                            </span>
+                                <i class="bi bi-stack text-info me-1"></i>Site Live Balance Stock :
+</span>
                             <span class="badge bg-light text-secondary border small" id="siteLiveStockCount">0 materials</span>
-                        </div>
+</div>
                         <div id="siteLiveStockChips" class="d-flex flex-wrap gap-1"></div>
-                    </div>
+</div>
 
                     {{-- Material / Supplier Source Selection (Image 2 style) --}}
                     <div class="p-3 rounded-3 bg-light border mb-3" id="materialSourceContainer" style="display: none;">
                         <label class="form-label small fw-semibold text-dark mb-1">
-                            <i class="bi bi-box-arrow-in-down text-primary me-1"></i>Material / Supplier Source (பொருள் பெறும் ஆதாரம்) <span class="text-danger">*</span>
-                        </label>
+                            <i class="bi bi-box-arrow-in-down text-primary me-1"></i>Material / Supplier Source  <span class="text-danger">*</span>
+</label>
                         <div class="d-flex flex-wrap gap-4 align-items-center mt-1">
                             <div class="form-check mb-0">
                                 <input class="form-check-input" type="radio" name="material_source" id="sourceThirdParty" value="third_party" checked>
                                 <label class="form-check-label small fw-semibold text-dark" for="sourceThirdParty">
-                                    Third-Party Supplier (வெளி சப்ளையர் - PO)
-                                </label>
-                            </div>
+                                    Third-Party Supplier 
+</label>
+</div>
                             <div class="form-check mb-0">
                                 <input class="form-check-input" type="radio" name="material_source" id="sourceStockTransfer" value="stock_transfer">
                                 <label class="form-check-label small fw-semibold text-purple" for="sourceStockTransfer" style="color:#7e22ce;">
-                                    <i class="bi bi-arrow-left-right me-1"></i>Transferred from Other Site (தள பரிமாற்றம்)
-                                </label>
-                            </div>
+                                    <i class="bi bi-arrow-left-right me-1"></i>Transferred from Other Site 
+</label>
+</div>
                             <div class="form-check mb-0">
                                 <input class="form-check-input" type="radio" name="material_source" id="sourceWarehouse" value="own_warehouse">
                                 <label class="form-check-label small fw-semibold text-primary" for="sourceWarehouse">
-                                    Own Warehouse (மைய கிடங்கு இருப்பு)
-                                </label>
-                            </div>
-                        </div>
-                    </div>
+                                    Own Warehouse 
+</label>
+</div>
+</div>
+</div>
 
                     {{-- Scenario 1: Third-Party Supplier PO Selection --}}
                     <div id="supplierPoSection" class="mb-3" style="display: none;">
                         <div class="p-3 border rounded bg-light-subtle">
                             <div class="d-flex justify-content-between align-items-center mb-1">
                                 <label class="form-label small fw-bold text-dark mb-0">
-                                    <i class="bi bi-file-earmark-text text-primary me-1"></i>Select Purchase Order(s) (கொள்முதல் ஆணை) <span class="text-danger">*</span>
-                                </label>
+                                    <i class="bi bi-file-earmark-text text-primary me-1"></i>Select Purchase Order(s) <span class="text-danger">*</span>
+</label>
                                 <span class="badge bg-primary-subtle text-primary border small" id="poCountBadge" style="display:none;">0 POs</span>
-                            </div>
+</div>
                             <div class="text-muted small mb-2" style="font-size:0.75rem;">
                                 Choose one or more Purchase Orders for this site to load materials with inward quantity and pricing.
-                            </div>
+</div>
                             <div class="dropdown" id="poDropdownWrapper">
                                 <button class="form-select form-select-sm text-start" 
                                     type="button" id="poDropdownBtn" data-bs-toggle="dropdown" aria-expanded="false" data-bs-auto-close="outside" style="background-color: #ffffff !important; border: 1px solid #ced4da;">
                                     <span id="poDropdownText" class="text-truncate small text-muted">— Select Purchase Order(s) —</span>
-                                </button>
+</button>
                                 <div class="dropdown-menu shadow w-100" id="poDropdownMenu" style="max-width: 600px;">
                                     <div class="text-muted small p-2" id="poDropdownEmpty">
                                         Please select a Project Site first.
-                                    </div>
+</div>
                                     <div id="poCheckboxContainer" style="display: none;">
                                         <div class="d-flex justify-content-between align-items-center pb-2 mb-2 border-bottom px-2">
                                             <span class="small fw-bold text-dark">Available POs</span>
                                             <div>
                                                 <button type="button" class="btn btn-link btn-sm p-0 text-decoration-none me-2 small fw-semibold text-primary" id="selectAllPOsBtn">Select All</button>
                                                 <button type="button" class="btn btn-link btn-sm p-0 text-decoration-none small text-danger" id="clearAllPOsBtn">Clear</button>
-                                            </div>
-                                        </div>
+</div>
+</div>
                                         <div id="poCheckboxList" style="max-height: 240px; overflow-y: auto; padding-right: 2px;"></div>
-                                    </div>
-                                </div>
-                            </div>
+</div>
+</div>
+</div>
                             <div class="invalid-feedback d-block" id="poValidationFeedback" style="display:none;">
                                 Please select at least one Purchase Order.
-                            </div>
+</div>
                             <div id="poDateMismatchFeedback" class="small mt-1 fw-semibold text-danger" style="display:none;"></div>
 
                             {{-- Selected PO Chips Area --}}
@@ -620,24 +620,24 @@
                                 <div class="d-flex align-items-center flex-wrap gap-2 p-2 bg-white border rounded">
                                     <span class="small text-muted fw-bold"><i class="bi bi-cart-check text-primary me-1"></i>Selected POs:</span>
                                     <div id="poChipsContainer" class="d-flex flex-wrap gap-1"></div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+</div>
+</div>
+</div>
+</div>
 
                     {{-- Scenario 2: Own Warehouse Materials Selection --}}
                     <div id="ownWarehouseSection" class="mb-3" style="display: none;">
                         <div class="p-3 border rounded bg-light-subtle">
                             <label class="form-label small fw-bold text-dark mb-1">
-                                <i class="bi bi-boxes text-primary me-1"></i>Select In-Stock Materials from Central Warehouse (மைய கிடங்கு இருப்பு பொருட்கள்) <span class="text-danger">*</span>
-                            </label>
+                                <i class="bi bi-boxes text-primary me-1"></i>Select In-Stock Materials from Central Warehouse  <span class="text-danger">*</span>
+</label>
                             <div class="text-muted small mb-2" style="font-size:0.75rem;">
                                 Directly record consumption of tools, safety equipment, and materials from Central Warehouse stock for this site.
-                            </div>
+</div>
                             <div class="row g-2 align-items-end">
                                 <div class="col-12 col-md-9">
                                     <select class="form-select form-select-sm" id="warehouseItemPicker">
-                                        <option value="" selected disabled>-- Select Material from Central Warehouse (கிடங்கு பொருள் தேர்வு) --</option>
+                                        <option value="" selected disabled>-- Select Material from Central Warehouse --</option>
                                         @foreach ($warehouseItems as $whItem)
                                             <option value="{{ $whItem->id }}"
                                                 data-id="{{ $whItem->id }}"
@@ -649,59 +649,59 @@
                                                 data-unit-id="{{ $whItem->unit_id }}"
                                                 data-rate="{{ $whItem->cash_amount ?: ($whItem->unit_rate ?: 0) }}">
                                                 [{{ $whItem->sku }}] {{ $whItem->name_en }}@if($whItem->name_ta) ({{ $whItem->name_ta }})@endif · Stock: {{ (float) $whItem->current_stock }} {{ $whItem->unit ?: 'Nos' }} @ ₹{{ number_format((float) ($whItem->cash_amount ?: $whItem->unit_rate), 2) }}
-                                            </option>
+</option>
                                         @endforeach
                                     </select>
-                                </div>
+</div>
                                 <div class="col-12 col-md-3">
                                     <button type="button" class="btn btn-primary btn-sm w-100 fw-semibold" id="addWarehouseItemBtn">
                                         <i class="bi bi-plus-circle me-1"></i> Add Material
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+</button>
+</div>
+</div>
+</div>
+</div>
 
                     {{-- Loading Spinner --}}
                     <div id="poLoadingSpinner" class="text-center py-4" style="display:none;">
                         <div class="spinner-border spinner-border-sm text-primary me-2"></div>
                         <span class="text-muted small">Loading PO materials…</span>
-                    </div>
+</div>
 
                     {{-- Empty State (Before items are selected) --}}
                     <div id="materialsEmptyState" class="border rounded p-4 text-center text-muted bg-light mb-3">
                         <i class="bi bi-box-arrow-in-down fs-2 text-primary d-block mb-1 opacity-75"></i>
                         <span class="small fw-semibold" id="emptyStateMessage">Please select a Project Site above to get started.</span>
-                    </div>
+</div>
 
                     {{-- Multiple Materials Table View --}}
                     <div id="materialsSection" style="display:none;">
                         <div class="d-flex align-items-center justify-content-between mb-2">
                             <h6 class="fw-semibold mb-0 small text-uppercase text-muted letter-spacing-1">
-                                <i class="bi bi-table me-1 text-primary"></i>Materials to Record for Usage (பயன்படுத்தப்படும் பொருட்கள்)
-                            </h6>
+                                <i class="bi bi-table me-1 text-primary"></i>Materials to Record for Usage 
+</h6>
                             <span class="badge bg-light text-secondary border" id="itemCountBadge">0 materials</span>
-                        </div>
+</div>
 
                         <div class="table-responsive border rounded bg-white shadow-sm">
                             <table class="table table-sm table-bordered align-middle mb-0" id="muMaterialsTable">
                                 <thead>
                                     <tr>
                                         <th style="width:34px" class="text-center">#</th>
-                                        <th>Material (பொருள்)</th>
-                                        <th>Source / PO (ஆதாரம்)</th>
+                                        <th>Material</th>
+                                        <th>Source / PO</th>
                                         <th class="text-center">Inward / Stock</th>
                                         <th class="text-center">Already Used</th>
                                         <th class="text-center">Available Stock</th>
                                         <th class="text-center" style="width:130px">
-                                            Used Qty (அளவு) <span class="text-danger">*</span>
-                                        </th>
+                                            Used Qty  <span class="text-danger">*</span>
+</th>
                                         <th class="text-center" style="width:130px">
-                                            Balance Stock (மீதமுள்ள இருப்பு)
-                                        </th>
+                                            Balance Stock 
+</th>
                                         <th class="text-center">Unit</th>
-                                        <th class="text-end">Unit Price (விலை ₹)</th>
-                                        <th class="text-end">Total (தொகை ₹)</th>
+                                        <th class="text-end">Unit Price (₹)</th>
+                                        <th class="text-end">Total</th>
                                         <th class="text-center" style="width:36px">Action</th>
                                     </tr>
                                 </thead>
@@ -720,22 +720,22 @@
                                     </tr>
                                 </tfoot>
                             </table>
-                        </div>
+</div>
                         <div class="d-flex justify-content-between align-items-center mt-2 text-muted small">
                             <span><i class="bi bi-info-circle me-1"></i>Price is auto-fetched from PO or Warehouse. Total is calculated automatically.</span>
                             <span class="fst-italic">Click ✕ to remove materials not needed.</span>
-                        </div>
-                    </div>
+</div>
+</div>
 
                     {{-- Remarks --}}
                     <div class="mt-3">
-                        <label class="form-label small fw-semibold mb-1">Remarks / Work Notes (குறிப்புகள்)</label>
+                        <label class="form-label small fw-semibold mb-1">Remarks / Work Notes</label>
                         <textarea class="form-control form-control-sm" name="remarks" rows="2"
                             placeholder="e.g. Consumed for first floor slab casting / pillar work"></textarea>
-                    </div>
+</div>
 
                 </form>
-            </div>
+</div>
 
             <div class="modal-footer py-2 px-3 justify-content-between">
                 <div class="small text-muted" id="modalFooterHint"></div>
@@ -743,12 +743,12 @@
                     <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
                     <button type="button" class="btn btn-primary btn-sm px-4 fw-semibold" id="saveUsageBtn">
                         <i class="bi bi-check-circle me-1"></i> Save Material Usage
-                    </button>
-                </div>
-            </div>
+</button>
+</div>
+</div>
 
-        </div>
-    </div>
+</div>
+</div>
 </div>
 
 {{-- ══════════════════════════════════════════════════════════
@@ -760,20 +760,20 @@
             <div class="modal-header bg-light py-2 px-3">
                 <h6 class="modal-title fw-bold text-dark mb-0">
                     <i class="bi bi-receipt me-2 text-primary"></i>Material Usage Voucher Details
-                </h6>
+</h6>
                 <button type="button" class="btn-close btn-sm" data-bs-dismiss="modal"></button>
-            </div>
+</div>
             <div class="modal-body px-3 py-3" id="viewUsageContent">
                 {{-- Loaded via AJAX --}}
                 <div class="text-center py-4">
                     <div class="spinner-border spinner-border-sm text-primary"></div>
-                </div>
-            </div>
+</div>
+</div>
             <div class="modal-footer py-2 px-3">
                 <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
-            </div>
-        </div>
-    </div>
+</div>
+</div>
+</div>
 </div>
 
 {{-- ══════════════════════════════════════════════════════════
@@ -784,10 +784,10 @@
         <div class="modal-content">
             <div class="modal-header bg-primary text-white py-2 px-3">
                 <h6 class="modal-title fw-bold mb-0">
-                    <i class="bi bi-pencil-square me-2"></i>Edit Material Usage (பொருள் பயன்பாடு திருத்துதல்) — <span id="editUsageNoTitle"></span>
-                </h6>
+                    <i class="bi bi-pencil-square me-2"></i>Edit Material Usage  — <span id="editUsageNoTitle"></span>
+</h6>
                 <button type="button" class="btn-close btn-close-white btn-sm" data-bs-dismiss="modal"></button>
-            </div>
+</div>
             <div class="modal-body px-3 py-3">
                 <form id="editUsageForm" novalidate>
                     <input type="hidden" id="editUsageId">
@@ -796,68 +796,68 @@
                         <div class="col-12 col-md-4">
                             <label class="form-label small fw-semibold mb-1">Usage No</label>
                             <input type="text" class="form-control form-control-sm bg-light fw-semibold" id="editUsageNoField" readonly>
-                        </div>
+</div>
                         <div class="col-12 col-md-4">
-                            <label class="form-label small fw-semibold mb-1">Usage Date (தேதி) <span class="text-danger">*</span></label>
+                            <label class="form-label small fw-semibold mb-1">Usage Date  <span class="text-danger">*</span></label>
                             <input type="date" class="form-control form-control-sm" id="editUsageDateField" name="usage_date" max="{{ date('Y-m-d') }}" required>
                             <div class="invalid-feedback">Select a valid date.</div>
                             <div id="editUsageDateRangeHint" class="form-text small mt-1 text-primary fw-semibold" style="display:none; font-size: 0.75rem;"></div>
-                        </div>
+</div>
                         <div class="col-12 col-md-4">
-                            <label class="form-label small fw-semibold mb-1">Project Site (தளம்)</label>
+                            <label class="form-label small fw-semibold mb-1">Project Site</label>
                             <input type="text" class="form-control form-control-sm bg-light fw-semibold" id="editUsageSiteField" readonly>
-                        </div>
-                    </div>
+</div>
+</div>
 
                     <div class="mb-3">
                         <div class="d-flex justify-content-between align-items-center mb-2">
                             <div>
                                 <h6 class="fw-semibold mb-0 small text-uppercase text-muted">
-                                    <i class="bi bi-boxes text-primary me-1"></i>Materials Consumed (பயன்படுத்திய பொருட்கள்)
-                                </h6>
+                                    <i class="bi bi-boxes text-primary me-1"></i>Materials Consumed 
+</h6>
                                 <span class="text-muted small">Update quantity or price below. Linked PO & stock will update automatically.</span>
-                            </div>
+</div>
                             <button type="button" class="btn btn-sm btn-outline-primary fw-semibold" id="toggleEditUsageAddMaterialBtn">
                                 <i class="bi bi-plus-circle me-1"></i> Add Material
-                            </button>
-                        </div>
+</button>
+</div>
 
                         {{-- Add Material Inline Box in Edit Modal --}}
                         <div id="editUsageAddMaterialBox" class="p-2 mb-3 border rounded bg-light-subtle shadow-sm" style="display: none;">
                             <div class="row g-2 align-items-end">
                                 <div class="col-12 col-md-7">
                                     <label class="form-label small fw-semibold text-dark mb-1">
-                                        <i class="bi bi-box-seam text-primary me-1"></i>Select Material from Site POs or Warehouse (பொருள் தேர்வு)
-                                    </label>
+                                        <i class="bi bi-box-seam text-primary me-1"></i>Select Material from Site POs or Warehouse 
+</label>
                                     <select class="form-select form-select-sm" id="editUsageMaterialPicker">
                                         <option value="">-- Choose Material to Add --</option>
                                     </select>
-                                </div>
+</div>
                                 <div class="col-6 col-md-3">
-                                    <label class="form-label small fw-semibold text-dark mb-1">Used Qty (அளவு) <span class="text-danger">*</span></label>
+                                    <label class="form-label small fw-semibold text-dark mb-1">Used Qty  <span class="text-danger">*</span></label>
                                     <input type="number" step="0.01" min="0.01" class="form-control form-control-sm text-center fw-semibold" id="editUsageNewItemQty" placeholder="Qty">
-                                </div>
+</div>
                                 <div class="col-6 col-md-2 d-flex gap-1">
                                     <button type="button" class="btn btn-primary btn-sm flex-grow-1 fw-semibold" id="confirmAddUsageMaterialBtn">
                                         <i class="bi bi-plus-lg me-1"></i> Add
-                                    </button>
+</button>
                                     <button type="button" class="btn btn-outline-secondary btn-sm" id="cancelAddUsageMaterialBtn" title="Close">
                                         <i class="bi bi-x-lg"></i>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
+</button>
+</div>
+</div>
+</div>
 
                         <div class="table-responsive">
                             <table class="table table-sm table-bordered align-middle mb-0" id="editMuMaterialsTable">
                                 <thead class="table-light">
                                     <tr>
                                         <th style="width:34px" class="text-center">#</th>
-                                        <th>Material (பொருள்)</th>
-                                        <th>Source / PO (ஆதாரம்)</th>
+                                        <th>Material</th>
+                                        <th>Source / PO</th>
                                         <th class="text-center" style="width:105px">Inward Stock</th>
-                                        <th class="text-center" style="width:130px">Used Qty (அளவு) <span class="text-danger">*</span></th>
-                                        <th class="text-center" style="width:115px">Balance Stock (மீதமுள்ள இருப்பு)</th>
+                                        <th class="text-center" style="width:130px">Used Qty  <span class="text-danger">*</span></th>
+                                        <th class="text-center" style="width:115px">Balance Stock</th>
                                         <th class="text-center" style="width:80px">Unit</th>
                                         <th class="text-end" style="width:130px">Unit Price (₹) <span class="text-danger">*</span></th>
                                         <th class="text-end" style="width:130px">Line Total (₹)</th>
@@ -879,23 +879,23 @@
                                     </tr>
                                 </tfoot>
                             </table>
-                        </div>
-                    </div>
+</div>
+</div>
 
                     <div class="mb-2">
-                        <label class="form-label small fw-semibold mb-1">Remarks / Work Details (குறிப்புகள்)</label>
+                        <label class="form-label small fw-semibold mb-1">Remarks / Work Details</label>
                         <textarea class="form-control form-control-sm" id="editUsageRemarks" rows="2" placeholder="e.g. Columns concreting, brickwork ground floor..."></textarea>
-                    </div>
+</div>
                 </form>
-            </div>
+</div>
             <div class="modal-footer py-2 px-3">
                 <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
                 <button type="button" class="btn btn-primary btn-sm px-3" id="saveEditUsageBtn">
                     <i class="bi bi-check-circle me-1"></i> Update Material Usage
-                </button>
-            </div>
-        </div>
-    </div>
+</button>
+</div>
+</div>
+</div>
 </div>
 @endsection
 
@@ -1054,7 +1054,7 @@
                     stockChips.innerHTML = siteStocks.map(s => `
                         <span class="badge border" style="background:#f8fafc;color:#1e293b;border-color:#cbd5e1!important;font-size:0.75rem;padding:4px 8px;">
                             <strong>${esc(s.material_name)}</strong>: <span class="text-success fw-bold">${parseFloat(s.current_stock || 0).toFixed(2)}</span> ${esc(s.unit || '')}
-                        </span>
+</span>
                     `).join('');
                 } else {
                     stockCount.textContent = '0 materials';
@@ -1197,15 +1197,15 @@
                     <div class="d-flex justify-content-between align-items-center mb-1">
                         <strong class="text-primary small">${esc(po.po_number)}</strong>
                         ${sourceBadge}
-                    </div>
+</div>
                     <div class="small text-dark fw-semibold text-truncate mb-1" style="max-width: 280px;" title="${esc(po.supplier_name || 'Central Warehouse')}">
                         ${esc(po.supplier_name || 'Central Warehouse')}
-                    </div>
+</div>
                     <div class="d-flex justify-content-between align-items-center text-muted" style="font-size:0.7rem;">
                         <span><i class="bi bi-calendar3 me-1"></i>${esc(po.order_date || '—')}</span>
                         <span class="badge bg-light text-secondary border">${po.items_count || 1} material(s)</span>
-                    </div>
-                </div>
+</div>
+</div>
             `;
             listDiv.appendChild(label);
         });
@@ -1296,15 +1296,15 @@
                     <div class="d-flex justify-content-between align-items-center mb-1">
                         <strong class="small" style="color:#7e22ce;">${esc(xfr.transfer_no)}</strong>
                         ${sourceBadge}
-                    </div>
+</div>
                     <div class="small text-dark fw-semibold text-truncate mb-1" style="max-width: 280px;" title="From ${esc(xfr.source_site_name || 'Other Site')}">
                         From: ${esc(xfr.source_site_name || 'Other Site')}
-                    </div>
+</div>
                     <div class="d-flex justify-content-between align-items-center text-muted" style="font-size:0.7rem;">
                         <span><i class="bi bi-calendar3 me-1"></i>${esc(xfr.transfer_date || '—')}</span>
                         <span class="badge bg-light text-secondary border">${xfr.items_count || 1} material(s)</span>
-                    </div>
-                </div>
+</div>
+</div>
             `;
             listDiv.appendChild(label);
         });
@@ -1415,7 +1415,7 @@
             usageDateInput.setAttribute('min', minDate);
             if (hintDiv) {
                 hintDiv.style.display = 'block';
-                hintDiv.innerHTML = `<i class="bi bi-calendar-check text-primary me-1"></i>Allowed: <strong>${formatDmy(minDate)}</strong> to <strong>Today (${formatDmy(todayStr)})</strong> <span class="text-muted" style="font-size:0.75rem;">(PO ஆணை தேதி முதல் இன்று வரை)</span>`;
+                hintDiv.innerHTML = `<i class="bi bi-calendar-check text-primary me-1"></i>Allowed: <strong>${formatDmy(minDate)}</strong> to <strong>Today (${formatDmy(todayStr)})</strong> <span class="text-muted" style="font-size:0.75rem;"></span>`;
             }
 
             // If current date is before PO date or empty, adjust to today or minDate
@@ -1442,10 +1442,10 @@
 
         if (this.value > todayStr) {
             this.value = todayStr;
-            showToast('Usage date cannot be in the future (எதிர்கால தேதி அனுமதிக்கப்படாது).', 'danger');
+            showToast('Usage date cannot be in the future .', 'danger');
         } else if (minAllowed && this.value < minAllowed) {
             this.value = minAllowed;
-            showToast(`Usage date cannot be before PO date (${formatDmy(minAllowed)}) (PO தேதிக்கு முந்தைய தேதி அனுமதிக்கப்படாது).`, 'danger');
+            showToast(`Usage date cannot be before PO date (${formatDmy(minAllowed)}).`, 'danger');
         }
     });
 
@@ -1627,7 +1627,7 @@
                 sourceBadgeHtml = `
                     <span class="badge border" style="background:#f3e8ff;color:#7e22ce;border-color:#e9d5ff!important;font-size:0.75rem;">
                         <i class="bi bi-arrow-left-right me-1"></i>${esc(item.source_reference || item.po_number || 'Transfer')}
-                    </span>
+</span>
                     ${item.source_site_name ? `<div class="text-muted" style="font-size:0.7rem;">From: ${esc(item.source_site_name)}</div>` : ''}
                 `;
             } else if (item.source_type === 'Own Warehouse') {
@@ -1681,7 +1681,7 @@
                 <td class="text-center font-monospace" id="rowBalance_${idx}">
                     <span class="badge ${defaultBal > 0 ? 'bg-success-subtle text-success border border-success-subtle' : 'bg-secondary-subtle text-secondary border'}">
                         ${defaultBal.toFixed(2)}
-                    </span>
+</span>
                 </td>
                 <td class="text-center text-muted">${esc(item.unit || '—')}</td>
                 <td class="text-end fw-semibold">₹${unitPrice.toFixed(2)}</td>
@@ -1689,7 +1689,7 @@
                 <td class="text-center">
                     <button type="button" class="btn btn-outline-danger btn-sm p-0 px-1 remove-mat-row-btn" title="Remove this material" data-row="${idx}">
                         <i class="bi bi-x"></i>
-                    </button>
+</button>
                 </td>
             `;
             tbody.appendChild(tr);
@@ -1779,7 +1779,7 @@
             <td>
                 <span class="badge bg-info-subtle text-info border border-info-subtle px-2 py-1">
                     <i class="bi bi-boxes me-1"></i>Own Warehouse
-                </span>
+</span>
                 <div class="small text-muted font-monospace" style="font-size:0.7rem;">${esc(sku)}</div>
             </td>
             <td class="text-center font-monospace">${stock.toFixed(2)}</td>
@@ -1798,7 +1798,7 @@
             <td class="text-center font-monospace" id="rowBalance_${rowIdx}">
                 <span class="badge ${defaultBal > 0 ? 'bg-success-subtle text-success border border-success-subtle' : 'bg-secondary-subtle text-secondary border'}">
                     ${defaultBal.toFixed(2)}
-                </span>
+</span>
             </td>
             <td class="text-center text-muted">${esc(unit)}</td>
             <td class="text-end fw-semibold">₹${rate.toFixed(2)}</td>
@@ -1806,7 +1806,7 @@
             <td class="text-center">
                 <button type="button" class="btn btn-outline-danger btn-sm p-0 px-1 remove-mat-row-btn" title="Remove this material" data-row="${rowIdx}">
                     <i class="bi bi-x"></i>
-                </button>
+</button>
             </td>
         `;
         tbody.appendChild(tr);
@@ -1945,7 +1945,7 @@
         const hasQty = inputs.some(i => (parseFloat(i.value) || 0) > 0);
 
         if (!hasQty) {
-            showToast('Enter used quantity greater than 0 for at least one material (குறைந்தது ஒரு பொருளுக்கு அளவு உள்ளிடவும்).', 'danger');
+            showToast('Enter used quantity greater than 0 for at least one material .', 'danger');
             return;
         }
 
@@ -2039,7 +2039,7 @@
                             <td class="text-center font-monospace">
                                 <span class="badge bg-success-subtle text-success border border-success-subtle">
                                     ${parseFloat(it.remaining_quantity || 0).toFixed(2)}
-                                </span>
+</span>
                             </td>
                             <td class="text-center text-muted">${esc(it.unit || '—')}</td>
                             <td class="text-end">₹${parseFloat(it.unit_price || 0).toFixed(2)}</td>
@@ -2053,22 +2053,22 @@
                         <div class="col-6 col-md-3">
                             <span class="text-muted small">Usage No:</span>
                             <div class="fw-bold">${esc(u.usage_no)}</div>
-                        </div>
+</div>
                         <div class="col-6 col-md-3">
                             <span class="text-muted small">Date:</span>
                             <div class="fw-semibold">${esc(u.usage_date)}</div>
-                        </div>
+</div>
                         <div class="col-6 col-md-3">
                             <span class="text-muted small">Project Site:</span>
                             <div class="fw-semibold">${esc(u.project_site?.name || '—')}</div>
-                        </div>
+</div>
                         <div class="col-6 col-md-3">
                             <span class="text-muted small">Recorded By:</span>
                             <div class="fw-semibold">${esc(u.creator?.name || '—')}</div>
-                        </div>
-                    </div>
+</div>
+</div>
 
-                    <h6 class="fw-semibold mb-2 small text-uppercase text-muted">Materials Consumed (பயன்படுத்திய பொருட்கள்)</h6>
+                    <h6 class="fw-semibold mb-2 small text-uppercase text-muted">Materials Consumed</h6>
                     <div class="table-responsive">
                         <table class="table table-sm table-bordered align-middle">
                             <thead class="table-light">
@@ -2078,7 +2078,7 @@
                                     <th>Source / Reference</th>
                                     <th class="text-center">Inward / Stock</th>
                                     <th class="text-center">Used Qty</th>
-                                    <th class="text-center">Balance Stock (மீதமுள்ள இருப்பு)</th>
+                                    <th class="text-center">Balance Stock</th>
                                     <th class="text-center">Unit</th>
                                     <th class="text-end">Price (₹)</th>
                                     <th class="text-end">Total (₹)</th>
@@ -2096,7 +2096,7 @@
                                 </tr>
                             </tfoot>
                         </table>
-                    </div>
+</div>
 
                     ${u.remarks ? `<div class="mt-2 text-muted small"><strong>Remarks:</strong> ${esc(u.remarks)}</div>` : ''}
                 `;
@@ -2196,7 +2196,7 @@
             let html = '<option value="">-- Choose Material to Add --</option>';
 
             if (poItems.length > 0) {
-                html += '<optgroup label="Purchase Orders for this Site (தள கொள்முதல் ஆணைகள்)">';
+                html += '<optgroup label="Purchase Orders for this Site ">';
                 poItems.forEach(it => {
                     const avail = parseFloat(it.available_quantity || 0);
                     const price = parseFloat(it.unit_price || 0);
@@ -2214,14 +2214,14 @@
                             data-unit-id="${it.unit_id || ''}"
                             data-price="${price}">
                             [${esc(it.po_number || 'PO')}] ${esc(it.material_name)} · Avail: ${avail.toFixed(2)} ${esc(it.unit || '')} @ ₹${price.toFixed(2)}
-                        </option>
+</option>
                     `;
                 });
                 html += '</optgroup>';
             }
 
             if (transferItems.length > 0) {
-                html += '<optgroup label="Stock Transferred from Other Sites (தள பரிமாற்றம்)">';
+                html += '<optgroup label="Stock Transferred from Other Sites ">';
                 transferItems.forEach(it => {
                     const avail = parseFloat(it.available_quantity || 0);
                     const price = parseFloat(it.unit_price || 0);
@@ -2239,14 +2239,14 @@
                             data-unit-id="${it.unit_id || ''}"
                             data-price="${price}">
                             [${esc(it.source_reference || 'Transfer')}] ${esc(it.material_name)} · Avail: ${avail.toFixed(2)} ${esc(it.unit || '')} @ ₹${price.toFixed(2)}
-                        </option>
+</option>
                     `;
                 });
                 html += '</optgroup>';
             }
 
             if (whItems.length > 0) {
-                html += '<optgroup label="Central Warehouse Stock (மைய கிடங்கு இருப்பு)">';
+                html += '<optgroup label="Central Warehouse Stock ">';
                 whItems.forEach(wh => {
                     const stock = parseFloat(wh.current_stock || 0);
                     const rate = parseFloat(wh.cash_amount || wh.unit_rate || 0);
@@ -2264,7 +2264,7 @@
                             data-unit-id="${wh.unit_id || ''}"
                             data-price="${rate}">
                             [${esc(wh.sku || 'WH')}] ${esc(wh.name_en)} · Stock: ${stock.toFixed(2)} ${esc(wh.unit || 'Nos')} @ ₹${rate.toFixed(2)}
-                        </option>
+</option>
                     `;
                 });
                 html += '</optgroup>';
@@ -2381,7 +2381,7 @@
                     <div class="input-group input-group-sm">
                         <span class="input-group-text">₹</span>
                         <input type="number" step="0.01" min="0" class="form-control form-control-sm text-end edit-item-price" value="${price.toFixed(2)}" required>
-                    </div>
+</div>
                 </td>
                 <td class="text-end fw-semibold text-success edit-item-total">
                     ₹${(qty * price).toFixed(2)}
@@ -2389,7 +2389,7 @@
                 <td class="text-center">
                     <button type="button" class="btn btn-outline-danger btn-sm p-0 remove-edit-usage-item" style="width:26px; height:26px;" title="Remove this material">
                         <i class="bi bi-trash"></i>
-                    </button>
+</button>
                 </td>
             `;
 
@@ -2482,7 +2482,7 @@
                     editDateInput.setAttribute('min', editMinDate);
                     if (editHintDiv) {
                         editHintDiv.style.display = 'block';
-                        editHintDiv.innerHTML = `<i class="bi bi-calendar-check text-primary me-1"></i>Allowed: <strong>${formatDmy(editMinDate)}</strong> to <strong>Today (${formatDmy(todayStr)})</strong> <span class="text-muted" style="font-size:0.75rem;">(PO ஆணை தேதி முதல் இன்று வரை)</span>`;
+                        editHintDiv.innerHTML = `<i class="bi bi-calendar-check text-primary me-1"></i>Allowed: <strong>${formatDmy(editMinDate)}</strong> to <strong>Today (${formatDmy(todayStr)})</strong> <span class="text-muted" style="font-size:0.75rem;"></span>`;
                     }
                 } else {
                     editDateInput.removeAttribute('min');
@@ -2540,7 +2540,7 @@
                                 <div class="input-group input-group-sm">
                                     <span class="input-group-text">₹</span>
                                     <input type="number" step="0.01" min="0" class="form-control form-control-sm text-end edit-item-price" value="${parseFloat(it.unit_price || 0).toFixed(2)}" required>
-                                </div>
+</div>
                             </td>
                             <td class="text-end fw-semibold text-success edit-item-total">
                                 ₹${parseFloat(it.total_price || 0).toFixed(2)}
@@ -2548,7 +2548,7 @@
                             <td class="text-center">
                                 <button type="button" class="btn btn-outline-danger btn-sm p-0 remove-edit-usage-item" style="width:26px; height:26px;" title="Remove this material">
                                     <i class="bi bi-trash"></i>
-                                </button>
+</button>
                             </td>
                         </tr>
                     `;
@@ -2575,10 +2575,10 @@
 
         if (this.value > todayStr) {
             this.value = todayStr;
-            showToast('Usage date cannot be in the future (எதிர்கால தேதி அனுமதிக்கப்படாது).', 'danger');
+            showToast('Usage date cannot be in the future .', 'danger');
         } else if (minAllowed && this.value < minAllowed) {
             this.value = minAllowed;
-            showToast(`Usage date cannot be before PO date (${formatDmy(minAllowed)}) (PO தேதிக்கு முந்தைய தேதி அனுமதிக்கப்படாது).`, 'danger');
+            showToast(`Usage date cannot be before PO date (${formatDmy(minAllowed)}).`, 'danger');
         }
 
         if (window._editUsageSiteId) {
@@ -2601,11 +2601,11 @@
                 return;
             }
             if (usageDate > todayStr) {
-                showToast('Usage date cannot be in the future (எதிர்கால தேதி அனுமதிக்கப்படாது).', 'danger');
+                showToast('Usage date cannot be in the future .', 'danger');
                 return;
             }
             if (minAllowed && usageDate < minAllowed) {
-                showToast(`Usage date cannot be before PO date (${formatDmy(minAllowed)}) (PO தேதிக்கு முந்தைய தேதி அனுமதிக்கப்படாது).`, 'danger');
+                showToast(`Usage date cannot be before PO date (${formatDmy(minAllowed)}).`, 'danger');
                 return;
             }
 
@@ -2823,7 +2823,7 @@
             <li class="page-item ${prevDisabled}">
                 <button class="page-link" type="button" data-page="${current - 1}" aria-label="Previous" title="Previous Page">
                     <i class="bi bi-chevron-left"></i>
-                </button>
+</button>
             </li>
         `);
 
@@ -2860,7 +2860,7 @@
             <li class="page-item ${nextDisabled}">
                 <button class="page-link" type="button" data-page="${current + 1}" aria-label="Next" title="Next Page">
                     <i class="bi bi-chevron-right"></i>
-                </button>
+</button>
             </li>
         `);
     }

@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('title', 'Property Type Master')
-@section('page_title', 'Property Type Master (சொத்து வகை முதன்மை பட்டியல்)')
+@section('page_title', 'Property Type Master ')
 
 @push('styles')
     <style>
@@ -43,21 +43,21 @@
         <div class="card-custom p-3 mb-3 mb-md-4 bg-white">
             <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
                 <div>
-                    <h5 class="fw-bold mb-1 text-dark">Property Types & Units Directory (சொத்து வகைகள் & அலகுகள்)</h5>
+                    <h5 class="fw-bold mb-1 text-dark">Property Types & Units Directory</h5>
                     <p class="text-muted small mb-0">Manage owned and leased commercial shops, residential complexes,
                         warehouse sheds, floor types, tenants, and monthly rent schedules.</p>
-                </div>
+</div>
                 <div class="d-flex gap-2">
                     <a href="{{ url('/properties') }}" class="btn btn-outline-secondary btn-sm">
                         <i class="bi bi-building me-1"></i> Property Master
-                    </a>
+</a>
                     <button class="btn btn-deiveni btn-sm" data-bs-toggle="modal" data-bs-target="#propertyTypeModal"
                         id="addPropertyTypeBtn">
                         <i class="bi bi-building-add me-1"></i> Add Property Type
-                    </button>
-                </div>
-            </div>
-        </div>
+</button>
+</div>
+</div>
+</div>
 
         <!-- Stat Highlights Row -->
         <div class="row g-3 mb-3 mb-md-4">
@@ -65,54 +65,50 @@
                 <div class="card-stat d-flex align-items-center gap-3">
                     <div class="stat-icon-wrapper bg-primary bg-opacity-10 text-primary">
                         <i class="bi bi-buildings fs-4"></i>
-                    </div>
+</div>
                     <div>
                         <div class="text-muted small fw-medium">Total Units / Types</div>
                         <h4 class="fw-bold mb-0 text-dark" id="statTotalProps">{{ $stats['total_properties'] ?? 0 }}</h4>
-                        <small class="ta-text text-muted" style="font-size:0.72rem;">மொத்த சொத்து வகைகள்</small>
-                    </div>
-                </div>
-            </div>
+</div>
+</div>
+</div>
             <div class="col-6 col-lg-3">
                 <div class="card-stat d-flex align-items-center gap-3">
                     <div class="stat-icon-wrapper bg-success bg-opacity-10 text-success">
                         <i class="bi bi-door-closed-fill fs-4"></i>
-                    </div>
+</div>
                     <div>
                         <div class="text-muted small fw-medium">Active Units</div>
                         <h4 class="fw-bold mb-0 text-success" id="statOccupiedUnits">{{ $stats['active_properties'] ?? 0 }}
-                        </h4>
-                        <small class="ta-text text-muted" style="font-size:0.72rem;">செயலில் உள்ளவை</small>
-                    </div>
-                </div>
-            </div>
+</h4>
+</div>
+</div>
+</div>
             <div class="col-6 col-lg-3">
                 <div class="card-stat d-flex align-items-center gap-3">
                     <div class="stat-icon-wrapper bg-info bg-opacity-10 text-info">
                         <i class="bi bi-cash-stack fs-4"></i>
-                    </div>
+</div>
                     <div>
                         <div class="text-muted small fw-medium">Monthly Expected Rent</div>
                         <h4 class="fw-bold mb-0 text-dark" id="statTotalRent">
                             ₹{{ number_format($stats['monthly_expected_rent'] ?? 0) }}</h4>
-                        <small class="ta-text text-muted" style="font-size:0.72rem;">மாத வருமானம் (வரவு)</small>
-                    </div>
-                </div>
-            </div>
+</div>
+</div>
+</div>
             <div class="col-6 col-lg-3">
                 <div class="card-stat d-flex align-items-center gap-3">
                     <div class="stat-icon-wrapper bg-warning bg-opacity-10 text-warning">
                         <i class="bi bi-safe2 fs-4"></i>
-                    </div>
+</div>
                     <div>
                         <div class="text-muted small fw-medium">Total Security Deposit</div>
                         <h4 class="fw-bold mb-0 text-dark" id="statTotalDeposit">
                             ₹{{ number_format($stats['total_security_deposit'] ?? 0) }}</h4>
-                        <small class="ta-text text-muted" style="font-size:0.72rem;">அட்வான்ஸ் இருப்பு</small>
-                    </div>
-                </div>
-            </div>
-        </div>
+</div>
+</div>
+</div>
+</div>
 
         <!-- Filter & Search Card -->
         <div class="card-custom p-3 mb-3 mb-md-4 bg-white">
@@ -122,36 +118,36 @@
                         <span class="input-group-text bg-light border-end-0"><i class="bi bi-search text-muted"></i></span>
                         <input type="text" class="form-control border-start-0 ps-0" id="propertyTypeSearchInput"
                             placeholder="Search Property, Shop/Office, Floor, Location, Tenant...">
-                    </div>
-                </div>
+</div>
+</div>
                 <div class="col-6 col-md-3">
                     <select class="form-select form-select-sm" id="propertyTypeFilter">
-                        <option value="">All Types (அனைத்து வகைகள்)</option>
-                        <option value="Commercial Shop">Commercial Shop (வணிகக் கடை)</option>
-                        <option value="Residential Flat">Residential Flat (குடியிருப்பு)</option>
-                        <option value="Office Space">Office Space (அலுவலகம்)</option>
-                        <option value="Warehouse / Shed">Warehouse / Shed (கிடங்கு)</option>
+                        <option value="">All Types</option>
+                        <option value="Commercial Shop">Commercial Shop</option>
+                        <option value="Residential Flat">Residential Flat</option>
+                        <option value="Office Space">Office Space</option>
+                        <option value="Warehouse / Shed">Warehouse / Shed</option>
                     </select>
-                </div>
+</div>
                 <div class="col-6 col-md-2">
                     <select class="form-select form-select-sm" id="propertyStatusFilter">
-                        <option value="">All Status (அனைத்து நிலை)</option>
-                        <option value="Active">Active (செயலில் உள்ளது)</option>
-                        <option value="Inactive">Inactive (நிறுத்தப்பட்டது)</option>
+                        <option value="">All Status</option>
+                        <option value="Active">Active</option>
+                        <option value="Inactive">Inactive</option>
                     </select>
-                </div>
+</div>
                 <div class="col-6 col-md-1">
                     <button type="button" class="btn btn-outline-secondary btn-sm px-2 py-1" id="historyFilterResetBtn"
                     title="Reset filters">
                     <i class="bi bi-arrow-counterclockwise"></i>
-                    </button>
-                </div>
+</button>
+</div>
                 <div class="col-6 col-md-2 text-md-end">
                     <span class="small text-muted" id="propertyTypeCountBadge">Showing <strong class="text-dark"
                             id="visiblePropertyTypeCount">{{ $propertyTypes->count() }}</strong> units</span>
-                </div>
-            </div>
-        </div>
+</div>
+</div>
+</div>
 
         <!-- Property Types Table -->
         <div class="card-custom overflow-hidden">
@@ -163,7 +159,7 @@
                             <th>Property & Location</th>
                             <th>Property Type & Floor</th>
                             <th>Current Tenant Details</th>
-                            <th>Monthly Rent </th>
+                            <th>Monthly Rent</th>
                             <th>Security Advance</th>
                             <th>Status</th>
                             <th class="text-end" style="width: 80px;">Actions</th>
@@ -208,18 +204,18 @@
                                         <div class="stat-icon-wrapper {{ $iconWrapperClass }} prop-icon-badge"
                                             style="width:36px; height:36px; font-size:1rem;">
                                             <i class="{{ $iconClass }}"></i>
-                                        </div>
+</div>
                                         <div>
                                             <div class="fw-bold text-dark fs-6 row-prop-title">{{ $item->property_name }}
-                                            </div>
+</div>
                                             <small class="text-muted row-location">
                                                 <i class="bi bi-geo-alt me-1"></i>{{ $item->location }}
                                                 @if ($item->shop_home_office_name)
                                                     &bull; <span class="ta-badge">{{ $item->shop_home_office_name }}</span>
                                                 @endif
-                                            </small>
-                                        </div>
-                                    </div>
+</small>
+</div>
+</div>
                                 </td>
                                 <td>
                                     <div class="d-flex flex-column gap-1">
@@ -230,27 +226,27 @@
                                                 class="badge bg-light text-secondary border border-secondary-subtle row-prop-floor w-fit"
                                                 style="font-size: 0.72rem;">
                                                 <i class="bi bi-layers me-1"></i>{{ $item->floor_type }}
-                                            </span>
+</span>
                                         @else
                                             <span
                                                 class="badge bg-light text-secondary border border-secondary-subtle row-prop-floor w-fit d-none"
                                                 style="font-size: 0.72rem;"></span>
                                         @endif
-                                    </div>
+</div>
                                 </td>
                                 <td>
                                     @if ($item->tenant_name)
                                         <div
                                             class="fw-semibold {{ $item->status === 'Active' ? 'text-dark' : 'text-warning' }} row-tenant-name">
                                             <i class="bi bi-person-fill text-muted me-1"></i>{{ $item->tenant_name }}
-                                        </div>
+</div>
                                         <small class="text-muted row-tenant-phone">
                                             <i class="bi bi-telephone text-muted me-1"></i>{{ $item->tenant_phone ?: '—' }}
-                                        </small>
+</small>
                                     @else
                                         <div class="fw-semibold text-warning row-tenant-name">
-                                            <i class="bi bi-exclamation-circle text-warning me-1"></i>Vacant (காலியாக உள்ளது)
-                                        </div>
+                                            <i class="bi bi-exclamation-circle text-warning me-1"></i>Vacant 
+</div>
                                         <small class="text-muted row-tenant-phone">—</small>
                                     @endif
                                 </td>
@@ -277,7 +273,7 @@
                                         <button class="btn table-action-btn" type="button" data-bs-toggle="dropdown"
                                             aria-expanded="false" title="Actions">
                                             <i class="bi bi-three-dots-vertical"></i>
-                                        </button>
+</button>
                                         <ul class="dropdown-menu dropdown-menu-end shadow-sm">
                                             <li><button class="dropdown-item edit-property-type-btn" type="button"><i
                                                         class="bi bi-pencil text-primary me-2"></i>Edit</button></li>
@@ -288,7 +284,7 @@
                                                     type="button"><i class="bi bi-trash3 text-danger me-2"></i>Delete</button>
                                             </li>
                                         </ul>
-                                    </div>
+</div>
                                 </td>
                             </tr>
                         @empty
@@ -308,7 +304,7 @@
                         </tr>
                     </tbody>
                 </table>
-            </div>
+</div>
 
             <!-- Table Pagination & Footer Summary -->
             <div class="p-3 bg-white border-top d-flex flex-column flex-md-row justify-content-between align-items-center gap-3"
@@ -325,26 +321,26 @@
                         Showing <strong class="text-dark" id="pageStart">1</strong> &minus; <strong class="text-dark"
                             id="pageEnd">{{ min(5, $propertyTypes->count()) }}</strong> of <strong class="text-dark"
                             id="pageTotal">{{ $propertyTypes->count() }}</strong> units
-                    </span>
-                </div>
+</span>
+</div>
                 <nav aria-label="Property type table pagination">
                     <ul class="pagination pagination-sm mb-0 gap-1" id="paginationNav">
                         <!-- Dynamic page links rendered by JS -->
                     </ul>
                 </nav>
-            </div>
-        </div>
+</div>
+</div>
 
-    </div>
+</div>
 
     <!-- Property Type Add / Edit Modal -->
     <div class="modal fade" id="propertyTypeModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title fw-bold" id="propertyTypeModalTitle">Add Property Type (புதிய சொத்து வகை)</h5>
+                    <h5 class="modal-title fw-bold" id="propertyTypeModalTitle">Add Property Type</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
+</div>
                 <form id="propertyTypeForm" novalidate>
                     @csrf
                     <div class="modal-body">
@@ -353,110 +349,109 @@
                             <!-- Select Property from Property Master -->
                             <div class="col-12 col-md-7">
                                 <label class="form-label small fw-semibold" for="modalPropertyId">Select Property
-                                    (சொத்தின் பெயர்) <span class="text-danger">*</span></label>
+ <span class="text-danger">*</span></label>
                                 <select class="form-select" id="modalPropertyId" name="property_id" required>
-                                    <option value="">-- Select Property (சொத்து தேர்வு) --</option>
+                                    <option value="">-- Select Property --</option>
                                     @foreach ($propertyList as $prop)
                                         <option value="{{ $prop->id }}">{{ $prop->property_name }}</option>
                                     @endforeach
                                 </select>
                                 <div class="invalid-feedback" id="errPropertyId"></div>
-                            </div>
+</div>
 
                             <div class="col-12 col-md-5">
                                 <label class="form-label small fw-semibold" for="modalShopOfficeName">Shop / Home / Office
-                                    Name (கடை / வீடு / அலுவலக பெயர்)</label>
+                                    Name</label>
                                 <input type="text" class="form-control" id="modalShopOfficeName"
                                     name="shop_home_office_name" placeholder="e.g. Shop 1 / Flat 2B / Unit 4 / Shed 3">
                                 <div class="invalid-feedback" id="errShopOfficeName"></div>
-                            </div>
+</div>
 
                             <div class="col-12 col-md-6">
-                                <label class="form-label small fw-semibold" for="modalPropType">Property Type (வகை) <span
+                                <label class="form-label small fw-semibold" for="modalPropType">Property Type  <span
                                         class="text-danger">*</span></label>
                                 <select class="form-select" id="modalPropType" required>
-                                    <option value="Commercial Shop">Commercial Shop (வணிகக் கடை)</option>
-                                    <option value="Residential Flat">Residential Flat (குடியிருப்பு)</option>
-                                    <option value="Office Space">Office Space (அலுவலகம்)</option>
-                                    <option value="Warehouse / Shed">Warehouse / Shed (கிடங்கு)</option>
+                                    <option value="Commercial Shop">Commercial Shop</option>
+                                    <option value="Residential Flat">Residential Flat</option>
+                                    <option value="Office Space">Office Space</option>
+                                    <option value="Warehouse / Shed">Warehouse / Shed</option>
                                 </select>
                                 <div class="invalid-feedback" id="errPropType"></div>
-                            </div>
+</div>
 
                             <!-- Floor Type input (Task 5) -->
                             <div class="col-12 col-md-6">
-                                <label class="form-label small fw-semibold" for="modalFloorType">Floor Type (தள வகை)</label>
+                                <label class="form-label small fw-semibold" for="modalFloorType">Floor Type</label>
                                 <input type="text" class="form-control" id="modalFloorType"
                                     placeholder="e.g. First Floor (FF), Ground Floor (GF), 2nd Floor (2F)">
                                 <div class="invalid-feedback" id="errFloorType"></div>
-                            </div>
+</div>
 
                             <div class="col-12">
                                 <label class="form-label small fw-semibold" for="modalPropLocation">Location / Address
-                                    (முகவரி) <span class="text-danger">*</span></label>
+ <span class="text-danger">*</span></label>
                                 <input type="text" class="form-control" id="modalPropLocation"
                                     placeholder="e.g. Medavakkam Main Road, Chennai" required>
                                 <div class="invalid-feedback" id="errPropLocation"></div>
-                            </div>
+</div>
 
                             <div class="col-12 col-md-6">
                                 <label class="form-label small fw-semibold" for="modalTenantName">Current Tenant Name
-                                    (வாடகைதாரர் பெயர்)</label>
+</label>
                                 <input type="text" class="form-control" id="modalTenantName"
                                     placeholder="e.g. M/s Royal Travels (or leave blank if vacant)">
                                 <div class="invalid-feedback" id="errTenantName"></div>
-                            </div>
+</div>
                             <div class="col-12 col-md-6">
                                 <label class="form-label small fw-semibold" for="modalTenantPhone">Tenant Contact
                                     Phone</label>
                                 <input type="text" class="form-control" id="modalTenantPhone"
                                     placeholder="e.g. +91 98410 11223">
                                 <div class="invalid-feedback" id="errTenantPhone"></div>
-                            </div>
+</div>
 
                             <div class="col-12 col-md-4">
-                                <label class="form-label small fw-semibold" for="modalMonthlyRent">Monthly Rent (மாத வாடகை
-                                    ரூ.) <span class="text-danger">*</span></label>
+                                <label class="form-label small fw-semibold" for="modalMonthlyRent">Monthly Rent  <span class="text-danger">*</span></label>
                                 <div class="input-group has-validation">
                                     <span class="input-group-text">₹</span>
                                     <input type="number" class="form-control" id="modalMonthlyRent" placeholder="10000"
                                         min="0" step="0.01" required>
                                     <div class="invalid-feedback" id="errMonthlyRent"></div>
-                                </div>
-                            </div>
+</div>
+</div>
                             <div class="col-12 col-md-4">
                                 <label class="form-label small fw-semibold" for="modalAdvanceDeposit">Security Advance
-                                    (முன்பணம் ரூ.)</label>
+</label>
                                 <div class="input-group has-validation">
                                     <span class="input-group-text">₹</span>
                                     <input type="number" class="form-control" id="modalAdvanceDeposit" placeholder="100000"
                                         min="0" step="0.01">
                                     <div class="invalid-feedback" id="errAdvanceDeposit"></div>
-                                </div>
-                            </div>
+</div>
+</div>
                             <div class="col-12 col-md-4">
-                                <label class="form-label small fw-semibold" for="modalStatus">Status (நிலை) <span
+                                <label class="form-label small fw-semibold" for="modalStatus">Status  <span
                                         class="text-danger">*</span></label>
                                 <select class="form-select" id="modalStatus" required>
-                                    <option value="Active">Active (செயலில் உள்ளது)</option>
-                                    <option value="Inactive">Inactive (நிறுத்தப்பட்டது)</option>
+                                    <option value="Active">Active</option>
+                                    <option value="Inactive">Inactive</option>
                                 </select>
                                 <div class="invalid-feedback" id="errStatus"></div>
-                            </div>
-                        </div>
-                    </div>
+</div>
+</div>
+</div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-light btn-sm" data-bs-dismiss="modal">Cancel</button>
                         <button type="submit" class="btn btn-deiveni btn-sm" id="savePropertyTypeBtn">
                             <span class="spinner-border spinner-border-sm me-1 d-none" id="savePropertyTypeSpinner"
                                 role="status" aria-hidden="true"></span>
                             <span id="savePropertyTypeBtnText">Save Property Type</span>
-                        </button>
-                    </div>
+</button>
+</div>
                 </form>
-            </div>
-        </div>
-    </div>
+</div>
+</div>
+</div>
 @endsection
 
 @push('scripts')
@@ -722,7 +717,7 @@
                         <li class="page-item ${prevDisabled}">
                             <button class="page-link" type="button" data-page="${current - 1}" aria-label="Previous" title="Previous Page">
                                 <i class="bi bi-chevron-left"></i>
-                            </button>
+</button>
                         </li>
                     `);
 
@@ -759,7 +754,7 @@
                         <li class="page-item ${nextDisabled}">
                             <button class="page-link" type="button" data-page="${current + 1}" aria-label="Next" title="Next Page">
                                 <i class="bi bi-chevron-right"></i>
-                            </button>
+</button>
                         </li>
                     `);
             }
@@ -798,7 +793,7 @@
 
             // Open Modal for Add
             $('#addPropertyTypeBtn').on('click', function () {
-                $('#propertyTypeModalTitle').text('Add Property Type (புதிய சொத்து வகை)');
+                $('#propertyTypeModalTitle').text('Add Property Type ');
                 $('#savePropertyTypeBtnText').text('Save Property Type');
                 $('#propertyTypeEditId').val('');
                 $('#propertyTypeForm')[0].reset();
@@ -826,7 +821,7 @@
                 const advance = tr.data('advance');
                 const status = tr.data('status');
 
-                $('#propertyTypeModalTitle').text('Edit Property Type (சொத்து வகை திருத்துதல்)');
+                $('#propertyTypeModalTitle').text('Edit Property Type ');
                 $('#savePropertyTypeBtnText').text('Update Property Type');
                 $('#propertyTypeEditId').val(id);
                 $('#modalPropertyId').val(propertyId);
@@ -905,7 +900,7 @@
                             const tenantDisplay = item.tenant_name
                                 ? `<div class="fw-semibold ${item.status === 'Active' ? 'text-dark' : 'text-warning'} row-tenant-name"><i class="bi bi-person-fill text-muted me-1"></i>${item.tenant_name}</div>
                                        <small class="text-muted row-tenant-phone"><i class="bi bi-telephone text-muted me-1"></i>${item.tenant_phone || '—'}</small>`
-                                : `<div class="fw-semibold text-warning row-tenant-name"><i class="bi bi-exclamation-circle text-warning me-1"></i>Vacant (காலியாக உள்ளது)</div>
+                                : `<div class="fw-semibold text-warning row-tenant-name"><i class="bi bi-exclamation-circle text-warning me-1"></i>Vacant</div>
                                        <small class="text-muted row-tenant-phone">—</small>`;
 
                             if (isEdit) {
@@ -929,7 +924,7 @@
                                         <div class="d-flex flex-column gap-1">
                                             <span class="badge ${theme.badge} row-prop-type w-fit">${item.property_type}</span>
                                             ${floorBadge}
-                                        </div>
+</div>
                                     `);
                                 tr.find('td:nth-child(4)').html(tenantDisplay);
                                 tr.find('.row-rent').attr('class', `fw-bold ${rentClass} fs-6 row-rent`).text('₹' + formattedRent);
@@ -958,18 +953,18 @@
                                                 <div class="d-flex align-items-center gap-2">
                                                     <div class="stat-icon-wrapper ${theme.wrapper} prop-icon-badge" style="width:36px; height:36px; font-size:1rem;">
                                                         <i class="${theme.icon}"></i>
-                                                    </div>
+</div>
                                                     <div>
                                                         <div class="fw-bold text-dark fs-6 row-prop-title">${item.property_name || (item.property ? item.property.property_name : '')}</div>
                                                         <small class="text-muted row-location">${locationSubtitle}</small>
-                                                    </div>
-                                                </div>
+</div>
+</div>
                                             </td>
                                             <td>
                                                 <div class="d-flex flex-column gap-1">
                                                     <span class="badge ${theme.badge} row-prop-type w-fit">${item.property_type}</span>
                                                     ${floorBadge}
-                                                </div>
+</div>
                                             </td>
                                             <td>${tenantDisplay}</td>
                                             <td>
@@ -984,13 +979,13 @@
                                                 <div class="dropdown table-action-dropdown">
                                                     <button class="btn table-action-btn" type="button" data-bs-toggle="dropdown" data-bs-popper-config='{"strategy":"fixed"}' aria-expanded="false" title="Actions">
                                                         <i class="bi bi-three-dots-vertical"></i>
-                                                    </button>
+</button>
                                                     <ul class="dropdown-menu dropdown-menu-end shadow-sm">
                                                         <li><button class="dropdown-item edit-property-type-btn" type="button"><i class="bi bi-pencil text-primary me-2"></i>Edit</button></li>
                                                         <li><hr class="dropdown-divider my-1"></li>
                                                         <li><button class="dropdown-item text-danger delete-property-type-btn" type="button"><i class="bi bi-trash3 text-danger me-2"></i>Delete</button></li>
                                                     </ul>
-                                                </div>
+</div>
                                             </td>
                                         </tr>
                                     `;
@@ -1077,9 +1072,9 @@
                             <div class="toast-body d-flex align-items-center gap-2">
                                 <i class="bi bi-${icon}"></i>
                                 <span>${message}</span>
-                            </div>
+</div>
                             <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
-                        </div>
+</div>
                     `;
 
                 toastContainer.appendChild(toastEl);

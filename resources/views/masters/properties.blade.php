@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('title', 'Property Master')
-@section('page_title', 'Property Master (சொத்து முதன்மை பட்டியல்)')
+@section('page_title', 'Property Master ')
 
 @push('styles')
     <style>
@@ -43,16 +43,16 @@
         <div class="card-custom p-3 mb-3 mb-md-4 bg-white">
             <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
                 <div>
-                    <h5 class="fw-bold mb-0 text-dark">Properties Directory (சொத்து விவரங்கள்)</h5>
-                </div>
+                    <h5 class="fw-bold mb-0 text-dark">Properties Directory</h5>
+</div>
                 <div class="d-flex gap-2">
                     <button class="btn btn-deiveni btn-sm" data-bs-toggle="modal" data-bs-target="#propertyModal"
                         id="addPropertyBtn">
                         <i class="bi bi-building-add me-1"></i> Add Property
-                    </button>
-                </div>
-            </div>
-        </div>
+</button>
+</div>
+</div>
+</div>
 
         <!-- Stat Highlights Row -->
         <div class="row g-3 mb-3 mb-md-4">
@@ -60,45 +60,42 @@
                 <div class="card-stat d-flex align-items-center gap-3">
                     <div class="stat-icon-wrapper bg-primary bg-opacity-10 text-primary">
                         <i class="bi bi-building fs-4"></i>
-                    </div>
+</div>
                     <div>
                         <div class="text-muted small fw-medium">Total Properties</div>
                         <h4 class="fw-bold mb-0 text-dark" id="statTotalProperties">
                             {{ $stats['total_properties'] ?? $properties->count() }}
-                        </h4>
-                        <small class="ta-text text-muted" style="font-size:0.72rem;">மொத்த சொத்துக்கள்</small>
-                    </div>
-                </div>
-            </div>
+</h4>
+</div>
+</div>
+</div>
             <div class="col-4">
                 <div class="card-stat d-flex align-items-center gap-3">
                     <div class="stat-icon-wrapper bg-success bg-opacity-10 text-success">
                         <i class="bi bi-check2-circle fs-4"></i>
-                    </div>
+</div>
                     <div>
                         <div class="text-muted small fw-medium">Active Properties</div>
                         <h4 class="fw-bold mb-0 text-success" id="statActiveProperties">
                             {{ $stats['active_properties'] ?? $properties->where('status', 'Active')->count() }}
-                        </h4>
-                        <small class="ta-text text-muted" style="font-size:0.72rem;">செயலில் உள்ளவை</small>
-                    </div>
-                </div>
-            </div>
+</h4>
+</div>
+</div>
+</div>
             <div class="col-4">
                 <div class="card-stat d-flex align-items-center gap-3">
                     <div class="stat-icon-wrapper bg-secondary bg-opacity-10 text-secondary">
                         <i class="bi bi-x-circle fs-4"></i>
-                    </div>
+</div>
                     <div>
                         <div class="text-muted small fw-medium">Inactive Properties</div>
                         <h4 class="fw-bold mb-0 text-secondary" id="statInactiveProperties">
                             {{ $stats['inactive_properties'] ?? $properties->where('status', 'Inactive')->count() }}
-                        </h4>
-                        <small class="ta-text text-muted" style="font-size:0.72rem;">செயலற்றவை</small>
-                    </div>
-                </div>
-            </div>
-        </div>
+</h4>
+</div>
+</div>
+</div>
+</div>
 
         <!-- Filter & Search Card -->
         <div class="card-custom p-3 mb-3 mb-md-4 bg-white">
@@ -108,27 +105,27 @@
                         <span class="input-group-text bg-light border-end-0"><i class="bi bi-search text-muted"></i></span>
                         <input type="text" class="form-control border-start-0 ps-0" id="propertySearchInput"
                             placeholder="Search Property Name...">
-                    </div>
-                </div>
+</div>
+</div>
                 <div class="col-6 col-md-3">
                     <select class="form-select form-select-sm" id="propertyStatusFilter">
-                        <option value="">All Status (அனைத்து நிலை)</option>
-                        <option value="Active">Active (செயலில் உள்ளது)</option>
-                        <option value="Inactive">Inactive (நிறுத்தப்பட்டது)</option>
+                        <option value="">All Status</option>
+                        <option value="Active">Active</option>
+                        <option value="Inactive">Inactive</option>
                     </select>
-                </div>
+</div>
                 <div class="col-6 col-md-1">
                     <button type="button" class="btn btn-outline-secondary btn-sm px-2 py-1" id="historyFilterResetBtn"
                     title="Reset filters">
                     <i class="bi bi-arrow-counterclockwise"></i>
-                    </button>
-                </div>
+</button>
+</div>
                 <div class="col-12 col-md-3 text-md-end">
                     <span class="small text-muted" id="propertyCountBadge">Showing <strong class="text-dark"
                             id="visiblePropertyCount">{{ $properties->count() }}</strong> records</span>
-                </div>
-            </div>
-        </div>
+</div>
+</div>
+</div>
 
         <!-- Properties Table -->
         <div class="card-custom overflow-hidden">
@@ -137,8 +134,8 @@
                     <thead>
                         <tr>
                             <th style="width: 60px;">#</th>
-                            <th>Property Name (சொத்தின் பெயர்)</th>
-                            <th>Status (நிலை)</th>
+                            <th>Property Name</th>
+                            <th>Status</th>
                             <th class="text-end" style="width: 100px;">Actions</th>
                         </tr>
                     </thead>
@@ -158,23 +155,23 @@
                                         <div class="stat-icon-wrapper bg-primary-subtle text-primary prop-icon-badge"
                                             style="width:36px; height:36px; font-size:1rem;">
                                             <i class="bi bi-building"></i>
-                                        </div>
+</div>
                                         <div>
                                             <div class="fw-bold text-dark fs-6 row-prop-title">{{ $property->property_name }}</div>
                                             <div class="d-flex align-items-center gap-1 mt-0.5 row-prop-sub">
                                                 @if ($property->property_name_ta)
                                                     <small class="text-muted row-prop-tamil" style="font-size:0.75rem;">
                                                         <span class="badge bg-light text-secondary border border-secondary-subtle font-normal">{{ $property->property_name_ta }}</span>
-                                                    </small>
+</small>
                                                 @endif
                                                 @if ($inUse)
                                                     <span class="badge bg-light text-secondary border border-secondary-subtle" style="font-size: 0.68rem;" title="Used by {{ $unitsCount }} units in Property Type Master">
                                                         <i class="bi bi-link-45deg me-0.5"></i>{{ $unitsCount }} {{ $unitsCount === 1 ? 'branch' : 'branches' }}
-                                                    </span>
+</span>
                                                 @endif
-                                            </div>
-                                        </div>
-                                    </div>
+</div>
+</div>
+</div>
                                 </td>
                                 <td>
                                     @if ($property->status === 'Active')
@@ -187,7 +184,7 @@
                                     <div class="dropdown table-action-dropdown">
                                         <button class="btn table-action-btn" type="button" data-bs-toggle="dropdown" data-bs-popper-config='{"strategy":"fixed"}' aria-expanded="false" title="Actions">
                                             <i class="bi bi-three-dots-vertical"></i>
-                                        </button>
+</button>
                                         <ul class="dropdown-menu dropdown-menu-end shadow-sm">
                                             <li><button class="dropdown-item edit-property-btn" type="button"><i
                                                         class="bi bi-pencil text-primary me-2"></i>Edit</button></li>
@@ -202,14 +199,14 @@
                                                         <i class="bi bi-lock-fill text-muted me-2"></i>Delete <span
                                                             class="badge bg-secondary-subtle text-secondary ms-1"
                                                             style="font-size: 0.65rem;">In Use</span>
-                                                    </button>
+</button>
                                                 </li>
                                             @else
                                                 <li><button class="dropdown-item text-danger delete-property-btn" type="button"><i
                                                             class="bi bi-trash3 text-danger me-2"></i>Delete</button></li>
                                             @endif
                                         </ul>
-                                    </div>
+</div>
                                 </td>
                             </tr>
                         @empty
@@ -228,7 +225,7 @@
                         </tr>
                     </tbody>
                 </table>
-            </div>
+</div>
 
             <!-- Table Pagination & Footer Summary -->
             <div class="p-3 bg-white border-top d-flex flex-column flex-md-row justify-content-between align-items-center gap-3" id="tablePaginationContainer">
@@ -242,68 +239,68 @@
                     </select>
                     <span class="small text-muted ms-md-2" id="paginationSummary">
                         Showing <strong class="text-dark" id="pageStart">1</strong> &minus; <strong class="text-dark" id="pageEnd">{{ min(5, $properties->count()) }}</strong> of <strong class="text-dark" id="pageTotal">{{ $properties->count() }}</strong> properties
-                    </span>
-                </div>
+</span>
+</div>
                 <nav aria-label="Property table pagination">
                     <ul class="pagination pagination-sm mb-0 gap-1" id="paginationNav">
                         <!-- Dynamic page links rendered by JS -->
                     </ul>
                 </nav>
-            </div>
-        </div>
+</div>
+</div>
 
-    </div>
+</div>
 
     <!-- Property Add / Edit Modal -->
     <div class="modal fade" id="propertyModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title fw-bold" id="propertyModalTitle">Add Property (புதிய சொத்து)</h5>
+                    <h5 class="modal-title fw-bold" id="propertyModalTitle">Add Property</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
+</div>
                 <form id="propertyForm" novalidate autocomplete="off">
                     @csrf
                     <div class="modal-body">
                         <input type="hidden" id="propertyEditId">
                         <div class="row g-3">
                             <div class="col-12">
-                                <label class="form-label small fw-semibold" for="modalPropertyName">Property Name (சொத்தின் பெயர்)
+                                <label class="form-label small fw-semibold" for="modalPropertyName">Property Name 
                                     <span class="text-danger">*</span></label>
                                 <input type="text" class="form-control" id="modalPropertyName" name="property_name"
                                     placeholder="e.g. Medavakkam Commercial Complex" required>
                                 <div class="invalid-feedback" id="errPropertyName"></div>
-                            </div>
+</div>
 
                             <div class="col-12">
-                                <label class="form-label small fw-semibold" for="modalPropertyNameTa">Property Name in Tamil (சொத்தின் பெயர் தமிழில்) <span class="text-muted small fw-normal">(விருப்பத்தேர்வு)</span></label>
+                                <label class="form-label small fw-semibold" for="modalPropertyNameTa">Property Name in Tamil  <span class="text-muted small fw-normal"></span></label>
                                 <input type="text" class="form-control" id="modalPropertyNameTa" name="property_name_ta"
                                     placeholder="e.g. மேடவாக்கம் வணிக வளாகம்">
                                 <div class="invalid-feedback" id="errPropertyNameTa"></div>
-                            </div>
+</div>
 
                             <div class="col-12">
-                                <label class="form-label small fw-semibold" for="modalStatus">Status (நிலை) <span class="text-danger">*</span></label>
+                                <label class="form-label small fw-semibold" for="modalStatus">Status  <span class="text-danger">*</span></label>
                                 <select class="form-select" id="modalStatus" name="status" required>
-                                    <option value="Active">Active (செயலில் உள்ளது)</option>
-                                    <option value="Inactive">Inactive (நிறுத்தப்பட்டது)</option>
+                                    <option value="Active">Active</option>
+                                    <option value="Inactive">Inactive</option>
                                 </select>
                                 <div class="invalid-feedback" id="errStatus"></div>
-                            </div>
-                        </div>
-                    </div>
+</div>
+</div>
+</div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-light btn-sm" data-bs-dismiss="modal">Cancel</button>
                         <button type="submit" class="btn btn-deiveni btn-sm" id="savePropertyBtn">
                             <span class="spinner-border spinner-border-sm me-1 d-none" id="savePropertySpinner" role="status"
                                 aria-hidden="true"></span>
                             <span id="savePropertyBtnText">Save Property</span>
-                        </button>
-                    </div>
+</button>
+</div>
                 </form>
-            </div>
-        </div>
-    </div>
+</div>
+</div>
+</div>
 
     <!-- Delete Confirmation Modal -->
     <div class="modal fade" id="deletePropertyModal" tabindex="-1" aria-hidden="true">
@@ -313,7 +310,7 @@
                     <div class="stat-icon-wrapper bg-danger bg-opacity-10 text-danger mx-auto mb-3"
                         style="width:54px; height:54px; border-radius:50%;">
                         <i class="bi bi-trash3 fs-3"></i>
-                    </div>
+</div>
                     <h6 class="fw-bold mb-1 text-dark">Delete Property?</h6>
                     <p class="text-muted small mb-3">Are you sure you want to delete <strong class="text-dark"
                             id="deletePropertyName"></strong>? This action cannot be reversed.</p>
@@ -324,12 +321,12 @@
                             <span class="spinner-border spinner-border-sm me-1 d-none" id="deletePropertySpinner" role="status"
                                 aria-hidden="true"></span>
                             Delete
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+</button>
+</div>
+</div>
+</div>
+</div>
+</div>
 @endsection
 
 @push('scripts')
@@ -366,9 +363,9 @@
                         <div class="toast-body d-flex align-items-center gap-2">
                             <i class="bi bi-${icon}"></i>
                             <span>${message}</span>
-                        </div>
+</div>
                         <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
-                    </div>
+</div>
                 `;
 
                 toastContainer.appendChild(toastEl);
@@ -495,7 +492,7 @@
                     <li class="page-item ${prevDisabled}">
                         <button class="page-link" type="button" data-page="${current - 1}" aria-label="Previous" title="Previous Page">
                             <i class="bi bi-chevron-left"></i>
-                        </button>
+</button>
                     </li>
                 `);
 
@@ -532,7 +529,7 @@
                     <li class="page-item ${nextDisabled}">
                         <button class="page-link" type="button" data-page="${current + 1}" aria-label="Next" title="Next Page">
                             <i class="bi bi-chevron-right"></i>
-                        </button>
+</button>
                     </li>
                 `);
             }
@@ -572,7 +569,7 @@
                 $('#propertyForm')[0].reset();
                 $('#propertyEditId').val('');
                 $('#modalPropertyNameTa').val('');
-                $('#propertyModalTitle').text('Add Property (புதிய சொத்து)');
+                $('#propertyModalTitle').text('Add Property ');
                 $('#savePropertyBtnText').text('Save Property');
                 $('#propertyForm .is-invalid').removeClass('is-invalid');
                 $('#propertyForm .invalid-feedback').text('').hide();
@@ -638,14 +635,14 @@
                                         <div class="stat-icon-wrapper bg-primary-subtle text-primary prop-icon-badge"
                                             style="width:36px; height:36px; font-size:1rem;">
                                             <i class="bi bi-building"></i>
-                                        </div>
+</div>
                                         <div>
                                             <div class="fw-bold text-dark fs-6 row-prop-title">${escapeHtml(property.property_name)}</div>
                                             <div class="d-flex align-items-center gap-1 mt-0.5 row-prop-sub">
                                                 ${tamilBadge}
-                                            </div>
-                                        </div>
-                                    </div>
+</div>
+</div>
+</div>
                                 </td>
                                 <td>
                                     <span class="badge ${property.status === 'Active' ? 'bg-success-subtle text-success border border-success-subtle' : 'bg-secondary-subtle text-muted border border-secondary-subtle'} row-status">${property.status}</span>
@@ -654,7 +651,7 @@
                                     <div class="dropdown table-action-dropdown">
                                         <button class="btn table-action-btn" type="button" data-bs-toggle="dropdown" data-bs-popper-config='{"strategy":"fixed"}' aria-expanded="false" title="Actions">
                                             <i class="bi bi-three-dots-vertical"></i>
-                                        </button>
+</button>
                                         <ul class="dropdown-menu dropdown-menu-end shadow-sm">
                                             <li><button class="dropdown-item edit-property-btn" type="button"><i
                                                         class="bi bi-pencil text-primary me-2"></i>Edit</button></li>
@@ -662,7 +659,7 @@
                                             <li><button class="dropdown-item text-danger delete-property-btn" type="button"><i
                                                         class="bi bi-trash3 text-danger me-2"></i>Delete</button></li>
                                         </ul>
-                                    </div>
+</div>
                                 </td>
                             </tr>
                         `;
@@ -753,7 +750,7 @@
                             $('#modalPropertyNameTa').val(p.property_name_ta || '');
                             $('#modalStatus').val(p.status);
 
-                            $('#propertyModalTitle').text('Edit Property (சொத்து திருத்துதல்)');
+                            $('#propertyModalTitle').text('Edit Property ');
                             $('#savePropertyBtnText').text('Update Property');
                             $('#propertyForm .is-invalid').removeClass('is-invalid');
                             $('#propertyForm .invalid-feedback').text('').hide();

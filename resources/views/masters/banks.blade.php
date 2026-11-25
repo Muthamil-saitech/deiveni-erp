@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('title', 'Bank Master')
-@section('page_title', 'Bank Master (வங்கி முதன்மை பட்டியல்)')
+@section('page_title', 'Bank Master ')
 
 @push('styles')
     <style>
@@ -43,19 +43,19 @@
         <div class="card-custom p-3 mb-3 mb-md-4 bg-white">
             <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
                 <div>
-                    <h5 class="fw-bold mb-0 text-dark">Empanelled Banks Directory (வங்கி விவரங்கள்)</h5>
-                </div>
+                    <h5 class="fw-bold mb-0 text-dark">Empanelled Banks Directory</h5>
+</div>
                 <div class="d-flex gap-2">
                     <a href="{{ url('/branches') }}" class="btn btn-outline-secondary btn-sm">
                         <i class="bi bi-diagram-3 me-1"></i> Branch Master
-                    </a>
+</a>
                     <button class="btn btn-deiveni btn-sm" data-bs-toggle="modal" data-bs-target="#bankModal"
                         id="addBankBtn">
                         <i class="bi bi-bank me-1"></i> Add Bank
-                    </button>
-                </div>
-            </div>
-        </div>
+</button>
+</div>
+</div>
+</div>
 
         <!-- Stat Highlights Row -->
         <div class="row g-3 mb-3 mb-md-4">
@@ -63,45 +63,42 @@
                 <div class="card-stat d-flex align-items-center gap-3">
                     <div class="stat-icon-wrapper bg-primary bg-opacity-10 text-primary">
                         <i class="bi bi-bank fs-4"></i>
-                    </div>
+</div>
                     <div>
                         <div class="text-muted small fw-medium">Total Banks</div>
                         <h4 class="fw-bold mb-0 text-dark" id="statTotalBanks">
                             {{ $stats['total_banks'] ?? $banks->count() }}
-                        </h4>
-                        <small class="ta-text text-muted" style="font-size:0.72rem;">மொத்த வங்கிகள்</small>
-                    </div>
-                </div>
-            </div>
+</h4>
+</div>
+</div>
+</div>
             <div class="col-4">
                 <div class="card-stat d-flex align-items-center gap-3">
                     <div class="stat-icon-wrapper bg-success bg-opacity-10 text-success">
                         <i class="bi bi-check2-circle fs-4"></i>
-                    </div>
+</div>
                     <div>
                         <div class="text-muted small fw-medium">Active Banks</div>
                         <h4 class="fw-bold mb-0 text-success" id="statActiveBanks">
                             {{ $stats['active_banks'] ?? $banks->where('status', 'Active')->count() }}
-                        </h4>
-                        <small class="ta-text text-muted" style="font-size:0.72rem;">செயலில் உள்ள வங்கிகள்</small>
-                    </div>
-                </div>
-            </div>
+</h4>
+</div>
+</div>
+</div>
             <div class="col-4">
                 <div class="card-stat d-flex align-items-center gap-3">
                     <div class="stat-icon-wrapper bg-secondary bg-opacity-10 text-secondary">
                         <i class="bi bi-x-circle fs-4"></i>
-                    </div>
+</div>
                     <div>
                         <div class="text-muted small fw-medium">Inactive Banks</div>
                         <h4 class="fw-bold mb-0 text-secondary" id="statInactiveBanks">
                             {{ $stats['inactive_banks'] ?? $banks->where('status', 'Inactive')->count() }}
-                        </h4>
-                        <small class="ta-text text-muted" style="font-size:0.72rem;">செயலற்ற வங்கிகள்</small>
-                    </div>
-                </div>
-            </div>
-        </div>
+</h4>
+</div>
+</div>
+</div>
+</div>
 
         <!-- Filter & Search Card -->
         <div class="card-custom p-3 mb-3 mb-md-4 bg-white">
@@ -111,27 +108,27 @@
                         <span class="input-group-text bg-light border-end-0"><i class="bi bi-search text-muted"></i></span>
                         <input type="text" class="form-control border-start-0 ps-0" id="bankSearchInput"
                             placeholder="Search Bank Name (English / Tamil)...">
-                    </div>
-                </div>
+</div>
+</div>
                 <div class="col-6 col-md-3">
                     <select class="form-select form-select-sm" id="bankStatusFilter">
-                        <option value="">All Status (அனைத்து நிலை)</option>
-                        <option value="Active">Active (செயலில் உள்ளது)</option>
-                        <option value="Inactive">Inactive (நிறுத்தப்பட்டது)</option>
+                        <option value="">All Status</option>
+                        <option value="Active">Active</option>
+                        <option value="Inactive">Inactive</option>
                     </select>
-                </div>
+</div>
                 <div class="col-6 col-md-1">
                     <button type="button" class="btn btn-outline-secondary btn-sm px-2 py-1" id="historyFilterResetBtn"
                     title="Reset filters">
                     <i class="bi bi-arrow-counterclockwise"></i>
-                    </button>
-                </div>
+</button>
+</div>
                 <div class="col-12 col-md-3 text-md-end">
                     <span class="small text-muted" id="bankCountBadge">Showing <strong class="text-dark"
                             id="visibleBankCount">{{ $banks->count() }}</strong> records</span>
-                </div>
-            </div>
-        </div>
+</div>
+</div>
+</div>
 
         <!-- Banks Table -->
         <div class="card-custom overflow-hidden">
@@ -140,8 +137,8 @@
                     <thead>
                         <tr>
                             <th style="width: 60px;">#</th>
-                            <th>Bank Name (வங்கி பெயர்)</th>
-                            <th>Status (நிலை)</th>
+                            <th>Bank Name</th>
+                            <th>Status</th>
                             <th class="text-end" style="width: 100px;">Actions</th>
                         </tr>
                     </thead>
@@ -173,7 +170,7 @@
                                         <div class="stat-icon-wrapper {{ $iconWrapperClass }} bank-icon-badge"
                                             style="width:36px; height:36px; font-size:1rem;">
                                             <i class="bi bi-bank"></i>
-                                        </div>
+</div>
                                         <div>
                                             <div class="fw-bold text-dark fs-6 row-bank-title">{{ $bank->bank_name }}</div>
                                             <div class="d-flex align-items-center gap-1 mt-0.5">
@@ -188,11 +185,11 @@
                                                         title="Used by {{ $branchesCount }} branch(es) in Branch Master">
                                                         <i class="bi bi-link-45deg me-0.5"></i>{{ $branchesCount }}
                                                         {{ $branchesCount === 1 ? 'branch' : 'branches' }}
-                                                    </span>
+</span>
                                                 @endif
-                                            </div>
-                                        </div>
-                                    </div>
+</div>
+</div>
+</div>
                                 </td>
                                 <td>
                                     @if ($bank->status === 'Active')
@@ -208,7 +205,7 @@
                                         <button class="btn table-action-btn" type="button" data-bs-toggle="dropdown"
                                             aria-expanded="false" title="Actions">
                                             <i class="bi bi-three-dots-vertical"></i>
-                                        </button>
+</button>
                                         <ul class="dropdown-menu dropdown-menu-end shadow-sm">
                                             <li><button class="dropdown-item edit-bank-btn" type="button"><i
                                                         class="bi bi-pencil text-primary me-2"></i>Edit</button></li>
@@ -223,14 +220,14 @@
                                                         <i class="bi bi-lock-fill text-muted me-2"></i>Delete <span
                                                             class="badge bg-secondary-subtle text-secondary ms-1"
                                                             style="font-size: 0.65rem;">In Use</span>
-                                                    </button>
+</button>
                                                 </li>
                                             @else
                                                 <li><button class="dropdown-item text-danger delete-bank-btn" type="button"><i
                                                             class="bi bi-trash3 text-danger me-2"></i>Delete</button></li>
                                             @endif
                                         </ul>
-                                    </div>
+</div>
                                 </td>
                             </tr>
                         @empty
@@ -249,7 +246,7 @@
                         </tr>
                     </tbody>
                 </table>
-            </div>
+</div>
 
             <!-- Table Pagination & Footer Summary -->
             <div class="p-3 bg-white border-top d-flex flex-column flex-md-row justify-content-between align-items-center gap-3"
@@ -266,69 +263,68 @@
                         Showing <strong class="text-dark" id="pageStart">1</strong> &minus; <strong class="text-dark"
                             id="pageEnd">{{ min(5, $banks->count()) }}</strong> of <strong class="text-dark"
                             id="pageTotal">{{ $banks->count() }}</strong> banks
-                    </span>
-                </div>
+</span>
+</div>
                 <nav aria-label="Bank table pagination">
                     <ul class="pagination pagination-sm mb-0 gap-1" id="paginationNav">
                         <!-- Dynamic page links rendered by JS -->
                     </ul>
                 </nav>
-            </div>
-        </div>
+</div>
+</div>
 
-    </div>
+</div>
 
     <!-- Bank Add / Edit Modal -->
     <div class="modal fade" id="bankModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title fw-bold" id="bankModalTitle">Add Bank (புதிய வங்கி தகவல்)</h5>
+                    <h5 class="modal-title fw-bold" id="bankModalTitle">Add Bank</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
+</div>
                 <form id="bankForm" novalidate autocomplete="off">
                     <div class="modal-body">
                         <input type="hidden" id="bankEditId">
                         <div class="row g-3">
                             <div class="col-12">
-                                <label class="form-label small fw-semibold" for="modalBankName">Bank Name (வங்கி பெயர்)
+                                <label class="form-label small fw-semibold" for="modalBankName">Bank Name 
                                     <span class="text-danger">*</span></label>
                                 <input type="text" class="form-control" id="modalBankName" name="bank_name"
                                     placeholder="e.g. State Bank of India (SBI)" required>
                                 <div class="invalid-feedback" id="errBankName"></div>
-                            </div>
+</div>
 
                             <div class="col-12">
-                                <label class="form-label small fw-semibold" for="modalBankNameTa">Bank Name in Tamil (தமிழ்
-                                    பெயர்) <span class="text-muted small fw-normal">(விருப்பத்தேர்வு)</span></label>
+                                <label class="form-label small fw-semibold" for="modalBankNameTa">Bank Name in Tamil  <span class="text-muted small fw-normal"></span></label>
                                 <input type="text" class="form-control" id="modalBankNameTa" name="bank_name_ta"
                                     placeholder="e.g. பாரத ஸ்டேட் வங்கி">
                                 <div class="invalid-feedback" id="errBankNameTa"></div>
-                            </div>
+</div>
 
                             <div class="col-12">
-                                <label class="form-label small fw-semibold" for="modalStatus">Status (நிலை) <span
+                                <label class="form-label small fw-semibold" for="modalStatus">Status  <span
                                         class="text-danger">*</span></label>
                                 <select class="form-select" id="modalStatus" name="status" required>
-                                    <option value="Active">Active (செயலில் உள்ளது)</option>
-                                    <option value="Inactive">Inactive (நிறுத்தப்பட்டது)</option>
+                                    <option value="Active">Active</option>
+                                    <option value="Inactive">Inactive</option>
                                 </select>
                                 <div class="invalid-feedback" id="errStatus"></div>
-                            </div>
-                        </div>
-                    </div>
+</div>
+</div>
+</div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-light btn-sm" data-bs-dismiss="modal">Cancel</button>
                         <button type="submit" class="btn btn-deiveni btn-sm" id="saveBankBtn">
                             <span class="spinner-border spinner-border-sm me-1 d-none" id="saveBankSpinner" role="status"
                                 aria-hidden="true"></span>
                             <span id="saveBankBtnText">Save Bank Details</span>
-                        </button>
-                    </div>
+</button>
+</div>
                 </form>
-            </div>
-        </div>
-    </div>
+</div>
+</div>
+</div>
 @endsection
 
 @push('scripts')
@@ -514,7 +510,7 @@
                         <li class="page-item ${prevDisabled}">
                             <button class="page-link" type="button" data-page="${current - 1}" aria-label="Previous" title="Previous Page">
                                 <i class="bi bi-chevron-left"></i>
-                            </button>
+</button>
                         </li>
                     `);
 
@@ -551,7 +547,7 @@
                         <li class="page-item ${nextDisabled}">
                             <button class="page-link" type="button" data-page="${current + 1}" aria-label="Next" title="Next Page">
                                 <i class="bi bi-chevron-right"></i>
-                            </button>
+</button>
                         </li>
                     `);
             }
@@ -612,7 +608,7 @@
 
             // Open Modal for Add
             $('#addBankBtn').on('click', function () {
-                $('#bankModalTitle').text('Add Bank (புதிய வங்கி தகவல்)');
+                $('#bankModalTitle').text('Add Bank ');
                 $('#saveBankBtnText').text('Save Bank Details');
                 $('#bankEditId').val('');
                 $('#bankForm')[0].reset();
@@ -628,7 +624,7 @@
                 const bankTa = tr.data('tamil');
                 const status = tr.data('status');
 
-                $('#bankModalTitle').text('Edit Bank (வங்கி விவரங்களை திருத்து)');
+                $('#bankModalTitle').text('Edit Bank ');
                 $('#saveBankBtnText').text('Update Bank Details');
                 $('#bankEditId').val(id);
                 $('#modalBankName').val(bank);
@@ -719,27 +715,27 @@
                                                 <div class="d-flex align-items-center gap-2">
                                                     <div class="stat-icon-wrapper ${theme.iconWrapper} bank-icon-badge" style="width:36px; height:36px; font-size:1rem;">
                                                         <i class="bi bi-bank"></i>
-                                                    </div>
+</div>
                                                     <div>
                                                         <div class="fw-bold text-dark fs-6 row-bank-title">${bank.bank_name}</div>
                                                         <div class="d-flex align-items-center gap-1 mt-0.5">
                                                             <small class="text-muted row-bank-subtitle ${bank.bank_name_ta ? '' : 'd-none'}">${tamilBadge}</small>
-                                                        </div>
-                                                    </div>
-                                                </div>
+</div>
+</div>
+</div>
                                             </td>
                                             <td>${statusBadge}</td>
                                             <td class="text-end">
                                                 <div class="dropdown table-action-dropdown">
                                                     <button class="btn table-action-btn" type="button" data-bs-toggle="dropdown" data-bs-popper-config='{"strategy":"fixed"}' aria-expanded="false" title="Actions">
                                                         <i class="bi bi-three-dots-vertical"></i>
-                                                    </button>
+</button>
                                                     <ul class="dropdown-menu dropdown-menu-end shadow-sm">
                                                         <li><button class="dropdown-item edit-bank-btn" type="button"><i class="bi bi-pencil text-primary me-2"></i>Edit</button></li>
                                                         <li><hr class="dropdown-divider my-1"></li>
                                                         <li><button class="dropdown-item text-danger delete-bank-btn" type="button"><i class="bi bi-trash3 text-danger me-2"></i>Delete</button></li>
                                                     </ul>
-                                                </div>
+</div>
                                             </td>
                                         </tr>
                                     `;

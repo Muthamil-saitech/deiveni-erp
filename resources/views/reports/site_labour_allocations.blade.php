@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('title', 'Daily Labour Allocation & Wage Sheet Report')
-@section('page_title', 'Daily Labour Allocation & Wage Sheet (தினசரி தொழிலாளர் பணி & கூலி அறிக்கை)')
+@section('page_title', 'Daily Labour Allocation & Wage Sheet ')
 
 @push('styles')
     <style>
@@ -184,13 +184,13 @@
         <!-- Dedicated Print Header (Visible ONLY during Print / PDF generation) -->
         <div class="print-report-header text-center">
             <h4 class="fw-bold mb-1 text-uppercase">Deiveni Constructions & Developers</h4>
-            <h5 class="fw-bold mb-1">Daily Labour Allocation & Wage Sheet Report (தினசரி பணி ஒதுக்கீடு & கூலி அறிக்கை)</h5>
+            <h5 class="fw-bold mb-1">Daily Labour Allocation & Wage Sheet Report</h5>
             <div class="small text-muted d-flex justify-content-between mt-2 pt-1 border-top">
                 <span id="printFilterRange">Period: <strong>{{ $filterMeta['this_week']['label'] }}</strong></span>
                 <span id="printFilterSite">Site: <strong>All Sites</strong></span>
                 <span>Generated: <strong>{{ date('d M Y, h:i A') }}</strong></span>
-            </div>
-        </div>
+</div>
+</div>
 
         <!-- Top Header & Action Toolbar -->
         <div class="card-custom p-3 p-md-4 mb-4 bg-white shadow-sm border-0" id="headerActionCard">
@@ -199,15 +199,15 @@
                     <div class="d-flex align-items-center gap-2 flex-wrap mb-1">
                         <h4 class="fw-bold mb-0 text-dark">
                             <i class="bi bi-people-fill text-warning me-2"></i>Daily Labour Allocation & Wage Sheet
-                            (தினசரி பணி ஒதுக்கீடு & கூலி அறிக்கை)
-                        </h4>
+
+</h4>
                         @if ($isAdmin)
                             <span class="badge bg-primary-subtle text-primary border border-primary-subtle">
                                 <i class="bi bi-shield-lock me-1"></i> Admin View
-                            </span>
+</span>
                         @endif
-                    </div>
-                </div>
+</div>
+</div>
 
                 <!-- Export & Navigation Actions -->
                 <div class="d-flex gap-2 flex-wrap align-items-center">
@@ -215,20 +215,20 @@
                         id="exportExcelBtn">
                         <i class="bi bi-file-earmark-excel text-success"></i>
                         <span>Export Excel</span>
-                    </button>
+</button>
                     <button type="button" class="btn btn-outline-danger btn-sm d-flex align-items-center gap-1 shadow-sm"
                         id="exportPdfBtn">
                         <i class="bi bi-file-earmark-pdf text-danger"></i>
                         <span>Export PDF</span>
-                    </button>
+</button>
                     <button type="button" class="btn btn-outline-secondary btn-sm d-flex align-items-center gap-1 shadow-sm"
                         id="printReportBtn">
                         <i class="bi bi-printer"></i>
                         <span>Print</span>
-                    </button>
-                </div>
-            </div>
-        </div>
+</button>
+</div>
+</div>
+</div>
 
         <!-- Filter Toolbar -->
         <div class="card-custom p-3 mb-4 bg-white shadow-sm border-0" id="filterCard">
@@ -236,87 +236,87 @@
                 <!-- Date Period Filter: ORDER => today, this week, last week (date range), this month and custom date range -->
                 <div class="col-12 col-md-3">
                     <label class="form-label small fw-semibold mb-1 text-muted">
-                        <i class="bi bi-calendar3 me-1 text-primary"></i> Date Period (தேதி வடிகட்டி)
-                    </label>
+                        <i class="bi bi-calendar3 me-1 text-primary"></i> Date Period 
+</label>
                     <select class="form-select form-select-sm" id="filterPeriod" name="period">
                         <option value="today" {{ ($activeFilters['period'] ?? '') === 'today' ? 'selected' : '' }}>
-                            Today (இன்று - {{ $filterMeta['today']['label'] }})
-                        </option>
+                            Today ({{ $filterMeta['today']['label'] }})
+</option>
                         <option value="this_week" {{ ($activeFilters['period'] ?? 'this_week') === 'this_week' ? 'selected' : '' }}>
-                            This Week (இந்த வாரம் - {{ $filterMeta['this_week']['label'] }})
-                        </option>
+                            This Week ({{ $filterMeta['this_week']['label'] }})
+</option>
                         <option value="last_week" {{ ($activeFilters['period'] ?? '') === 'last_week' ? 'selected' : '' }}>
-                            Last Week (முந்தைய வாரம் - {{ $filterMeta['last_week']['label'] }})
-                        </option>
+                            Last Week ({{ $filterMeta['last_week']['label'] }})
+</option>
                         <option value="this_month" {{ ($activeFilters['period'] ?? '') === 'this_month' ? 'selected' : '' }}>
-                            This Month (இந்த மாதம் - {{ $filterMeta['this_month']['label'] }})
-                        </option>
+                            This Month ({{ $filterMeta['this_month']['label'] }})
+</option>
                         <option value="custom" {{ ($activeFilters['period'] ?? '') === 'custom' ? 'selected' : '' }}>
                             Custom Date Range...
-                        </option>
+</option>
                         <option value="all" {{ ($activeFilters['period'] ?? '') === 'all' ? 'selected' : '' }}>
-                            All Dates (அனைத்து தேதிகள்)
-                        </option>
+                            All Dates 
+</option>
                     </select>
-                </div>
+</div>
 
                 <!-- Custom Date Inputs -->
                 <div class="col-6 col-md-2" id="customDateStartCol" style="{{ ($activeFilters['period'] ?? '') === 'custom' ? '' : 'display: none;' }}">
                     <label class="form-label small fw-semibold mb-1 text-muted">From Date</label>
                     <input type="date" class="form-control form-control-sm" id="filterStartDate"
                         value="{{ $activeFilters['start_date'] ?? $filterMeta['this_week']['start'] }}">
-                </div>
+</div>
                 <div class="col-6 col-md-2" id="customDateEndCol" style="{{ ($activeFilters['period'] ?? '') === 'custom' ? '' : 'display: none;' }}">
                     <label class="form-label small fw-semibold mb-1 text-muted">To Date</label>
                     <input type="date" class="form-control form-control-sm" id="filterEndDate"
                         value="{{ $activeFilters['end_date'] ?? $filterMeta['this_week']['end'] }}">
-                </div>
+</div>
 
                 <!-- Project Site Filter -->
                 <div class="col-6 col-md-3">
                     <label class="form-label small fw-semibold mb-1 text-muted">
-                        <i class="bi bi-building me-1 text-primary"></i> Project Site (கட்டுமான தளம்)
-                    </label>
+                        <i class="bi bi-building me-1 text-primary"></i> Project Site 
+</label>
                     <select class="form-select form-select-sm" id="filterSite" name="site_id">
-                        <option value="all">All Sites (அனைத்து தளங்கள்)</option>
+                        <option value="all">All Sites</option>
                         @foreach ($sites as $site)
                             <option value="{{ $site->id }}" {{ (string)($activeFilters['site_id'] ?? '') === (string)$site->id ? 'selected' : '' }}>
                                 {{ $site->name }} @if($site->location) ({{ $site->location }}) @endif
-                            </option>
+</option>
                         @endforeach
                     </select>
-                </div>
+</div>
 
                 <!-- Text Search -->
                 <div class="col-12 col-md-4">
                     <label class="form-label small fw-semibold mb-1 text-muted">
-                        <i class="bi bi-search me-1 text-primary"></i> Search Trade / Particulars (தேடல்)
-                    </label>
+                        <i class="bi bi-search me-1 text-primary"></i> Search Trade / Particulars 
+</label>
                     <div class="input-group input-group-sm">
                         <input type="text" class="form-control" id="filterSearchInput"
                             placeholder="Search trade, mason, site...">
                         <button class="btn btn-outline-secondary" type="button" id="clearSearchBtn">
                             <i class="bi bi-x"></i>
-                        </button>
-                    </div>
-                </div>
+</button>
+</div>
+</div>
 
                 <!-- Reset Filter Button -->
                 <div class="col-12 col-md-2">
                     <button type="button" class="btn btn-sm btn-light border text-muted w-100" id="resetFilterBtn">
                         <i class="bi bi-arrow-counterclockwise me-1"></i> Reset Filters
-                    </button>
-                </div>
-            </div>
+</button>
+</div>
+</div>
 
             <div class="d-flex justify-content-between align-items-center mt-2 pt-2 border-top">
                 <span class="small text-muted" id="filterMatchCountBadge">
                     Active filters: <strong>This Week ({{ $filterMeta['this_week']['label'] }})</strong> &bull; <strong>All
                         Sites</strong>
-                </span>
+</span>
                 <span class="small text-muted">Current Reference Date: {{ $filterMeta['current_date'] }}</span>
-            </div>
-        </div>
+</div>
+</div>
 
         <!-- KPI Summary Cards -->
         <div class="row g-3 mb-4 kpi-print-grid">
@@ -327,13 +327,13 @@
                             <div class="text-muted small fw-semibold">Total Man-Days Logged</div>
                             <h4 class="fw-bold mb-0 text-dark mt-1" id="kpiManDays">{{ $kpis['total_man_days'] }}</h4>
                             <small class="text-muted">Manpower deployed</small>
-                        </div>
+</div>
                         <div class="bg-warning-subtle text-warning p-2 rounded no-print">
                             <i class="bi bi-people-fill fs-5"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
+</div>
+</div>
+</div>
+</div>
             <div class="col-6 col-md-3">
                 <div class="card-custom kpi-card p-3 bg-white border-start border-4 border-danger h-100 shadow-sm">
                     <div class="d-flex justify-content-between align-items-start">
@@ -342,13 +342,13 @@
                             <h4 class="fw-bold mb-0 text-danger mt-1" id="kpiLabourWage">
                                 ₹{{ number_format($kpis['total_labour_wage'], 2) }}</h4>
                             <small class="text-muted">Trade worker payouts</small>
-                        </div>
+</div>
                         <div class="bg-danger-subtle text-danger p-2 rounded no-print">
                             <i class="bi bi-wallet2 fs-5"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
+</div>
+</div>
+</div>
+</div>
             <div class="col-6 col-md-3">
                 <div class="card-custom kpi-card p-3 bg-white border-start border-4 border-info h-100 shadow-sm">
                     <div class="d-flex justify-content-between align-items-start">
@@ -357,13 +357,13 @@
                             <h4 class="fw-bold mb-0 text-info mt-1" id="kpiExpenses">
                                 ₹{{ number_format($kpis['total_expenses'], 2) }}</h4>
                             <small class="text-muted">Daily petty + weekly expenses</small>
-                        </div>
+</div>
                         <div class="bg-info-subtle text-info p-2 rounded no-print">
                             <i class="bi bi-receipt fs-5"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
+</div>
+</div>
+</div>
+</div>
             <div class="col-6 col-md-3">
                 <div class="card-custom kpi-card p-3 bg-white border-start border-4 border-success h-100 shadow-sm">
                     <div class="d-flex justify-content-between align-items-start">
@@ -372,14 +372,14 @@
                             <h4 class="fw-bold mb-0 text-success mt-1" id="kpiGrandTotal">
                                 ₹{{ number_format($kpis['grand_total'], 2) }}</h4>
                             <small class="text-muted">Wages + All Expenses</small>
-                        </div>
+</div>
                         <div class="bg-success-subtle text-success p-2 rounded no-print">
                             <i class="bi bi-cash-coin fs-5"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+</div>
+</div>
+</div>
+</div>
+</div>
 
         <!-- 1. Daily Labour Allocation & Wage Sheet Table Card -->
         <div class="card-custom p-3 p-md-4 bg-white mb-4 shadow-sm border-0">
@@ -387,26 +387,26 @@
                 <div>
                     <h6 class="fw-bold mb-0 text-dark">
                         <i class="bi bi-calendar-check text-warning me-1"></i>
-                        Daily Labour Allocation & Wage Register (தினசரி பணி ஒதுக்கீடு & கூலி பட்டியல்)
-                    </h6>
+                        Daily Labour Allocation & Wage Register 
+</h6>
                     <small class="text-muted">Detailed daily site allocation records with trades, wage rates, and petty
                         expenses</small>
-                </div>
+</div>
                 <span class="badge bg-light text-dark border" id="allocCountBadge">{{ count($allocations) }}
                     Allocations</span>
-            </div>
+</div>
 
             <div class="table-responsive">
                 <table class="table table-hover align-middle mb-0" id="smAllocationsTable">
                     <thead class="table-light text-muted small text-uppercase">
                         <tr>
-                            <th style="min-width: 110px;">Date (தேதி)</th>
-                            <th style="min-width: 160px;">Project Site (கட்டுமான தளம்)</th>
-                            <th style="min-width: 220px;">Trade Summary (பணி விவரம்)</th>
+                            <th style="min-width: 110px;">Date</th>
+                            <th style="min-width: 160px;">Project Site</th>
+                            <th style="min-width: 220px;">Trade Summary</th>
                             <th class="text-center" style="min-width: 90px;">Workers</th>
-                            <th class="text-end" style="min-width: 110px;">Labour Wage (ரூ.)</th>
-                            <th class="text-end" style="min-width: 110px;">Expenses (ரூ.)</th>
-                            <th class="text-end" style="min-width: 120px;">Day Total (ரூ.)</th>
+                            <th class="text-end" style="min-width: 110px;">Labour Wage (₹)</th>
+                            <th class="text-end" style="min-width: 110px;">Expenses (₹)</th>
+                            <th class="text-end" style="min-width: 120px;">Day Total (₹)</th>
                             <th class="text-center no-print" style="min-width: 110px;">Breakdown</th>
                         </tr>
                     </thead>
@@ -424,7 +424,7 @@
                         </tr>
                     </tfoot>
                 </table>
-            </div>
+</div>
 
             <!-- Allocation Table Pagination & Footer Summary -->
             <div class="p-3 bg-white border-top d-flex flex-column flex-md-row justify-content-between align-items-center gap-3 no-print" id="allocPaginationContainer">
@@ -438,15 +438,15 @@
                     </select>
                     <span class="small text-muted ms-md-2" id="allocPaginationSummary">
                         Showing <strong class="text-dark" id="allocPageStart">1</strong> &minus; <strong class="text-dark" id="allocPageEnd">{{ min(10, count($allocations)) }}</strong> of <strong class="text-dark" id="allocPageTotal">{{ count($allocations) }}</strong> allocations
-                    </span>
-                </div>
+</span>
+</div>
                 <nav aria-label="Labour allocation table pagination">
                     <ul class="pagination pagination-sm mb-0 gap-1" id="allocPaginationNav">
                         <!-- Dynamic page links rendered by JS -->
                     </ul>
                 </nav>
-            </div>
-        </div>
+</div>
+</div>
 
         <!-- 2. Weekly Wages & Settlement Summary Card -->
         <div class="card-custom p-3 p-md-4 bg-white mb-4 shadow-sm border-0">
@@ -454,26 +454,26 @@
                 <div>
                     <h6 class="fw-bold mb-0 text-dark">
                         <i class="bi bi-wallet2 text-primary me-1"></i>
-                        Weekly Wages & Settlement Sheets (வாராந்திர கூலி & தீர்வு விவரம்)
-                    </h6>
+                        Weekly Wages & Settlement Sheets 
+</h6>
                     <small class="text-muted">Consolidated weekly payouts, man-days, and additional weekly site
                         expenses</small>
-                </div>
+</div>
                 <span class="badge bg-light text-dark border" id="weeklyCountBadge">{{ count($weeklyWages) }} Weekly
                     Sheets</span>
-            </div>
+</div>
 
             <div class="table-responsive">
                 <table class="table table-hover align-middle mb-0" id="smWeeklyWagesTable">
                     <thead class="table-light text-muted small text-uppercase">
                         <tr>
-                            <th style="min-width: 150px;">Week Cycle (வாரம்)</th>
-                            <th style="min-width: 160px;">Project Site (கட்டுமான தளம்)</th>
+                            <th style="min-width: 150px;">Week Cycle</th>
+                            <th style="min-width: 160px;">Project Site</th>
                             <th class="text-center" style="min-width: 90px;">Man-Days</th>
-                            <th class="text-end" style="min-width: 120px;">Labour Wages (ரூ.)</th>
-                            <th class="text-end" style="min-width: 120px;">Daily Expenses (ரூ.)</th>
-                            <th class="text-end" style="min-width: 120px;">Weekly Expenses (ரூ.)</th>
-                            <th class="text-end" style="min-width: 130px;">Net Payout (ரூ.)</th>
+                            <th class="text-end" style="min-width: 120px;">Labour Wages (₹)</th>
+                            <th class="text-end" style="min-width: 120px;">Daily Expenses (₹)</th>
+                            <th class="text-end" style="min-width: 120px;">Weekly Expenses (₹)</th>
+                            <th class="text-end" style="min-width: 130px;">Net Payout (₹)</th>
                             <th class="text-center no-print" style="min-width: 110px;">Weekly Exp</th>
                         </tr>
                     </thead>
@@ -492,7 +492,7 @@
                         </tr>
                     </tfoot>
                 </table>
-            </div>
+</div>
 
             <!-- Weekly Wages Table Pagination & Footer Summary -->
             <div class="p-3 bg-white border-top d-flex flex-column flex-md-row justify-content-between align-items-center gap-3 no-print" id="weeklyPaginationContainer">
@@ -506,15 +506,15 @@
                     </select>
                     <span class="small text-muted ms-md-2" id="weeklyPaginationSummary">
                         Showing <strong class="text-dark" id="weeklyPageStart">1</strong> &minus; <strong class="text-dark" id="weeklyPageEnd">{{ min(10, count($weeklyWages)) }}</strong> of <strong class="text-dark" id="weeklyPageTotal">{{ count($weeklyWages) }}</strong> sheets
-                    </span>
-                </div>
+</span>
+</div>
                 <nav aria-label="Weekly wages table pagination">
                     <ul class="pagination pagination-sm mb-0 gap-1" id="weeklyPaginationNav">
                         <!-- Dynamic page links rendered by JS -->
                     </ul>
                 </nav>
-            </div>
-        </div>
+</div>
+</div>
 
         <!-- Day Breakdown Modal -->
         <div class="modal fade" id="dayBreakdownModal" tabindex="-1" aria-hidden="true">
@@ -524,55 +524,55 @@
                         <div>
                             <h6 class="modal-title fw-bold mb-0 text-dark" id="modalDayTitle">Day Allocation Breakdown</h6>
                             <small class="text-muted" id="modalDaySubtitle"></small>
-                        </div>
+</div>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
+</div>
                     <div class="modal-body p-4">
-                        <h6 class="fw-bold text-dark mb-2">Worker Trades & Rates (தொழிலாளர்கள் & கூலி)</h6>
+                        <h6 class="fw-bold text-dark mb-2">Worker Trades & Rates</h6>
                         <div class="table-responsive mb-4">
                             <table class="table table-sm table-bordered align-middle">
                                 <thead class="table-light">
                                     <tr>
-                                        <th>Trade (English & தமிழ்)</th>
+                                        <th>Trade</th>
                                         <th class="text-center">Count</th>
-                                        <th class="text-end">Allocated Rate (ரூ.)</th>
-                                        <th class="text-end">Master Rate (ரூ.)</th>
-                                        <th class="text-end">Subtotal (ரூ.)</th>
+                                        <th class="text-end">Allocated Rate (₹)</th>
+                                        <th class="text-end">Master Rate (₹)</th>
+                                        <th class="text-end">Subtotal (₹)</th>
                                     </tr>
                                 </thead>
                                 <tbody id="modalWorkersBody"></tbody>
                             </table>
-                        </div>
+</div>
 
-                        <h6 class="fw-bold text-dark mb-2">Daily Site Petty Expenses (தள இதர செலவுகள்)</h6>
+                        <h6 class="fw-bold text-dark mb-2">Daily Site Petty Expenses</h6>
                         <div class="table-responsive mb-3">
                             <table class="table table-sm table-bordered align-middle">
                                 <thead class="table-light">
                                     <tr>
                                         <th>Item / Title</th>
                                         <th class="text-center">Qty</th>
-                                        <th class="text-end">Unit Price (ரூ.)</th>
-                                        <th class="text-end">Amount (ரூ.)</th>
+                                        <th class="text-end">Unit Price (₹)</th>
+                                        <th class="text-end">Amount (₹)</th>
                                     </tr>
                                 </thead>
                                 <tbody id="modalExpensesBody"></tbody>
                             </table>
-                        </div>
+</div>
 
                         <div class="p-3 bg-light rounded d-flex justify-content-between align-items-center">
                             <div class="small text-muted">Allocated & logged to database records</div>
                             <div class="text-end">
                                 <span class="small text-muted me-2">Grand Total:</span>
                                 <span class="fw-bold fs-5 text-primary" id="modalGrandTotal">₹0</span>
-                            </div>
-                        </div>
-                    </div>
+</div>
+</div>
+</div>
                     <div class="modal-footer py-2">
                         <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
-                    </div>
-                </div>
-            </div>
-        </div>
+</div>
+</div>
+</div>
+</div>
 
         <!-- Weekly Additional Expenses Breakdown Modal -->
         <div class="modal fade" id="weeklyBreakdownModal" tabindex="-1" aria-hidden="true">
@@ -581,11 +581,11 @@
                     <div class="modal-header bg-light">
                         <div>
                             <h6 class="modal-title fw-bold mb-0 text-dark" id="weeklyModalTitle">Weekly Additional Expenses
-                            </h6>
+</h6>
                             <small class="text-muted" id="weeklyModalSubtitle"></small>
-                        </div>
+</div>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
+</div>
                     <div class="modal-body p-4">
                         <div class="table-responsive mb-3">
                             <table class="table table-sm table-bordered align-middle">
@@ -593,30 +593,30 @@
                                     <tr>
                                         <th>Item Description</th>
                                         <th class="text-center">Qty</th>
-                                        <th class="text-end">Unit Price (ரூ.)</th>
-                                        <th class="text-end">Amount (ரூ.)</th>
+                                        <th class="text-end">Unit Price (₹)</th>
+                                        <th class="text-end">Amount (₹)</th>
                                     </tr>
                                 </thead>
                                 <tbody id="modalWeeklyExpensesBody"></tbody>
                             </table>
-                        </div>
+</div>
 
                         <div class="p-3 bg-light rounded d-flex justify-content-between align-items-center">
                             <div class="small text-muted">Weekly additional expense items</div>
                             <div class="text-end">
                                 <span class="small text-muted me-2">Weekly Expenses Total:</span>
                                 <span class="fw-bold fs-6 text-primary" id="modalWeeklyGrandTotal">₹0</span>
-                            </div>
-                        </div>
-                    </div>
+</div>
+</div>
+</div>
                     <div class="modal-footer py-2">
                         <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
-                    </div>
-                </div>
-            </div>
-        </div>
+</div>
+</div>
+</div>
+</div>
 
-    </div>
+</div>
 @endsection
 
 @push('scripts')
@@ -755,7 +755,7 @@
                                     <td class="text-center no-print">
                                         <button type="button" class="btn btn-xs btn-outline-primary py-0 px-2 view-day-breakdown-btn" data-index="${index}">
                                             <i class="bi bi-eye me-1"></i>View
-                                        </button>
+</button>
                                     </td>
                                 </tr>
                             `);
@@ -820,7 +820,7 @@
                                         ${ww.expenses && ww.expenses.length > 0 ? `
                                             <button type="button" class="btn btn-xs btn-outline-info py-0 px-2 view-weekly-breakdown-btn" data-index="${index}">
                                                 <i class="bi bi-eye me-1"></i>${ww.expenses.length} Exp
-                                            </button>
+</button>
                                         ` : '<span class="text-muted small">-</span>'}
                                     </td>
                                 </tr>
@@ -941,7 +941,7 @@
                     <li class="page-item ${prevDisabled}">
                         <button class="page-link" type="button" data-page="${current - 1}" aria-label="Previous" title="Previous Page">
                             <i class="bi bi-chevron-left"></i>
-                        </button>
+</button>
                     </li>
                 `);
 
@@ -978,7 +978,7 @@
                     <li class="page-item ${nextDisabled}">
                         <button class="page-link" type="button" data-page="${current + 1}" aria-label="Next" title="Next Page">
                             <i class="bi bi-chevron-right"></i>
-                        </button>
+</button>
                     </li>
                 `);
             }

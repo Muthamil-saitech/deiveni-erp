@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('title', 'Worker Categories')
-@section('page_title', 'Worker Categories (தொழிலாளர் பிரிவுகள்)')
+@section('page_title', 'Worker Categories ')
 
 @push('styles')
     <style>
@@ -43,16 +43,16 @@
         <div class="card-custom p-3 mb-3 mb-md-4 bg-white">
             <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
                 <div>
-                    <h5 class="fw-bold mb-0 text-dark">Worker Trade Categories (தொழிலாளர் வகைகள் & தினக்கூலி)</h5>
-                </div>
+                    <h5 class="fw-bold mb-0 text-dark">Worker Trade Categories</h5>
+</div>
                 <div class="d-flex gap-2">
                     <button class="btn btn-deiveni btn-sm" data-bs-toggle="modal" data-bs-target="#categoryModal"
                         id="addCategoryBtn">
                         <i class="bi bi-plus-circle-fill me-1"></i> Add Category
-                    </button>
-                </div>
-            </div>
-        </div>
+</button>
+</div>
+</div>
+</div>
 
         <!-- Filter & Search Card -->
         <div class="card-custom p-3 mb-3 mb-md-4 bg-white">
@@ -61,29 +61,29 @@
                     <div class="input-group input-group-sm">
                         <span class="input-group-text bg-light border-end-0"><i class="bi bi-search text-muted"></i></span>
                         <input type="text" class="form-control border-start-0 ps-0" id="categorySearchInput"
-                            placeholder="Search தமிழ் / English category name (எ.கா. கொத்தனார், மேஸ்திரி)...">
-                    </div>
-                </div>
+                            placeholder="Search தமிழ் / English category name ...">
+</div>
+</div>
                 <div class="col-6 col-md-3">
                     <select class="form-select form-select-sm" id="catStatusFilter">
-                        <option value="">All Status (அனைத்து நிலை)</option>
-                        <option value="Active">Active (செயலில் உள்ளவை)</option>
-                        <option value="Inactive">Inactive (நிறுத்தப்பட்டவை)</option>
+                        <option value="">All Status</option>
+                        <option value="Active">Active</option>
+                        <option value="Inactive">Inactive</option>
                     </select>
-                </div>
+</div>
                 <div class="col-6 col-md-1">
                     <button type="button" class="btn btn-outline-secondary btn-sm px-2 py-1" id="historyFilterResetBtn"
                     title="Reset filters">
                     <i class="bi bi-arrow-counterclockwise"></i>
-                    </button>
-                </div>
+</button>
+</div>
                 <div class="col-12 col-md-3 text-md-end">
                     <span class="small text-muted" id="categoryCountBadge">Showing <strong
                             class="text-dark">{{ $categories->count() }}</strong>
                         categories</span>
-                </div>
-            </div>
-        </div>
+</div>
+</div>
+</div>
 
         <!-- Worker Categories Table -->
         <div class="card-custom overflow-hidden">
@@ -92,9 +92,9 @@
                     <thead>
                         <tr>
                             <th style="width: 60px;">#</th>
-                            <th>Trade Category (பிரிவு - தமிழ் & English)</th>
+                            <th>Trade Category</th>
                             <th>Category Code</th>
-                            <th>Default Daily Wage (ரூ.)</th>
+                            <th>Default Daily Wage (₹)</th>
                             <th>Standard Shift</th>
                             <th>Status</th>
                             <th class="text-end" style="width: 70px;">Actions</th>
@@ -142,13 +142,13 @@
                                         <div class="rounded-circle {{ $badgeColor }} d-flex align-items-center justify-content-center fw-bold me-2 icon-wrapper"
                                             style="width: 36px; height: 36px;">
                                             <i class="{{ $iconClass }}"></i>
-                                        </div>
+</div>
                                         <div>
                                             <div class="fw-bold text-dark fs-6 ta-text row-name-ta">{{ $category->name_en }}
-                                            </div>
+</div>
                                             <small class="text-muted row-name-en">{{ $category->name_ta }}</small>
-                                        </div>
-                                    </div>
+</div>
+</div>
                                 </td>
                                 <td><span
                                         class="font-monospace badge bg-light text-dark border row-code">{{ $category->code }}</span>
@@ -172,7 +172,7 @@
                                         <button class="btn table-action-btn" type="button" data-bs-toggle="dropdown"
                                             data-bs-popper-config='{"strategy":"fixed"}' aria-expanded="false" title="Actions">
                                             <i class="bi bi-three-dots-vertical"></i>
-                                        </button>
+</button>
                                         <ul class="dropdown-menu dropdown-menu-end shadow-sm">
                                             <li><button class="dropdown-item edit-cat-btn" type="button"><i
                                                         class="bi bi-pencil text-primary me-2"></i>Edit</button></li>
@@ -182,7 +182,7 @@
                                             <li><button class="dropdown-item text-danger delete-cat-btn" type="button"><i
                                                         class="bi bi-trash3 text-danger me-2"></i>Delete</button></li>
                                         </ul>
-                                    </div>
+</div>
                                 </td>
                             </tr>
                         @empty
@@ -201,7 +201,7 @@
                         </tr>
                     </tbody>
                 </table>
-            </div>
+</div>
 
             <!-- Table Pagination & Footer Summary -->
             <div class="p-3 bg-white border-top d-flex flex-column flex-md-row justify-content-between align-items-center gap-3"
@@ -218,26 +218,26 @@
                         Showing <strong class="text-dark" id="pageStart">1</strong> &minus; <strong class="text-dark"
                             id="pageEnd">{{ min(5, $categories->count()) }}</strong> of <strong class="text-dark"
                             id="pageTotal">{{ $categories->count() }}</strong> categories
-                    </span>
-                </div>
+</span>
+</div>
                 <nav aria-label="Worker category table pagination">
                     <ul class="pagination pagination-sm mb-0 gap-1" id="paginationNav">
                         <!-- Dynamic page links rendered by JS -->
                     </ul>
                 </nav>
-            </div>
-        </div>
+</div>
+</div>
 
-    </div>
+</div>
 
     <!-- Add / Edit Category Modal -->
     <div class="modal fade" id="categoryModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title fw-bold" id="categoryModalTitle">Add Worker Category (தொழிலாளர் பிரிவு)</h5>
+                    <h5 class="modal-title fw-bold" id="categoryModalTitle">Add Worker Category</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
+</div>
                 <form id="categoryForm" novalidate>
                     @csrf
                     <div class="modal-body">
@@ -249,14 +249,14 @@
                                 <input type="text" class="form-control" id="catNameEn" name="name_en"
                                     placeholder="e.g. Brick Mason / Helper" required>
                                 <div class="invalid-feedback" id="errNameEn"></div>
-                            </div>
+</div>
                             <div class="col-12">
-                                <label class="form-label small fw-semibold" for="catNameTa">Category Name in தமிழ் (Tamil)
+                                <label class="form-label small fw-semibold" for="catNameTa">Category Name in Tamil (Tamil)
                                     <span class="text-danger">*</span></label>
                                 <input type="text" class="form-control ta-text" id="catNameTa" name="name_ta"
                                     placeholder="எ.கா. கொத்தனார் / மேஸ்திரி / சித்தாள்" required>
                                 <div class="invalid-feedback" id="errNameTa"></div>
-                            </div>
+</div>
                             <div class="col-12 col-md-6">
                                 <label
                                     class="form-label small fw-semibold d-flex justify-content-between align-items-center"
@@ -264,55 +264,55 @@
                                     <span>Category Code</span>
                                     <span class="badge bg-light text-muted border"
                                         style="font-size: 0.68rem;">Auto-generated</span>
-                                </label>
+</label>
                                 <div class="input-group">
                                     <span class="input-group-text bg-light text-muted"><i
                                             class="bi bi-lock-fill"></i></span>
                                     <input type="text" class="form-control font-monospace bg-light" id="catCode"
                                         placeholder="Auto-generated" readonly tabindex="-1">
-                                </div>
+</div>
                                 <small class="text-muted" style="font-size: 0.72rem;">
-                                    தானாக உருவாக்கப்படும் (User cannot fill)
+                                    Auto-generated (User cannot fill)
                                 </small>
-                            </div>
+</div>
                             <div class="col-12 col-md-6">
-                                <label class="form-label small fw-semibold" for="catWage">Default Daily Wage (ரூ.) <span
+                                <label class="form-label small fw-semibold" for="catWage">Default Daily Wage (₹) <span
                                         class="text-danger">*</span></label>
                                 <div class="input-group has-validation">
                                     <span class="input-group-text">₹</span>
                                     <input type="number" class="form-control" id="catWage" name="daily_wage"
                                         placeholder="1100" required min="1" step="0.01">
                                     <div class="invalid-feedback" id="errWage"></div>
-                                </div>
-                            </div>
+</div>
+</div>
                             <div class="col-12 col-md-6">
                                 <label class="form-label small fw-semibold" for="catShift">Standard Shift</label>
                                 <input type="text" class="form-control" id="catShift" name="shift"
                                     value="8 Hours (8:30 AM - 5:30 PM)">
                                 <div class="invalid-feedback" id="errShift"></div>
-                            </div>
+</div>
                             <div class="col-12 col-md-6">
                                 <label class="form-label small fw-semibold" for="catStatus">Status</label>
                                 <select class="form-select" id="catStatus" name="status">
-                                    <option value="Active">Active (செயலில் உள்ளது)</option>
-                                    <option value="Inactive">Inactive (நிறுத்தப்பட்டது)</option>
+                                    <option value="Active">Active</option>
+                                    <option value="Inactive">Inactive</option>
                                 </select>
                                 <div class="invalid-feedback" id="errStatus"></div>
-                            </div>
-                        </div>
-                    </div>
+</div>
+</div>
+</div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-light btn-sm" data-bs-dismiss="modal">Cancel</button>
                         <button type="submit" class="btn btn-deiveni btn-sm" id="saveCategoryBtn">
                             <span class="spinner-border spinner-border-sm me-1 d-none" id="saveSpinner" role="status"
                                 aria-hidden="true"></span>
                             <span id="saveBtnText">Save Category</span>
-                        </button>
-                    </div>
+</button>
+</div>
                 </form>
-            </div>
-        </div>
-    </div>
+</div>
+</div>
+</div>
 @endsection
 
 @push('scripts')
@@ -458,7 +458,7 @@
                                                         <li class="page-item ${prevDisabled}">
                                                             <button class="page-link" type="button" data-page="${current - 1}" aria-label="Previous" title="Previous Page">
                                                                 <i class="bi bi-chevron-left"></i>
-                                                            </button>
+</button>
                                                         </li>
                                                     `);
 
@@ -495,7 +495,7 @@
                                                         <li class="page-item ${nextDisabled}">
                                                             <button class="page-link" type="button" data-page="${current + 1}" aria-label="Next" title="Next Page">
                                                                 <i class="bi bi-chevron-right"></i>
-                                                            </button>
+</button>
                                                         </li>
                                                     `);
             }
@@ -578,7 +578,7 @@
 
             // Open Add Modal
             $('#addCategoryBtn').on('click', function () {
-                $('#categoryModalTitle').text('Add Worker Category (தொழிலாளர் பிரிவு)');
+                $('#categoryModalTitle').text('Add Worker Category ');
                 $('#categoryEditId').val('');
                 $('#categoryForm')[0].reset();
                 $('#catShift').val('8 Hours (8:30 AM - 5:30 PM)');
@@ -590,7 +590,7 @@
             // Open Edit Modal
             $(document).on('click', '.edit-cat-btn', function () {
                 const tr = $(this).closest('tr');
-                $('#categoryModalTitle').text('Edit Worker Category (பிரிவு திருத்து)');
+                $('#categoryModalTitle').text('Edit Worker Category ');
                 $('#categoryEditId').val(tr.data('id'));
                 $('#catNameTa').val(tr.data('name-ta'));
                 $('#catNameEn').val(tr.data('name-en'));
@@ -684,12 +684,12 @@
                                                                                     <div class="rounded-circle ${iconConfig.badge} d-flex align-items-center justify-content-center fw-bold me-2 icon-wrapper"
                                                                                         style="width: 36px; height: 36px;">
                                                                                         <i class="${iconConfig.icon}"></i>
-                                                                                    </div>
+</div>
                                                                                     <div>
                                                                                         <div class="fw-bold text-dark fs-6 ta-text row-name-ta">${cat.name_en}</div>
                                                                                         <small class="text-muted row-name-en">${cat.name_ta}</small>
-                                                                                    </div>
-                                                                                </div>
+</div>
+</div>
                                                                             </td>
                                                                             <td><span class="font-monospace badge bg-light text-dark border row-code">${cat.code}</span></td>
                                                                             <td>
@@ -700,19 +700,19 @@
                                                                             <td>
                                                                                 <span class="badge ${cat.status === 'Active' ? 'bg-success-subtle text-success' : 'bg-secondary-subtle text-muted'} row-status-badge">
                                                                                     ${cat.status}
-                                                                                </span>
+</span>
                                                                             </td>
                                                                             <td class="text-end">
                                                                                 <div class="dropdown table-action-dropdown">
                                                                                     <button class="btn table-action-btn" type="button" data-bs-toggle="dropdown" data-bs-popper-config='{"strategy":"fixed"}' aria-expanded="false" title="Actions">
                                                                                         <i class="bi bi-three-dots-vertical"></i>
-                                                                                    </button>
+</button>
                                                                                     <ul class="dropdown-menu dropdown-menu-end shadow-sm">
                                                                                         <li><button class="dropdown-item edit-cat-btn" type="button"><i class="bi bi-pencil text-primary me-2"></i>Edit</button></li>
                                                                                         <li><hr class="dropdown-divider my-1"></li>
                                                                                         <li><button class="dropdown-item text-danger delete-cat-btn" type="button"><i class="bi bi-trash3 text-danger me-2"></i>Delete</button></li>
                                                                                     </ul>
-                                                                                </div>
+</div>
                                                                             </td>
                                                                         </tr>
                                                                     `;
@@ -749,7 +749,7 @@
                 const catId = tr.data('id');
                 const nameTa = tr.data('name-ta') || tr.data('name-en') || 'this category';
 
-                confirmDelete(`Are you sure you want to remove category "${nameTa}"? (தொழிலாளர் பிரிவு நீக்க வேண்டுமா?)`, function () {
+                confirmDelete(`Are you sure you want to remove category "${nameTa}"?`, function () {
                     $.ajax({
                         url: '{{ route("worker-categories.destroy", ":id") }}'.replace(':id', catId),
                         method: 'POST',

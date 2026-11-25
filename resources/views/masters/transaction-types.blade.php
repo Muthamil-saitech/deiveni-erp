@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('title', 'Transaction Type Master')
-@section('page_title', 'Transaction Types (பரிவர்த்தனை வகைகள்)')
+@section('page_title', 'Transaction Types ')
 
 @push('styles')
     <style>
@@ -43,15 +43,15 @@
         <div class="card-custom p-3 mb-3 mb-md-4 bg-white">
             <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
                 <div>
-                    <h5 class="fw-bold mb-0 text-dark">Transaction Type Directory (பரிவர்த்தனை வகைகள் முதன்மை பட்டியல்)</h5>
-                </div>
+                    <h5 class="fw-bold mb-0 text-dark">Transaction Type Directory</h5>
+</div>
                 <div class="d-flex gap-2">
                     <button class="btn btn-deiveni btn-sm" data-bs-toggle="modal" data-bs-target="#txnTypeModal" id="addTxnTypeBtn">
                         <i class="bi bi-plus-circle-fill me-1"></i> Add Transaction Type
-                    </button>
-                </div>
-            </div>
-        </div>
+</button>
+</div>
+</div>
+</div>
 
         <!-- Stat Highlights Row -->
         <div class="row g-3 mb-3 mb-md-4">
@@ -59,45 +59,42 @@
                 <div class="card-stat d-flex align-items-center gap-3">
                     <div class="stat-icon-wrapper bg-primary bg-opacity-10 text-primary">
                         <i class="bi bi-tags-fill fs-4"></i>
-                    </div>
+</div>
                     <div>
                         <div class="text-muted small fw-medium">Total Types</div>
                         <h4 class="fw-bold mb-0 text-dark" id="statTotalTypes">
                             {{ $stats['total'] ?? $transactionTypes->count() }}
-                        </h4>
-                        <small class="ta-text text-muted" style="font-size:0.72rem;">மொத்த வகைகள்</small>
-                    </div>
-                </div>
-            </div>
+</h4>
+</div>
+</div>
+</div>
             <div class="col-4">
                 <div class="card-stat d-flex align-items-center gap-3">
                     <div class="stat-icon-wrapper bg-success bg-opacity-10 text-success">
                         <i class="bi bi-check2-circle fs-4"></i>
-                    </div>
+</div>
                     <div>
                         <div class="text-muted small fw-medium">Active Types</div>
                         <h4 class="fw-bold mb-0 text-success" id="statActiveTypes">
                             {{ $stats['active'] ?? $transactionTypes->where('status', 'Active')->count() }}
-                        </h4>
-                        <small class="ta-text text-muted" style="font-size:0.72rem;">செயலில் உள்ளவை</small>
-                    </div>
-                </div>
-            </div>
+</h4>
+</div>
+</div>
+</div>
             <div class="col-4">
                 <div class="card-stat d-flex align-items-center gap-3">
                     <div class="stat-icon-wrapper bg-secondary bg-opacity-10 text-secondary">
                         <i class="bi bi-x-circle fs-4"></i>
-                    </div>
+</div>
                     <div>
                         <div class="text-muted small fw-medium">Inactive Types</div>
                         <h4 class="fw-bold mb-0 text-secondary" id="statInactiveTypes">
                             {{ $stats['inactive'] ?? $transactionTypes->where('status', 'Inactive')->count() }}
-                        </h4>
-                        <small class="ta-text text-muted" style="font-size:0.72rem;">செயலற்ற வகைகள்</small>
-                    </div>
-                </div>
-            </div>
-        </div>
+</h4>
+</div>
+</div>
+</div>
+</div>
 
         <!-- Filter & Search Card -->
         <div class="card-custom p-3 mb-3 mb-md-4 bg-white">
@@ -106,34 +103,34 @@
                     <div class="input-group input-group-sm">
                         <span class="input-group-text bg-light border-end-0"><i class="bi bi-search text-muted"></i></span>
                         <input type="text" class="form-control border-start-0 ps-0" id="txnTypeSearchInput"
-                            placeholder="Search Transaction Name (பரிவர்த்தனை பெயர்)...">
-                    </div>
-                </div>
+                            placeholder="Search Transaction Name ...">
+</div>
+</div>
                 <div class="col-6 col-md-4">
                     <select class="form-select form-select-sm" id="categoryFilter">
-                        <option value="">All Categories (அனைத்து வகைகள்)</option>
-                        <option value="Construction">Construction (கட்டுமானம் - Stage/Advance)</option>
+                        <option value="">All Categories</option>
+                        <option value="Construction">Construction</option>
                         <option value="Bank Valuation">Bank (Valuation / Inspection fee)</option>
-                        <option value="Rental">Rental (வாடகை வருமானம்)</option>
-                        <option value="Supplier">Supplier (சப்ளையர்)</option>
+                        <option value="Rental">Rental</option>
+                        <option value="Supplier">Supplier</option>
                         <option value="Office and other expenses">Office and other expenses</option>
                     </select>
-                </div>
+</div>
                 <div class="col-6 col-md-3">
                     <select class="form-select form-select-sm" id="txnStatusFilter">
-                        <option value="">All Status (அனைத்து நிலை)</option>
-                        <option value="Active">Active (செயலில் உள்ளது)</option>
-                        <option value="Inactive">Inactive (நிறுத்தப்பட்டது)</option>
+                        <option value="">All Status</option>
+                        <option value="Active">Active</option>
+                        <option value="Inactive">Inactive</option>
                     </select>
-                </div>
+</div>
                 <div class="col-6 col-md-1">
                     <button type="button" class="btn btn-outline-secondary btn-sm px-2 py-1" id="historyFilterResetBtn"
                     title="Reset filters">
                     <i class="bi bi-arrow-counterclockwise"></i>
-                    </button>
-                </div>
-            </div>
-        </div>
+</button>
+</div>
+</div>
+</div>
 
         <!-- Table Card -->
         <div class="card-custom overflow-hidden">
@@ -158,29 +155,29 @@
                                 <td>
                                     <div class="fw-bold text-dark fs-6 row-name-en">
                                         {{ $type->name_en }}
-                                    </div>
+</div>
                                 </td>
                                 <td>
                                     @if ($type->category === 'Construction')
                                         <span class="badge bg-primary-subtle text-primary border border-primary-subtle row-category-badge">
                                             <i class="bi bi-hammer me-1"></i>Construction
-                                        </span>
+</span>
                                     @elseif ($type->category === 'Bank Valuation')
                                         <span class="badge bg-info-subtle text-info border border-info-subtle row-category-badge">
                                             <i class="bi bi-bank me-1"></i>Bank Valuation
-                                        </span>
+</span>
                                     @elseif ($type->category === 'Rental')
                                         <span class="badge bg-success-subtle text-success border border-success-subtle row-category-badge">
                                             <i class="bi bi-building me-1"></i>Rental
-                                        </span>
+</span>
                                     @elseif ($type->category === 'Supplier')
                                         <span class="badge bg-warning-subtle text-dark border border-warning-subtle row-category-badge">
                                             <i class="bi bi-truck me-1"></i>Supplier
-                                        </span>
+</span>
                                     @else
                                         <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle row-category-badge">
                                             <i class="bi bi-receipt me-1"></i>Office and other expenses
-                                        </span>
+</span>
                                     @endif
                                 </td>
                                 <td>
@@ -194,21 +191,21 @@
                                     <div class="dropdown table-action-dropdown">
                                         <button class="btn table-action-btn" type="button" data-bs-toggle="dropdown" data-bs-popper-config='{"strategy":"fixed"}' aria-expanded="false" title="Actions">
                                             <i class="bi bi-three-dots-vertical"></i>
-                                        </button>
+</button>
                                         <ul class="dropdown-menu dropdown-menu-end shadow-sm">
                                             <li>
                                                 <button class="dropdown-item edit-txn-type-btn" type="button">
                                                     <i class="bi bi-pencil text-primary me-2"></i>Edit
-                                                </button>
+</button>
                                             </li>
                                             <li><hr class="dropdown-divider my-1"></li>
                                             <li>
                                                 <button class="dropdown-item text-danger delete-txn-type-btn" type="button">
                                                     <i class="bi bi-trash3 text-danger me-2"></i>Delete
-                                                </button>
+</button>
                                             </li>
                                         </ul>
-                                    </div>
+</div>
                                 </td>
                             </tr>
                         @empty
@@ -221,7 +218,7 @@
                         @endforelse
                     </tbody>
                 </table>
-            </div>
+</div>
 
             <!-- Client-side Pagination Footer -->
             <div class="p-3 border-top d-flex flex-column flex-sm-row justify-content-between align-items-center gap-2" id="paginationWrapper" style="display: none !important;">
@@ -229,10 +226,10 @@
                 <nav aria-label="Transaction Types pagination">
                     <ul class="pagination pagination-sm mb-0" id="paginationControls"></ul>
                 </nav>
-            </div>
-        </div>
+</div>
+</div>
 
-    </div>
+</div>
 
     <!-- Create / Edit Modal -->
     <div class="modal fade" id="txnTypeModal" tabindex="-1" aria-labelledby="txnTypeModalLabel" aria-hidden="true">
@@ -241,7 +238,7 @@
                 <div class="modal-header">
                     <h5 class="modal-title fw-bold" id="txnTypeModalLabel">Add Transaction Type</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
+</div>
                 <form id="txnTypeForm" novalidate>
                     <input type="hidden" id="txnTypeId" name="id">
                     <div class="modal-body">
@@ -251,50 +248,50 @@
                             <div class="col-12">
                                 <label for="inputNameEn" class="form-label small fw-semibold">
                                     Transaction Name <span class="text-danger">*</span>
-                                </label>
+</label>
                                 <input type="text" class="form-control" id="inputNameEn" name="name_en"
                                     placeholder="e.g. Client Stage Advance" required maxlength="100">
                                 <div class="invalid-feedback" id="errNameEn"></div>
-                            </div>
+</div>
 
                             <div class="col-12">
                                 <label for="inputCategory" class="form-label small fw-semibold">
                                     Transaction Category <span class="text-danger">*</span>
-                                </label>
+</label>
                                 <select class="form-select" id="inputCategory" name="category" required>
-                                    <option value="" disabled selected>-- Select Category (வகையை தேர்வு செய்க) --</option>
-                                    <option value="Construction">Construction (கட்டுமானம் - Stage/Advance)</option>
+                                    <option value="" disabled selected>-- Select Category --</option>
+                                    <option value="Construction">Construction</option>
                                     <option value="Bank Valuation">Bank (Valuation / Inspection fee)</option>
-                                    <option value="Rental">Rental (வாடகை வருமானம்)</option>
-                                    <option value="Supplier">Supplier (சப்ளையர்)</option>
+                                    <option value="Rental">Rental</option>
+                                    <option value="Supplier">Supplier</option>
                                     <option value="Office and other expenses">Office and other expenses</option>
                                 </select>
                                 <div class="invalid-feedback" id="errCategory"></div>
-                            </div>
+</div>
 
                             <div class="col-12">
                                 <label for="inputStatus" class="form-label small fw-semibold">
-                                    Status (நிலை) <span class="text-danger">*</span>
-                                </label>
+                                    Status  <span class="text-danger">*</span>
+</label>
                                 <select class="form-select" id="inputStatus" name="status" required>
-                                    <option value="Active" selected>Active (செயலில் உள்ளது)</option>
-                                    <option value="Inactive">Inactive (நிறுத்தப்பட்டது)</option>
+                                    <option value="Active" selected>Active</option>
+                                    <option value="Inactive">Inactive</option>
                                 </select>
                                 <div class="invalid-feedback" id="errStatus"></div>
-                            </div>
-                        </div>
-                    </div>
+</div>
+</div>
+</div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
                         <button type="submit" class="btn btn-deiveni btn-sm" id="saveTxnTypeBtn">
                             <span class="spinner-border spinner-border-sm me-1 d-none" id="saveSpinner"></span>
                             <span id="saveBtnText">Save Transaction Type</span>
-                        </button>
-                    </div>
+</button>
+</div>
                 </form>
-            </div>
-        </div>
-    </div>
+</div>
+</div>
+</div>
 
     <!-- Delete Confirmation Modal -->
     <div class="modal fade" id="deleteTxnTypeModal" tabindex="-1" aria-hidden="true">
@@ -303,7 +300,7 @@
                 <div class="modal-body text-center p-4">
                     <div class="text-danger mb-3">
                         <i class="bi bi-exclamation-triangle-fill fs-1"></i>
-                    </div>
+</div>
                     <h6 class="fw-bold mb-2">Delete Transaction Type?</h6>
                     <p class="text-muted small mb-3">
                         Are you sure you want to delete <strong class="text-dark" id="deleteTxnTypeName"></strong>? This action cannot be undone.
@@ -313,12 +310,12 @@
                         <button type="button" class="btn btn-danger btn-sm" id="confirmDeleteTxnTypeBtn">
                             <span class="spinner-border spinner-border-sm me-1 d-none" id="deleteSpinner"></span>
                             Delete
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+</button>
+</div>
+</div>
+</div>
+</div>
+</div>
 @endsection
 
 @push('scripts')
@@ -639,10 +636,10 @@
                             <div class="toast-body d-flex align-items-center gap-2">
                                 <i class="bi ${icon} fs-5"></i>
                                 <span>${message}</span>
-                            </div>
+</div>
                             <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
-                        </div>
-                    </div>
+</div>
+</div>
                 `;
                 let toastContainer = document.getElementById('toastContainer');
                 if (!toastContainer) {

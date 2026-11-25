@@ -956,7 +956,6 @@ test('project site detail page displays balance stock tab, materials used balanc
 
     $response->assertOk();
     $response->assertSee('Balance Stock');
-    $response->assertSee('மீதமுள்ள இருப்பு');
     $response->assertSee('OUTWARD');
     $response->assertSee('XFR-OUT-001');
     $response->assertSee('Cement (UltraTech)');
@@ -967,9 +966,8 @@ test('project site detail page displays supplier purchases tab with clean summar
 
     $response->assertOk();
     $response->assertSee('Supplier Purchases');
-    $response->assertSee('சப்ளையர் கொள்முதல்');
     $response->assertSee($this->po->supplier_name);
-    $response->assertSee('View (விவரங்கள்)');
+    $response->assertSee('View');
     $response->assertSee('₹'.number_format($this->poItemCement->total_price + $this->poItemSand->total_price, 2));
 });
 

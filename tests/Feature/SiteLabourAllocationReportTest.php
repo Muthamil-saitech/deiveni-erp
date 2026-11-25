@@ -165,7 +165,7 @@ test('task 4: filter options has correct order: today, this week, last week with
     $lastWeekEnd = Carbon::now()->subWeek()->endOfWeek(Carbon::SUNDAY)->format('d M Y');
     $expectedLastWeekRange = $lastWeekStart.' - '.$lastWeekEnd;
 
-    $response->assertSee('Last Week (முந்தைய வாரம் - '.$expectedLastWeekRange.')', false);
+    $response->assertSee('Last Week ('.$expectedLastWeekRange.')', false);
 });
 
 test('task 5: report contains export options for excel, pdf, and print and streams structured csv', function () {

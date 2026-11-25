@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('title', 'Project Sites')
-@section('page_title', 'Project Sites (கட்டுமான திட்ட தளங்கள்)')
+@section('page_title', 'Project Sites ')
 
 @section('content')
     <div class="container-fluid px-0">
@@ -10,16 +10,16 @@
         <div class="card-custom p-3 mb-4 bg-white">
             <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
                 <div>
-                    <h5 class="fw-bold mb-0 text-dark">Client & Project Sites (தளங்கள் மற்றும் வாடிக்கையாளர்கள்)</h5>
-                </div>
+                    <h5 class="fw-bold mb-0 text-dark">Client & Project Sites</h5>
+</div>
                 <div class="d-flex gap-2 flex-wrap">
                     <button class="btn btn-deiveni btn-sm" data-bs-toggle="modal" data-bs-target="#siteModal"
                         id="addSiteBtn">
                         <i class="bi bi-building-fill-add me-1"></i> Add New Site
-                    </button>
-                </div>
-            </div>
-        </div>
+</button>
+</div>
+</div>
+</div>
 
         <!-- Filter & Search Cards -->
         <div class="card-custom p-3 mb-4 bg-white">
@@ -29,36 +29,36 @@
                         <span class="input-group-text bg-light border-end-0"><i class="bi bi-search text-muted"></i></span>
                         <input type="text" class="form-control border-start-0 ps-0" id="siteSearchInput"
                             placeholder="Search Site Name, Client Name, Location...">
-                    </div>
-                </div>
+</div>
+</div>
                 <div class="col-6 col-md-3">
                     <select class="form-select form-select-sm" id="workTypeFilter">
-                        <option value="">All Work Types (அனைத்து பணிகள்)</option>
-                        <option value="New Build">New Build (புதிய கட்டுமானம்)</option>
-                        <option value="Alteration">Alteration (சிறு மாற்றம் / புதுப்பித்தல்)</option>
+                        <option value="">All Work Types</option>
+                        <option value="New Build">New Build</option>
+                        <option value="Alteration">Alteration</option>
                     </select>
-                </div>
+</div>
                 <div class="col-6 col-md-2">
                     <select class="form-select form-select-sm" id="siteStatusFilter">
-                        <option value="">All Status (அனைத்து நிலை)</option>
+                        <option value="">All Status</option>
                         <option value="In Progress">In Progress</option>
                         <option value="Planning">Planning</option>
                         <option value="Completed">Completed</option>
                         <option value="On Hold">On Hold</option>
                     </select>
-                </div>
+</div>
                 <div class="col-6 col-md-1">
                     <button type="button" class="btn btn-outline-secondary btn-sm px-2 py-1" id="historyFilterResetBtn"
                     title="Reset filters">
                     <i class="bi bi-arrow-counterclockwise"></i>
-                    </button>
-                </div>
+</button>
+</div>
                 <div class="col-12 col-md-2 text-md-end">
                     <span class="small text-muted" id="siteCountBadge">Showing <strong class="text-dark"
                             id="visibleSiteCount">{{ $sites->count() }}</strong> Sites</span>
-                </div>
-            </div>
-        </div>
+</div>
+</div>
+</div>
 
         <!-- Sites Cards Grid View -->
         <div class="row g-4" id="sitesContainer">
@@ -99,11 +99,11 @@
                                 <span class="badge {{ $badgeTypeClass }} fw-semibold">{{ $site->work_type }}</span>
                                 <span class="badge {{ $statusBadgeClass }}">{{ $site->status }}</span>
                         
-                            </div>
+</div>
                             <h5 class="fw-bold text-dark mb-1 site-card-title">
                                 <a href="{{ route('sites.show', $site->encrypted_id) }}"
                                     class="text-dark text-decoration-none">{{ $site->name }}</a>
-                            </h5>
+</h5>
                             <p class="text-muted small mb-3"><i class="bi bi-geo-alt text-danger me-1"></i><span
                                     class="site-card-location">{{ $site->location }}</span></p>
 
@@ -114,19 +114,19 @@
                                         class="site-card-phone">{{ $site->client?->phone ?? '-' }}</span></div>
                                 <div class="text-muted" style="font-size: 0.75rem;"><i class="bi bi-house me-1"></i><span
                                         class="site-card-address">{{ $site->client?->address ?: $site->location }}</span></div>
-                            </div>
+</div>
                             <div class="mb-3">
                                 <div class="d-flex justify-content-between small mb-1">
                                     <span class="text-muted">Budget Spent: <strong>₹{{ $spentInLakhs }} L</strong></span>
                                     <span class="fw-bold text-dark">Est: ₹{{ $estInLakhs }} L</span>
-                                </div>
+</div>
                                 <div class="progress" style="height: 7px;">
                                     <div class="progress-bar bg-primary" role="progressbar" style="width: {{ $pct }}%;"
                                         aria-valuenow="{{ $pct }}" aria-valuemin="0" aria-valuemax="100"></div>
-                                </div>
+</div>
                                 <div class="text-end small text-muted mt-1" style="font-size: 0.72rem;">{{ number_format($pct, 2) }}% of estimate utilised</div>
-                            </div>
-                        </div>
+</div>
+</div>
                         <div class="pt-3 border-top d-flex justify-content-between align-items-center">
                             <span class="small text-muted"><i class="bi bi-calendar-event me-1"></i>Start:
                                 {{ $displayStart }}</span>
@@ -134,43 +134,43 @@
                                 <a href="{{ route('sites.show', $site->encrypted_id) }}" class="btn table-action-btn"
                                     title="View Site Details">
                                     <i class="bi bi-eye text-info"></i>
-                                </a>
+</a>
                                 <button class="btn table-action-btn edit-site-btn" type="button" title="Edit Site">
                                     <i class="bi bi-pencil text-primary"></i>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+</button>
+</div>
+</div>
+</div>
+</div>
             @empty
             @endforelse
-        </div>
+</div>
 
         <!-- Empty State Container -->
         <div id="sitesEmptyState" class="card-custom p-5 bg-white text-center my-3"
             style="{{ $sites->isEmpty() ? '' : 'display: none;' }}">
             <div class="rounded-circle bg-light d-inline-flex p-3 mb-3">
                 <i class="bi bi-building fs-1 text-muted"></i>
-            </div>
+</div>
             <h5 class="fw-bold text-dark mb-1">No Project Sites Recorded Yet</h5>
             <p class="text-muted small mb-3">There are no project sites found in the system. Click "Add New Site" below to
                 create your first site.</p>
             <div>
                 <button class="btn btn-deiveni btn-sm" data-bs-toggle="modal" data-bs-target="#siteModal">
                     <i class="bi bi-building-fill-add me-1"></i> Add New Site
-                </button>
-            </div>
-        </div>
-    </div>
+</button>
+</div>
+</div>
+</div>
 
     <!-- Site Add / Edit Modal -->
     <div class="modal fade" id="siteModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title fw-bold" id="siteModalTitle">Add Project Site (புதிய கட்டுமான தளம்)</h5>
+                    <h5 class="modal-title fw-bold" id="siteModalTitle">Add Project Site</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
+</div>
                 <form id="siteForm" novalidate>
                     <div class="modal-body">
                         <input type="hidden" id="siteEditId" name="id">
@@ -180,76 +180,76 @@
                             <div class="col-12">
                                 <h6 class="fw-bold text-primary border-bottom pb-2 mb-2"><i
                                         class="bi bi-building me-1"></i>Site Details</h6>
-                            </div>
+</div>
                             <div class="col-12 col-md-6">
                                 <label class="form-label small fw-semibold">Site Project Name <span
                                         class="text-danger">*</span></label>
                                 <input type="text" class="form-control" id="siteName" name="name"
                                     placeholder="e.g. Site A - Duplex Villa">
                                 <div class="invalid-feedback" id="errSiteName"></div>
-                            </div>
+</div>
                             <div class="col-12 col-md-6">
                                 <label class="form-label small fw-semibold">Location / Area <span
                                         class="text-danger">*</span></label>
                                 <input type="text" class="form-control" id="siteLocation" name="location"
                                     placeholder="e.g. Porur, Chennai">
                                 <div class="invalid-feedback" id="errSiteLocation"></div>
-                            </div>
+</div>
                             <div class="col-12 col-md-4">
-                                <label class="form-label small fw-semibold">Work Type (பணி வகை) <span
+                                <label class="form-label small fw-semibold">Work Type  <span
                                         class="text-danger">*</span></label>
                                 <select class="form-select" id="siteWorkType" name="work_type">
-                                    <option value="New Build">New Build (புதிய கட்டுமானம்)</option>
-                                    <option value="Alteration">Alteration (சிறு மாற்றம் / புதுப்பித்தல்)</option>
+                                    <option value="New Build">New Build</option>
+                                    <option value="Alteration">Alteration</option>
                                 </select>
                                 <div class="invalid-feedback" id="errSiteWorkType"></div>
-                            </div>
+</div>
                             <div class="col-12 col-md-4">
                                 <label class="form-label small fw-semibold">Start Date</label>
                                 <input type="date" class="form-control" id="siteStartDate" name="start_date">
                                 <div class="invalid-feedback" id="errSiteStartDate"></div>
-                            </div>
+</div>
                             <div class="col-12 col-md-4">
                                 <label class="form-label small fw-semibold" for="enddate">End Date</label>
                                 <input type="date" class="form-control" id="enddate" name="end_date">
                                 <div class="invalid-feedback" id="errSiteEndDate"></div>
-                            </div>
+</div>
                             <div class="col-12 col-md-4">
-                                <label class="form-label small fw-semibold">Estimated Budget (ரூ.) <span
+                                <label class="form-label small fw-semibold">Estimated Budget (₹) <span
                                         class="text-danger">*</span></label>
                                 <div class="input-group has-validation">
                                     <span class="input-group-text">₹</span>
                                     <input type="number" step="0.01" class="form-control" id="siteEstimate"
                                         name="estimated_budget" placeholder="5000000">
                                     <div class="invalid-feedback" id="errSiteEstimate"></div>
-                                </div>
-                            </div>
+</div>
+</div>
 
                             <div class="col-12 mt-4">
                                 <div
                                     class="d-flex flex-wrap justify-content-between align-items-center border-bottom pb-2 mb-2 gap-2">
                                     <div class="d-flex align-items-center flex-wrap gap-2">
                                         <h6 class="fw-bold text-primary mb-0">
-                                            <i class="bi bi-person-circle me-1"></i>Client Details (வாடிக்கையாளர் தகவல்)
-                                        </h6>
-                                    </div>
+                                            <i class="bi bi-person-circle me-1"></i>Client Details 
+</h6>
+</div>
                                     <div class="btn-group btn-group-sm" role="group" aria-label="Customer Type Selection">
                                         <input type="radio" class="btn-check" name="clientOption" id="clientOptionNew"
                                             value="new" checked autocomplete="off">
                                         <label class="btn btn-outline-primary btn-sm py-1 px-2" for="clientOptionNew"
                                             title="Create a new client">
                                             <i class="bi bi-person-plus-fill me-1"></i>New Client
-                                        </label>
+</label>
 
                                         <input type="radio" class="btn-check" name="clientOption" id="clientOptionExisting"
                                             value="existing" autocomplete="off">
                                         <label class="btn btn-outline-primary btn-sm py-1 px-2" for="clientOptionExisting"
                                             title="Choose from existing customers">
                                             <i class="bi bi-people-fill me-1"></i>Select Existing Customer
-                                        </label>
-                                    </div>
-                                </div>
-                            </div>
+</label>
+</div>
+</div>
+</div>
 
                             <!-- Existing Customer Selection Dropdown Container -->
                             <div class="col-12" id="existingClientWrapper" style="display: none;">
@@ -258,10 +258,10 @@
                                         <label class="form-label small fw-semibold text-primary mb-0"
                                             for="existingCustomerSelect">
                                             <i class="bi bi-person-lines-fill me-1"></i>Select Existing Customer
-                                            (வாடிக்கையாளர் தேர்வு) <span class="text-danger">*</span>
-                                        </label>
+ <span class="text-danger">*</span>
+</label>
                                         <span class="small text-muted" id="existingCustomerCountBadge"></span>
-                                    </div>
+</div>
                                     <select class="form-select" id="existingCustomerSelect" name="existing_client_id">
                                         <option value="">-- Choose Existing Customer --</option>
                                         @foreach ($clients as $client)
@@ -269,7 +269,7 @@
                                                 data-name="{{ $client->name }}" data-phone="{{ $client->phone }}"
                                                 data-address="{{ $client->address }}">
                                                 {{ $client->name }}{{ $client->phone ? ' • ' . $client->phone : '' }}{{ $client->address ? ' (' . $client->address . ')' : '' }}
-                                            </option>
+</option>
                                         @endforeach
                                     </select>
                                     <div class="invalid-feedback" id="errExistingCustomer"></div>
@@ -283,10 +283,10 @@
                                             <span id="prevCustPhone" class="text-muted"></span>
                                             <span id="prevCustAddress" class="text-muted text-truncate"
                                                 style="max-width: 280px;"></span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+</div>
+</div>
+</div>
+</div>
 
                             <!-- New Client Form Fields (Hidden when Select Existing Customer is active) -->
                             <div class="col-12" id="newClientFieldsWrapper">
@@ -297,46 +297,46 @@
                                         <input type="text" class="form-control" id="clientName" name="client_name"
                                             placeholder="e.g. Mr. R. Balaji">
                                         <div class="invalid-feedback" id="errClientName"></div>
-                                    </div>
+</div>
                                     <div class="col-12 col-md-6">
                                         <label class="form-label small fw-semibold">Client Phone Number <span
                                                 class="text-danger">*</span></label>
                                         <input type="tel" class="form-control" id="clientPhone" name="client_phone"
                                             placeholder="98400 11223">
                                         <div class="invalid-feedback" id="errClientPhone"></div>
-                                    </div>
+</div>
                                     <div class="col-12">
                                         <label class="form-label small fw-semibold">Client Address</label>
                                         <input type="text" class="form-control" id="clientAddress" name="client_address"
                                             placeholder="e.g. No. 5, Mount Poonamallee Road, Porur">
                                         <div class="invalid-feedback" id="errClientAddress"></div>
-                                    </div>
-                                </div>
-                            </div>
+</div>
+</div>
+</div>
 
                             <div class="col-12 col-md-6">
                                 <label class="form-label small fw-semibold">Project Status</label>
                                 <select class="form-select" id="siteStatus" name="status">
-                                    <option value="In Progress">In Progress (நடைபெறுகிறது)</option>
-                                    <option value="Planning">Planning (திட்டமிடல்)</option>
-                                    <option value="Completed">Completed (நிறைவு)</option>
-                                    <option value="On Hold">On Hold (தற்காலிக நிறுத்தம்)</option>
+                                    <option value="In Progress">In Progress</option>
+                                    <option value="Planning">Planning</option>
+                                    <option value="Completed">Completed</option>
+                                    <option value="On Hold">On Hold</option>
                                 </select>
                                 <div class="invalid-feedback" id="errSiteStatus"></div>
-                            </div>
-                        </div>
-                    </div>
+</div>
+</div>
+</div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-light btn-sm" data-bs-dismiss="modal">Cancel</button>
                         <button type="submit" class="btn btn-deiveni btn-sm" id="siteSubmitBtn">
                             <span class="spinner-border spinner-border-sm d-none me-1" id="siteSubmitSpinner"></span>
                             <span id="siteSubmitBtnText">Save Project Site</span>
-                        </button>
-                    </div>
+</button>
+</div>
                 </form>
-            </div>
-        </div>
-    </div>
+</div>
+</div>
+</div>
 
 
 @endsection
@@ -504,7 +504,7 @@
 
             // Reset modal for creating a new site
             function resetSiteModalForNew() {
-                $('#siteModalTitle').text('Add Project Site (புதிய கட்டுமான தளம்)');
+                $('#siteModalTitle').text('Add Project Site ');
                 $('#siteEditId').val('');
                 $('#client_id').val('');
                 $('#siteForm')[0].reset();
@@ -566,7 +566,7 @@
                                         <div class="d-flex justify-content-between align-items-start mb-2">
                                             <span class="badge ${badgeTypeClass} fw-semibold">${site.work_type}</span>
                                             <span class="badge ${statusBadgeClass}">${site.status}</span>
-                                        </div>
+</div>
                                         <h5 class="fw-bold text-dark mb-1 site-card-title"><a href="${'{{ route("sites.show", ":id") }}'.replace(':id', site.encrypted_id || site.id)}" class="text-dark text-decoration-none">${site.name}</a></h5>
                                         <p class="text-muted small mb-3"><i class="bi bi-geo-alt text-danger me-1"></i><span class="site-card-location">${site.location}</span></p>
 
@@ -574,33 +574,33 @@
                                             <div class="fw-semibold text-dark"><i class="bi bi-person-fill text-primary me-1"></i><span class="site-card-client">${clientName}</span></div>
                                             <div class="text-muted"><i class="bi bi-telephone text-muted me-1"></i><span class="site-card-phone">${clientPhone}</span></div>
                                             <div class="text-muted" style="font-size: 0.75rem;"><i class="bi bi-house me-1"></i><span class="site-card-address">${clientAddress}</span></div>
-                                        </div>
+</div>
 
                                         <div class="mb-3">
                                             <div class="d-flex justify-content-between small mb-1">
                                                 <span class="text-muted">Budget Spent: <strong>₹${spentInLakhs} L</strong></span>
                                                 <span class="fw-bold text-dark">Est: ₹${estInLakhs} L</span>
-                                            </div>
+</div>
                                             <div class="progress" style="height: 7px;">
                                                 <div class="progress-bar bg-primary" role="progressbar" style="width: ${pct}%;" aria-valuenow="${pct}" aria-valuemin="0" aria-valuemax="100"></div>
-                                            </div>
+</div>
                                             <div class="text-end small text-muted mt-1" style="font-size: 0.72rem;">${pct}% of estimate utilised</div>
-                                        </div>
-                                    </div>
+</div>
+</div>
 
                                     <div class="pt-3 border-top d-flex justify-content-between align-items-center">
                                         <span class="small text-muted"><i class="bi bi-calendar-event me-1"></i>Start: ${displayStart}</span>
                                         <div class="d-flex align-items-center gap-1">
                                             <a href="${'{{ route("sites.show", ":id") }}'.replace(':id', site.encrypted_id || site.id)}" class="btn table-action-btn" title="View Site Details">
                                                 <i class="bi bi-eye text-info"></i>
-                                            </a>
+</a>
                                             <button class="btn table-action-btn edit-site-btn" type="button" title="Edit Site">
                                                 <i class="bi bi-pencil text-primary"></i>
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+</button>
+</div>
+</div>
+</div>
+</div>
                         `;
             }
 
@@ -666,7 +666,7 @@
                 const clientPhone = card.data('phone');
                 const clientAddress = card.data('address');
 
-                $('#siteModalTitle').text('Edit Project Site (தள விவரம் திருத்து)');
+                $('#siteModalTitle').text('Edit Project Site ');
                 $('#siteEditId').val(siteId);
                 $('#siteName').val(siteName);
                 $('#siteLocation').val(siteLocation);

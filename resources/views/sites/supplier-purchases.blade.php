@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('title', 'Supplier Purchases - ' . $supplierName . ' | ' . $site->name)
-@section('page_title', 'Supplier Purchase Details (சப்ளையர் கொள்முதல் முழு விவரம்)')
+@section('page_title', 'Supplier Purchase Details ')
 
 @push('styles')
     <style>
@@ -64,13 +64,13 @@
         </nav>
         <div class="d-flex align-items-center gap-2">
             <a href="{{ route('sites.show', $site->encrypted_id) }}" class="btn btn-outline-secondary btn-sm d-inline-flex align-items-center gap-1 shadow-sm">
-                <i class="bi bi-arrow-left"></i> Back to Site (தளத்திற்கு திரும்பு)
-            </a>
+                <i class="bi bi-arrow-left"></i> Back to Site 
+</a>
             <button onclick="window.print()" class="btn btn-outline-dark btn-sm d-inline-flex align-items-center gap-1 shadow-sm">
-                <i class="bi bi-printer"></i> Print (அச்சிடுக)
-            </button>
-        </div>
-    </div>
+                <i class="bi bi-printer"></i> Print 
+</button>
+</div>
+</div>
 
     {{-- Header Banner & Identity Cards --}}
     <div class="row g-3 mb-4">
@@ -78,8 +78,8 @@
         <div class="col-12 col-md-6">
             <div class="card-custom p-3 h-100 border-start border-4 border-primary">
                 <div class="d-flex align-items-center gap-2 text-primary small fw-semibold mb-1">
-                    <i class="bi bi-building"></i> PROJECT SITE (திட்ட களம்)
-                </div>
+                    <i class="bi bi-building"></i> PROJECT SITE 
+</div>
                 <h5 class="fw-bold text-dark mb-1">{{ $site->name }}</h5>
                 <div class="text-muted small mb-2 d-flex flex-wrap gap-3">
                     @if($site->location)
@@ -91,21 +91,21 @@
                     @if($site->work_type)
                         <span class="badge bg-light text-dark border">{{ $site->work_type }}</span>
                     @endif
-                </div>
-            </div>
-        </div>
+</div>
+</div>
+</div>
 
         {{-- Supplier Card --}}
         <div class="col-12 col-md-6">
             <div class="card-custom p-3 h-100 border-start border-4 border-success">
                 <div class="d-flex align-items-center justify-content-between mb-1">
                     <div class="d-flex align-items-center gap-2 text-success small fw-semibold">
-                        <i class="bi bi-shop"></i> SUPPLIER DETAILS (சப்ளையர் விவரம்)
-                    </div>
+                        <i class="bi bi-shop"></i> SUPPLIER DETAILS 
+</div>
                     @if(!empty($supplier?->gst_number))
                         <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle fw-normal">GST: {{ $supplier->gst_number }}</span>
                     @endif
-                </div>
+</div>
                 <h5 class="fw-bold text-dark mb-1">{{ $supplierName }}</h5>
                 <div class="text-muted small d-flex flex-wrap gap-3">
                     @if(!empty($supplier?->contact_person))
@@ -117,101 +117,101 @@
                     @if(!empty($supplier?->address))
                         <span><i class="bi bi-geo-alt me-1"></i>{{ $supplier->address }}</span>
                     @endif
-                </div>
-            </div>
-        </div>
-    </div>
+</div>
+</div>
+</div>
+</div>
 
     {{-- Overview KPI Cards --}}
     <div class="row g-2 mb-4" id="kpiCardsRow">
         <div class="col-6 col-md-3">
             <div class="card-custom p-3 text-center">
-                <div class="text-muted small mb-1" style="font-size:0.75rem;">Total Purchase Value (மொத்த கொள்முதல்)</div>
+                <div class="text-muted small mb-1" style="font-size:0.75rem;">Total Purchase Value</div>
                 <div class="fs-4 fw-bold text-success" id="kpiTotalValue">₹{{ number_format($supplierStats['total_amount'], 2) }}</div>
-            </div>
-        </div>
+</div>
+</div>
         <div class="col-6 col-md-3">
             <div class="card-custom p-3 text-center">
-                <div class="text-muted small mb-1" style="font-size:0.75rem;">Purchase Orders (கொள்முதல் ஆணைகள்)</div>
+                <div class="text-muted small mb-1" style="font-size:0.75rem;">Purchase Orders</div>
                 <div class="fs-4 fw-bold text-primary" id="kpiTotalOrders">{{ $supplierStats['total_pos'] }} {{ Str::plural('Order', $supplierStats['total_pos']) }}</div>
-            </div>
-        </div>
+</div>
+</div>
         <div class="col-6 col-md-3">
             <div class="card-custom p-3 text-center">
-                <div class="text-muted small mb-1" style="font-size:0.75rem;">Materials Types (பொருட்கள் வகைகள்)</div>
+                <div class="text-muted small mb-1" style="font-size:0.75rem;">Materials Types</div>
                 <div class="fs-4 fw-bold text-warning" id="kpiTotalMaterials">{{ $supplierStats['materials_count'] }}</div>
-            </div>
-        </div>
+</div>
+</div>
         <div class="col-6 col-md-3">
             <div class="card-custom p-3 text-center">
-                <div class="text-muted small mb-1" style="font-size:0.75rem;">Total Quantity (மொத்த பொருட்கள் அளவு)</div>
+                <div class="text-muted small mb-1" style="font-size:0.75rem;">Total Quantity</div>
                 <div class="fs-4 fw-bold text-dark font-monospace" id="kpiTotalQuantity">{{ number_format($supplierStats['total_quantity'], 2) }}</div>
-            </div>
-        </div>
-    </div>
+</div>
+</div>
+</div>
 
-    {{-- DATE FILTER BAR (தேதி வாரியான வடிகட்டி) --}}
+    {{-- DATE FILTER BAR --}}
     <div class="card-custom p-3 mb-4 bg-light no-print">
         <form method="GET" action="{{ route('sites.supplier-purchases', ['encryptedId' => $site->encrypted_id, 'supplierKey' => $supplierKey]) }}" id="dateFilterForm">
             <div class="row g-2 align-items-center">
                 <div class="col-12 col-md-auto d-flex align-items-center gap-2">
                     <span class="fw-bold text-dark small text-nowrap">
-                        <i class="bi bi-calendar-range text-primary me-1"></i>Date Filter (தேதி வாரியாக):
-                    </span>
-                </div>
+                        <i class="bi bi-calendar-range text-primary me-1"></i>Date Filter :
+</span>
+</div>
                 <div class="col-6 col-md-2">
                     <div class="input-group input-group-sm">
                         <span class="input-group-text bg-white small text-muted">From</span>
                         <input type="date" name="from_date" id="filterFromDate" class="form-control form-control-sm" value="{{ $fromDate ?? '' }}">
-                    </div>
-                </div>
+</div>
+</div>
                 <div class="col-6 col-md-2">
                     <div class="input-group input-group-sm">
                         <span class="input-group-text bg-white small text-muted">To</span>
                         <input type="date" name="to_date" id="filterToDate" class="form-control form-control-sm" value="{{ $toDate ?? '' }}">
-                    </div>
-                </div>
+</div>
+</div>
                 <div class="col-12 col-md-auto d-flex flex-wrap align-items-center gap-2">
                     <button type="submit" class="btn btn-primary btn-sm px-3 shadow-sm d-inline-flex align-items-center gap-1">
                         <i class="bi bi-funnel"></i> Apply Filter
-                    </button>
+</button>
                     <a href="{{ route('sites.supplier-purchases', ['encryptedId' => $site->encrypted_id, 'supplierKey' => $supplierKey]) }}" class="btn btn-outline-secondary btn-sm px-3 d-inline-flex align-items-center gap-1" id="resetFilterBtn">
-                        <i class="bi bi-arrow-counterclockwise"></i> Reset (அனைத்தும்)
-                    </a>
-                </div>
+                        <i class="bi bi-arrow-counterclockwise"></i> Reset 
+</a>
+</div>
                 <div class="col-12 col-md-auto ms-md-auto d-flex flex-wrap align-items-center gap-1">
                     <button type="button" class="btn btn-xs btn-outline-primary py-1 px-2 filter-preset-btn" data-preset="all" style="font-size:0.75rem;">
                         All Dates
-                    </button>
+</button>
                     <button type="button" class="btn btn-xs btn-outline-primary py-1 px-2 filter-preset-btn" data-preset="this-month" style="font-size:0.75rem;">
-                        This Month (இந்த மாதம்)
-                    </button>
+                        This Month 
+</button>
                     <button type="button" class="btn btn-xs btn-outline-primary py-1 px-2 filter-preset-btn" data-preset="last-30" style="font-size:0.75rem;">
                         Last 30 Days
-                    </button>
-                </div>
-            </div>
+</button>
+</div>
+</div>
         </form>
-    </div>
+</div>
 
     {{-- SECTION 1: Materials & Price Breakdown Summary --}}
     <div class="card-custom mb-4 overflow-hidden" id="materialSummaryCard">
         <div class="card-header bg-light py-2 px-3 border-bottom d-flex align-items-center justify-content-between">
             <div class="fw-bold text-dark d-flex align-items-center gap-2">
                 <i class="bi bi-box-seam-fill text-primary"></i>
-                <span>Materials & Price Summary (பொருட்கள் வாரியான சுருக்கம் & சராசரி விலை)</span>
-            </div>
+                <span>Materials & Price Summary</span>
+</div>
             <span class="badge bg-light text-dark border" id="materialsCountBadge">{{ count($materialSummary) }} Materials</span>
-        </div>
+</div>
         <div class="table-responsive">
             <table class="table table-hover align-middle mb-0" id="materialsSummaryTable">
                 <thead class="table-light">
                     <tr>
                         <th class="ps-3 py-2 text-muted" style="width: 40px;">#</th>
-                        <th class="py-2 text-muted">Material Name (பொருள்)</th>
-                        <th class="py-2 text-center text-muted">Purchased Quantity (வாங்கிய அளவு)</th>
-                        <th class="py-2 text-end text-muted">Average Rate (சராசரி விலை / அலகு)</th>
-                        <th class="pe-3 py-2 text-end text-muted">Total Amount (மொத்த விலை)</th>
+                        <th class="py-2 text-muted">Material Name</th>
+                        <th class="py-2 text-center text-muted">Purchased Quantity</th>
+                        <th class="py-2 text-end text-muted">Average Rate</th>
+                        <th class="pe-3 py-2 text-end text-muted">Total Amount</th>
                     </tr>
                 </thead>
                 <tbody id="materialSummaryTbody">
@@ -227,7 +227,7 @@
                             <td class="text-center font-monospace">
                                 <span class="badge bg-light text-dark border px-2 py-1">
                                     {{ number_format($mItem['total_quantity'], 2) }} {{ $mItem['unit'] }}
-                                </span>
+</span>
                             </td>
                             <td class="text-end fw-semibold text-secondary">
                                 ₹{{ number_format($mItem['average_price'], 2) }}
@@ -245,34 +245,34 @@
                 </tbody>
                 <tfoot class="table-light border-top" id="materialSummaryTfoot">
                     <tr>
-                        <td colspan="2" class="ps-3 fw-bold text-dark">Total Material Summary (மொத்தம்)</td>
+                        <td colspan="2" class="ps-3 fw-bold text-dark">Total Material Summary </td>
                         <td class="text-center fw-bold text-dark font-monospace" id="summaryTotalQty">{{ number_format($supplierStats['total_quantity'], 2) }} items</td>
                         <td class="text-end text-muted small">Total Value:</td>
                         <td class="pe-3 text-end fw-bold text-success fs-6" id="summaryTotalAmount">₹{{ number_format($supplierStats['total_amount'], 2) }}</td>
                     </tr>
                 </tfoot>
             </table>
-        </div>
-    </div>
+</div>
+</div>
 
     {{-- SECTION 2: Date-wise Purchase History & Orders Breakdown --}}
     <div class="mb-3 d-flex flex-wrap align-items-center justify-content-between gap-2">
         <h6 class="fw-bold text-dark mb-0 d-flex align-items-center gap-2">
             <i class="bi bi-calendar-check-fill text-success"></i>
-            <span>Date-wise Purchase Breakdown (தேதி வாரியான கொள்முதல் மற்றும் விலை விவரங்கள்)</span>
-        </h6>
+            <span>Date-wise Purchase Breakdown</span>
+</h6>
         <span class="text-muted small" id="ordersFilterStatus">Showing {{ count($dateGroupedPurchases) }} orders</span>
-    </div>
+</div>
 
     {{-- Empty Message if no orders match date filter --}}
     <div class="card-custom p-4 text-center text-muted mb-4 d-none" id="noOrdersMessage">
         <i class="bi bi-calendar-x fs-1 text-secondary opacity-50 d-block mb-2"></i>
         <div class="fw-bold text-dark">No Purchases Found for Selected Date Range</div>
-        <div class="small text-muted mb-3">தேர்ந்தெடுக்கப்பட்ட தேதி வரம்பில் எந்த கொள்முதல் ஆணையும் இல்லை.</div>
+        <div class="small text-muted mb-3">No purchase orders found in the selected date range.</div>
         <a href="{{ route('sites.supplier-purchases', ['encryptedId' => $site->encrypted_id, 'supplierKey' => $supplierKey]) }}" class="btn btn-sm btn-outline-primary">
-            <i class="bi bi-arrow-counterclockwise me-1"></i>View All Purchases (அனைத்தையும் காண்க)
-        </a>
-    </div>
+            <i class="bi bi-arrow-counterclockwise me-1"></i>View All Purchases 
+</a>
+</div>
 
     <div class="d-flex flex-column gap-3 mb-4" id="dateGroupedContainer">
         @forelse($dateGroupedPurchases as $poGroupIndex => $poGroup)
@@ -281,43 +281,43 @@
                     <div class="d-flex align-items-center gap-2">
                         <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1">
                             <i class="bi bi-calendar3 me-1"></i>Date: <strong>{{ $poGroup['order_date'] }}</strong>
-                        </span>
+</span>
                         <div class="fw-bold text-dark">
                             Purchase Order: 
                             <a href="{{ route('purchases.show', $poGroup['po_encrypted_id']) }}" class="text-decoration-none text-primary" target="_blank">
                                 {{ $poGroup['po_number'] }}
-                            </a>
-                        </div>
+</a>
+</div>
                         @if(!empty($poGroup['status']))
                             <span class="badge bg-primary-subtle text-primary border border-primary-subtle fw-normal" style="font-size:0.68rem;">
                                 {{ $poGroup['status'] }}
-                            </span>
+</span>
                         @endif
                         @if(!empty($poGroup['delivery_status']))
                             <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle fw-normal" style="font-size:0.68rem;">
                                 {{ $poGroup['delivery_status'] }}
-                            </span>
+</span>
                         @endif
-                    </div>
+</div>
                     <div class="d-flex align-items-center gap-2 ms-auto">
                         <span class="fw-bold text-success">
                             PO Total: ₹{{ number_format($poGroup['total_amount'], 2) }}
-                        </span>
+</span>
                         <a href="{{ route('purchases.show', $poGroup['po_encrypted_id']) }}" class="btn btn-sm btn-outline-primary py-0 px-2 no-print" style="font-size:0.75rem;" target="_blank">
                             <i class="bi bi-eye me-1"></i>View PO
-                        </a>
-                    </div>
-                </div>
+</a>
+</div>
+</div>
 
                 <div class="table-responsive">
                     <table class="table table-hover align-middle mb-0">
                         <thead class="table-light">
                             <tr>
                                 <th class="ps-3 py-2 text-muted" style="width: 40px;">#</th>
-                                <th class="py-2 text-muted">Material Name (பொருள் பெயர்)</th>
-                                <th class="py-2 text-center text-muted">Purchased Quantity (வாங்கிய அளவு)</th>
-                                <th class="py-2 text-end text-muted">Unit Price (விலை / அலகு)</th>
-                                <th class="pe-3 py-2 text-end text-muted">Total Price (மொத்த விலை)</th>
+                                <th class="py-2 text-muted">Material Name</th>
+                                <th class="py-2 text-center text-muted">Purchased Quantity</th>
+                                <th class="py-2 text-end text-muted">Unit Price</th>
+                                <th class="pe-3 py-2 text-end text-muted">Total Price</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -333,7 +333,7 @@
                                     <td class="text-center font-monospace">
                                         <span class="badge bg-light text-dark border px-2 py-1">
                                             {{ number_format($lineItem['quantity'], 2) }} {{ $lineItem['unit'] }}
-                                        </span>
+</span>
                                     </td>
                                     <td class="text-end fw-semibold text-secondary">
                                         ₹{{ number_format($lineItem['unit_price'], 2) }}
@@ -354,22 +354,22 @@
                             </tr>
                         </tfoot>
                     </table>
-                </div>
-            </div>
+</div>
+</div>
         @empty
             <div class="card-custom p-4 text-center text-muted">
                 <i class="bi bi-cart-x fs-1 text-secondary opacity-50 d-block mb-2"></i>
                 <div class="fw-bold text-dark">No Purchase Orders Recorded</div>
-                <div class="small text-muted">இந்த சப்ளையரிடம் இருந்து எந்த கொள்முதல் ஆணையும் இதுவரை இல்லை.</div>
-            </div>
+                <div class="small text-muted">No purchase orders recorded for this supplier yet.</div>
+</div>
         @endforelse
-    </div>
+</div>
 
     {{-- Grand Total Bottom Card --}}
     <div class="card-custom p-3 bg-light border text-end mb-4" id="grandTotalCard">
         <span class="text-muted me-2">Total Purchased from <strong>{{ $supplierName }}</strong> for this site:</span>
         <span class="fs-5 fw-bold text-success" id="grandTotalAmount">₹{{ number_format($supplierStats['total_amount'], 2) }}</span>
-    </div>
+</div>
 
 </div>
 @endsection

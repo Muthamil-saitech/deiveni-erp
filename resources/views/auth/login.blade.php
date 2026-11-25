@@ -20,12 +20,12 @@
 
     <style>
         :root {
-            --deiveni-primary: #1e3a8a;
-            --deiveni-primary-hover: #1d4ed8;
-            --deiveni-accent: #f59e0b;
-            --deiveni-accent-dark: #d97706;
-            --deiveni-dark: #0f172a;
-            --deiveni-slate: #1e293b;
+           --deiveni-primary: #1e3a8a;
+           --deiveni-primary-hover: #1d4ed8;
+           --deiveni-accent: #f59e0b;
+           --deiveni-accent-dark: #d97706;
+           --deiveni-dark: #0f172a;
+           --deiveni-slate: #1e293b;
         }
 
         * {
@@ -310,7 +310,7 @@
     <!-- Ambient Glowing Background Elements -->
     <div class="ambient-bg">
         <div class="ambient-grid"></div>
-    </div>
+</div>
 
     <!-- Main Login Card Container -->
     <div class="login-wrapper">
@@ -320,11 +320,11 @@
             <div class="card-header-gradient">
                 <div class="brand-logo-icon">
                     <i class="fa-solid fa-helmet-safety"></i>
-                </div>
+</div>
                 <h4 class="brand-title">DEIVENI CONSTRUCTION</h4>
-                <div class="brand-subtitle-ta">தெய்வேணி கன்ஸ்ட்ரக்ஷன்</div>
+                <div class="brand-subtitle-ta">Construction &amp; Project ERP</div>
                 <p class="text-muted small mt-1 mb-0">Daily Wages, Attendance & Financial Ledger ERP</p>
-            </div>
+</div>
 
             <!-- Card Body: Credentials Form -->
             <div class="card-body-content">
@@ -333,23 +333,22 @@
                 <div class="mb-3">
                     <label class="form-label small fw-semibold text-muted d-flex justify-content-between mb-1">
                         <span>Select Role for Quick Login</span>
-                        <span class="ta-text text-secondary" style="font-size: 0.72rem;">உள்நுழைவுப் பங்கு</span>
-                    </label>
+</label>
                     <div class="d-flex gap-2">
                         <button type="button" class="role-demo-pill" id="pillOwner" onclick="selectRole('owner')">
                             <span><i class="fa-solid fa-crown me-1 text-warning"></i> Owner</span>
                             <small class="text-muted">Admin</small>
-                        </button>
+</button>
                         <button type="button" class="role-demo-pill active" id="pillSiteManager" onclick="selectRole('site_manager')">
                             <span><i class="fa-solid fa-hard-hat me-1 text-warning"></i> Site Mgr</span>
                             <small class="text-muted">Operations</small>
-                        </button>
+</button>
                         <button type="button" class="role-demo-pill" id="pillAccountManager" onclick="selectRole('account_manager')">
                             <span><i class="fa-solid fa-calculator me-1 text-success"></i> Acc Mgr</span>
                             <small class="text-muted">Finance</small>
-                        </button>
-                    </div>
-                </div>
+</button>
+</div>
+</div>
 
                 <form id="loginForm" method="POST" action="{{ route('login.post') }}" novalidate>
                     @csrf
@@ -359,20 +358,20 @@
                         <div class="alert alert-danger py-2 px-3 small mb-3 d-flex align-items-center" role="alert">
                             <i class="bi bi-exclamation-triangle-fill me-2 fs-6 flex-shrink-0"></i>
                             <div>{{ $errors->first() }}</div>
-                        </div>
+</div>
                     @endif
 
                     <div id="loginAlert" class="alert alert-danger py-2 px-3 small d-none mb-3" role="alert">
                         <i class="bi bi-exclamation-triangle-fill me-1"></i>
                         <span id="loginAlertText">Please enter valid login credentials.</span>
-                    </div>
+</div>
 
                     <!-- Email / Username Input -->
                     <div class="form-floating-custom">
                         <input type="email" class="form-control @error('email') is-invalid @enderror" id="loginEmail" name="email"
                             placeholder="Email address" value="{{ old('email', 'sm@deiveni.com') }}" autocomplete="username" required>
                         <i class="bi bi-person-fill input-icon"></i>
-                    </div>
+</div>
 
                     <!-- Password Input -->
                     <div class="form-floating-custom">
@@ -382,8 +381,8 @@
                         <button type="button" class="toggle-password-btn" id="togglePasswordBtn"
                             aria-label="Toggle password visibility" title="Show or hide password">
                             <i class="bi bi-eye" id="passwordEyeIcon"></i>
-                        </button>
-                    </div>
+</button>
+</div>
 
                     <!-- Options Row: Remember Me & Forgot Password -->
                     <div class="d-flex justify-content-between align-items-center mb-4">
@@ -393,28 +392,26 @@
                             <label class="form-check-label small text-secondary" for="rememberMe"
                                 style="font-size: 0.84rem; cursor: pointer;">
                                 Remember this device
-                            </label>
-                        </div>
-                    </div>
+</label>
+</div>
+</div>
 
                     <!-- Sign In Action Button -->
                     <div class="d-grid mb-3">
                         <button type="submit" class="btn btn-submit-login" id="submitBtn">
                             <i class="bi bi-box-arrow-in-right me-2" id="submitBtnIcon"></i>
                             <span id="submitBtnText">Sign In to Workspace</span>
-                        </button>
-                    </div>
+</button>
+</div>
 
                     <!-- Security & Admin Info Footer -->
                     <div class="footer-note">
                         <div class="fw-semibold text-dark mb-0.5">Authorized Personnel Only</div>
-                        <div class="ta-text text-muted" style="font-size: 0.74rem;">உள்நுழைவு அனுமதி பெற்றவர்களுக்கு
-                            மட்டும்</div>
                     </div>
                 </form>
-            </div>
-        </div>
-    </div>
+</div>
+</div>
+</div>
 
     <!-- Bootstrap 5.3 JS Bundle -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>

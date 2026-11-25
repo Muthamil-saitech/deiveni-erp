@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('title', 'Purchase Order #' . $id . ' Details')
-@section('page_title', 'Purchase Order Details (கொள்முதல் ஆணை முழு விவரம்)')
+@section('page_title', 'Purchase Order Details ')
 
 @push('styles')
     <style>
@@ -333,29 +333,29 @@
                         class="btn btn-outline-secondary btn-sm d-inline-flex align-items-center"
                         title="Back to Material Purchases">
                         <i class="bi bi-arrow-left me-1"></i> Back to Purchases
-                    </a>
+</a>
                     <div class="vr d-none d-md-block"></div>
                     <div>
                         <div class="d-flex align-items-center gap-2 flex-wrap">
                             <h5 class="fw-bold mb-0 text-dark" id="poHeaderTitle">Purchase Order</h5>
                             <span class="badge" id="poHeaderStatusBadge">-</span>
-                        </div>
+</div>
                         <small class="text-muted">
                             PO / Bill No: <span class="font-monospace text-primary fw-semibold"
                                 id="poHeaderBillNo">#{{ $id }}</span> &bull;
                             <i class="bi bi-calendar3 me-1"></i><span id="poHeaderDate">-</span> &bull;
                             <i class="bi bi-geo-alt me-1"></i><span id="poHeaderSite">-</span>
-                        </small>
-                    </div>
-                </div>
+</small>
+</div>
+</div>
                 <div class="d-flex gap-2 flex-wrap">
                     <button type="button" class="btn btn-deiveni btn-sm d-inline-flex align-items-center"
                         onclick="window.print()">
-                        <i class="bi bi-printer me-1"></i> Print Purchase Order (அச்சிடுக)
-                    </button>
-                </div>
-            </div>
-        </div>
+                        <i class="bi bi-printer me-1"></i> Print Purchase Order 
+</button>
+</div>
+</div>
+</div>
 
         <!-- Record Not Found State (Hidden by default) -->
         <div class="card-custom p-5 text-center bg-white mb-4 no-print" id="poNotFoundBox" style="display: none;">
@@ -365,8 +365,8 @@
                 purchases.</p>
             <a href="{{ route('purchases.index') }}" class="btn btn-deiveni btn-sm">
                 <i class="bi bi-arrow-left me-1"></i> Return to Purchases List
-            </a>
-        </div>
+</a>
+</div>
 
         <!-- Main Detail Content -->
         <div id="poContentBox">
@@ -380,63 +380,63 @@
                             <div>
                                 <span class="text-muted small fw-semibold d-block text-uppercase">Total Bill Amount</span>
                                 <h4 class="fw-bold mb-0 text-success mt-1" id="statTotalAmount">₹0</h4>
-                            </div>
+</div>
                             <div class="bg-success-subtle text-success p-2 rounded-3">
                                 <i class="bi bi-currency-rupee fs-4"></i>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+</div>
+</div>
+</div>
+</div>
 
                 <!-- 2. Order Status -->
                 <div class="col-12 col-sm-6 col-xl-3">
                     <div class="card-custom p-3 bg-white h-100 border-start border-4 border-primary">
                         <div class="d-flex justify-content-between align-items-center">
                             <div>
-                                <span class="text-muted small fw-semibold d-block text-uppercase">Order Status (நிலை)</span>
+                                <span class="text-muted small fw-semibold d-block text-uppercase">Order Status</span>
                                 <div class="mt-1" id="statStatusBadge">
                                     <span class="badge bg-secondary">Loading...</span>
-                                </div>
-                            </div>
+</div>
+</div>
                             <div class="bg-primary-subtle text-primary p-2 rounded-3">
                                 <i class="bi bi-patch-check-fill fs-4"></i>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+</div>
+</div>
+</div>
+</div>
 
                 <!-- 3. Destination Site -->
                 <div class="col-12 col-sm-6 col-xl-3">
                     <div class="card-custom p-3 bg-white h-100 border-start border-4 border-info">
                         <div class="d-flex justify-content-between align-items-center">
                             <div>
-                                <span class="text-muted small fw-semibold d-block text-uppercase">Project Site (தளம்)</span>
+                                <span class="text-muted small fw-semibold d-block text-uppercase">Project Site</span>
                                 <h6 class="fw-bold mb-0 text-dark mt-1 text-truncate" id="statSiteName"
                                     style="max-width: 170px;">-</h6>
-                            </div>
+</div>
                             <div class="bg-info-subtle text-info p-2 rounded-3">
                                 <i class="bi bi-buildings fs-4"></i>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+</div>
+</div>
+</div>
+</div>
 
                 <!-- 4. Supplier / Vendor -->
                 <div class="col-12 col-sm-6 col-xl-3">
                     <div class="card-custom p-3 bg-white h-100 border-start border-4 border-warning">
                         <div class="d-flex justify-content-between align-items-center">
                             <div>
-                                <span class="text-muted small fw-semibold d-block text-uppercase">Supplier (சப்ளையர்)</span>
+                                <span class="text-muted small fw-semibold d-block text-uppercase">Supplier</span>
                                 <h6 class="fw-bold mb-0 text-dark mt-1 text-truncate" id="statSupplierName"
                                     style="max-width: 170px;">-</h6>
-                            </div>
+</div>
                             <div class="bg-warning-subtle text-warning p-2 rounded-3">
                                 <i class="bi bi-truck fs-4"></i>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+</div>
+</div>
+</div>
+</div>
+</div>
 
             <!-- Printable Official Purchase Order Document -->
             <div class="card-custom p-4 p-md-5 bg-white print-document mb-4">
@@ -450,7 +450,7 @@
                                         class="bi bi-building me-1"></i>CONSTRUCTION</span>
                                 <span class="text-muted small fw-semibold text-uppercase">Material Inward & Purchase
                                     Order</span>
-                            </div>
+</div>
                             <h3 class="fw-extrabold text-primary mb-1 tracking-tight">DEIVENI CONSTRUCTIONS</h3>
                             <p class="text-muted small mb-1 lh-sm">
                                 Engineering, Civil Construction & Infrastructure Development<br>
@@ -460,34 +460,34 @@
                             </p>
                             <div class="text-muted small"><strong>GSTIN:</strong> <span
                                     class="font-monospace fw-semibold text-dark">33ABCDE1234F1Z5</span></div>
-                        </div>
+</div>
 
                         <div class="col-12 col-md-5 po-print-col-meta text-md-end">
                             <div class="po-meta-card text-start d-inline-block w-100" style="max-width: 320px;">
                                 <div class="fw-bold text-dark fs-6 text-uppercase border-bottom pb-1 mb-2 text-primary d-flex justify-content-between align-items-center">
                                     <span>Purchase Order Details</span>
                                     <span class="badge bg-primary-subtle text-primary border border-primary-subtle d-print-none" style="font-size: 0.65rem;">PO SLIP</span>
-                                </div>
+</div>
                                 <div class="small mb-1 meta-item d-flex justify-content-between align-items-center">
                                     <span class="text-muted">PO / Bill No:</span>
                                     <strong class="text-primary font-monospace" id="slipBillNo">{{ $id }}</strong>
-                                </div>
+</div>
                                 <div class="small mb-1 meta-item d-flex justify-content-between align-items-center">
                                     <span class="text-muted">Order Date:</span>
                                     <strong class="text-dark" id="slipDate">-</strong>
-                                </div>
+</div>
                                 <div class="small mb-1 meta-item d-flex justify-content-between align-items-center">
                                     <span class="text-muted">Order Status:</span>
                                     <span id="slipStatusBadge"><span class="badge bg-secondary">-</span></span>
-                                </div>
+</div>
                                 <div class="small meta-item d-flex justify-content-between align-items-center">
                                     <span class="text-muted">Payment Type:</span>
                                     <strong class="text-dark" id="slipPaymentType">Credit / Site Voucher</strong>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+</div>
+</div>
+</div>
+</div>
+</div>
 
                 <!-- Vendor & Destination Site Two Columns -->
                 <div class="row g-3 mb-3 party-cards-row">
@@ -495,63 +495,63 @@
                         <div class="party-card">
                             <div class="d-flex justify-content-between align-items-center border-bottom pb-1 mb-2">
                                 <span class="text-uppercase small fw-bold text-primary">
-                                    <i class="bi bi-truck me-1"></i> Vendor / Supplier Information (சப்ளையர்)
-                                </span>
+                                    <i class="bi bi-truck me-1"></i> Vendor / Supplier Information 
+</span>
                                 <span class="badge bg-secondary-subtle text-dark border">Supplier</span>
-                            </div>
+</div>
                             <h6 class="fw-bold text-dark mb-1" id="slipSupplierName">-</h6>
                             <div class="small text-muted mb-1" id="slipSupplierContact">
                                 <i class="bi bi-telephone me-1"></i> <span id="slipSupplierPhone">-</span>
-                            </div>
+</div>
                             <div class="small text-muted" id="slipSupplierAddress">
                                 <i class="bi bi-geo-alt me-1"></i> Verified Material Supplier Partner
-                            </div>
-                        </div>
-                    </div>
+</div>
+</div>
+</div>
 
                     <div class="col-12 col-md-6">
                         <div class="party-card">
                             <div class="d-flex justify-content-between align-items-center border-bottom pb-1 mb-2">
                                 <span class="text-uppercase small fw-bold text-primary">
-                                    <i class="bi bi-geo-alt-fill me-1"></i> Destination Project Site (டெலிவரி தளம்)
-                                </span>
+                                    <i class="bi bi-geo-alt-fill me-1"></i> Destination Project Site 
+</span>
                                 <span class="badge bg-info-subtle text-primary border border-info-subtle">Site Delivery</span>
-                            </div>
+</div>
                             <h6 class="fw-bold text-dark mb-1" id="slipSiteName">-</h6>
                             <div class="small text-muted mb-1">
                                 <i class="bi bi-building me-1"></i> <span id="slipSiteAddress">Site Inward Location</span>
-                            </div>
+</div>
                             <div class="small text-muted">
                                 <i class="bi bi-check2-circle text-success me-1"></i> Inward Entry Verified & Logged
-                            </div>
-                        </div>
-                    </div>
-                </div>
+</div>
+</div>
+</div>
+</div>
 
                 <!-- Return / Cancellation Notice Box (Shown dynamically when needed) -->
                 <div class="alert alert-warning border border-warning p-2 mb-2" id="slipReasonBox" style="display: none;">
                     <div class="fw-bold small text-dark mb-1" id="slipReasonHeading"></div>
                     <div class="small text-muted" id="slipReasonText"></div>
-                </div>
+</div>
 
                 <!-- Itemized Materials Table -->
                 <div class="mb-3">
                     <div class="d-flex justify-content-between align-items-center mb-2">
                         <h6 class="fw-bold text-dark mb-0 small text-uppercase">
-                            <i class="bi bi-list-check text-primary me-1"></i> Ordered Materials & Items Breakdown (பொருட்கள் விவரம்)
-                        </h6>
+                            <i class="bi bi-list-check text-primary me-1"></i> Ordered Materials & Items Breakdown 
+</h6>
                         <span class="badge bg-light text-dark border" id="slipItemsCountBadge">0 Items</span>
-                    </div>
+</div>
                     <div class="table-responsive">
                         <table class="table table-bordered table-custom align-middle mb-0">
                             <thead class="table-light">
                                 <tr>
                                     <th style="width: 5%;" class="text-center">#</th>
-                                    <th style="width: 43%;">Material / Item Description (பொருள் பெயர்)</th>
-                                    <th class="text-center" style="width: 12%;">Quantity (அளவு)</th>
+                                    <th style="width: 43%;">Material / Item Description</th>
+                                    <th class="text-center" style="width: 12%;">Quantity</th>
                                     <th class="text-center" style="width: 12%;">Unit</th>
-                                    <th class="text-end" style="width: 13%;">Unit Rate (ரூ.)</th>
-                                    <th class="text-end" style="width: 15%;">Amount (மொத்தம் ரூ.)</th>
+                                    <th class="text-end" style="width: 13%;">Unit Rate (₹)</th>
+                                    <th class="text-end" style="width: 15%;">Amount</th>
                                 </tr>
                             </thead>
                             <tbody id="slipItemsTableBody">
@@ -567,63 +567,63 @@
                                     <td class="text-end text-muted font-monospace">₹0</td>
                                 </tr>
                                 <tr class="table-primary border-primary">
-                                    <td colspan="5" class="text-end fw-extrabold fs-6">Total Bill Amount (மொத்த தொகை):</td>
+                                    <td colspan="5" class="text-end fw-extrabold fs-6">Total Bill Amount :</td>
                                     <td class="text-end fw-extrabold fs-5 text-primary font-monospace" id="slipGrandTotal">
                                         ₹0</td>
                                 </tr>
                             </tfoot>
                         </table>
-                    </div>
+</div>
                     <div class="d-flex justify-content-between align-items-center mt-2 px-1 amount-words-row">
                         <small class="text-muted">
-                            <strong>Amount in Words (தொகை வார்த்தைகளில்):</strong> <span class="fst-italic text-dark fw-semibold" id="slipAmountWords">Zero Rupees
+                            <strong>Amount in Words :</strong> <span class="fst-italic text-dark fw-semibold" id="slipAmountWords">Zero Rupees
                                 Only</span>
-                        </small>
-                    </div>
-                </div>
+</small>
+</div>
+</div>
 
                 <!-- Notes & Remarks Section -->
                 <div class="notes-box mb-3">
                     <h6 class="fw-bold text-dark mb-1 small text-uppercase">
-                        <i class="bi bi-card-text text-primary me-1"></i> Inward Notes & Delivery Remarks (குறிப்புகள்)
-                    </h6>
+                        <i class="bi bi-card-text text-primary me-1"></i> Inward Notes & Delivery Remarks 
+</h6>
                     <p class="text-muted small mb-0" id="slipNotesText">
                         No specific delivery notes recorded for this purchase order.
                     </p>
-                </div>
+</div>
 
                 <!-- Signatures & Verification Section -->
                 <div class="row pt-2 text-center po-signatures">
                     <div class="col-4">
                         <div class="signature-line">
                             <div class="fw-bold">Prepared By / Store Incharge</div>
-                            <div class="text-muted small" style="font-size: 7.5pt;">(தயாரித்தவர் / ஸ்டோர்)</div>
-                        </div>
-                    </div>
+                            <div class="text-muted small" style="font-size: 7.5pt;"></div>
+</div>
+</div>
                     <div class="col-4">
                         <div class="signature-line">
                             <div class="fw-bold">Received By / Site Supervisor</div>
-                            <div class="text-muted small" style="font-size: 7.5pt;">(தள மேற்பார்வையாளர்)</div>
-                        </div>
-                    </div>
+                            <div class="text-muted small" style="font-size: 7.5pt;"></div>
+</div>
+</div>
                     <div class="col-4">
                         <div class="signature-line">
                             <div class="fw-bold">Authorized Signatory</div>
-                            <div class="text-muted small" style="font-size: 7.5pt;">(அங்கீகரிக்கப்பட்ட கையொப்பம்)</div>
-                        </div>
-                    </div>
-                </div>
+                            <div class="text-muted small" style="font-size: 7.5pt;"></div>
+</div>
+</div>
+</div>
 
                 <!-- Official Footer (Print Only) -->
                 <div class="d-none d-print-flex justify-content-between align-items-center mt-2 pt-1 border-top text-muted" style="font-size: 7.5pt;">
                     <span>DEIVENI CONSTRUCTIONS &bull; Official Purchase Order Slip</span>
                     <span>Printed on: {{ now()->format('d/m/Y h:i A') }}</span>
                     <span>Page 1 of 1</span>
-                </div>
-            </div>
-        </div>
+</div>
+</div>
+</div>
 
-    </div>
+</div>
 @endsection
 
 @push('scripts')
@@ -824,18 +824,18 @@
                 status = status || 'Order Completed';
                 switch (status) {
                     case 'Ordered':
-                        return '<span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle px-2 py-1"><i class="bi bi-clock me-1"></i>Ordered (ஆர்டர் செய்யப்பட்டது)</span>';
+                        return '<span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle px-2 py-1"><i class="bi bi-clock me-1"></i>Ordered</span>';
                     case 'Order Received':
-                        return '<span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1"><i class="bi bi-check2-circle me-1"></i>Order Received (ஆர்டர் பெறப்பட்டது)</span>';
+                        return '<span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1"><i class="bi bi-check2-circle me-1"></i>Order Received</span>';
                     case 'Partial Received':
-                        return '<span class="badge bg-info-subtle text-info-emphasis border border-info-subtle px-2 py-1"><i class="bi bi-pie-chart me-1"></i>Partial Received (பகுதி பெறப்பட்டது)</span>';
+                        return '<span class="badge bg-info-subtle text-info-emphasis border border-info-subtle px-2 py-1"><i class="bi bi-pie-chart me-1"></i>Partial Received</span>';
                     case 'Order Return':
-                        return '<span class="badge bg-danger-subtle text-danger-emphasis border border-danger-subtle px-2 py-1"><i class="bi bi-arrow-return-left me-1"></i>Order Return (திரும்பியது)</span>';
+                        return '<span class="badge bg-danger-subtle text-danger-emphasis border border-danger-subtle px-2 py-1"><i class="bi bi-arrow-return-left me-1"></i>Order Return</span>';
                     case 'Order Canceled':
-                        return '<span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle px-2 py-1"><i class="bi bi-x-circle me-1"></i>Order Canceled (ரத்து செய்யப்பட்டது)</span>';
+                        return '<span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle px-2 py-1"><i class="bi bi-x-circle me-1"></i>Order Canceled</span>';
                     case 'Order Completed':
                     default:
-                        return '<span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1"><i class="bi bi-check2-circle me-1"></i>Order Completed (முழுவதும் பெறப்பட்டது)</span>';
+                        return '<span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1"><i class="bi bi-check2-circle me-1"></i>Order Completed</span>';
                 }
             }
 
@@ -887,9 +887,9 @@
             // Handle Return or Cancellation Notice
             if ((statusVal === 'Order Return' || statusVal === 'Order Canceled') && statusReasonVal) {
                 if (statusVal === 'Order Return') {
-                    $('#slipReasonHeading').html('<i class="bi bi-arrow-return-left me-1"></i> Order Return Notice (பொருட்கள் திருப்பியதற்கான குறிப்பு)');
+                    $('#slipReasonHeading').html('<i class="bi bi-arrow-return-left me-1"></i> Order Return Notice ');
                 } else {
-                    $('#slipReasonHeading').html('<i class="bi bi-x-circle me-1"></i> Order Cancellation Notice (ஆர்டர் ரத்து செய்யப்பட்டதற்கான குறிப்பு)');
+                    $('#slipReasonHeading').html('<i class="bi bi-x-circle me-1"></i> Order Cancellation Notice ');
                 }
                 $('#slipReasonText').text(statusReasonVal);
                 $('#slipReasonBox').show();

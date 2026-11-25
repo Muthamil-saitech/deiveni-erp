@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('title', 'Admin Executive Profit & Loss Report')
-@section('page_title', 'Executive Profit & Loss Report (நிர்வாக லாப / நஷ்ட அறிக்கை)')
+@section('page_title', 'Executive Profit & Loss Report ')
 
 @push('styles')
     <style>
@@ -169,20 +169,20 @@
             <div class="d-flex justify-content-between align-items-center">
                 <div>
                     <h4 class="fw-bold mb-1 text-uppercase text-dark">DEIVENI CONSTRUCTIONS & DEVELOPERS</h4>
-                    <h5 class="fw-bold mb-0 text-secondary">Executive Profit & Loss Report (நிர்வாக லாப / நஷ்ட அறிக்கை)</h5>
+                    <h5 class="fw-bold mb-0 text-secondary">Executive Profit & Loss Report</h5>
                     <small class="text-muted">High-level financial performance: Project-wise revenue collections vs
                         operating expenditures, net profit margins, cost analysis, and financial health.</small>
-                </div>
+</div>
                 <div class="text-end">
                     <span class="badge border border-dark text-dark px-2 py-1 mb-1 d-inline-block">CONFIDENTIAL EXECUTIVE
                         AUDIT</span>
                     <div class="small text-muted">Generated: <strong>{{ $filterMeta['current_date'] }}</strong></div>
                     <div class="small text-muted" id="printActivePeriod">Period:
                         <strong>{{ ucfirst(str_replace('_', ' ', $activeFilters['period'] ?? 'this_week')) }}</strong>
-                    </div>
+</div>
                     <div class="small text-muted" id="printActiveSite">Site: <strong>All Sites</strong></div>
-                </div>
-            </div>
+</div>
+</div>
 
             <!-- Print KPI Summary Row -->
             <div class="kpi-print-grid mt-2">
@@ -190,24 +190,24 @@
                     <span class="text-muted small">Total Contract Portfolio</span>
                     <div class="fw-bold fs-6 text-dark" id="printKpiContractValue">
                         ₹{{ number_format($kpis['contract_portfolio'], 2) }}</div>
-                </div>
+</div>
                 <div>
-                    <span class="text-muted small">Total Revenue Inflow (வரவு)</span>
+                    <span class="text-muted small">Total Revenue Inflow</span>
                     <div class="fw-bold fs-6 text-success" id="printKpiRevenue">
                         ₹{{ number_format($kpis['total_revenue'], 2) }}</div>
-                </div>
+</div>
                 <div>
-                    <span class="text-muted small">Total Project Cost (பற்று)</span>
+                    <span class="text-muted small">Total Project Cost</span>
                     <div class="fw-bold fs-6 text-danger" id="printKpiExpense">
                         ₹{{ number_format($kpis['total_expense'], 2) }}</div>
-                </div>
+</div>
                 <div>
-                    <span class="text-muted small">Net Operating Profit (நிகர லாபம்)</span>
+                    <span class="text-muted small">Net Operating Profit</span>
                     <div class="fw-bold fs-6 text-primary" id="printKpiNetProfit">
                         ₹{{ number_format($kpis['net_profit'], 2) }}</div>
-                </div>
-            </div>
-        </div>
+</div>
+</div>
+</div>
 
         <!-- Top Header & Action Toolbar -->
         <div class="card-custom p-3 p-md-4 mb-4 bg-white shadow-sm border-0" id="headerActionCard">
@@ -216,25 +216,25 @@
                     <div class="d-flex align-items-center gap-2 flex-wrap mb-1">
                         <h4 class="fw-bold mb-0 text-dark">
                             <i class="bi bi-graph-up-arrow text-primary me-2"></i>Executive Profit & Loss Report
-                            (நிர்வாக லாப / நஷ்ட அறிக்கை)
-                        </h4>
-                    </div>
-                </div>
+
+</h4>
+</div>
+</div>
 
                 <!-- Action Buttons: Export Excel, PDF & Print -->
                 <div class="d-flex gap-2 flex-wrap align-items-center">
                     <button type="button" class="btn btn-outline-success btn-sm" id="exportExcelBtn">
                         <i class="bi bi-file-earmark-excel me-1"></i> Export Excel
-                    </button>
+</button>
                     <button type="button" class="btn btn-outline-danger btn-sm" id="exportPdfBtn">
                         <i class="bi bi-file-earmark-pdf me-1"></i> Export PDF
-                    </button>
+</button>
                     <button type="button" class="btn btn-outline-secondary btn-sm" id="printReportBtn">
                         <i class="bi bi-printer me-1"></i> Print
-                    </button>
-                </div>
-            </div>
-        </div>
+</button>
+</div>
+</div>
+</div>
 
         <!-- Filter Toolbar -->
         <div class="card-custom p-3 mb-4 bg-white shadow-sm border-0" id="filterCard">
@@ -242,74 +242,74 @@
                 <!-- Date Period Filter -->
                 <div class="col-12 col-md-3">
                     <label class="form-label small fw-semibold mb-1 text-muted">
-                        <i class="bi bi-calendar3 me-1 text-primary"></i> Date Period (தேதி வடிகட்டி)
-                    </label>
+                        <i class="bi bi-calendar3 me-1 text-primary"></i> Date Period 
+</label>
                     <select class="form-select form-select-sm" id="filterPeriod">
                         <option value="this_week" selected>This Week ({{ $filterMeta['this_week']['label'] }})</option>
                         <option value="last_week">Last Week ({{ $filterMeta['last_week']['label'] }})</option>
                         <option value="today">Today ({{ $filterMeta['today']['label'] }})</option>
                         <option value="this_month">This Month ({{ $filterMeta['this_month']['label'] }})</option>
-                        <option value="all">All Dates (அனைத்து தேதிகள்)</option>
+                        <option value="all">All Dates</option>
                         <option value="custom">Custom Date Range...</option>
                     </select>
-                </div>
+</div>
 
                 <!-- Custom Date Inputs -->
                 <div class="col-6 col-md-2" id="customDateStartCol" style="display: none;">
                     <label class="form-label small fw-semibold mb-1 text-muted">From Date</label>
                     <input type="date" class="form-control form-control-sm" id="filterStartDate"
                         value="{{ $filterMeta['this_week']['start'] }}">
-                </div>
+</div>
                 <div class="col-6 col-md-2" id="customDateEndCol" style="display: none;">
                     <label class="form-label small fw-semibold mb-1 text-muted">To Date</label>
                     <input type="date" class="form-control form-control-sm" id="filterEndDate"
                         value="{{ $filterMeta['this_week']['end'] }}">
-                </div>
+</div>
 
                 <!-- Project Site Filter -->
                 <div class="col-6 col-md-3">
                     <label class="form-label small fw-semibold mb-1 text-muted">
-                        <i class="bi bi-building me-1 text-primary"></i> Project Site (கட்டுமான தளம்)
-                    </label>
+                        <i class="bi bi-building me-1 text-primary"></i> Project Site 
+</label>
                     <select class="form-select form-select-sm" id="filterSite">
-                        <option value="all">All Sites (அனைத்து தளங்கள்)</option>
+                        <option value="all">All Sites</option>
                         @foreach ($sites as $site)
                             <option value="{{ $site->id }}">{{ $site->name }}</option>
                         @endforeach
                     </select>
-                </div>
+</div>
 
                 <!-- Text Search -->
                 <div class="col-12 col-md-4">
                     <label class="form-label small fw-semibold mb-1 text-muted">
-                        <i class="bi bi-search me-1 text-primary"></i> Quick Search (தேடல்)
-                    </label>
+                        <i class="bi bi-search me-1 text-primary"></i> Quick Search 
+</label>
                     <div class="input-group input-group-sm">
                         <input type="text" class="form-control" id="filterSearchInput"
                             placeholder="Search site, client, location, work type...">
                         <button class="btn btn-outline-secondary" type="button" id="clearSearchBtn">
                             <i class="bi bi-x"></i>
-                        </button>
-                    </div>
-                </div>
+</button>
+</div>
+</div>
 
                 <!-- Reset Filter Button -->
                 <div class="col-12 col-md-2">
                     <button type="button" class="btn btn-sm btn-light border text-muted w-100" id="resetFilterBtn">
                         <i class="bi bi-arrow-counterclockwise me-1"></i> Reset Filters
-                    </button>
-                </div>
-            </div>
+</button>
+</div>
+</div>
 
             <div class="d-flex justify-content-between align-items-center mt-2 pt-2 border-top">
                 <span class="small text-muted" id="filterMatchCountBadge">
                     Active filters: <strong>This Week ({{ $filterMeta['this_week']['label'] }})</strong> &bull; <strong>All
                         Sites</strong>
-                </span>
+</span>
                 <span class="small text-muted" id="activeDateBadge">Current Date:
                     <strong>{{ $filterMeta['current_date'] }}</strong></span>
-            </div>
-        </div>
+</div>
+</div>
 
         <!-- Admin P&L KPI Summary Cards -->
         <div class="row g-3 mb-4">
@@ -321,79 +321,78 @@
                             <h4 class="fw-bold mb-0 text-dark mt-1" id="kpiContractValue">
                                 ₹{{ number_format($kpis['contract_portfolio'], 2) }}</h4>
                             <small class="text-muted">Total estimate / pipeline</small>
-                        </div>
+</div>
                         <div class="bg-info-subtle text-info p-2 rounded">
                             <i class="bi bi-building-check fs-5"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
+</div>
+</div>
+</div>
+</div>
             <div class="col-6 col-md-3">
                 <div class="card-custom p-3 bg-white border-start border-4 border-success h-100 shadow-sm">
                     <div class="d-flex justify-content-between align-items-start">
                         <div>
-                            <div class="text-muted small fw-semibold">Total Revenue Inflow (வரவு)</div>
+                            <div class="text-muted small fw-semibold">Total Revenue Inflow</div>
                             <h4 class="fw-bold mb-0 text-success mt-1" id="kpiRevenue">
                                 ₹{{ number_format($kpis['total_revenue'], 2) }}</h4>
                             <small class="text-muted">Client advance receipts</small>
-                        </div>
+</div>
                         <div class="bg-success-subtle text-success p-2 rounded">
                             <i class="bi bi-arrow-down-left-circle-fill fs-5"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
+</div>
+</div>
+</div>
+</div>
             <div class="col-6 col-md-3">
                 <div class="card-custom p-3 bg-white border-start border-4 border-danger h-100 shadow-sm">
                     <div class="d-flex justify-content-between align-items-start">
                         <div>
-                            <div class="text-muted small fw-semibold">Total Project Cost (பற்று)</div>
+                            <div class="text-muted small fw-semibold">Total Project Cost</div>
                             <h4 class="fw-bold mb-0 text-danger mt-1" id="kpiExpense">
                                 ₹{{ number_format($kpis['total_expense'], 2) }}</h4>
                             <small class="text-muted">Wages, materials, suppliers</small>
-                        </div>
+</div>
                         <div class="bg-danger-subtle text-danger p-2 rounded">
                             <i class="bi bi-arrow-up-right-circle-fill fs-5"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
+</div>
+</div>
+</div>
+</div>
             <div class="col-6 col-md-3">
                 <div class="card-custom p-3 bg-white border-start border-4 border-primary h-100 shadow-sm">
                     <div class="d-flex justify-content-between align-items-start">
                         <div>
-                            <div class="text-muted small fw-semibold">Net Profit / Surplus (நிகர லாபம்)</div>
+                            <div class="text-muted small fw-semibold">Net Profit / Surplus</div>
                             <h4 class="fw-bold mb-0 text-primary mt-1" id="kpiNetProfit">
                                 ₹{{ number_format($kpis['net_profit'], 2) }}</h4>
                             <small class="fw-semibold text-primary" id="kpiMarginBadge">{{ $kpis['net_margin'] }}% Net
                                 Margin</small>
-                        </div>
+</div>
                         <div class="bg-primary-subtle text-primary p-2 rounded">
                             <i class="bi bi-piggy-bank-fill fs-5"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+</div>
+</div>
+</div>
+</div>
+</div>
 
         <!-- Site-by-Site Profit & Loss Table Card -->
         <div class="card-custom p-3 p-md-4 mb-4 bg-white shadow-sm border-0">
             <div class="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-2">
                 <div>
                     <h6 class="fw-bold text-dark mb-0">
-                        <i class="bi bi-table me-1 text-primary"></i> Site-Wise Profit & Loss Analysis (கட்டுமான தள வாரியான
-                        லாப / நஷ்ட விவரம்)
-                    </h6>
+                        <i class="bi bi-table me-1 text-primary"></i> Site-Wise Profit & Loss Analysis 
+</h6>
                     <small class="text-muted">Revenue collections, trade wages, materials, and operating margins for each
                         site.</small>
-                </div>
+</div>
                 <div class="d-flex gap-2 align-items-center">
                     <span class="badge bg-primary-subtle text-primary border" id="sitesCountBadge">{{ count($reportSites) }}
                         Sites</span>
                     <span class="badge bg-success-subtle text-success border" id="overallProfitBadge">Overall Profit:
                         ₹{{ number_format($kpis['net_profit'], 2) }}</span>
-                </div>
-            </div>
+</div>
+</div>
 
             <div class="table-responsive">
                 <table class="table table-hover align-middle mb-0" id="adminPnlSitesTable">
@@ -418,7 +417,7 @@
                     </tbody>
                     <tfoot class="table-light fw-bold small">
                         <tr>
-                            <td>Totals (மொத்தம்):</td>
+                            <td>Totals :</td>
                             <td class="text-end text-dark" id="footEstimate">₹0.00</td>
                             <td class="text-end text-success" id="footRevenue">₹0.00</td>
                             <td class="text-end text-danger" id="footLabour">₹0.00</td>
@@ -432,7 +431,7 @@
                         </tr>
                     </tfoot>
                 </table>
-            </div>
+</div>
 
             <!-- Table Pagination & Footer Summary -->
             <div class="p-3 bg-white border-top d-flex flex-column flex-md-row justify-content-between align-items-center gap-3 no-print" id="tablePaginationContainer">
@@ -446,15 +445,15 @@
                     </select>
                     <span class="small text-muted ms-md-2" id="paginationSummary">
                         Showing <strong class="text-dark" id="pageStart">1</strong> &minus; <strong class="text-dark" id="pageEnd">{{ min(10, count($reportSites)) }}</strong> of <strong class="text-dark" id="pageTotal">{{ count($reportSites) }}</strong> sites
-                    </span>
-                </div>
+</span>
+</div>
                 <nav aria-label="Admin PnL table pagination">
                     <ul class="pagination pagination-sm mb-0 gap-1" id="paginationNav">
                         <!-- Dynamic page links rendered by JS -->
                     </ul>
                 </nav>
-            </div>
-        </div>
+</div>
+</div>
 
         <!-- Profit & Loss Statement & Cost Breakdown Cards Row -->
         <div class="row g-3">
@@ -464,31 +463,31 @@
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <h6 class="fw-bold text-dark mb-0">
                             <i class="bi bi-file-earmark-spreadsheet me-1 text-primary"></i> Executive Income & Expense
-                            Statement (நிதி அறிக்கை)
-                        </h6>
+                            Statement 
+</h6>
                         <span class="badge bg-light text-muted border">Filtered Period</span>
-                    </div>
+</div>
 
                     <div class="table-responsive">
                         <table class="table table-sm align-middle mb-0">
                             <tbody>
                                 <tr class="table-light">
                                     <td colspan="2" class="fw-bold text-uppercase text-success small">
-                                        <i class="bi bi-plus-circle me-1"></i> A. Operating Revenue / Income (வரவு விவரம்)
+                                        <i class="bi bi-plus-circle me-1"></i> A. Operating Revenue / Income 
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td class="ps-3 text-muted">Client Advance Payments (வாடிக்கையாளர் முன்பணம்)</td>
+                                    <td class="ps-3 text-muted">Client Advance Payments </td>
                                     <td class="text-end fw-semibold text-success" id="stmtClientAdvance">
                                         ₹{{ number_format($statement['client_advances'], 2) }}</td>
                                 </tr>
                                 <tr>
-                                    <td class="ps-3 text-muted">Stage Billing & Other Inflows (இதர வரவு)</td>
+                                    <td class="ps-3 text-muted">Stage Billing & Other Inflows </td>
                                     <td class="text-end fw-semibold text-success" id="stmtOtherInflows">
                                         ₹{{ number_format($statement['other_inflows'], 2) }}</td>
                                 </tr>
                                 <tr class="fw-bold border-top border-bottom">
-                                    <td class="text-dark">Gross Revenue (மொத்த வருவாய்):</td>
+                                    <td class="text-dark">Gross Revenue :</td>
                                     <td class="text-end text-success fs-6" id="stmtTotalRevenue">
                                         ₹{{ number_format($statement['gross_revenue'], 2) }}</td>
                                 </tr>
@@ -496,127 +495,126 @@
                                 <tr class="table-light">
                                     <td colspan="2" class="fw-bold text-uppercase text-danger small pt-3">
                                         <i class="bi bi-dash-circle me-1"></i> B. Cost of Construction & Operating Expenses
-                                        (செலவுகள் விவரம்)
+
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td class="ps-3 text-muted">Daily Worker Wages Disbursed (தொழிலாளர் கூலி)</td>
+                                    <td class="ps-3 text-muted">Daily Worker Wages Disbursed </td>
                                     <td class="text-end fw-semibold text-danger" id="stmtWages">
                                         ₹{{ number_format($statement['worker_wages'], 2) }}</td>
                                 </tr>
                                 <tr>
-                                    <td class="ps-3 text-muted">Material Purchases & Consumables (கட்டுமானப் பொருட்கள்)</td>
+                                    <td class="ps-3 text-muted">Material Purchases & Consumables </td>
                                     <td class="text-end fw-semibold text-danger" id="stmtMaterials">
                                         ₹{{ number_format($statement['materials_consumables'], 2) }}</td>
                                 </tr>
                                 <tr>
-                                    <td class="ps-3 text-muted">Power Tools & Machinery Rentals (இயந்திர வாடகை)</td>
+                                    <td class="ps-3 text-muted">Power Tools & Machinery Rentals </td>
                                     <td class="text-end fw-semibold text-danger" id="stmtTools">
                                         ₹{{ number_format($statement['tools_rentals'], 2) }}</td>
                                 </tr>
                                 <tr>
-                                    <td class="ps-3 text-muted">Supplier Invoices Settled (சப்ளையர் பட்டுவாடா)</td>
+                                    <td class="ps-3 text-muted">Supplier Invoices Settled </td>
                                     <td class="text-end fw-semibold text-danger" id="stmtSuppliers">
                                         ₹{{ number_format($statement['supplier_invoices'], 2) }}</td>
                                 </tr>
                                 <tr>
-                                    <td class="ps-3 text-muted">Site Handling & Sundry Expenses (தள சில்லறை செலவுகள்)</td>
+                                    <td class="ps-3 text-muted">Site Handling & Sundry Expenses </td>
                                     <td class="text-end fw-semibold text-danger" id="stmtSundries">
                                         ₹{{ number_format($statement['site_sundries'], 2) }}</td>
                                 </tr>
                                 <tr class="fw-bold border-top border-bottom">
-                                    <td class="text-dark">Total Construction & Operating Expenses (மொத்த செலவுகள்):</td>
+                                    <td class="text-dark">Total Construction & Operating Expenses :</td>
                                     <td class="text-end text-danger fs-6" id="stmtTotalExpenses">
                                         ₹{{ number_format($statement['total_expenses'], 2) }}</td>
                                 </tr>
 
                                 <tr class="table-primary fw-bold">
                                     <td class="fs-6 text-dark py-2">
-                                        <i class="bi bi-award me-1 text-primary"></i> NET OPERATING PROFIT / (LOSS) (நிகர
-                                        லாபம்):
+                                        <i class="bi bi-award me-1 text-primary"></i> NET OPERATING PROFIT / (LOSS):
                                     </td>
                                     <td class="text-end fs-5 py-2 text-primary" id="stmtNetProfit">
                                         ₹{{ number_format($statement['net_profit'], 2) }}</td>
                                 </tr>
                             </tbody>
                         </table>
-                    </div>
-                </div>
-            </div>
+</div>
+</div>
+</div>
 
             <!-- Right: Cost Allocation & Financial Health -->
             <div class="col-12 col-lg-5">
                 <div class="card-custom p-3 p-md-4 bg-white shadow-sm border-0 h-100">
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <h6 class="fw-bold text-dark mb-0">
-                            <i class="bi bi-pie-chart me-1 text-primary"></i> Expense Distribution (செலவு ஒதுக்கீடு)
-                        </h6>
+                            <i class="bi bi-pie-chart me-1 text-primary"></i> Expense Distribution 
+</h6>
                         <span class="badge bg-light text-muted border">Cost Breakdown</span>
-                    </div>
+</div>
 
                     <div class="mb-3">
                         <div class="d-flex justify-content-between small fw-semibold mb-1">
                             <span><i class="bi bi-people me-1 text-warning"></i> Labour Wages</span>
                             <span id="distLabourText">₹{{ number_format($distribution['labour']['amount'], 2) }}
                                 ({{ $distribution['labour']['pct'] }}%)</span>
-                        </div>
+</div>
                         <div class="progress" style="height: 8px;">
                             <div class="progress-bar bg-warning" id="distLabourBar"
                                 style="width: {{ $distribution['labour']['pct'] }}%;"></div>
-                        </div>
-                    </div>
+</div>
+</div>
 
                     <div class="mb-3">
                         <div class="d-flex justify-content-between small fw-semibold mb-1">
                             <span><i class="bi bi-boxes me-1 text-info"></i> Materials & Tools</span>
                             <span id="distMaterialText">₹{{ number_format($distribution['material']['amount'], 2) }}
                                 ({{ $distribution['material']['pct'] }}%)</span>
-                        </div>
+</div>
                         <div class="progress" style="height: 8px;">
                             <div class="progress-bar bg-info" id="distMaterialBar"
                                 style="width: {{ $distribution['material']['pct'] }}%;"></div>
-                        </div>
-                    </div>
+</div>
+</div>
 
                     <div class="mb-3">
                         <div class="d-flex justify-content-between small fw-semibold mb-1">
                             <span><i class="bi bi-truck me-1 text-primary"></i> Supplier Payments</span>
                             <span id="distSupplierText">₹{{ number_format($distribution['supplier']['amount'], 2) }}
                                 ({{ $distribution['supplier']['pct'] }}%)</span>
-                        </div>
+</div>
                         <div class="progress" style="height: 8px;">
                             <div class="progress-bar bg-primary" id="distSupplierBar"
                                 style="width: {{ $distribution['supplier']['pct'] }}%;"></div>
-                        </div>
-                    </div>
+</div>
+</div>
 
                     <div class="mb-4">
                         <div class="d-flex justify-content-between small fw-semibold mb-1">
                             <span><i class="bi bi-receipt me-1 text-secondary"></i> Site Petty & Sundries</span>
                             <span id="distSundryText">₹{{ number_format($distribution['sundry']['amount'], 2) }}
                                 ({{ $distribution['sundry']['pct'] }}%)</span>
-                        </div>
+</div>
                         <div class="progress" style="height: 8px;">
                             <div class="progress-bar bg-secondary" id="distSundryBar"
                                 style="width: {{ $distribution['sundry']['pct'] }}%;"></div>
-                        </div>
-                    </div>
+</div>
+</div>
 
                     <!-- Financial Health Alert Box -->
                     <div class="card p-3 border-0 bg-light rounded-3" id="healthAlertBox">
                         <div class="d-flex align-items-center gap-2 mb-1">
                             <i class="bi {{ $health['icon'] }} fs-5" id="healthIcon"></i>
                             <h6 class="fw-bold mb-0 text-dark" id="healthTitle">{{ $health['title'] }}</h6>
-                        </div>
+</div>
                         <p class="small text-muted mb-0" id="healthDesc">
                             {{ $health['desc'] }}
                         </p>
-                    </div>
-                </div>
-            </div>
-        </div>
+</div>
+</div>
+</div>
+</div>
 
-    </div>
+</div>
 @endsection
 
 @push('scripts')
@@ -714,9 +712,9 @@
                                             <div class="d-flex align-items-center gap-1">
                                                 <div class="progress flex-grow-1" style="height: 6px;">
                                                     <div class="progress-bar ${budgetPct > 85 ? 'bg-danger' : 'bg-primary'}" style="width: ${budgetPct}%;"></div>
-                                                </div>
+</div>
                                                 <span class="small text-muted">${budgetPct}%</span>
-                                            </div>
+</div>
                                         </td>
                                         <td class="text-center">${statusBadge}</td>
                                     </tr>
@@ -850,7 +848,7 @@
                     <li class="page-item ${prevDisabled}">
                         <button class="page-link" type="button" data-page="${current - 1}" aria-label="Previous" title="Previous Page">
                             <i class="bi bi-chevron-left"></i>
-                        </button>
+</button>
                     </li>
                 `);
 
@@ -887,7 +885,7 @@
                     <li class="page-item ${nextDisabled}">
                         <button class="page-link" type="button" data-page="${current + 1}" aria-label="Next" title="Next Page">
                             <i class="bi bi-chevron-right"></i>
-                        </button>
+</button>
                     </li>
                 `);
             }

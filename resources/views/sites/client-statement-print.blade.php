@@ -172,21 +172,21 @@
         <div class="container d-flex justify-content-between align-items-center">
             <div class="d-flex align-items-center gap-2">
                 <a href="{{ route('sites.show', $site->encrypted_id) }}" class="btn btn-outline-light btn-sm d-inline-flex align-items-center gap-1">
-                    <i class="bi bi-arrow-left"></i> Back to Site (தளத்திற்கு திரும்பு)
-                </a>
+                    <i class="bi bi-arrow-left"></i> Back to Site 
+</a>
                 <span class="text-white-50">|</span>
                 <span class="small fw-semibold">Statement #{{ $statement->statement_number }}</span>
-            </div>
+</div>
             <div class="d-flex align-items-center gap-2">
                 <button type="button" class="btn btn-warning btn-sm d-inline-flex align-items-center gap-1" onclick="window.print()">
-                    <i class="bi bi-printer-fill"></i> Print A4 (அச்சிடு)
-                </button>
+                    <i class="bi bi-printer-fill"></i> Print A4 
+</button>
                 <button type="button" class="btn btn-success btn-sm d-inline-flex align-items-center gap-1" onclick="window.print()">
-                    <i class="bi bi-download"></i> Save as PDF (பதிவிறக்கம்)
-                </button>
-            </div>
-        </div>
-    </div>
+                    <i class="bi bi-download"></i> Save as PDF 
+</button>
+</div>
+</div>
+</div>
 
     <!-- The Statement A4 Document -->
     <div class="statement-sheet">
@@ -197,65 +197,65 @@
                 <div class="d-flex align-items-center gap-3">
                     <div class="bg-primary text-white rounded p-2 text-center" style="width: 44px; height: 44px;">
                         <i class="bi bi-building fs-4"></i>
-                    </div>
+</div>
                     <div>
                         <div class="header-brand-title">DEIVENI CONSTRUCTIONS</div>
                         <div class="header-brand-sub">Engineers &bull; Builders &bull; Contractors &bull; Material Suppliers</div>
                         <div class="small text-muted mt-1" style="font-size:7.5pt;">
                             No. 12, Melakkal Main Road, Kochadai, Madurai &bull; GSTIN: 33AAAAA0000A1Z5 &bull; Phone: +91 94442 22333
-                        </div>
-                    </div>
-                </div>
-            </div>
+</div>
+</div>
+</div>
+</div>
             <div class="col-4 text-end">
                 <div class="border rounded p-2 bg-light d-inline-block text-start" style="min-width: 170px;">
                     <div class="text-muted" style="font-size:7pt; text-transform:uppercase; font-weight:700;">Statement / Bill No:</div>
                     <div class="fw-bold font-monospace text-primary" style="font-size:9.5pt;">{{ $statement->statement_number }}</div>
                     <div class="text-muted mt-1" style="font-size:7pt; text-transform:uppercase; font-weight:700;">Date:</div>
                     <div class="fw-semibold text-dark" style="font-size:8.5pt;">{{ \Carbon\Carbon::parse($statement->statement_date)->format('d M Y') }}</div>
-                </div>
-            </div>
-        </div>
+</div>
+</div>
+</div>
 
         <!-- Banner Title -->
         <div class="statement-title-banner">
             <h5>{{ $statement->title ?: 'CLIENT PROJECT EXPENSE & WORK STATEMENT' }}</h5>
-        </div>
+</div>
 
         <!-- Parties Meta Block -->
         <div class="row g-3 mb-3">
             <div class="col-6">
                 <div class="meta-card">
-                    <div class="meta-title"><i class="bi bi-person-fill me-1"></i> Billed To (கிளையண்ட் விவரம்):</div>
+                    <div class="meta-title"><i class="bi bi-person-fill me-1"></i> Billed To :</div>
                     <div class="fw-bold text-dark fs-6">{{ $statement->client_name ?: ($site->client?->name ?? 'Client') }}</div>
                     @if ($statement->client_phone)
                         <div class="small text-muted mt-1">
                             <i class="bi bi-telephone me-1"></i> Phone: <strong>{{ $statement->client_phone }}</strong>
-                        </div>
+</div>
                     @endif
                     @if ($statement->client_address)
                         <div class="small text-muted mt-1">
                             <i class="bi bi-geo-alt me-1"></i> Address: {{ $statement->client_address }}
-                        </div>
+</div>
                     @endif
-                </div>
-            </div>
+</div>
+</div>
             <div class="col-6">
                 <div class="meta-card">
-                    <div class="meta-title"><i class="bi bi-building me-1"></i> Project Site (திட்ட தளம்):</div>
+                    <div class="meta-title"><i class="bi bi-building me-1"></i> Project Site :</div>
                     <div class="fw-bold text-dark fs-6">{{ $site->name }}</div>
                     <div class="small text-muted mt-1">
                         <i class="bi bi-pin-map me-1"></i> Location: <strong>{{ $site->location ?? 'Madurai' }}</strong>
                         @if ($site->work_type)
                             &bull; Type: <strong>{{ $site->work_type }}</strong>
                         @endif
-                    </div>
+</div>
                     <div class="small text-muted mt-1">
                         Status: <span class="badge bg-success-subtle text-success border border-success-subtle" style="font-size:6.5pt;">{{ $site->status ?? 'Active' }}</span>
-                    </div>
-                </div>
-            </div>
-        </div>
+</div>
+</div>
+</div>
+</div>
 
         <!-- Line Items Table (Date-Wise Material & Work Items) -->
         @php
@@ -331,7 +331,7 @@
             <!-- Weekly Site & Operational Expenses Table (Placed Separately Below) -->
             <div class="fw-bold text-dark mt-3 mb-1" style="font-size: 8.5pt; letter-spacing: 0.03em;">
                 <i class="bi bi-calendar-week me-1 text-primary"></i> WEEKLY SITE & OPERATIONAL EXPENSES
-            </div>
+</div>
             <table class="table-print mt-1">
                 <thead>
                     <tr>
@@ -458,14 +458,14 @@
         <div class="amount-words-card mb-3">
             <span class="text-muted small fw-bold">Amount in Words:</span>
             <strong class="text-dark ms-1">{{ numberToIndianWords(round((float)$statement->total_amount)) }}</strong>
-        </div>
+</div>
 
         <!-- Notes & Payment Terms -->
         @if (!empty($statement->notes))
             <div class="border rounded p-2 mb-3 bg-light" style="font-size:7.5pt;">
-                <div class="fw-bold text-dark mb-1 text-uppercase" style="font-size:7pt;">Terms & Instructions / குறிப்புகள்:</div>
+                <div class="fw-bold text-dark mb-1 text-uppercase" style="font-size:7pt;">Terms & Instructions:</div>
                 <div style="white-space: pre-line; color: #475569;">{{ $statement->notes }}</div>
-            </div>
+</div>
         @endif
 
         <!-- Signatures Block -->
@@ -474,27 +474,27 @@
                 <div class="sign-line">
                     Prepared By<br>
                     <small class="text-muted">{{ $statement->creator?->name ?? 'Site Supervisor' }}</small>
-                </div>
-            </div>
+</div>
+</div>
             <div class="col-4">
                 <div class="sign-line">
                     Client Acknowledgment<br>
                     <small class="text-muted">{{ $statement->client_name ?: 'Client Signature' }}</small>
-                </div>
-            </div>
+</div>
+</div>
             <div class="col-4">
                 <div class="sign-line">
                     For Deiveni Constructions<br>
                     <small class="text-muted">Authorized Signatory</small>
-                </div>
-            </div>
-        </div>
+</div>
+</div>
+</div>
 
         <div class="text-center text-muted mt-4" style="font-size:6.5pt; border-top: 1px solid #f1f5f9; padding-top: 6px;">
             This is a computer generated statement. Generated on {{ now()->format('d M Y, h:i A') }}
-        </div>
+</div>
 
-    </div>
+</div>
 
     @if ($autoprint)
         <script>

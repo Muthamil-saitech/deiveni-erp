@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('title', 'Financial & Ledger Report')
-@section('page_title', 'Financial & Ledger Report (கணக்கு மேலாளர் நிதி & லெட்ஜர் அறிக்கை)')
+@section('page_title', 'Financial & Ledger Report ')
 
 @push('styles')
     <style>
@@ -170,37 +170,37 @@
             <div class="d-flex justify-content-between align-items-center">
                 <div>
                     <h4 class="fw-bold mb-1 text-uppercase text-dark">DEIVENI CONSTRUCTIONS & DEVELOPERS</h4>
-                    <h5 class="fw-bold mb-0 text-secondary">Financial & Ledger Report (கணக்கு மேலாளர் நிதி & லெட்ஜர் அறிக்கை)</h5>
+                    <h5 class="fw-bold mb-0 text-secondary">Financial & Ledger Report</h5>
                     <small class="text-muted">Dynamic Ledger Flow, Client Advance Receipts, Wage Disbursements, and Supplier Settlements</small>
-                </div>
+</div>
                 <div class="text-end">
                     <span class="badge border border-dark text-dark px-2 py-1 mb-1 d-inline-block">OFFICIAL LEDGER AUDIT</span>
                     <div class="small text-muted">Generated: <strong>{{ $filterMeta['current_date'] }}</strong></div>
                     <div class="small text-muted" id="printActivePeriod">Period: <strong>This Week</strong></div>
                     <div class="small text-muted" id="printActiveSite">Site: <strong>All Sites</strong></div>
-                </div>
-            </div>
+</div>
+</div>
 
             <!-- Print KPI Summary Row -->
             <div class="kpi-print-grid mt-2">
                 <div>
-                    <span class="text-muted small">Total Inflow (வரவு)</span>
+                    <span class="text-muted small">Total Inflow</span>
                     <div class="fw-bold fs-6 text-success" id="printKpiTotalIn">₹{{ number_format($kpis['total_in'], 2) }}</div>
-                </div>
+</div>
                 <div>
-                    <span class="text-muted small">Total Outflow (பற்று)</span>
+                    <span class="text-muted small">Total Outflow</span>
                     <div class="fw-bold fs-6 text-danger" id="printKpiTotalOut">₹{{ number_format($kpis['total_out'], 2) }}</div>
-                </div>
+</div>
                 <div>
-                    <span class="text-muted small">Net Surplus / Balance (மீதம்)</span>
+                    <span class="text-muted small">Net Surplus / Balance</span>
                     <div class="fw-bold fs-6 text-primary" id="printKpiNetBalance">₹{{ number_format($kpis['net_balance'], 2) }}</div>
-                </div>
+</div>
                 <div>
                     <span class="text-muted small">Total Transactions</span>
                     <div class="fw-bold fs-6 text-dark" id="printKpiCount">{{ $kpis['count'] }} Entries</div>
-                </div>
-            </div>
-        </div>
+</div>
+</div>
+</div>
 
         <!-- Top Header & Action Toolbar -->
         <div class="card-custom p-3 p-md-4 mb-4 bg-white shadow-sm border-0" id="headerActionCard">
@@ -209,33 +209,33 @@
                     <div class="d-flex align-items-center gap-2 flex-wrap mb-1">
                         <h4 class="fw-bold mb-0 text-dark">
                             <i class="bi bi-journal-text text-success me-2"></i>Account Manager Financial & Ledger Report
-                            (கணக்கு மேலாளர் நிதி & லெட்ஜர் அறிக்கை)
-                        </h4>
+
+</h4>
                         @if ($isAdmin)
                             <span class="badge bg-primary-subtle text-primary border border-primary-subtle">
                                 <i class="bi bi-shield-lock me-1"></i> Admin View
-                            </span>
+</span>
                         @endif
-                    </div>
-                </div>
+</div>
+</div>
 
                 <!-- Export & Navigation Actions (Task 5: Excel, PDF, Print) -->
                 <div class="d-flex gap-2 flex-wrap align-items-center">
                     <button type="button" class="btn btn-outline-success btn-sm d-flex align-items-center gap-1 shadow-sm" id="exportExcelBtn">
                         <i class="bi bi-file-earmark-excel"></i>
                         <span>Export Excel</span>
-                    </button>
+</button>
                     <button type="button" class="btn btn-outline-danger btn-sm d-flex align-items-center gap-1 shadow-sm" id="exportPdfBtn">
                         <i class="bi bi-file-earmark-pdf"></i>
                         <span>Export PDF</span>
-                    </button>
+</button>
                     <button type="button" class="btn btn-outline-secondary btn-sm d-flex align-items-center gap-1 shadow-sm" id="printReportBtn">
                         <i class="bi bi-printer"></i>
                         <span>Print</span>
-                    </button>
-                </div>
-            </div>
-        </div>
+</button>
+</div>
+</div>
+</div>
 
         <!-- Filter Toolbar -->
         <div class="card-custom p-3 mb-4 bg-white shadow-sm border-0" id="filterCard">
@@ -243,113 +243,113 @@
                 <!-- Date Period Filter (Task 4: Order: today, this_week, last_week (date range), this_month, custom, all) -->
                 <div class="col-12 col-md-3">
                     <label class="form-label small fw-semibold mb-1 text-muted">
-                        <i class="bi bi-calendar3 me-1 text-primary"></i> Date Period (தேதி வடிகட்டி)
-                    </label>
+                        <i class="bi bi-calendar3 me-1 text-primary"></i> Date Period 
+</label>
                     <select class="form-select form-select-sm" id="filterPeriod" name="period">
                         <option value="today" {{ ($activeFilters['period'] ?? '') === 'today' ? 'selected' : '' }}>
-                            Today (இன்று - {{ $filterMeta['today']['label'] }})
-                        </option>
+                            Today ({{ $filterMeta['today']['label'] }})
+</option>
                         <option value="this_week" {{ ($activeFilters['period'] ?? 'this_week') === 'this_week' ? 'selected' : '' }}>
-                            This Week (இந்த வாரம் - {{ $filterMeta['this_week']['label'] }})
-                        </option>
+                            This Week ({{ $filterMeta['this_week']['label'] }})
+</option>
                         <option value="last_week" {{ ($activeFilters['period'] ?? '') === 'last_week' ? 'selected' : '' }}>
                             Last Week ({{ $filterMeta['last_week']['label'] }})
-                        </option>
+</option>
                         <option value="this_month" {{ ($activeFilters['period'] ?? '') === 'this_month' ? 'selected' : '' }}>
-                            This Month (நடப்பு மாதம் - {{ $filterMeta['this_month']['label'] }})
-                        </option>
+                            This Month ({{ $filterMeta['this_month']['label'] }})
+</option>
                         <option value="custom" {{ ($activeFilters['period'] ?? '') === 'custom' ? 'selected' : '' }}>
                             Custom Date Range...
-                        </option>
+</option>
                         <option value="all" {{ ($activeFilters['period'] ?? '') === 'all' ? 'selected' : '' }}>
-                            All Dates (அனைத்து தேதிகள்)
-                        </option>
+                            All Dates 
+</option>
                     </select>
-                </div>
+</div>
 
                 <!-- Custom Date Inputs -->
                 <div class="col-6 col-md-2" id="customDateStartCol" style="display: none;">
                     <label class="form-label small fw-semibold mb-1 text-muted">From Date</label>
                     <input type="date" class="form-control form-control-sm" id="filterStartDate"
                         value="{{ $filterMeta['this_week']['start'] }}">
-                </div>
+</div>
                 <div class="col-6 col-md-2" id="customDateEndCol" style="display: none;">
                     <label class="form-label small fw-semibold mb-1 text-muted">To Date</label>
                     <input type="date" class="form-control form-control-sm" id="filterEndDate"
                         value="{{ $filterMeta['this_week']['end'] }}">
-                </div>
+</div>
 
                 <!-- Project Site Filter (Task 2 & 3: Dynamic DB sites) -->
                 <div class="col-6 col-md-2">
                     <label class="form-label small fw-semibold mb-1 text-muted">
-                        <i class="bi bi-building me-1 text-primary"></i> Project Site (தளம்)
-                    </label>
+                        <i class="bi bi-building me-1 text-primary"></i> Project Site 
+</label>
                     <select class="form-select form-select-sm" id="filterSite" name="site_id">
-                        <option value="all">All Sites (அனைத்து தளங்கள்)</option>
+                        <option value="all">All Sites</option>
                         @foreach ($sites as $site)
                             <option value="{{ $site->id }}" {{ (string) ($activeFilters['site_id'] ?? '') === (string) $site->id ? 'selected' : '' }}>
                                 {{ $site->name }}
-                            </option>
+</option>
                         @endforeach
                     </select>
-                </div>
+</div>
 
                 <!-- Transaction Flow Type / Source Filter (5 Categories) -->
                 <div class="col-6 col-md-2">
                     <label class="form-label small fw-semibold mb-1 text-muted">
                         <i class="bi bi-funnel me-1 text-primary"></i> Transaction Flow Type
-                    </label>
+</label>
                     <select class="form-select form-select-sm" id="filterFlowType" name="flow_type">
-                        <option value="all">All Sources / Categories (அனைத்து வகைகள்)</option>
-                        <option value="Construction">Construction (கட்டுமானம்)</option>
+                        <option value="all">All Sources / Categories</option>
+                        <option value="Construction">Construction</option>
                         <option value="Bank Valuation">Bank (Valuation / Inspection)</option>
-                        <option value="Rental">Rental (வாடகை)</option>
-                        <option value="Supplier">Supplier (சப்ளையர்)</option>
+                        <option value="Rental">Rental</option>
+                        <option value="Supplier">Supplier</option>
                         <option value="Office and other expenses">Office and other expenses</option>
                     </select>
-                </div>
+</div>
 
                 <!-- Cash Flow Filter (Income / Expense) -->
                 <div class="col-6 col-md-2">
                     <label class="form-label small fw-semibold mb-1 text-muted">
-                        <i class="bi bi-arrow-left-right me-1 text-primary"></i> Cash Flow (பரிவர்த்தனை)
-                    </label>
+                        <i class="bi bi-arrow-left-right me-1 text-primary"></i> Cash Flow 
+</label>
                     <select class="form-select form-select-sm" id="filterCashFlow" name="cash_flow">
-                        <option value="all">All Cash Flows (அனைத்து)</option>
-                        <option value="income">Income Only (Dr - வரவு)</option>
-                        <option value="expense">Expense Only (Cr - செலவு)</option>
+                        <option value="all">All Cash Flows</option>
+                        <option value="income">Income Only (Dr)</option>
+                        <option value="expense">Expense Only (Cr)</option>
                     </select>
-                </div>
+</div>
 
                 <!-- Text Search -->
                 <div class="col-12 col-md-3">
                     <label class="form-label small fw-semibold mb-1 text-muted">
                         <i class="bi bi-search me-1 text-primary"></i> Search Particulars / Supplier / Party
-                    </label>
+</label>
                     <div class="input-group input-group-sm">
                         <input type="text" class="form-control" id="filterSearchInput"
                             placeholder="Search particulars, supplier, client...">
                         <button class="btn btn-outline-secondary" type="button" id="clearSearchBtn">
                             <i class="bi bi-x"></i>
-                        </button>
-                    </div>
-                </div>
+</button>
+</div>
+</div>
 
                 <!-- Reset Filter Button -->
                 <div class="col-12 col-md-1">
                     <button type="button" class="btn btn-sm btn-light border text-muted w-100" id="resetFilterBtn" title="Reset all filters">
                         <i class="bi bi-arrow-counterclockwise me-1"></i> Reset
-                    </button>
-                </div>
-            </div>
+</button>
+</div>
+</div>
 
             <div class="d-flex justify-content-between align-items-center mt-2 pt-2 border-top">
                 <span class="small text-muted" id="filterMatchCountBadge">
                     Active filters: <strong>This Week</strong> &bull; <strong>All Sites</strong> &bull; <strong>All Sources</strong>
-                </span>
+</span>
                 <span class="small text-muted">Current Reference Date: <strong>{{ $filterMeta['current_date'] }}</strong></span>
-            </div>
-        </div>
+</div>
+</div>
 
         <!-- KPI Summary Cards -->
         <div class="row g-3 mb-4">
@@ -357,44 +357,44 @@
                 <div class="card-custom p-3 bg-white border-start border-4 border-success h-100 shadow-sm">
                     <div class="d-flex justify-content-between align-items-start">
                         <div>
-                            <div class="text-muted small fw-semibold">Total Inflow (வரவு)</div>
+                            <div class="text-muted small fw-semibold">Total Inflow</div>
                             <h4 class="fw-bold mb-0 text-success mt-1" id="kpiTotalIn">₹{{ number_format($kpis['total_in'], 2) }}</h4>
                             <small class="text-muted">Client advance &amp; income receipts</small>
-                        </div>
+</div>
                         <div class="bg-success-subtle text-success p-2 rounded">
                             <i class="bi bi-arrow-down-left-circle-fill fs-5"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
+</div>
+</div>
+</div>
+</div>
             <div class="col-6 col-md-3">
                 <div class="card-custom p-3 bg-white border-start border-4 border-danger h-100 shadow-sm">
                     <div class="d-flex justify-content-between align-items-start">
                         <div>
-                            <div class="text-muted small fw-semibold">Total Outflow (பற்று)</div>
+                            <div class="text-muted small fw-semibold">Total Outflow</div>
                             <h4 class="fw-bold mb-0 text-danger mt-1" id="kpiTotalOut">₹{{ number_format($kpis['total_out'], 2) }}</h4>
                             <small class="text-muted">Wages, materials &amp; expenses</small>
-                        </div>
+</div>
                         <div class="bg-danger-subtle text-danger p-2 rounded">
                             <i class="bi bi-arrow-up-right-circle-fill fs-5"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
+</div>
+</div>
+</div>
+</div>
             <div class="col-6 col-md-3">
                 <div class="card-custom p-3 bg-white border-start border-4 border-primary h-100 shadow-sm">
                     <div class="d-flex justify-content-between align-items-start">
                         <div>
-                            <div class="text-muted small fw-semibold">Net Cash Surplus (மீதம்)</div>
+                            <div class="text-muted small fw-semibold">Net Cash Surplus</div>
                             <h4 class="fw-bold mb-0 text-primary mt-1" id="kpiNetBalance">₹{{ number_format($kpis['net_balance'], 2) }}</h4>
                             <small class="text-muted">Net reconciled balance</small>
-                        </div>
+</div>
                         <div class="bg-primary-subtle text-primary p-2 rounded">
                             <i class="bi bi-wallet-fill fs-5"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
+</div>
+</div>
+</div>
+</div>
             <div class="col-6 col-md-3">
                 <div class="card-custom p-3 bg-white border-start border-4 border-secondary h-100 shadow-sm">
                     <div class="d-flex justify-content-between align-items-start">
@@ -402,14 +402,14 @@
                             <div class="text-muted small fw-semibold">Total Transactions</div>
                             <h4 class="fw-bold mb-0 text-dark mt-1" id="kpiTxnCount">{{ $kpis['count'] }}</h4>
                             <small class="text-muted">Audited ledger entries</small>
-                        </div>
+</div>
                         <div class="bg-light text-secondary p-2 rounded border">
                             <i class="bi bi-receipt fs-5"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+</div>
+</div>
+</div>
+</div>
+</div>
 
         <!-- Daily Ledger Transactions Table Card -->
         <div class="card-custom p-3 p-md-4 bg-white mb-4 shadow-sm border-0">
@@ -417,24 +417,24 @@
                 <div>
                     <h6 class="fw-bold mb-0 text-dark">
                         <i class="bi bi-journal-text text-success me-1"></i>
-                        Daily Ledger Transaction Register (தினசரி பேரேடு பரிவர்த்தனைகள்)
-                    </h6>
+                        Daily Ledger Transaction Register 
+</h6>
                     <small class="text-muted">Chronological database ledger entries with credit/debit breakdown</small>
-                </div>
+</div>
                 <span class="badge bg-light text-dark border" id="txnCountBadge">{{ $kpis['count'] }} Entries</span>
-            </div>
+</div>
 
             <div class="table-responsive">
                 <table class="table table-hover align-middle mb-0" id="amLedgerTable">
                     <thead class="table-light text-muted small text-uppercase">
                         <tr>
                             <th style="min-width: 120px;">Date &amp; Time</th>
-                            <th style="min-width: 140px;">Flow Type (வகை)</th>
+                            <th style="min-width: 140px;">Flow Type</th>
                             <th style="min-width: 160px;">Project Site</th>
                             <th style="min-width: 240px;">Particulars / Description</th>
                             <th style="min-width: 160px;">Party / Supplier</th>
-                            <th class="text-end" style="min-width: 120px;">Inflow (வரவு)</th>
-                            <th class="text-end" style="min-width: 120px;">Outflow (பற்று)</th>
+                            <th class="text-end" style="min-width: 120px;">Inflow</th>
+                            <th class="text-end" style="min-width: 120px;">Outflow</th>
                             <th class="text-center" style="min-width: 100px;">Status</th>
                         </tr>
                     </thead>
@@ -450,7 +450,7 @@
                         </tr>
                     </tfoot>
                 </table>
-            </div>
+</div>
 
             <!-- Table Pagination & Footer Summary -->
             <div class="p-3 bg-white border-top d-flex flex-column flex-md-row justify-content-between align-items-center gap-3 no-print" id="tablePaginationContainer">
@@ -464,32 +464,32 @@
                     </select>
                     <span class="small text-muted ms-md-2" id="paginationSummary">
                         Showing <strong class="text-dark" id="pageStart">1</strong> &minus; <strong class="text-dark" id="pageEnd">{{ min(10, $kpis['count']) }}</strong> of <strong class="text-dark" id="pageTotal">{{ $kpis['count'] }}</strong> entries
-                    </span>
-                </div>
+</span>
+</div>
                 <nav aria-label="Ledger report pagination">
                     <ul class="pagination pagination-sm mb-0 gap-1" id="paginationNav">
                         <!-- Dynamic page links rendered by JS -->
                     </ul>
                 </nav>
-            </div>
-        </div>
+</div>
+</div>
 
-        <!-- Office ↔ Site Cash & Wages Returns Reconciliation (தள மேலாளர் ரொக்கம் திரும்ப ஒப்படைப்பு & சமரசம்) -->
+        <!-- Office ↔ Site Cash & Wages Returns Reconciliation -->
         <div class="card-custom p-3 p-md-4 bg-white mb-4 shadow-sm border-0" id="officeSiteReconciliationCard">
             <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2 mb-3">
                 <div>
                     <h6 class="fw-bold mb-0 text-dark">
                         <i class="bi bi-arrow-left-right text-primary me-1"></i>
-                        Office &harr; Site Cash &amp; Wages Reconciliation (அலுவலகம் &harr; தள மேலாளர் ரொக்க சமரசம்)
-                    </h6>
+                        Office &harr; Site Cash &amp; Wages Reconciliation
+</h6>
                     <small class="text-muted">Office Cash sent for Painter/Electrician wages vs Site Manager returns with Received / Not Received audit</small>
-                </div>
+</div>
                 <div class="d-flex align-items-center gap-2">
                     <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-2 py-1" style="font-size: 0.78rem;">
                         <i class="bi bi-building me-1"></i>Office Cash Tracking
-                    </span>
-                </div>
-            </div>
+</span>
+</div>
+</div>
 
             <!-- 3 Quick Metrics: Sent (-), Received (+), Pending (-) -->
             <div class="row g-2 mb-3">
@@ -497,59 +497,59 @@
                     <div class="p-2 p-md-3 rounded-3 bg-danger-subtle bg-opacity-25 border border-danger-subtle">
                         <div class="d-flex justify-content-between align-items-center">
                             <div>
-                                <span class="text-muted small fw-semibold">1. Sent from Office (&minus; பற்று)</span>
+                                <span class="text-muted small fw-semibold">1. Sent from Office (&minus;)</span>
                                 <h5 class="fw-bold text-danger mb-0 mt-1" id="recTotalSent">&minus;₹0.00</h5>
                                 <small class="text-muted" id="recCountSent">0 transactions sent</small>
-                            </div>
+</div>
                             <div class="bg-danger text-white rounded p-2">
                                 <i class="bi bi-box-arrow-up-right fs-5"></i>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+</div>
+</div>
+</div>
+</div>
                 <div class="col-12 col-md-4">
                     <div class="p-2 p-md-3 rounded-3 bg-success-subtle bg-opacity-25 border border-success-subtle">
                         <div class="d-flex justify-content-between align-items-center">
                             <div>
-                                <span class="text-muted small fw-semibold">2. Received from Site (+ வரவு)</span>
+                                <span class="text-muted small fw-semibold">2. Received from Site</span>
                                 <h5 class="fw-bold text-success mb-0 mt-1" id="recTotalReceived">+₹0.00</h5>
                                 <small class="text-success fw-medium" id="recCountReceived">✓ 0 Received</small>
-                            </div>
+</div>
                             <div class="bg-success text-white rounded p-2">
                                 <i class="bi bi-check2-circle fs-5"></i>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+</div>
+</div>
+</div>
+</div>
                 <div class="col-12 col-md-4">
                     <div class="p-2 p-md-3 rounded-3 bg-warning-subtle bg-opacity-25 border border-warning-subtle">
                         <div class="d-flex justify-content-between align-items-center">
                             <div>
-                                <span class="text-muted small fw-semibold">3. Pending from Site (&minus; வர வேண்டியது)</span>
+                                <span class="text-muted small fw-semibold">3. Pending from Site (&minus;)</span>
                                 <h5 class="fw-bold text-warning-emphasis mb-0 mt-1" id="recTotalPending">&minus;₹0.00</h5>
                                 <small class="text-danger fw-semibold" id="recCountPending">⏳ 0 Not Received</small>
-                            </div>
+</div>
                             <div class="bg-warning text-dark rounded p-2">
                                 <i class="bi bi-clock-history fs-5"></i>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+</div>
+</div>
+</div>
+</div>
+</div>
 
             <!-- Toggle Tabs between Detailed Wage Dispatches & Site Manager Return Receipts -->
             <ul class="nav nav-pills nav-fill mb-3 p-1 bg-light rounded-3" id="reconciliationTabs" role="tablist">
                 <li class="nav-item" role="presentation">
                     <button class="nav-link active py-2 px-3 fw-semibold small" id="tab-dispatches-btn" data-bs-toggle="tab" data-bs-target="#tab-dispatches" type="button" role="tab">
-                        <i class="bi bi-send text-primary me-1"></i>Office Cash Sent &amp; Status (கூலி அனுப்பியது &amp; நிலை)
+                        <i class="bi bi-send text-primary me-1"></i>Office Cash Sent &amp; Status
                         <span class="badge bg-primary ms-1" id="badgeDispatchesCount">0</span>
-                    </button>
+</button>
                 </li>
                 <li class="nav-item" role="presentation">
                     <button class="nav-link py-2 px-3 fw-semibold small" id="tab-returns-btn" data-bs-toggle="tab" data-bs-target="#tab-returns" type="button" role="tab">
-                        <i class="bi bi-box-arrow-in-left text-success me-1"></i>Site Manager Return Receipts (தள மேலாளர் ஒப்படைத்த பணம்)
+                        <i class="bi bi-box-arrow-in-left text-success me-1"></i>Site Manager Return Receipts 
                         <span class="badge bg-success ms-1" id="badgeReturnsCount">0</span>
-                    </button>
+</button>
                 </li>
             </ul>
 
@@ -563,18 +563,18 @@
                                 <tr>
                                     <th style="min-width: 110px;">Date &amp; Time</th>
                                     <th style="min-width: 140px;">Project Site</th>
-                                    <th style="min-width: 260px;">Office Cash Sent Details (கூலி / செலவு விவரம்)</th>
-                                    <th class="text-end" style="min-width: 120px;">Sent Amount (&minus; பற்று)</th>
+                                    <th style="min-width: 260px;">Office Cash Sent Details</th>
+                                    <th class="text-end" style="min-width: 120px;">Sent Amount (&minus;)</th>
                                     <th class="text-center" style="min-width: 130px;">Return Status</th>
-                                    <th class="text-end" style="min-width: 130px;">Return Received (+ வரவு)</th>
+                                    <th class="text-end" style="min-width: 130px;">Return Received</th>
                                 </tr>
                             </thead>
                             <tbody id="recDispatchesTableBody" class="small">
                                 <!-- Populated dynamically via JS -->
                             </tbody>
                         </table>
-                    </div>
-                </div>
+</div>
+</div>
 
                 <!-- Tab 2: Site Manager Return Receipts -->
                 <div class="tab-pane fade" id="tab-returns" role="tabpanel">
@@ -586,7 +586,7 @@
                                     <th style="min-width: 140px;">Project Site</th>
                                     <th style="min-width: 260px;">Return Narration / Wages Covered</th>
                                     <th style="min-width: 140px;">Received By</th>
-                                    <th class="text-end" style="min-width: 120px;">Returned Amount (+ வரவு)</th>
+                                    <th class="text-end" style="min-width: 120px;">Returned Amount</th>
                                     <th class="text-center" style="min-width: 100px;">Audit Status</th>
                                 </tr>
                             </thead>
@@ -594,12 +594,12 @@
                                 <!-- Populated dynamically via JS -->
                             </tbody>
                         </table>
-                    </div>
-                </div>
-            </div>
-        </div>
+</div>
+</div>
+</div>
+</div>
 
-    </div>
+</div>
 @endsection
 
 @push('scripts')
@@ -830,8 +830,8 @@
                     }
 
                     const statusPill = it.is_received
-                        ? `<span class="badge bg-success text-white py-1 px-2"><i class="bi bi-check-circle-fill me-1"></i>Received (பெறப்பட்டது)</span>`
-                        : `<span class="badge bg-warning text-dark py-1 px-2"><i class="bi bi-hourglass-split me-1 text-dark"></i>Not Received (வர வேண்டியது)</span>`;
+                        ? `<span class="badge bg-success text-white py-1 px-2"><i class="bi bi-check-circle-fill me-1"></i>Received</span>`
+                        : `<span class="badge bg-warning text-dark py-1 px-2"><i class="bi bi-hourglass-split me-1 text-dark"></i>Not Received</span>`;
 
                     const returnCol = it.is_received
                         ? `<strong class="text-success fs-6">+₹${sentAmt.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong>
@@ -954,7 +954,7 @@
                     <li class="page-item ${prevDisabled}">
                         <button class="page-link" type="button" data-page="${current - 1}" aria-label="Previous" title="Previous Page">
                             <i class="bi bi-chevron-left"></i>
-                        </button>
+</button>
                     </li>
                 `);
 
@@ -991,7 +991,7 @@
                     <li class="page-item ${nextDisabled}">
                         <button class="page-link" type="button" data-page="${current + 1}" aria-label="Next" title="Next Page">
                             <i class="bi bi-chevron-right"></i>
-                        </button>
+</button>
                     </li>
                 `);
             }

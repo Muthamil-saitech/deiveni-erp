@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('title', $site->name . ' - Project Site Details')
-@section('page_title', 'Project Site Details (கட்டுமான திட்ட தளம் முழு விவரம்)')
+@section('page_title', 'Project Site Details ')
 
 @push('styles')
     <style>
@@ -130,34 +130,34 @@
                         class="btn btn-outline-secondary btn-sm d-inline-flex align-items-center"
                         title="Back to Project Sites">
                         <i class="bi bi-arrow-left me-1"></i> Back to Sites
-                    </a>
+</a>
                     <div class="vr d-none d-md-block"></div>
                     <div>
                         <div class="d-flex align-items-center gap-2 flex-wrap">
                             <h5 class="fw-bold mb-0 text-dark">{{ $site->name }}</h5>
                             <span class="badge {{ $workTypeBadgeClass }} fw-semibold">{{ $site->work_type }}</span>
                             <span class="badge {{ $statusBadgeClass }}">{{ $site->status }}</span>
-                        </div>
+</div>
                         <small class="text-muted">
                             <i class="bi bi-geo-alt-fill text-danger me-1"></i>{{ $site->location }}
-                        </small>
-                    </div>
-                </div>
+</small>
+</div>
+</div>
                 <div class="d-flex gap-2 flex-wrap">
                     <a href="{{ route('sites.client-statement', $site->encrypted_id) }}"
                         class="btn btn-primary btn-sm d-inline-flex align-items-center shadow-sm"
                         title="Prepare and print client statement">
-                        <i class="bi bi-printer-fill me-1"></i> Client (கிளையண்ட் அறிக்கை)
-                    </a>
+                        <i class="bi bi-printer-fill me-1"></i> Client 
+</a>
                     @if ($site->client?->phone)
                         <a href="tel:{{ $site->client->phone }}"
                             class="btn btn-outline-success btn-sm d-inline-flex align-items-center">
                             <i class="bi bi-telephone-fill me-1"></i> Call Client
-                        </a>
+</a>
                     @endif
-                </div>
-            </div>
-        </div>
+</div>
+</div>
+</div>
 
         <!-- 4 Quick Stat Summary Cards -->
         <div class="row g-3 mb-4">
@@ -166,66 +166,66 @@
                 <div class="card-custom p-3 bg-white h-100 border-start border-4 border-primary">
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
-                            <span class="text-muted small fw-semibold d-block text-uppercase">Work Type (பணி வகை)</span>
+                            <span class="text-muted small fw-semibold d-block text-uppercase">Work Type</span>
                             <h6 class="fw-bold mb-0 text-dark mt-1">{{ $site->work_type }}</h6>
                             <small
-                                class="text-muted">{{ $site->work_type === 'New Build' ? 'புதிய கட்டுமானம்' : 'சிறு மாற்றம் / புதுப்பித்தல்' }}</small>
-                        </div>
+                                class="text-muted">{{ $site->work_type === 'New Build' ? 'New Construction' : 'Alteration / Renovation' }}</small>
+</div>
                         <div class="bg-primary-subtle text-primary p-2 rounded-3">
                             <i class="bi bi-hammer fs-5"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
+</div>
+</div>
+</div>
+</div>
 
             <!-- 2. Estimated Budget -->
             <div class="col-12 col-sm-6 col-xl-3">
                 <div class="card-custom p-3 bg-white h-100 border-start border-4 border-success">
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
-                            <span class="text-muted small fw-semibold d-block text-uppercase">Est. Budget (மதிப்பீடு)</span>
+                            <span class="text-muted small fw-semibold d-block text-uppercase">Est. Budget</span>
                             <h5 class="fw-bold mb-0 text-success mt-1">₹{{ number_format($estNum, 2) }}</h5>
                             <small class="text-muted">₹{{ $estInLakhs }} Lakhs</small>
-                        </div>
+</div>
                         <div class="bg-success-subtle text-success p-2 rounded-3">
                             <i class="bi bi-cash-stack fs-5"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
+</div>
+</div>
+</div>
+</div>
 
             <!-- 3. Total Spent -->
             <div class="col-12 col-sm-6 col-xl-3">
                 <div class="card-custom p-3 bg-white h-100 border-start border-4 border-danger">
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
-                            <span class="text-muted small fw-semibold d-block text-uppercase">Total Spent (செலவு)</span>
+                            <span class="text-muted small fw-semibold d-block text-uppercase">Total Spent</span>
                             <h5 class="fw-bold mb-0 text-danger mt-1">₹{{ number_format($spentNum, 2) }}</h5>
                             <small class="text-muted">{{ number_format($pct, 2) }}% utilized (₹{{ $spentInLakhs }} L)</small>
-                        </div>
+</div>
                         <div class="bg-danger-subtle text-danger p-2 rounded-3">
                             <i class="bi bi-graph-up-arrow fs-5"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
+</div>
+</div>
+</div>
+</div>
 
             <!-- 4. Project Status & Progress -->
             <div class="col-12 col-sm-6 col-xl-3">
                 <div class="card-custom p-3 bg-white h-100 border-start border-4 border-warning">
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
-                            <span class="text-muted small fw-semibold d-block text-uppercase">Site Status (நிலை)</span>
+                            <span class="text-muted small fw-semibold d-block text-uppercase">Site Status</span>
                             <h6 class="fw-bold mb-0 text-dark mt-1">{{ $site->status }}</h6>
                             <small class="text-muted">Remaining: ₹{{ $remainingInLakhs }} L</small>
-                        </div>
+</div>
                         <div class="bg-warning-subtle text-warning p-2 rounded-3">
                             <i class="bi bi-speedometer2 fs-5"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+</div>
+</div>
+</div>
+</div>
+</div>
 
         <div class="row g-4">
             <!-- Left Column: Site Overview & Financials -->
@@ -233,39 +233,39 @@
                 <div class="card-custom p-4 bg-white mb-4">
                     <div class="d-flex justify-content-between align-items-center border-bottom pb-3 mb-3">
                         <h6 class="fw-bold mb-0 text-dark">
-                            <i class="bi bi-building me-2 text-primary"></i>Site Overview (தள விவரங்கள்)
-                        </h6>
+                            <i class="bi bi-building me-2 text-primary"></i>Site Overview 
+</h6>
                         <span class="badge {{ $statusBadgeClass }} px-3 py-1">{{ $site->status }}</span>
-                    </div>
+</div>
 
                     <div class="row g-3">
                         <div class="col-12 col-sm-6">
                             <small class="text-muted d-block fw-semibold">Site Project Name</small>
                             <span class="fw-bold text-dark fs-6">{{ $site->name }}</span>
-                        </div>
+</div>
                         <div class="col-12 col-sm-6">
                             <small class="text-muted d-block fw-semibold">Location / Area</small>
                             <span class="text-dark">
                                 <i class="bi bi-geo-alt text-danger me-1"></i>{{ $site->location }}
-                            </span>
-                        </div>
+</span>
+</div>
                         <div class="col-12 col-sm-6">
                             <small class="text-muted d-block fw-semibold">Work Type</small>
                             <span class="badge {{ $workTypeBadgeClass }} mt-1">{{ $site->work_type }}</span>
-                        </div>
+</div>
                         <div class="col-12 col-sm-6">
-                        </div>
+</div>
 
                         <div class="col-12 col-sm-6">
                             <small class="text-muted d-block fw-semibold">Start Date</small>
                             <span class="text-dark"><i
                                     class="bi bi-calendar-check me-1 text-primary"></i>{{ $startDateFormatted }}</span>
-                        </div>
+</div>
                         <div class="col-12 col-sm-6">
                             <small class="text-muted d-block fw-semibold">Target End Date</small>
                             <span class="text-dark"><i
                                     class="bi bi-calendar-x me-1 text-primary"></i>{{ $endDateFormatted }}</span>
-                        </div>
+</div>
 
                         @if ($durationDays !== null)
                             <div class="col-12">
@@ -273,18 +273,17 @@
                                     <i class="bi bi-clock-history me-2 text-primary fs-6"></i>
                                     <span>Planned Timeline: <strong>{{ $durationDays }} Days</strong> ({{ $startDateFormatted }}
                                         to {{ $endDateFormatted }})</span>
-                                </div>
-                            </div>
+</div>
+</div>
                         @endif
-                    </div>
-                </div>
+</div>
+</div>
 
                 <!-- Budget & Financial Card -->
                 <div class="card-custom p-4 bg-white mb-4">
                     <h6 class="fw-bold mb-3 text-dark border-bottom pb-2">
-                        <i class="bi bi-currency-rupee me-1 text-primary"></i>Budget & Expenditure (நிதி மற்றும் பட்ஜெட்
-                        பயன்பாடு)
-                    </h6>
+                        <i class="bi bi-currency-rupee me-1 text-primary"></i>Budget & Expenditure 
+</h6>
 
                     <div class="mb-3">
                         <div class="d-flex justify-content-between small mb-1">
@@ -292,35 +291,35 @@
                                     ({{ $spentInLakhs }} Lakhs)</strong></span>
                             <span class="fw-bold text-dark">Estimated: ₹{{ number_format($estNum, 2) }} ({{ $estInLakhs }}
                                 Lakhs)</span>
-                        </div>
+</div>
                         <div class="progress" style="height: 10px;">
                             <div class="progress-bar {{ $pct > 90 ? 'bg-danger' : ($pct > 75 ? 'bg-warning' : 'bg-primary') }}"
                                 role="progressbar" style="width: {{ $pct }}%;" aria-valuenow="{{ $pct }}" aria-valuemin="0"
                                 aria-valuemax="100"></div>
-                        </div>
+</div>
                         <div class="d-flex justify-content-between small text-muted mt-1">
                             <span>{{ $pct }}% utilized</span>
                             <span>Remaining Balance: <strong
                                     class="text-success">₹{{ number_format($remainingNum, 2) }}</strong></span>
-                        </div>
-                    </div>
+</div>
+</div>
 
                     <div class="row g-2 pt-2 border-top mb-0">
                         <div class="col-4 text-center border-end">
                             <small class="text-muted d-block">Total Budget</small>
                             <strong class="text-dark">₹{{ $estInLakhs }} L</strong>
-                        </div>
+</div>
                         <div class="col-4 text-center border-end">
                             <small class="text-muted d-block">Utilized</small>
                             <strong class="text-danger">₹{{ $spentInLakhs }} L</strong>
-                        </div>
+</div>
                         <div class="col-4 text-center">
                             <small class="text-muted d-block">Available</small>
                             <strong class="text-success">₹{{ $remainingInLakhs }} L</strong>
-                        </div>
-                    </div>
-                </div>
-            </div>
+</div>
+</div>
+</div>
+</div>
 
             <!-- Right Column: Client Information & Operations -->
             <div class="col-12 col-lg-5">
@@ -328,23 +327,23 @@
                 <div class="card-custom p-4 bg-white mb-4">
                     <div class="d-flex justify-content-between align-items-center border-bottom pb-3 mb-3">
                         <h6 class="fw-bold mb-0 text-dark">
-                            <i class="bi bi-person-circle me-2 text-primary"></i>Client Information (வாடிக்கையாளர் தகவல்)
-                        </h6>
+                            <i class="bi bi-person-circle me-2 text-primary"></i>Client Information 
+</h6>
                         <span class="badge bg-success-subtle text-success">
                             <i class="bi bi-check-circle me-1"></i>Active Client
-                        </span>
-                    </div>
+</span>
+</div>
 
                     @if ($site->client)
                         <div class="d-flex align-items-center gap-3 mb-3 p-3 bg-light rounded-3">
                             <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center fw-bold"
                                 style="width: 46px; height: 46px; font-size: 1.1rem;">
                                 {{ strtoupper(substr($site->client->name, 0, 1)) }}
-                            </div>
+</div>
                             <div>
                                 <h6 class="fw-bold text-dark mb-0">{{ $site->client->name }}</h6>
-                            </div>
-                        </div>
+</div>
+</div>
 
                         <div class="vstack gap-3 small">
                             <div>
@@ -357,37 +356,37 @@
                                         <a href="tel:{{ $site->client->phone }}" class="btn btn-sm btn-outline-primary py-0 px-2"
                                             title="Call">
                                             <i class="bi bi-telephone-fill"></i>
-                                        </a>
+</a>
                                         @if ($cleanPhone)
                                             <a href="https://wa.me/91{{ $cleanPhone }}" target="_blank"
                                                 class="btn btn-sm btn-outline-success py-0 px-2" title="WhatsApp">
                                                 <i class="bi bi-whatsapp"></i>
-                                            </a>
+</a>
                                         @endif
                                     @endif
-                                </div>
-                            </div>
+</div>
+</div>
 
                             <div>
                                 <span class="text-muted d-block fw-semibold"><i
                                         class="bi bi-geo-alt text-primary me-1"></i>Billing & Contact Address:</span>
                                 <span class="text-dark">{{ $site->client->address ?: $site->location }}</span>
-                            </div>
+</div>
 
                             <div class="pt-2 border-top">
                                 <a href="{{ route('sites.client-statement', $site->encrypted_id) }}"
                                     class="btn btn-outline-primary btn-sm w-100 d-flex align-items-center justify-content-center gap-1 shadow-sm">
-                                    <i class="bi bi-printer-fill"></i> Client Statement & Print (அறிக்கை & பிரிண்ட்)
-                                </a>
-                            </div>
-                        </div>
+                                    <i class="bi bi-printer-fill"></i> Client Statement & Print 
+</a>
+</div>
+</div>
                     @else
                         <div class="text-muted small py-3 text-center">
                             <i class="bi bi-person-x fs-3 d-block mb-2 text-warning"></i>
                             No dedicated client linked to this site.
-                        </div>
+</div>
                     @endif
-                </div>
+</div>
 
                 <!-- Site Operations Quick Links removed - replaced by Tabs in Budget card -->
 
@@ -397,23 +396,23 @@
                         <span>Created:</span>
                         <strong
                             class="text-dark">{{ $site->created_at ? $site->created_at->format('d M Y, h:i A') : 'N/A' }}</strong>
-                    </div>
+</div>
                     <div class="d-flex justify-content-between mt-1">
                         <span>Last Updated:</span>
                         <strong
                             class="text-dark">{{ $site->updated_at ? $site->updated_at->format('d M Y, h:i A') : 'N/A' }}</strong>
-                    </div>
-                </div>
-            </div>
-        </div>
+</div>
+</div>
+</div>
+</div>
 
         {{-- ===== FULL-WIDTH TABS CARD: Labours / Materials Used / Stock Transferred ===== --}}
         <div class="card-custom p-4 bg-white mt-4">
             <div class="d-flex justify-content-between align-items-center border-bottom pb-3 mb-3">
                 <h6 class="fw-bold mb-0 text-dark">
-                    <i class="bi bi-bar-chart-steps me-2 text-primary"></i>Site Activity (தளத்தின் செயல்பாடுகள்)
-                </h6>
-            </div>
+                    <i class="bi bi-bar-chart-steps me-2 text-primary"></i>Site Activity 
+</h6>
+</div>
 
             {{-- Tab Nav --}}
             <ul class="nav nav-tabs border-bottom-0" id="siteExpTabs" role="tablist">
@@ -422,36 +421,36 @@
                         data-bs-toggle="tab" data-bs-target="#panel-labour" type="button" role="tab"
                         aria-controls="panel-labour" aria-selected="true" style="font-size:0.83rem;">
                         <i class="bi bi-people-fill text-primary"></i>
-                        <span class="fw-semibold">Labours <span class="ta-text" style="font-size:0.75rem;">(தொழிலாளர்கள்)</span></span>
+                        <span class="fw-semibold">Labours</span>
                         <span class="badge bg-primary-subtle text-primary border border-primary-subtle" style="font-size:0.68rem;">{{ $labourRecords->count() }}</span>
-                    </button>
+</button>
                 </li>
                 <li class="nav-item" role="presentation">
                     <button class="nav-link d-flex align-items-center gap-2 px-3 py-2" id="tab-materials"
                         data-bs-toggle="tab" data-bs-target="#panel-materials" type="button" role="tab"
                         aria-controls="panel-materials" aria-selected="false" style="font-size:0.83rem;">
                         <i class="bi bi-box-seam-fill text-warning"></i>
-                        <span class="fw-semibold">Materials Used <span class="ta-text" style="font-size:0.75rem;">(பொருள் பயன்பாடு)</span></span>
+                        <span class="fw-semibold">Materials Used</span>
                         <span class="badge bg-warning-subtle text-warning border border-warning-subtle" style="font-size:0.68rem;">{{ $materialUsageRecords->count() }}</span>
-                    </button>
+</button>
                 </li>
                 <li class="nav-item" role="presentation">
                     <button class="nav-link d-flex align-items-center gap-2 px-3 py-2" id="tab-transfers"
                         data-bs-toggle="tab" data-bs-target="#panel-transfers" type="button" role="tab"
                         aria-controls="panel-transfers" aria-selected="false" style="font-size:0.83rem;">
                         <i class="bi bi-arrow-left-right text-success"></i>
-                        <span class="fw-semibold">Stock Transferred <span class="ta-text" style="font-size:0.75rem;">(பொருள் பரிமாற்றம்)</span></span>
+                        <span class="fw-semibold">Stock Transferred</span>
                         <span class="badge bg-success-subtle text-success border border-success-subtle" style="font-size:0.68rem;">{{ $stockTransferRecords->count() }}</span>
-                    </button>
+</button>
                 </li>
                 <li class="nav-item" role="presentation">
                     <button class="nav-link d-flex align-items-center gap-2 px-3 py-2" id="tab-balance-stock"
                         data-bs-toggle="tab" data-bs-target="#panel-balance-stock" type="button" role="tab"
                         aria-controls="panel-balance-stock" aria-selected="false" style="font-size:0.83rem;">
                         <i class="bi bi-stack text-info"></i>
-                        <span class="fw-semibold">Balance Stock <span class="ta-text" style="font-size:0.75rem;">(மீதமுள்ள இருப்பு)</span></span>
+                        <span class="fw-semibold">Balance Stock</span>
                         <span class="badge bg-info-subtle text-info border border-info-subtle" style="font-size:0.68rem;">{{ isset($balanceStockList) ? $balanceStockList->count() : 0 }}</span>
-                    </button>
+</button>
                 </li>
             </ul>
 
@@ -462,21 +461,21 @@
                     @if ($labourRecords->isEmpty())
                         <div class="text-center py-5 text-muted">
                             <i class="bi bi-people fs-1 d-block mb-2 text-secondary opacity-25"></i>
-                            <div class="fw-semibold">No Labour Records (தொழிலாளர் பதிவுகள் இல்லை)</div>
+                            <div class="fw-semibold">No Labour Records</div>
                             <small>No daily allocation records found for this site.</small>
-                        </div>
+</div>
                     @else
                         <div class="table-responsive">
                             <table class="table table-custom table-hover align-middle mb-0" id="labourTabTable">
                                 <thead class="table-light">
                                     <tr class="text-muted small text-uppercase fw-bold" style="font-size:0.74rem;">
-                                        <th class="ps-3">DATE <span class="ta-text fw-normal text-lowercase" style="font-size:0.68rem;">(தேதி)</span></th>
-                                        <th>WORKER CATEGORIES <span class="ta-text fw-normal text-lowercase" style="font-size:0.68rem;">(பணியாளர் வகைகள்)</span></th>
-                                        <th class="text-center">LABOURS <span class="ta-text fw-normal text-lowercase" style="font-size:0.68rem;">(எண்ணிக்கை)</span></th>
-                                        <th class="text-end">LABOUR WAGE (₹) <span class="ta-text fw-normal text-lowercase" style="font-size:0.68rem;">(கூலி)</span></th>
-                                        <th class="text-end">EXPENSES (₹) <span class="ta-text fw-normal text-lowercase" style="font-size:0.68rem;">(செலவு)</span></th>
-                                        <th class="text-end">GRAND TOTAL (₹) <span class="ta-text fw-normal text-lowercase" style="font-size:0.68rem;">(மொத்தம்)</span></th>
-                                        <th>RECORDED BY <span class="ta-text fw-normal text-lowercase" style="font-size:0.68rem;">(பதிவு செய்தவர்)</span></th>
+                                        <th class="ps-3">DATE</th>
+                                        <th>WORKER CATEGORIES</th>
+                                        <th class="text-center">LABOURS</th>
+                                        <th class="text-end">LABOUR WAGE (₹)</th>
+                                        <th class="text-end">EXPENSES (₹)</th>
+                                        <th class="text-end">GRAND TOTAL (₹)</th>
+                                        <th>RECORDED BY</th>
                                     </tr>
                                 </thead>
                                 <tbody id="labourTabBody">
@@ -495,12 +494,12 @@
                                                                 @if ($item->worker_count)
                                                                     <span class="text-primary fw-bold ms-1">×{{ $item->worker_count }}</span>
                                                                 @endif
-                                                            </span>
+</span>
                                                         @endforeach
                                                         @if ($da->items->count() > 3)
                                                             <span class="badge bg-secondary-subtle text-secondary" style="font-size:0.68rem;">+{{ $da->items->count() - 3 }} more</span>
                                                         @endif
-                                                    </div>
+</div>
                                                 @else
                                                     <span class="text-muted small">—</span>
                                                 @endif
@@ -516,7 +515,7 @@
                                     @endforeach
                                 </tbody>
                             </table>
-                        </div>
+</div>
                         <div class="d-flex flex-column flex-md-row justify-content-between align-items-center gap-2 px-3 py-2 bg-light border-top rounded-bottom" id="labourPagination">
                             <div class="d-flex align-items-center gap-2">
                                 <span class="small text-muted">Rows per page:</span>
@@ -526,31 +525,31 @@
                                     <option value="25">25</option>
                                 </select>
                                 <span class="small text-muted ms-2" id="labourTabSummary"></span>
-                            </div>
+</div>
                             <nav><ul class="pagination pagination-sm mb-0 gap-1" id="labourTabNav"></ul></nav>
-                        </div>
+</div>
                     @endif
-                </div>
+</div>
 
                 {{-- ===== MATERIALS USED TAB ===== --}}
                 <div class="tab-pane fade" id="panel-materials" role="tabpanel">
                     @if ($materialUsageRecords->isEmpty())
                         <div class="text-center py-5 text-muted">
                             <i class="bi bi-box-seam fs-1 d-block mb-2 text-secondary opacity-25"></i>
-                            <div class="fw-semibold">No Material Usage Records (பொருள் பயன்பாடு பதிவுகள் இல்லை)</div>
+                            <div class="fw-semibold">No Material Usage Records</div>
                             <small>No materials have been recorded as used for this site.</small>
-                        </div>
+</div>
                     @else
                         <div class="table-responsive">
                             <table class="table table-custom table-hover align-middle mb-0" id="materialsTabTable">
                                 <thead class="table-light">
                                     <tr class="text-muted small text-uppercase fw-bold" style="font-size:0.74rem;">
-                                        <th class="ps-3">USAGE NO & DATE <span class="ta-text fw-normal text-lowercase" style="font-size:0.68rem;">(பயன்பாடு எண் & தேதி)</span></th>
-                                        <th>SOURCE / PO <span class="ta-text fw-normal text-lowercase" style="font-size:0.68rem;">(ஆதாரம்)</span></th>
-                                        <th style="min-width:260px;">MATERIALS, QTY & PRICE <span class="ta-text fw-normal text-lowercase" style="font-size:0.68rem;">(பொருட்கள் & விலை)</span></th>
-                                        <th class="text-end">TOTAL QTY <span class="ta-text fw-normal text-lowercase" style="font-size:0.68rem;">(மொத்த அளவு)</span></th>
-                                        <th class="text-end">TOTAL COST (₹) <span class="ta-text fw-normal text-lowercase" style="font-size:0.68rem;">(மொத்த தொகை)</span></th>
-                                        <th>RECORDED BY <span class="ta-text fw-normal text-lowercase" style="font-size:0.68rem;">(பதிவு செய்தவர்)</span></th>
+                                        <th class="ps-3">USAGE NO & DATE</th>
+                                        <th>SOURCE / PO</th>
+                                        <th style="min-width:260px;">MATERIALS, QTY & PRICE</th>
+                                        <th class="text-end">TOTAL QTY</th>
+                                        <th class="text-end">TOTAL COST (₹)</th>
+                                        <th>RECORDED BY</th>
                                     </tr>
                                 </thead>
                                 <tbody id="materialsTabBody">
@@ -568,18 +567,18 @@
                                                 @if ($hasWarehouse)
                                                     <span class="badge bg-info-subtle text-info border border-info-subtle mb-1" style="font-size:0.72rem;">
                                                         <i class="bi bi-boxes me-1"></i>Own Warehouse
-                                                    </span><br>
+</span><br>
                                                 @endif
                                                 @if ($poNumbers->count() > 0)
                                                     @foreach ($poNumbers as $poNum)
                                                         <span class="badge bg-primary-subtle text-primary border border-primary-subtle mb-1" style="font-size:0.72rem;">
                                                             <i class="bi bi-receipt me-1"></i>{{ $poNum }}
-                                                        </span><br>
+</span><br>
                                                     @endforeach
                                                 @elseif (!$hasWarehouse && $mu->purchaseOrder)
                                                     <span class="badge bg-primary-subtle text-primary border border-primary-subtle" style="font-size:0.72rem;">
                                                         <i class="bi bi-receipt me-1"></i>{{ $mu->purchaseOrder->po_number }}
-                                                    </span>
+</span>
                                                     <div class="text-muted mt-1" style="font-size:0.7rem;">{{ $mu->purchaseOrder->supplier?->name }}</div>
                                                 @elseif (!$hasWarehouse)
                                                     <span class="text-muted small">—</span>
@@ -595,15 +594,15 @@
                                                             @else
                                                                 <span class="badge bg-light text-secondary border ms-1" style="font-size:0.65rem;">{{ $item->source_reference ?: 'PO' }}</span>
                                                             @endif
-                                                        </div>
+</div>
                                                         <div class="text-end" style="white-space:nowrap;">
                                                             <span class="fw-semibold text-primary">{{ number_format((float) $item->used_quantity, 2) }} {{ $item->unit }}</span>
                                                             <span class="badge bg-success-subtle text-success border border-success-subtle ms-1" style="font-size:0.68rem;" title="Remaining stock after usage">
                                                                 Bal: {{ number_format((float) $item->remaining_quantity, 2) }} {{ $item->unit }}
-                                                            </span>
+</span>
                                                             <span class="text-muted ms-1" style="font-size:0.72rem;">@ ₹{{ number_format((float) $item->unit_price, 2) }}</span>
-                                                        </div>
-                                                    </div>
+</div>
+</div>
                                                 @endforeach
                                             </td>
                                             <td class="text-end fw-semibold text-dark">{{ number_format((float) $mu->total_used_quantity, 2) }}</td>
@@ -613,7 +612,7 @@
                                     @endforeach
                                 </tbody>
                             </table>
-                        </div>
+</div>
                         <div class="d-flex flex-column flex-md-row justify-content-between align-items-center gap-2 px-3 py-2 bg-light border-top rounded-bottom" id="materialsPagination">
                             <div class="d-flex align-items-center gap-2">
                                 <span class="small text-muted">Rows per page:</span>
@@ -623,31 +622,31 @@
                                     <option value="25">25</option>
                                 </select>
                                 <span class="small text-muted ms-2" id="materialsTabSummary"></span>
-                            </div>
+</div>
                             <nav><ul class="pagination pagination-sm mb-0 gap-1" id="materialsTabNav"></ul></nav>
-                        </div>
+</div>
                     @endif
-                </div>
+</div>
 
                 {{-- ===== STOCK TRANSFERRED TAB ===== --}}
                 <div class="tab-pane fade" id="panel-transfers" role="tabpanel">
                     @if ($stockTransferRecords->isEmpty())
                         <div class="text-center py-5 text-muted">
                             <i class="bi bi-arrow-left-right fs-1 d-block mb-2 text-secondary opacity-25"></i>
-                            <div class="fw-semibold">No Stock Transfers (பொருள் பரிமாற்றம் இல்லை)</div>
+                            <div class="fw-semibold">No Stock Transfers</div>
                             <small>No stock transfers from this site yet.</small>
-                        </div>
+</div>
                     @else
                         <div class="table-responsive">
                             <table class="table table-custom table-hover align-middle mb-0" id="transfersTabTable">
                                 <thead class="table-light">
                                     <tr class="text-muted small text-uppercase fw-bold" style="font-size:0.74rem;">
-                                        <th class="ps-3">TRANSFER NO & DATE <span class="ta-text fw-normal text-lowercase" style="font-size:0.68rem;">(பரிமாற்ற எண் & தேதி)</span></th>
-                                        <th>TYPE & SITE <span class="ta-text fw-normal text-lowercase" style="font-size:0.68rem;">(வகை & தளம்)</span></th>
-                                        <th style="min-width:200px;">MATERIALS <span class="ta-text fw-normal text-lowercase" style="font-size:0.68rem;">(பொருட்கள்)</span></th>
-                                        <th class="text-center">QTY <span class="ta-text fw-normal text-lowercase" style="font-size:0.68rem;">(அளவு)</span></th>
-                                        <th class="text-end">VALUE (₹) <span class="ta-text fw-normal text-lowercase" style="font-size:0.68rem;">(மதிப்பு)</span></th>
-                                        <th>BY <span class="ta-text fw-normal text-lowercase" style="font-size:0.68rem;">(பதிவு)</span></th>
+                                        <th class="ps-3">TRANSFER NO & DATE</th>
+                                        <th>TYPE & SITE</th>
+                                        <th style="min-width:200px;">MATERIALS</th>
+                                        <th class="text-center">QTY</th>
+                                        <th class="text-end">VALUE (₹)</th>
+                                        <th>BY</th>
                                     </tr>
                                 </thead>
                                 <tbody id="transfersTabBody">
@@ -661,46 +660,46 @@
                                                 <div class="text-muted" style="font-size:0.72rem;"><i class="bi bi-calendar3 me-1"></i>{{ $st->transfer_date?->format('d M Y') }}</div>
                                                 @if ($isOutward)
                                                     <span class="badge bg-danger-subtle text-danger border border-danger-subtle mt-1" style="font-size:0.65rem;">
-                                                        <i class="bi bi-arrow-up-right me-1"></i>OUTWARD (அனுப்பியது)
-                                                    </span>
+                                                        <i class="bi bi-arrow-up-right me-1"></i>OUTWARD 
+</span>
                                                 @else
                                                     <span class="badge bg-success-subtle text-success border border-success-subtle mt-1" style="font-size:0.65rem;">
-                                                        <i class="bi bi-arrow-down-left me-1"></i>INWARD (பெற்றது)
-                                                    </span>
+                                                        <i class="bi bi-arrow-down-left me-1"></i>INWARD 
+</span>
                                                 @endif
                                             </td>
                                             <td>
                                                 @if ($isOutward)
                                                     <span class="badge border" style="background:#fee2e2;color:#991b1b;border-color:#fecaca!important;font-size:0.72rem;">
                                                         <i class="bi bi-geo-alt me-1"></i>To: {{ $st->toSite?->name ?? 'Site #'.$st->to_project_site_id }}
-                                                    </span>
+</span>
                                                 @else
                                                     <span class="badge border" style="background:#dcfce7;color:#166534;border-color:#bbf7d0!important;font-size:0.72rem;">
                                                         <i class="bi bi-geo-alt me-1"></i>From: {{ $st->fromSite?->name ?? 'Site #'.$st->from_project_site_id }}
-                                                    </span>
+</span>
                                                 @endif
                                             </td>
                                             <td>
                                                 @if ($st->items->count() > 1)
                                                     <div class="fw-semibold text-dark" style="font-size:0.82rem;">
                                                         <i class="bi bi-boxes text-primary me-1"></i>{{ $st->items->count() }} Materials
-                                                    </div>
+</div>
                                                     <div class="d-flex flex-wrap gap-1 mt-1">
                                                         @foreach ($st->items->take(2) as $it)
                                                             <span class="badge bg-light text-dark border" style="font-size:0.68rem;">
                                                                 {{ $it->material_name }} ({{ (float) $it->quantity }} {{ $it->unit }})
-                                                            </span>
+</span>
                                                         @endforeach
                                                         @if ($st->items->count() > 2)
                                                             <span class="badge bg-secondary-subtle text-secondary" style="font-size:0.68rem;">+{{ $st->items->count() - 2 }} more</span>
                                                         @endif
-                                                    </div>
+</div>
                                                 @elseif ($st->items->count() === 1)
                                                     @php $si = $st->items->first(); @endphp
                                                     <div class="fw-semibold text-dark" style="font-size:0.82rem;">{{ $si->material_name }}</div>
                                                     <span class="badge border mt-1 {{ $si->source_type === 'Own Warehouse' ? 'bg-info-subtle text-info border-info-subtle' : 'bg-primary-subtle text-primary border-primary-subtle' }}" style="font-size:0.65rem;">
                                                         {{ $si->source_reference ?: $si->source_type }}
-                                                    </span>
+</span>
                                                 @else
                                                     <span class="fw-semibold text-dark" style="font-size:0.82rem;">{{ $st->material?->name_en ?? '—' }}</span>
                                                 @endif
@@ -724,7 +723,7 @@
                                     @endforeach
                                 </tbody>
                             </table>
-                        </div>
+</div>
                         <div class="d-flex flex-column flex-md-row justify-content-between align-items-center gap-2 px-3 py-2 bg-light border-top rounded-bottom" id="transfersPagination">
                             <div class="d-flex align-items-center gap-2">
                                 <span class="small text-muted">Rows per page:</span>
@@ -734,20 +733,20 @@
                                     <option value="25">25</option>
                                 </select>
                                 <span class="small text-muted ms-2" id="transfersTabSummary"></span>
-                            </div>
+</div>
                             <nav><ul class="pagination pagination-sm mb-0 gap-1" id="transfersTabNav"></ul></nav>
-                        </div>
+</div>
                     @endif
-                </div>
+</div>
 
                 {{-- ===== BALANCE STOCK TAB ===== --}}
                 <div class="tab-pane fade" id="panel-balance-stock" role="tabpanel">
                     @if (empty($balanceStockList) || $balanceStockList->isEmpty())
                         <div class="text-center py-5 text-muted">
                             <i class="bi bi-stack fs-1 d-block mb-2 text-secondary opacity-25"></i>
-                            <div class="fw-semibold">No Stock Balance Records (இருப்பு விவரங்கள் இல்லை)</div>
+                            <div class="fw-semibold">No Stock Balance Records</div>
                             <small>No materials have been received or recorded for this site yet.</small>
-                        </div>
+</div>
                     @else
                         {{-- Stock Mini KPIs --}}
                         <div class="row g-2 p-3 bg-light border-bottom">
@@ -755,42 +754,42 @@
                                 <div class="bg-white p-2 rounded border">
                                     <span class="text-muted small d-block">Materials Tracked</span>
                                     <strong class="text-dark fs-6">{{ $stockStats['total_items'] ?? $balanceStockList->count() }}</strong>
-                                </div>
-                            </div>
+</div>
+</div>
                             <div class="col-6 col-md-3">
                                 <div class="bg-white p-2 rounded border">
                                     <span class="text-muted small d-block">Items In Stock</span>
                                     <strong class="text-success fs-6">{{ $stockStats['in_stock_items'] ?? $balanceStockList->where('current_balance', '>', 0)->count() }}</strong>
-                                </div>
-                            </div>
+</div>
+</div>
                             <div class="col-6 col-md-3">
                                 <div class="bg-white p-2 rounded border">
                                     <span class="text-muted small d-block">Total Balance Qty</span>
                                     <strong class="text-primary fs-6">{{ number_format((float) ($stockStats['total_quantity'] ?? $balanceStockList->sum('current_balance')), 2) }}</strong>
-                                </div>
-                            </div>
+</div>
+</div>
                             <div class="col-6 col-md-3">
                                 <div class="bg-white p-2 rounded border">
                                     <span class="text-muted small d-block">Approx Stock Value</span>
                                     <strong class="text-success fs-6">₹{{ number_format((float) ($stockStats['total_stock_value'] ?? $balanceStockList->sum('total_value')), 2) }}</strong>
-                                </div>
-                            </div>
-                        </div>
+</div>
+</div>
+</div>
 
                         <div class="table-responsive">
                             <table class="table table-custom table-hover align-middle mb-0" id="stockTabTable">
                                 <thead class="table-light">
                                     <tr class="text-muted small text-uppercase fw-bold" style="font-size:0.74rem;">
                                         <th class="ps-3">#</th>
-                                        <th>MATERIAL <span class="ta-text fw-normal text-lowercase" style="font-size:0.68rem;">(பொருள்)</span></th>
-                                        <th class="text-center">UNIT <span class="ta-text fw-normal text-lowercase" style="font-size:0.68rem;">(அலகு)</span></th>
-                                        <th class="text-end">TOTAL RECEIVED <span class="ta-text fw-normal text-lowercase" style="font-size:0.68rem;">(வந்தது)</span></th>
-                                        <th class="text-end">USED AT SITE <span class="ta-text fw-normal text-lowercase" style="font-size:0.68rem;">(பயன்பாடு)</span></th>
-                                        <th class="text-end">TRANSFERRED OUT <span class="ta-text fw-normal text-lowercase" style="font-size:0.68rem;">(அனுப்பியது)</span></th>
-                                        <th class="text-end">TRANSFERRED IN <span class="ta-text fw-normal text-lowercase" style="font-size:0.68rem;">(பெற்றது)</span></th>
-                                        <th class="text-end bg-success-subtle bg-opacity-25">BALANCE STOCK <span class="ta-text fw-normal text-lowercase" style="font-size:0.68rem;">(மீதமுள்ள இருப்பு)</span></th>
+                                        <th>MATERIAL</th>
+                                        <th class="text-center">UNIT</th>
+                                        <th class="text-end">TOTAL RECEIVED</th>
+                                        <th class="text-end">USED AT SITE</th>
+                                        <th class="text-end">TRANSFERRED OUT</th>
+                                        <th class="text-end">TRANSFERRED IN</th>
+                                        <th class="text-end bg-success-subtle bg-opacity-25">BALANCE STOCK</th>
                                         <th class="text-end">APPROX VALUE (₹)</th>
-                                        <th class="text-center pe-3">STATUS <span class="ta-text fw-normal text-lowercase" style="font-size:0.68rem;">(நிலை)</span></th>
+                                        <th class="text-center pe-3">STATUS</th>
                                     </tr>
                                 </thead>
                                 <tbody id="stockTabBody">
@@ -798,7 +797,7 @@
                                         @php
                                             $bal = (float) $stk['current_balance'];
                                             $badgeClass = $bal > 5 ? 'bg-success-subtle text-success border border-success-subtle' : ($bal > 0 ? 'bg-warning-subtle text-dark border border-warning-subtle' : 'bg-danger-subtle text-danger border border-danger-subtle');
-                                            $statusText = $bal > 5 ? 'In Stock (இருப்பில் உள்ளது)' : ($bal > 0 ? 'Low Stock (குறைந்த இருப்பு)' : 'Depleted (தீர்ந்துவிட்டது)');
+                                            $statusText = $bal > 5 ? 'In Stock ' : ($bal > 0 ? 'Low Stock ' : 'Depleted ');
                                         @endphp
                                         <tr>
                                             <td class="ps-3 text-muted small">{{ $loop->iteration }}</td>
@@ -821,7 +820,7 @@
                                             <td class="text-end bg-success-subtle bg-opacity-25">
                                                 <span class="fw-bold fs-6 {{ $bal > 0 ? 'text-success' : 'text-danger' }} font-monospace">
                                                     {{ number_format($bal, 2) }}
-                                                </span>
+</span>
                                                 <span class="text-muted small ms-1">{{ $stk['unit'] }}</span>
                                             </td>
                                             <td class="text-end fw-semibold text-dark">
@@ -830,13 +829,13 @@
                                             <td class="text-center pe-3">
                                                 <span class="badge {{ $badgeClass }}" style="font-size:0.7rem;">
                                                     {{ $statusText }}
-                                                </span>
+</span>
                                             </td>
                                         </tr>
                                     @endforeach
                                 </tbody>
                             </table>
-                        </div>
+</div>
                         <div class="d-flex flex-column flex-md-row justify-content-between align-items-center gap-2 px-3 py-2 bg-light border-top rounded-bottom" id="stockPagination">
                             <div class="d-flex align-items-center gap-2">
                                 <span class="small text-muted">Rows per page:</span>
@@ -846,80 +845,79 @@
                                     <option value="25">25</option>
                                 </select>
                                 <span class="small text-muted ms-2" id="stockTabSummary"></span>
-                            </div>
+</div>
                             <nav><ul class="pagination pagination-sm mb-0 gap-1" id="stockTabNav"></ul></nav>
-                        </div>
+</div>
                     @endif
-                </div>
+</div>
 
-            </div>{{-- end tab-content --}}
-        </div>{{-- end tabs card --}}
+</div>{{-- end tab-content --}}
+</div>{{-- end tabs card --}}
 
-        <!-- Supplier Purchases Section (சப்ளையர் கொள்முதல் & விலை விவரங்கள்) -->
+        <!-- Supplier Purchases Section -->
         <div class="card-custom p-4 bg-white mb-4">
             <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-3 border-bottom pb-3">
                 <div class="d-flex align-items-center gap-2">
                     <div class="bg-primary-subtle text-primary p-2 rounded-3">
                         <i class="bi bi-cart-check-fill fs-5"></i>
-                    </div>
+</div>
                     <div>
                         <h5 class="fw-bold mb-0 text-dark">
-                            Supplier Purchases <span class="ta-text small text-muted">(சப்ளையர் கொள்முதல் & விலை விவரங்கள்)</span>
-                        </h5>
+                            Supplier Purchases
+</h5>
                         <small class="text-muted">Breakdown of purchases from third-party suppliers for this site.</small>
-                    </div>
-                </div>
+</div>
+</div>
                 <div>
                     <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-3 py-2">
                         <i class="bi bi-truck-front me-1"></i>
                         {{ isset($supplierPurchases) ? count($supplierPurchases) : 0 }} Suppliers &bull; {{ $supplierStats['total_purchase_orders_count'] ?? 0 }} Purchase Orders
-                    </span>
-                </div>
-            </div>
+</span>
+</div>
+</div>
 
             @if (empty($supplierPurchases) || count($supplierPurchases) === 0)
                 <div class="text-center py-5 text-muted">
                     <i class="bi bi-cart-x fs-1 d-block mb-2 text-secondary opacity-50"></i>
                     <div class="fw-semibold">No Supplier Purchases Recorded</div>
-                    <small class="ta-text text-muted">இந்த தளத்திற்கு சப்ளையர் கொள்முதல் ஆணை எதுவும் இதுவரை பதிவு செய்யப்படவில்லை.</small>
-                </div>
+</div>
             @else
                 <!-- Summary KPIs for Supplier Purchases -->
                 <div class="row g-2 mb-3">
                     <div class="col-6 col-md-3">
                         <div class="p-2 rounded bg-light border text-center">
-                            <div class="text-muted small" style="font-size:0.75rem;">Total Suppliers (சப்ளையர்கள்)</div>
+                            <div class="text-muted small" style="font-size:0.75rem;">Total Suppliers</div>
                             <div class="fw-bold text-dark fs-5">{{ $supplierStats['total_suppliers_count'] ?? count($supplierPurchases) }}</div>
-                        </div>
-                    </div>
+</div>
+</div>
                     <div class="col-6 col-md-3">
                         <div class="p-2 rounded bg-light border text-center">
-                            <div class="text-muted small" style="font-size:0.75rem;">Purchase Orders (ஆணைகள்)</div>
+                            <div class="text-muted small" style="font-size:0.75rem;">Purchase Orders</div>
                             <div class="fw-bold text-primary fs-5">{{ $supplierStats['total_purchase_orders_count'] ?? 0 }}</div>
-                        </div>
-                    </div>
+</div>
+</div>
                     <div class="col-6 col-md-3">
                         <div class="p-2 rounded bg-light border text-center">
-                            <div class="text-muted small" style="font-size:0.75rem;">Materials (பொருட்கள் வகைகள்)</div>
+                            <div class="text-muted small" style="font-size:0.75rem;">Materials</div>
                             <div class="fw-bold text-warning fs-5">{{ $supplierStats['total_materials_purchased_count'] ?? 0 }}</div>
-                        </div>
-                    </div>
+</div>
+</div>
                     <div class="col-6 col-md-3">
                         <div class="p-2 rounded bg-light border text-center">
-                            <div class="text-muted small" style="font-size:0.75rem;">Total Purchased Value (மொத்த கொள்முதல்)</div>
+                            <div class="text-muted small" style="font-size:0.75rem;">Total Purchased Value</div>
                             <div class="fw-bold text-success fs-5">₹{{ number_format($supplierStats['total_purchased_value'] ?? 0, 2) }}</div>
-                        </div>
-                    </div>
-                </div>
+</div>
+</div>
+</div>
 
                 <!-- Live Search Bar -->
                 <div class="d-flex align-items-center mb-3">
                     <div class="input-group input-group-sm" style="max-width: 380px;">
                         <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted"></i></span>
-                        <input type="text" id="supplierSearchInput" class="form-control border-start-0" placeholder="Search supplier, contact, phone, material... (தேடுக)">
-                    </div>
+                        <input type="text" id="supplierSearchInput" class="form-control border-start-0" placeholder="Search supplier, contact, phone, material... ">
+</div>
                     <span class="text-muted ms-auto small" id="supplierFilterSummary">Showing all {{ count($supplierPurchases) }} suppliers</span>
-                </div>
+</div>
 
                 <!-- Single Clean Supplier Purchases Table -->
                 <div class="table-responsive rounded border">
@@ -927,11 +925,11 @@
                         <thead class="table-light">
                             <tr>
                                 <th class="ps-3 py-2 text-muted" style="width:35px; font-size:0.7rem;">#</th>
-                                <th class="py-2 text-muted text-uppercase" style="font-size:0.7rem;">Supplier (சப்ளையர்)</th>
-                                <th class="py-2 text-muted text-uppercase" style="font-size:0.7rem;">Contact & Phone (தொடர்பு)</th>
-                                <th class="py-2 text-center text-muted text-uppercase" style="font-size:0.7rem;">Orders (ஆணைகள்)</th>
-                                <th class="py-2 text-end text-muted text-uppercase" style="font-size:0.7rem;">Total Value (மொத்த கொள்முதல்)</th>
-                                <th class="pe-3 py-2 text-end text-muted text-uppercase" style="width:140px; font-size:0.7rem;">Action (செயல்)</th>
+                                <th class="py-2 text-muted text-uppercase" style="font-size:0.7rem;">Supplier</th>
+                                <th class="py-2 text-muted text-uppercase" style="font-size:0.7rem;">Contact & Phone</th>
+                                <th class="py-2 text-center text-muted text-uppercase" style="font-size:0.7rem;">Orders</th>
+                                <th class="py-2 text-end text-muted text-uppercase" style="font-size:0.7rem;">Total Value</th>
+                                <th class="pe-3 py-2 text-end text-muted text-uppercase" style="width:140px; font-size:0.7rem;">Action</th>
                             </tr>
                         </thead>
                         <tbody id="supplierTabBody">
@@ -946,31 +944,31 @@
                                         <div class="fw-bold text-dark d-flex align-items-center gap-2">
                                             <a href="{{ $detailUrl }}" class="text-decoration-none text-dark hover-primary">
                                                 {{ $sup['supplier_name'] }}
-                                            </a>
+</a>
                                             @if(!empty($sup['gst_number']))
                                                 <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle fw-normal" style="font-size:0.65rem;">
                                                     GST: {{ $sup['gst_number'] }}
-                                                </span>
+</span>
                                             @endif
-                                        </div>
+</div>
                                         @if(!empty($sup['address']))
                                             <div class="text-muted small text-truncate" style="max-width:280px; font-size:0.72rem;">
                                                 <i class="bi bi-geo-alt me-1"></i>{{ $sup['address'] }}
-                                            </div>
+</div>
                                         @endif
                                     </td>
                                     <td>
                                         @if(!empty($sup['contact_person']))
                                             <div class="fw-medium text-dark" style="font-size:0.78rem;">
                                                 <i class="bi bi-person me-1 text-muted"></i>{{ $sup['contact_person'] }}
-                                            </div>
+</div>
                                         @endif
                                         @if(!empty($sup['phone']))
                                             <div>
                                                 <a href="tel:{{ $sup['phone'] }}" class="text-decoration-none text-muted small" style="font-size:0.75rem;">
                                                     <i class="bi bi-telephone me-1"></i>{{ $sup['phone'] }}
-                                                </a>
-                                            </div>
+</a>
+</div>
                                         @else
                                             <span class="text-muted small">&mdash;</span>
                                         @endif
@@ -978,15 +976,15 @@
                                     <td class="text-center">
                                         <span class="badge bg-light text-dark border px-2 py-1">
                                             <i class="bi bi-file-earmark-text text-primary me-1"></i>{{ $sup['pos_count'] }} {{ Str::plural('PO', $sup['pos_count']) }}
-                                        </span>
+</span>
                                     </td>
                                     <td class="text-end fw-bold text-success fs-6">
                                         ₹{{ number_format($sup['total_amount'], 2) }}
                                     </td>
                                     <td class="pe-3 text-end">
                                         <a href="{{ $detailUrl }}" class="btn btn-sm btn-primary d-inline-flex align-items-center gap-1 shadow-sm px-2 py-1" style="font-size:0.75rem;">
-                                            <i class="bi bi-eye"></i> View (விவரங்கள்)
-                                        </a>
+                                            <i class="bi bi-eye"></i> View 
+</a>
                                     </td>
                                 </tr>
                             @endforeach
@@ -1006,7 +1004,7 @@
                             </tr>
                         </tfoot>
                     </table>
-                </div>
+</div>
 
                 <!-- Table Pagination -->
                 <div class="d-flex flex-column flex-md-row justify-content-between align-items-center gap-2 px-3 py-2 bg-light border-top rounded-bottom" id="supplierPagination">
@@ -1018,13 +1016,13 @@
                             <option value="25">25</option>
                         </select>
                         <span class="small text-muted ms-2" id="supplierTabSummary"></span>
-                    </div>
+</div>
                     <nav><ul class="pagination pagination-sm mb-0 gap-1" id="supplierTabNav"></ul></nav>
-                </div>
+</div>
             @endif
-        </div>
+</div>
 
-        <!-- Site Cash & Project Transactions Section (தள ரொக்கம் மற்றும் திட்ட நிதிப் பரிவர்த்தனைகள்) -->
+        <!-- Site Cash & Project Transactions Section -->
         <div class="card-custom p-4 bg-white mt-4">
             @php
                 $txnsList = isset($combinedCashTransactions) && $combinedCashTransactions->isNotEmpty()
@@ -1060,57 +1058,57 @@
             <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2 border-bottom pb-3 mb-3">
                 <div>
                     <h6 class="fw-bold mb-1 text-dark">
-                        <i class="bi bi-wallet2 me-2 text-primary"></i>Site Cash & Project Transactions (தள ரொக்கம் மற்றும் திட்ட பரிவர்த்தனைகள்)
-                    </h6>
+                        <i class="bi bi-wallet2 me-2 text-primary"></i>Site Cash & Project Transactions 
+</h6>
                     <small class="text-muted">Account Manager project disbursements (Office Ledger) & Site Manager field cash transactions (Site Cash).</small>
-                </div>
+</div>
                 <div class="d-flex align-items-center gap-2 flex-wrap">
                     <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-3 py-2">
                         {{ $totalTxnCount }} Transactions
-                    </span>
+</span>
                     <a href="{{ route('cash-transfer.index') }}" class="btn btn-sm btn-outline-success d-inline-flex align-items-center">
                         <i class="bi bi-arrow-left-right me-1"></i> Cash Transfer
-                    </a>
+</a>
                     <a href="{{ route('site-cash.index') }}" class="btn btn-sm btn-outline-primary d-inline-flex align-items-center">
                         <i class="bi bi-plus-circle me-1"></i> Record Site Cash
-                    </a>
-                </div>
-            </div>
+</a>
+</div>
+</div>
 
             <!-- Project Cash Flow Quick Metrics -->
             @if(isset($projectCashKpis))
                 <div class="row g-2 mb-3">
                     <div class="col-6 col-md">
                         <div class="p-2 px-3 rounded bg-light border h-100">
-                            <small class="text-muted d-block fw-semibold" style="font-size:0.72rem;">Funds Received (வரவு)</small>
+                            <small class="text-muted d-block fw-semibold" style="font-size:0.72rem;">Funds Received</small>
                             <h6 class="fw-bold text-dark mb-0 mt-1">₹{{ number_format($projectCashKpis['total_funds_received'] ?? 0, 2) }}</h6>
-                        </div>
-                    </div>
+</div>
+</div>
                     <div class="col-6 col-md">
                         <div class="p-2 px-3 rounded bg-light border h-100">
-                            <small class="text-muted d-block fw-semibold" style="font-size:0.72rem;">AM Project Spent (அலுவலக செலவு)</small>
+                            <small class="text-muted d-block fw-semibold" style="font-size:0.72rem;">AM Project Spent</small>
                             <h6 class="fw-bold text-primary mb-0 mt-1">₹{{ number_format($projectCashKpis['am_spent'] ?? 0, 2) }}</h6>
-                        </div>
-                    </div>
+</div>
+</div>
                     <div class="col-6 col-md">
                         <div class="p-2 px-3 rounded bg-light border h-100">
-                            <small class="text-muted d-block fw-semibold" style="font-size:0.72rem;">AM Remaining Fund (மீதம்)</small>
+                            <small class="text-muted d-block fw-semibold" style="font-size:0.72rem;">AM Remaining Fund</small>
                             <h6 class="fw-bold text-info mb-0 mt-1">₹{{ number_format($projectCashKpis['am_balance'] ?? 0, 2) }}</h6>
-                        </div>
-                    </div>
+</div>
+</div>
                     <div class="col-6 col-md">
                         <div class="p-2 px-3 rounded bg-light border h-100">
-                            <small class="text-muted d-block fw-semibold" style="font-size:0.72rem;">SM Site Spent (தள செலவு)</small>
+                            <small class="text-muted d-block fw-semibold" style="font-size:0.72rem;">SM Site Spent</small>
                             <h6 class="fw-bold text-danger mb-0 mt-1">₹{{ number_format($projectCashKpis['sm_spent'] ?? 0, 2) }}</h6>
-                        </div>
-                    </div>
+</div>
+</div>
                     <div class="col-12 col-md">
                         <div class="p-2 px-3 rounded bg-light border h-100">
-                            <small class="text-muted d-block fw-semibold" style="font-size:0.72rem;">Site Cash in Hand (கையிருப்பு)</small>
+                            <small class="text-muted d-block fw-semibold" style="font-size:0.72rem;">Site Cash in Hand</small>
                             <h6 class="fw-bold text-success mb-0 mt-1">₹{{ number_format($projectCashKpis['site_cash_in_hand'] ?? 0, 2) }}</h6>
-                        </div>
-                    </div>
-                </div>
+</div>
+</div>
+</div>
             @endif
 
             @if ($txnsList->isNotEmpty())
@@ -1122,45 +1120,45 @@
                                 <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted"></i></span>
                                 <input type="text" class="form-control border-start-0 ps-0" id="cashSearchInput"
                                     placeholder="Search by spender, party, description, bill, date...">
-                            </div>
-                        </div>
+</div>
+</div>
                         <div class="col-6 col-md-3">
                             <select class="form-select form-select-sm" id="cashHandlerFilter">
-                                <option value="">All Spenders / Handlers (அனைவரும்)</option>
-                                <option value="Account Manager">Account Manager Only (அக்கவுண்டன்ட்)</option>
-                                <option value="Site Manager">Site Manager Only (தள மேலாளர்)</option>
+                                <option value="">All Spenders / Handlers</option>
+                                <option value="Account Manager">Account Manager Only</option>
+                                <option value="Site Manager">Site Manager Only</option>
                             </select>
-                        </div>
+</div>
                         <div class="col-6 col-md-3">
                             <select class="form-select form-select-sm" id="cashTypeFilter">
-                                <option value="">All Transaction Types (அனைத்து வகை)</option>
+                                <option value="">All Transaction Types</option>
                                 @foreach ($uniqueTypes as $tType)
                                     <option value="{{ $tType }}">{{ $tType }}</option>
                                 @endforeach
                             </select>
-                        </div>
+</div>
                         <div class="col-6 col-md-1">
                             <button type="button" class="btn btn-outline-secondary btn-sm px-2 py-1 w-100" id="historyFilterResetBtn"
                                 title="Reset filters">
                                 <i class="bi bi-arrow-counterclockwise"></i>
-                            </button>
-                        </div>
+</button>
+</div>
                         <div class="col-6 col-md-1 text-md-end text-start">
                             <span class="small text-muted" id="cashCountBadge">Showing <strong class="text-dark"
                                     id="visibleCashCount">{{ $totalTxnCount }}</strong></span>
-                        </div>
-                    </div>
-                </div>
+</div>
+</div>
+</div>
 
                 <div class="table-responsive">
                     <table class="table table-custom table-hover align-middle mb-0" id="siteCashTable">
                         <thead>
                             <tr>
                                 <th style="min-width: 110px;">Date &amp; Time</th>
-                                <th style="min-width: 170px;">Spender / Handled By (யார் செலவு செய்தது)</th>
-                                <th style="min-width: 160px;">Type (வகை)</th>
+                                <th style="min-width: 170px;">Spender / Handled By</th>
+                                <th style="min-width: 160px;">Type</th>
                                 <th style="min-width: 160px;">Party / Supplier / Payee</th>
-                                <th style="min-width: 200px;">Description / Notes (விவரம்)</th>
+                                <th style="min-width: 200px;">Description / Notes</th>
                                 <th style="min-width: 120px;">Bill / Ref No</th>
                                 <th class="text-end" style="min-width: 120px;">Inflow (+)</th>
                                 <th class="text-end" style="min-width: 120px;">Outflow (-)</th>
@@ -1172,10 +1170,10 @@
                                 @php
                                     $type = (string) ($txn['type'] ?? '');
                                     $badgeClass = match ($type) {
-                                        'Client Collection', 'Client Advance', 'Client Receipt (வரவு)' => 'bg-success-subtle text-success border border-success-subtle',
+                                        'Client Collection', 'Client Advance', 'Client Receipt ' => 'bg-success-subtle text-success border border-success-subtle',
                                         'Project Cash Received' => 'bg-success text-white',
                                         'Project Cash Transfer to Site' => 'bg-info-subtle text-info border border-info-subtle',
-                                        'Material Purchase', 'Supplier Payment', 'Tool Rental', 'Daily Wage Payment', 'Other Expense', 'Project Expense (செலவு)' => 'bg-danger-subtle text-danger border border-danger-subtle',
+                                        'Material Purchase', 'Supplier Payment', 'Tool Rental', 'Daily Wage Payment', 'Other Expense', 'Project Expense ' => 'bg-danger-subtle text-danger border border-danger-subtle',
                                         'Balance Returned' => 'bg-warning-subtle text-dark border border-warning-subtle',
                                         default => 'bg-primary-subtle text-primary border border-primary-subtle',
                                     };
@@ -1215,15 +1213,15 @@
                                             @if ($handlerRole === 'Account Manager')
                                                 <span class="badge bg-primary text-white border border-primary px-2 py-1" style="font-size:0.75rem;">
                                                     <i class="bi bi-briefcase me-1"></i>Account Manager
-                                                </span>
+</span>
                                             @else
                                                 <span class="badge bg-warning text-dark border border-warning px-2 py-1" style="font-size:0.75rem;">
                                                     <i class="bi bi-person-badge me-1"></i>Site Manager
-                                                </span>
+</span>
                                             @endif
                                             <div class="small fw-semibold text-dark mt-1" style="font-size:0.8rem;">{{ $handlerName }}</div>
                                             <small class="text-muted" style="font-size:0.72rem;">({{ $sourceLabel }})</small>
-                                        </div>
+</div>
                                     </td>
                                     <td><span class="badge {{ $badgeClass }}">{{ $type }}</span></td>
                                     <td>
@@ -1231,18 +1229,18 @@
                                             <div>
                                                 <span class="fw-semibold text-primary">
                                                     <i class="bi bi-person-fill me-1"></i>{{ $partyName }}
-                                                </span>
+</span>
                                                 @if (!empty($txn['items']) && is_array($txn['items']))
                                                     <div class="mt-1 d-flex flex-wrap gap-1">
                                                         @foreach ($txn['items'] as $it)
                                                             <span class="badge bg-light text-dark border py-1 px-2" style="font-size:0.72rem;">
                                                                 <i class="bi bi-box-seam text-secondary me-1"></i>{{ $it['qty'] ?? 1 }}
                                                                 {{ $it['unit'] ?? 'Unit' }} {{ $it['materialName'] ?? ($it['material'] ?? '') }}
-                                                            </span>
+</span>
                                                         @endforeach
-                                                    </div>
+</div>
                                                 @endif
-                                            </div>
+</div>
                                         @else
                                             <span class="text-muted">-</span>
                                         @endif
@@ -1257,7 +1255,7 @@
                                             @endphp
                                             <div class="text-dark small text-truncate" style="max-width: 250px;" title="{{ $descStr }}">
                                                 {{ \Illuminate\Support\Str::limit($cleanDesc, 45) }}
-                                            </div>
+</div>
                                         @else
                                             <span class="text-muted small">-</span>
                                         @endif
@@ -1268,7 +1266,7 @@
                                             <span class="badge bg-primary-subtle text-primary border border-primary-subtle ms-1"
                                                 title="Receipt image attached">
                                                 <i class="bi bi-image"></i>
-                                            </span>
+</span>
                                         @endif
                                     </td>
                                     <td class="text-end fw-bold text-success">
@@ -1280,9 +1278,9 @@
                                     <td class="text-center">
                                         <a href="{{ $txn['view_url'] }}"
                                             class="btn btn-outline-primary btn-sm px-2 py-1"
-                                            title="View Details (விவரங்களை பார்க்க)">
+                                            title="View Details ">
                                             <i class="bi bi-eye me-1"></i>View
-                                        </a>
+</a>
                                     </td>
                                 </tr>
                             @endforeach
@@ -1294,7 +1292,7 @@
                             </tr>
                         </tbody>
                     </table>
-                </div>
+</div>
 
                 <!-- Table Pagination & Footer Summary -->
                 <div class="p-3 bg-white border-top d-flex flex-column flex-md-row justify-content-between align-items-center gap-3" id="tablePaginationContainer">
@@ -1308,14 +1306,14 @@
                         </select>
                         <span class="small text-muted ms-md-2" id="paginationSummary">
                             Showing <strong class="text-dark" id="pageStart">1</strong> &minus; <strong class="text-dark" id="pageEnd">{{ min(10, $totalTxnCount) }}</strong> of <strong class="text-dark" id="pageTotal">{{ $totalTxnCount }}</strong> transactions
-                        </span>
-                    </div>
+</span>
+</div>
                     <nav aria-label="Site cash transactions pagination">
                         <ul class="pagination pagination-sm mb-0 gap-1" id="paginationNav">
                             <!-- Dynamic page links rendered by JS -->
                         </ul>
                     </nav>
-                </div>
+</div>
             @else
                 <div class="text-center py-4 text-muted">
                     <i class="bi bi-wallet2 fs-2 d-block mb-2 text-secondary"></i>
@@ -1324,47 +1322,46 @@
                     <div class="mt-3 d-flex justify-content-center gap-2">
                         <a href="{{ route('cash-transfer.index') }}" class="btn btn-sm btn-outline-success">
                             <i class="bi bi-arrow-left-right me-1"></i> Cash Transfer
-                        </a>
+</a>
                         <a href="{{ route('site-cash.index') }}" class="btn btn-sm btn-deiveni">
                             <i class="bi bi-plus-circle me-1"></i> Record Site Cash
-                        </a>
-                    </div>
-                </div>
+</a>
+</div>
+</div>
             @endif
-        </div>
+</div>
 
-        <!-- Saved Client Statements & Prints Section (கிளையண்ட் அச்சிடப்பட்ட அறிக்கைகள் & பதிவிறக்கம்) -->
+        <!-- Saved Client Statements & Prints Section -->
         <div class="card-custom p-4 bg-white mt-4 mb-4" id="clientStatementsSection">
             <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-3 border-bottom pb-3">
                 <div class="d-flex align-items-center gap-2">
                     <div class="bg-primary-subtle text-primary p-2 rounded-3">
                         <i class="bi bi-file-earmark-ruled fs-5"></i>
-                    </div>
+</div>
                     <div>
                         <h5 class="fw-bold mb-0 text-dark">
-                            Client Statements & Print History <span class="ta-text small text-muted">(கிளையண்ட் அச்சிடப்பட்ட அறிக்கைகள்)</span>
-                        </h5>
+                            Client Statements & Print History
+</h5>
                         <small class="text-muted">History of client statements, customized billing prints, and downloads for this project.</small>
-                    </div>
-                </div>
+</div>
+</div>
                 <div class="d-flex align-items-center gap-2">
                     <a href="{{ route('sites.client-statement', $site->encrypted_id) }}" class="btn btn-primary btn-sm d-inline-flex align-items-center gap-1 shadow-sm px-3">
-                        <i class="bi bi-plus-circle"></i> + New Client Print (புதிய அறிக்கை அச்சிடு)
-                    </a>
-                </div>
-            </div>
+                        <i class="bi bi-plus-circle"></i> + New Client Print 
+</a>
+</div>
+</div>
 
             @if (!isset($clientStatements) || $clientStatements->isEmpty())
                 <div class="text-center py-5 text-muted">
                     <i class="bi bi-file-earmark-x fs-1 d-block mb-2 text-secondary opacity-50"></i>
                     <div class="fw-semibold">No Client Statements Generated Yet</div>
-                    <small class="ta-text text-muted">இந்த திட்டத்திற்கான கிளையண்ட் பிரிண்ட் அறிக்கைகள் எதுவும் இதுவரை சேமிக்கப்படவில்லை.</small>
                     <div class="mt-3">
                         <a href="{{ route('sites.client-statement', $site->encrypted_id) }}" class="btn btn-outline-primary btn-sm">
-                            <i class="bi bi-printer me-1"></i> Create First Client Statement (அறிக்கை உருவாக்கு)
-                        </a>
-                    </div>
-                </div>
+                            <i class="bi bi-printer me-1"></i> Create First Client Statement 
+</a>
+</div>
+</div>
             @else
                 <div class="table-responsive rounded border">
                     <table class="table table-hover align-middle mb-0" id="clientStatementsTable" style="font-size: 0.83rem;">
@@ -1391,7 +1388,7 @@
                                     <td>
                                         <a href="{{ $printUrl }}" target="_blank" class="fw-bold font-monospace text-primary text-decoration-none">
                                             {{ $cStatement->statement_number }}
-                                        </a>
+</a>
                                     </td>
                                     <td>
                                         <div class="fw-semibold text-dark">{{ \Carbon\Carbon::parse($cStatement->statement_date)->format('d M Y') }}</div>
@@ -1404,7 +1401,7 @@
                                     <td class="text-center">
                                         <span class="badge bg-light text-dark border px-2 py-1">
                                             {{ count($stItems) }} Items
-                                        </span>
+</span>
                                     </td>
                                     <td class="text-end fw-bold text-success fs-6">
                                         ₹{{ number_format((float) $cStatement->total_amount, 2) }}
@@ -1412,30 +1409,30 @@
                                     <td>
                                         <span class="small text-muted">
                                             <i class="bi bi-person me-1"></i>{{ $cStatement->creator?->name ?? 'User' }}
-                                        </span>
+</span>
                                     </td>
                                     <td class="pe-3 text-end">
                                         <div class="btn-group btn-group-sm">
-                                            <a href="{{ $printUrl }}?autoprint=1" target="_blank" class="btn btn-outline-primary" title="Print Statement (அச்சிடு)">
+                                            <a href="{{ $printUrl }}?autoprint=1" target="_blank" class="btn btn-outline-primary" title="Print Statement ">
                                                 <i class="bi bi-printer"></i> Print
-                                            </a>
-                                            <a href="{{ $printUrl }}" target="_blank" class="btn btn-outline-success" title="View & Download PDF / HTML (பதிவிறக்கம்)">
+</a>
+                                            <a href="{{ $printUrl }}" target="_blank" class="btn btn-outline-success" title="View & Download PDF / HTML ">
                                                 <i class="bi bi-download"></i> Download
-                                            </a>
+</a>
                                             <button type="button" class="btn btn-outline-danger btn-delete-statement" data-id="{{ $cStatement->encrypted_id }}" title="Delete Statement">
                                                 <i class="bi bi-trash"></i>
-                                            </button>
-                                        </div>
+</button>
+</div>
                                     </td>
                                 </tr>
                             @endforeach
                         </tbody>
                     </table>
-                </div>
+</div>
             @endif
-        </div>
+</div>
 
-    </div>
+</div>
 @endsection
 
 @push('scripts')
@@ -1537,7 +1534,7 @@
                     <li class="page-item ${prevDisabled}">
                         <button class="page-link" type="button" data-page="${current - 1}" aria-label="Previous" title="Previous Page">
                             <i class="bi bi-chevron-left"></i>
-                        </button>
+</button>
                     </li>
                 `);
 
@@ -1574,7 +1571,7 @@
                     <li class="page-item ${nextDisabled}">
                         <button class="page-link" type="button" data-page="${current + 1}" aria-label="Next" title="Next Page">
                             <i class="bi bi-chevron-right"></i>
-                        </button>
+</button>
                     </li>
                 `);
             }
@@ -1742,7 +1739,7 @@
             // Delete client statement handler
             $(document).on('click', '.btn-delete-statement', async function () {
                 const statementEncId = $(this).data('id');
-                if (!confirm('Are you sure you want to delete this saved client statement? (இந்த அறிக்கையை நீக்க விரும்புகிறீர்களா?)')) {
+                if (!confirm('Are you sure you want to delete this saved client statement?')) {
                     return;
                 }
 

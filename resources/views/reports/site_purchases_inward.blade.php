@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('title', 'Purchases & Material Inward Report')
-@section('page_title', 'Purchases & Material Inward Report (பொருட்கள் கொள்முதல் & தள வரவு அறிக்கை)')
+@section('page_title', 'Purchases & Material Inward Report ')
 
 @push('styles')
     <style>
@@ -170,16 +170,15 @@
             <div class="d-flex justify-content-between align-items-center">
                 <div>
                     <h4 class="fw-bold mb-1 text-uppercase text-dark">DEIVENI CONSTRUCTIONS &amp; DEVELOPERS</h4>
-                    <h5 class="fw-bold mb-0 text-secondary">Purchases & Material Inward Report (பொருட்கள் கொள்முதல் & தள
-                        வரவு அறிக்கை)</h5>
-                </div>
+                    <h5 class="fw-bold mb-0 text-secondary">Purchases & Material Inward Report</h5>
+</div>
                 <div class="text-end small">
                     <div>Generated: <strong>{{ date('d M Y, h:i A') }}</strong></div>
                     <div id="printActivePeriod">Period: <strong>{{ $filterMeta['this_week']['label'] }}</strong></div>
                     <div id="printActiveSite">Site: <strong>All Sites</strong></div>
-                </div>
-            </div>
-        </div>
+</div>
+</div>
+</div>
 
         <!-- Top Header & Action Toolbar -->
         <div class="card-custom p-3 p-md-4 mb-4 bg-white shadow-sm border-0" id="headerActionCard">
@@ -188,30 +187,30 @@
                     <div class="d-flex align-items-center gap-2 flex-wrap mb-1">
                         <h4 class="fw-bold mb-0 text-dark">
                             <i class="bi bi-cart-check-fill text-info me-2"></i>Purchases & Material Inward Report
-                            (பொருட்கள் கொள்முதல் & தள வரவு அறிக்கை)
-                        </h4>
+
+</h4>
                         @if ($isAdmin)
                             <span class="badge bg-primary-subtle text-primary border border-primary-subtle">
                                 <i class="bi bi-shield-lock me-1"></i> Admin View
-                            </span>
+</span>
                         @endif
-                    </div>
-                </div>
+</div>
+</div>
 
                 <!-- Export & Navigation Actions -->
                 <div class="d-flex gap-2 flex-wrap align-items-center">
                     <button type="button" class="btn btn-outline-success btn-sm" id="exportExcelBtn">
                         <i class="bi bi-file-earmark-excel me-1"></i> Export Excel
-                    </button>
+</button>
                     <button type="button" class="btn btn-outline-danger btn-sm" id="exportPdfBtn">
                         <i class="bi bi-file-earmark-pdf me-1"></i> Export PDF
-                    </button>
+</button>
                     <button type="button" class="btn btn-outline-secondary btn-sm" id="printReportBtn">
                         <i class="bi bi-printer me-1"></i> Print
-                    </button>
-                </div>
-            </div>
-        </div>
+</button>
+</div>
+</div>
+</div>
 
         <!-- Filter Toolbar -->
         <div class="card-custom p-3 mb-4 bg-white shadow-sm border-0" id="filterCard">
@@ -219,29 +218,29 @@
                 <!-- Date Period Filter (Task 4: Order: today, this_week, last_week (date range), this_month, custom) -->
                 <div class="col-12 col-md-3">
                     <label class="form-label small fw-semibold mb-1 text-muted">
-                        <i class="bi bi-calendar3 me-1 text-primary"></i> Date Period (தேதி வடிகட்டி)
-                    </label>
+                        <i class="bi bi-calendar3 me-1 text-primary"></i> Date Period 
+</label>
                     <select class="form-select form-select-sm" id="filterPeriod" name="period">
                         <option value="today" {{ ($activeFilters['period'] ?? '') === 'today' ? 'selected' : '' }}>
-                            Today (இன்று - {{ $filterMeta['today']['label'] }})
-                        </option>
+                            Today ({{ $filterMeta['today']['label'] }})
+</option>
                         <option value="this_week" {{ ($activeFilters['period'] ?? 'this_week') === 'this_week' ? 'selected' : '' }}>
-                            This Week (இந்த வாரம் - {{ $filterMeta['this_week']['label'] }})
-                        </option>
+                            This Week ({{ $filterMeta['this_week']['label'] }})
+</option>
                         <option value="last_week" {{ ($activeFilters['period'] ?? '') === 'last_week' ? 'selected' : '' }}>
                             Last Week ({{ $filterMeta['last_week']['label'] }})
-                        </option>
+</option>
                         <option value="this_month" {{ ($activeFilters['period'] ?? '') === 'this_month' ? 'selected' : '' }}>
-                            This Month (நடப்பு மாதம் - {{ $filterMeta['this_month']['label'] }})
-                        </option>
+                            This Month ({{ $filterMeta['this_month']['label'] }})
+</option>
                         <option value="custom" {{ ($activeFilters['period'] ?? '') === 'custom' ? 'selected' : '' }}>
                             Custom Date Range...
-                        </option>
+</option>
                         <option value="all" {{ ($activeFilters['period'] ?? '') === 'all' ? 'selected' : '' }}>
-                            All Dates (அனைத்து தேதிகள்)
-                        </option>
+                            All Dates 
+</option>
                     </select>
-                </div>
+</div>
 
                 <!-- Custom Date Inputs -->
                 <div class="col-6 col-md-2" id="customDateStartCol"
@@ -249,59 +248,59 @@
                     <label class="form-label small fw-semibold mb-1 text-muted">From Date</label>
                     <input type="date" class="form-control form-control-sm" id="filterStartDate"
                         value="{{ $activeFilters['start_date'] ?? $filterMeta['this_week']['start'] }}">
-                </div>
+</div>
                 <div class="col-6 col-md-2" id="customDateEndCol"
                     style="{{ ($activeFilters['period'] ?? '') === 'custom' ? '' : 'display: none;' }}">
                     <label class="form-label small fw-semibold mb-1 text-muted">To Date</label>
                     <input type="date" class="form-control form-control-sm" id="filterEndDate"
                         value="{{ $activeFilters['end_date'] ?? $filterMeta['this_week']['end'] }}">
-                </div>
+</div>
 
                 <!-- Project Site Filter -->
                 <div class="col-6 col-md-3">
                     <label class="form-label small fw-semibold mb-1 text-muted">
-                        <i class="bi bi-building me-1 text-primary"></i> Project Site (கட்டுமான தளம்)
-                    </label>
+                        <i class="bi bi-building me-1 text-primary"></i> Project Site 
+</label>
                     <select class="form-select form-select-sm" id="filterSite" name="site_id">
-                        <option value="all">All Sites (அனைத்து தளங்கள்)</option>
+                        <option value="all">All Sites</option>
                         @foreach ($sites as $site)
                             <option value="{{ $site->id }}" {{ ($activeFilters['site_id'] ?? 'all') == (string) $site->id ? 'selected' : '' }}>
                                 {{ $site->name }}
-                            </option>
+</option>
                         @endforeach
                     </select>
-                </div>
+</div>
 
                 <!-- Text Search -->
                 <div class="col-12 col-md-4">
                     <label class="form-label small fw-semibold mb-1 text-muted">
                         <i class="bi bi-search me-1 text-primary"></i> Search Material / Supplier / PO
-                    </label>
+</label>
                     <div class="input-group input-group-sm">
                         <input type="text" class="form-control" id="filterSearchInput"
                             placeholder="Search cement, bricks, PO-2026..." value="{{ $activeFilters['search'] ?? '' }}">
                         <button class="btn btn-outline-secondary" type="button" id="clearSearchBtn">
                             <i class="bi bi-x"></i>
-                        </button>
-                    </div>
-                </div>
+</button>
+</div>
+</div>
 
                 <!-- Reset Filter Button -->
                 <div class="col-12 col-md-2">
                     <button type="button" class="btn btn-sm btn-light border text-muted w-100" id="resetFilterBtn">
                         <i class="bi bi-arrow-counterclockwise me-1"></i> Reset Filters
-                    </button>
-                </div>
-            </div>
+</button>
+</div>
+</div>
 
             <div class="d-flex justify-content-between align-items-center mt-2 pt-2 border-top">
                 <span class="small text-muted" id="filterMatchCountBadge">
                     Active filters: <strong>{{ $filterMeta['this_week']['label'] }}</strong> &bull; <strong>All
                         Sites</strong>
-                </span>
+</span>
                 <span class="small text-muted">Current Reference Date: {{ $filterMeta['current_date'] }}</span>
-            </div>
-        </div>
+</div>
+</div>
 
         <!-- KPI Summary Cards -->
         <div class="row g-3 mb-4 kpi-print-grid">
@@ -312,13 +311,13 @@
                             <div class="text-muted small fw-semibold">Total Purchase Orders</div>
                             <h4 class="fw-bold mb-0 text-dark mt-1" id="kpiPoCount">{{ $kpis['po_count'] ?? 0 }}</h4>
                             <small class="text-muted">Orders logged</small>
-                        </div>
+</div>
                         <div class="bg-info-subtle text-info p-2 rounded no-print">
                             <i class="bi bi-file-earmark-text fs-5"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
+</div>
+</div>
+</div>
+</div>
             <div class="col-6 col-md-6">
                 <div class="card-custom p-3 bg-white border-start border-4 border-danger h-100 shadow-sm">
                     <div class="d-flex justify-content-between align-items-start">
@@ -327,14 +326,14 @@
                             <h4 class="fw-bold mb-0 text-danger mt-1" id="kpiTotalValue">
                                 ₹{{ number_format((float) ($kpis['total_value'] ?? 0), 2) }}</h4>
                             <small class="text-muted">Procurement commitments</small>
-                        </div>
+</div>
                         <div class="bg-danger-subtle text-danger p-2 rounded no-print">
                             <i class="bi bi-cash-stack fs-5"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+</div>
+</div>
+</div>
+</div>
+</div>
 
         <!-- Purchases Table Card -->
         <div class="card-custom p-3 p-md-4 bg-white mb-4 shadow-sm border-0">
@@ -342,14 +341,14 @@
                 <div>
                     <h6 class="fw-bold mb-0 text-dark">
                         <i class="bi bi-table text-info me-1"></i>
-                        Purchases & Material Inward Register (பொருட்கள் கொள்முதல் விவரங்கள்)
-                    </h6>
+                        Purchases & Material Inward Register 
+</h6>
                     <small class="text-muted">Purchase orders, supplier deliveries, units, rates, and verified inward
                         status</small>
-                </div>
+</div>
                 <span class="badge bg-light text-dark border" id="poCountBadge">{{ $kpis['po_count'] ?? 0 }} Purchase
                     Orders</span>
-            </div>
+</div>
 
             <div class="table-responsive">
                 <table class="table table-hover align-middle mb-0" id="smPurchasesTable">
@@ -361,8 +360,8 @@
                             <th style="min-width: 160px;">Supplier Name</th>
                             <th style="min-width: 180px;">Material / Equipment</th>
                             <th class="text-center" style="min-width: 110px;">Qty &amp; Unit</th>
-                            <th class="text-end" style="min-width: 100px;">Rate (ரூ.)</th>
-                            <th class="text-end" style="min-width: 115px;">Total (ரூ.)</th>
+                            <th class="text-end" style="min-width: 100px;">Rate (₹)</th>
+                            <th class="text-end" style="min-width: 115px;">Total (₹)</th>
                             <th class="text-center" style="min-width: 130px;">Delivery Status</th>
                         </tr>
                     </thead>
@@ -378,7 +377,7 @@
                         </tr>
                     </tfoot>
                 </table>
-            </div>
+</div>
 
             <!-- Table Pagination & Footer Summary -->
             <div class="p-3 bg-white border-top d-flex flex-column flex-md-row justify-content-between align-items-center gap-3 no-print"
@@ -395,17 +394,17 @@
                         Showing <strong class="text-dark" id="pageStart">1</strong> &minus; <strong class="text-dark"
                             id="pageEnd">{{ min(10, $kpis['po_count'] ?? 0) }}</strong> of <strong class="text-dark"
                             id="pageTotal">{{ $kpis['po_count'] ?? 0 }}</strong> purchase orders
-                    </span>
-                </div>
+</span>
+</div>
                 <nav aria-label="Purchases report pagination">
                     <ul class="pagination pagination-sm mb-0 gap-1" id="paginationNav">
                         <!-- Dynamic page links rendered by JS -->
                     </ul>
                 </nav>
-            </div>
-        </div>
+</div>
+</div>
 
-    </div>
+</div>
 @endsection
 
 @push('scripts')
@@ -540,7 +539,7 @@
                                 itemsBadges += `<div class="d-flex justify-content-between align-items-center py-1 border-bottom border-light">
                                                 <span>&bull; ${escapeHtml(it.material_name)} (${q} ${escapeHtml(it.unit)})</span>
                                                 <span class="text-muted font-monospace">₹${r.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} &times; ${q} = ₹${t.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-                                            </div>`;
+</div>`;
                             });
 
                             tbody.append(`
@@ -555,7 +554,7 @@
                                                     <div class="mb-1 text-primary fw-semibold">${escapeHtml(po.material)} <span class="badge bg-light text-secondary border ms-1">${po.items.length} items</span></div>
                                                     <div class="small bg-light-subtle p-2 rounded border border-light">
                                                         ${itemsBadges}
-                                                    </div>
+</div>
                                                 </td>
                                                 <td class="text-end fw-bold text-danger align-top">₹${poVal.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
                                                 <td class="text-center align-top">${statusBadge}</td>
@@ -653,7 +652,7 @@
                         <li class="page-item ${prevDisabled}">
                             <button class="page-link" type="button" data-page="${current - 1}" aria-label="Previous" title="Previous Page">
                                 <i class="bi bi-chevron-left"></i>
-                            </button>
+</button>
                         </li>
                     `);
 
@@ -690,7 +689,7 @@
                         <li class="page-item ${nextDisabled}">
                             <button class="page-link" type="button" data-page="${current + 1}" aria-label="Next" title="Next Page">
                                 <i class="bi bi-chevron-right"></i>
-                            </button>
+</button>
                         </li>
                     `);
             }

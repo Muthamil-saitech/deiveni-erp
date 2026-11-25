@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('title', 'Branch Master')
-@section('page_title', 'Branch Master (வங்கி கிளை முதன்மை பட்டியல்)')
+@section('page_title', 'Branch Master ')
 
 @push('styles')
     <style>
@@ -43,19 +43,19 @@
         <div class="card-custom p-3 mb-3 mb-md-4 bg-white">
             <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
                 <div>
-                    <h5 class="fw-bold mb-0 text-dark">Empanelled Bank Branches & Valuation Directory (வங்கி கிளை விவரங்கள்)</h5>
-                </div>
+                    <h5 class="fw-bold mb-0 text-dark">Empanelled Bank Branches & Valuation Directory</h5>
+</div>
                 <div class="d-flex gap-2">
                     <a href="{{ url('/banks') }}" class="btn btn-outline-primary btn-sm">
                         <i class="bi bi-bank me-1"></i> Bank Master
-                    </a>
+</a>
                     <button class="btn btn-deiveni btn-sm" data-bs-toggle="modal" data-bs-target="#branchModal"
                         id="addBranchBtn">
                         <i class="bi bi-diagram-3 me-1"></i> Add Branch
-                    </button>
-                </div>
-            </div>
-        </div>
+</button>
+</div>
+</div>
+</div>
 
         <!-- Stat Highlights Row -->
         <div class="row g-3 mb-3 mb-md-4">
@@ -63,57 +63,53 @@
                 <div class="card-stat d-flex align-items-center gap-3">
                     <div class="stat-icon-wrapper bg-primary bg-opacity-10 text-primary">
                         <i class="bi bi-diagram-3 fs-4"></i>
-                    </div>
+</div>
                     <div>
                         <div class="text-muted small fw-medium">Total Branches</div>
                         <h4 class="fw-bold mb-0 text-dark" id="statTotalBranches">
                             {{ $stats['total_branches'] ?? $branches->count() }}
-                        </h4>
-                        <small class="ta-text text-muted" style="font-size:0.72rem;">மொத்த கிளைகள்</small>
-                    </div>
-                </div>
-            </div>
+</h4>
+</div>
+</div>
+</div>
             <div class="col-6 col-lg-3">
                 <div class="card-stat d-flex align-items-center gap-3">
                     <div class="stat-icon-wrapper bg-success bg-opacity-10 text-success">
                         <i class="bi bi-check2-circle fs-4"></i>
-                    </div>
+</div>
                     <div>
                         <div class="text-muted small fw-medium">Active Branches</div>
                         <h4 class="fw-bold mb-0 text-success" id="statActiveBranches">
                             {{ $stats['active_branches'] ?? $branches->where('status', 'Active')->count() }}
-                        </h4>
-                        <small class="ta-text text-muted" style="font-size:0.72rem;">செயலில் உள்ள கிளைகள்</small>
-                    </div>
-                </div>
-            </div>
+</h4>
+</div>
+</div>
+</div>
             <div class="col-6 col-lg-3">
                 <div class="card-stat d-flex align-items-center gap-3">
                     <div class="stat-icon-wrapper bg-secondary bg-opacity-10 text-secondary">
                         <i class="bi bi-x-circle fs-4"></i>
-                    </div>
+</div>
                     <div>
                         <div class="text-muted small fw-medium">Inactive Branches</div>
                         <h4 class="fw-bold mb-0 text-secondary" id="statInactiveBranches">
                             {{ $stats['inactive_branches'] ?? $branches->where('status', 'Inactive')->count() }}
-                        </h4>
-                        <small class="ta-text text-muted" style="font-size:0.72rem;">செயலற்ற கிளைகள்</small>
-                    </div>
-                </div>
-            </div>
+</h4>
+</div>
+</div>
+</div>
             <div class="col-6 col-lg-3">
                 <div class="card-stat d-flex align-items-center gap-3">
                     <div class="stat-icon-wrapper bg-warning bg-opacity-10 text-warning">
                         <i class="bi bi-cash-coin fs-4"></i>
-                    </div>
+</div>
                     <div>
                         <div class="text-muted small fw-medium">Avg Valuation Fee</div>
                         <h4 class="fw-bold mb-0 text-dark" id="statAvgFee">₹{{ number_format($stats['avg_fee'] ?? 0) }}</h4>
-                        <small class="ta-text text-muted" style="font-size:0.72rem;">சராசரி ஆய்வு கட்டணம்</small>
-                    </div>
-                </div>
-            </div>
-        </div>
+</div>
+</div>
+</div>
+</div>
 
         <!-- Filter & Search Card -->
         <div class="card-custom p-3 mb-3 mb-md-4 bg-white">
@@ -123,11 +119,11 @@
                         <span class="input-group-text bg-light border-end-0"><i class="bi bi-search text-muted"></i></span>
                         <input type="text" class="form-control border-start-0 ps-0" id="branchSearchInput"
                             placeholder="Search Bank Name, Branch, IFSC, Manager...">
-                    </div>
-                </div>
+</div>
+</div>
                 <div class="col-6 col-md-3">
                     <select class="form-select form-select-sm" id="branchBankFilter">
-                        <option value="">All Banks (அனைத்து வங்கிகள்)</option>
+                        <option value="">All Banks</option>
                         @php
                             $allBanks = $allBanks ?? \App\Models\Bank::orderBy('bank_name')->get();
                         @endphp
@@ -138,26 +134,26 @@
                             <option value="{{ $bName }}">{{ $bName }}</option>
                         @endforeach
                     </select>
-                </div>
+</div>
                 <div class="col-6 col-md-2">
                     <select class="form-select form-select-sm" id="branchStatusFilter">
-                        <option value="">All Status (அனைத்து நிலை)</option>
-                        <option value="Active">Active (செயலில் உள்ளது)</option>
-                        <option value="Inactive">Inactive (நிறுத்தப்பட்டது)</option>
+                        <option value="">All Status</option>
+                        <option value="Active">Active</option>
+                        <option value="Inactive">Inactive</option>
                     </select>
-                </div>
+</div>
                 <div class="col-6 col-md-1">
                     <button type="button" class="btn btn-outline-secondary btn-sm px-2 py-1" id="historyFilterResetBtn"
                     title="Reset filters">
                     <i class="bi bi-arrow-counterclockwise"></i>
-                    </button>
-                </div>
+</button>
+</div>
                 <div class="col-6 col-md-2 text-md-end">
                     <span class="small text-muted" id="branchCountBadge">Showing <strong class="text-dark"
                             id="visibleBranchCount">{{ $branches->count() }}</strong> records</span>
-                </div>
-            </div>
-        </div>
+</div>
+</div>
+</div>
 
         <!-- Branches Table -->
         <div class="card-custom overflow-hidden">
@@ -208,7 +204,7 @@
                                         <div class="stat-icon-wrapper {{ $iconWrapperClass }} bank-icon-badge"
                                             style="width:36px; height:36px; font-size:1rem;">
                                             <i class="bi bi-bank"></i>
-                                        </div>
+</div>
                                         <div>
                                             <div class="fw-bold text-dark fs-6 row-bank-title">{{ $branch->bank_name }}</div>
                                             <small class="text-muted row-branch-subtitle">
@@ -216,9 +212,9 @@
                                                 @if ($branch->branch_name_ta)
                                                     &bull; <span class="ta-badge">{{ $branch->branch_name_ta }}</span>
                                                 @endif
-                                            </small>
-                                        </div>
-                                    </div>
+</small>
+</div>
+</div>
                                 </td>
                                 <td>
                                     <div><span class="font-monospace badge {{ $badgeClass }} row-ifsc">{{ $branch->ifsc_code }}</span></div>
@@ -227,12 +223,12 @@
                                     <div class="fw-semibold text-dark row-contact">{{ $branch->contact_person ?: '—' }}</div>
                                     <small class="text-muted row-phone">
                                         <i class="bi bi-telephone text-muted me-1"></i>{{ $branch->phone ?: '—' }}
-                                    </small>
+</small>
                                 </td>
                                 <td>
                                     <div class="fw-bold {{ $feeClass }} fs-6 row-fee">
                                         {{ $branch->valuation_fee > 0 ? '₹' . number_format($branch->valuation_fee) : '—' }}
-                                    </div>
+</div>
                                 </td>
                                 <td>
                                     @if ($branch->status === 'Active')
@@ -246,7 +242,7 @@
                                         <button class="btn table-action-btn" type="button" data-bs-toggle="dropdown"
                                             aria-expanded="false" title="Actions">
                                             <i class="bi bi-three-dots-vertical"></i>
-                                        </button>
+</button>
                                         <ul class="dropdown-menu dropdown-menu-end shadow-sm">
                                             <li><button class="dropdown-item edit-branch-btn" type="button"><i
                                                         class="bi bi-pencil text-primary me-2"></i>Edit</button></li>
@@ -256,7 +252,7 @@
                                             <li><button class="dropdown-item text-danger delete-branch-btn" type="button"><i
                                                         class="bi bi-trash3 text-danger me-2"></i>Delete</button></li>
                                         </ul>
-                                    </div>
+</div>
                                 </td>
                             </tr>
                         @empty
@@ -275,7 +271,7 @@
                         </tr>
                     </tbody>
                 </table>
-            </div>
+</div>
 
             <!-- Table Pagination & Footer Summary -->
             <div class="p-3 bg-white border-top d-flex flex-column flex-md-row justify-content-between align-items-center gap-3" id="tablePaginationContainer">
@@ -289,63 +285,63 @@
                     </select>
                     <span class="small text-muted ms-md-2" id="paginationSummary">
                         Showing <strong class="text-dark" id="pageStart">1</strong> &minus; <strong class="text-dark" id="pageEnd">{{ min(5, $branches->count()) }}</strong> of <strong class="text-dark" id="pageTotal">{{ $branches->count() }}</strong> branches
-                    </span>
-                </div>
+</span>
+</div>
                 <nav aria-label="Branch table pagination">
                     <ul class="pagination pagination-sm mb-0 gap-1" id="paginationNav">
                         <!-- Dynamic page links rendered by JS -->
                     </ul>
                 </nav>
-            </div>
-        </div>
+</div>
+</div>
 
-    </div>
+</div>
 
     <!-- Branch Add / Edit Modal -->
     <div class="modal fade" id="branchModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title fw-bold" id="branchModalTitle">Add Branch (புதிய வங்கி கிளை தகவல்)</h5>
+                    <h5 class="modal-title fw-bold" id="branchModalTitle">Add Branch</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
+</div>
                 <form id="branchForm" novalidate autocomplete="off">
                     <div class="modal-body">
                         <input type="hidden" id="branchEditId">
                         <div class="row g-3">
                             <div class="col-12 col-md-6">
-                                <label class="form-label small fw-semibold" for="modalBankId">Bank Name (வங்கி பெயர்)
+                                <label class="form-label small fw-semibold" for="modalBankId">Bank Name 
                                     <span class="text-danger">*</span></label>
                                 <select class="form-select" id="modalBankId" name="bank_id" required>
-                                    <option value="">Select Bank (வங்கியை தேர்ந்தெடுக்கவும்)</option>
+                                    <option value="">Select Bank</option>
                                     @foreach ($bankList as $bankItem)
                                         <option value="{{ $bankItem->id }}">{{ $bankItem->bank_name }}</option>
                                     @endforeach
                                 </select>
                                 <div class="invalid-feedback" id="errBankId"></div>
-                            </div>
+</div>
                             <div class="col-12 col-md-6">
-                                <label class="form-label small fw-semibold" for="modalBranchName">Branch Name (வங்கி கிளை)
+                                <label class="form-label small fw-semibold" for="modalBranchName">Branch Name 
                                     <span class="text-danger">*</span></label>
                                 <input type="text" class="form-control" id="modalBranchName" name="branch_name"
                                     placeholder="e.g. Valasaravakkam / Guindy / Porur" required>
                                 <div class="invalid-feedback" id="errBranchName"></div>
-                            </div>
+</div>
 
                             <div class="col-12 col-md-6">
                                 <label class="form-label small fw-semibold" for="modalBranchNameTa">Branch Name in
-                                    Tamil (தமிழ் பெயர்) <span class="text-muted small fw-normal">(விருப்பத்தேர்வு)</span></label>
+                                    Tamil  <span class="text-muted small fw-normal"></span></label>
                                 <input type="text" class="form-control" id="modalBranchNameTa" name="branch_name_ta"
                                     placeholder="e.g. வளசரவாக்கம் கிளை">
                                 <div class="invalid-feedback" id="errBranchNameTa"></div>
-                            </div>
+</div>
                             <div class="col-12 col-md-6">
                                 <label class="form-label small fw-semibold" for="modalIfsc">IFSC Code <span
                                         class="text-danger">*</span></label>
                                 <input type="text" class="form-control font-monospace text-uppercase" id="modalIfsc"
                                     name="ifsc_code" placeholder="e.g. SBIN0001234" maxlength="11" required>
                                 <div class="invalid-feedback" id="errIfsc"></div>
-                            </div>
+</div>
 
                             <div class="col-12 col-md-6">
                                 <label class="form-label small fw-semibold" for="modalContact">Branch Manager / Loan
@@ -353,47 +349,47 @@
                                 <input type="text" class="form-control" id="modalContact" name="contact_person"
                                     placeholder="e.g. Mr. S. Ramanathan">
                                 <div class="invalid-feedback" id="errContact"></div>
-                            </div>
+</div>
                             <div class="col-12 col-md-6">
                                 <label class="form-label small fw-semibold" for="modalPhone">Contact Phone Number</label>
                                 <input type="text" class="form-control" id="modalPhone" name="phone"
                                     placeholder="e.g. +91 98401 23456">
                                 <div class="invalid-feedback" id="errPhone"></div>
-                            </div>
+</div>
 
                             <div class="col-12 col-md-6">
-                                <label class="form-label small fw-semibold" for="modalFee">Standard Valuation Fee (ரூ.)
-                                    <span class="text-muted small fw-normal">(விருப்பத்தேர்வு)</span></label>
+                                <label class="form-label small fw-semibold" for="modalFee">Standard Valuation Fee (₹)
+                                    <span class="text-muted small fw-normal"></span></label>
                                 <div class="input-group has-validation">
                                     <span class="input-group-text">₹</span>
                                     <input type="number" class="form-control" id="modalFee" name="valuation_fee"
                                         placeholder="7500" min="0" step="100">
                                     <div class="invalid-feedback" id="errFee"></div>
-                                </div>
-                            </div>
+</div>
+</div>
 
                             <div class="col-12 col-md-6">
                                 <label class="form-label small fw-semibold" for="modalStatus">Status</label>
                                 <select class="form-select" id="modalStatus" name="status">
-                                    <option value="Active">Active (செயலில் உள்ளது)</option>
-                                    <option value="Inactive">Inactive (நிறுத்தப்பட்டது)</option>
+                                    <option value="Active">Active</option>
+                                    <option value="Inactive">Inactive</option>
                                 </select>
                                 <div class="invalid-feedback" id="errStatus"></div>
-                            </div>
-                        </div>
-                    </div>
+</div>
+</div>
+</div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-light btn-sm" data-bs-dismiss="modal">Cancel</button>
                         <button type="submit" class="btn btn-deiveni btn-sm" id="saveBranchBtn">
                             <span class="spinner-border spinner-border-sm me-1 d-none" id="saveBranchSpinner" role="status"
                                 aria-hidden="true"></span>
                             <span id="saveBranchBtnText">Save Branch Details</span>
-                        </button>
-                    </div>
+</button>
+</div>
                 </form>
-            </div>
-        </div>
-    </div>
+</div>
+</div>
+</div>
 @endsection
 
 @push('scripts')
@@ -463,7 +459,7 @@
                 });
 
                 const $filter = $('#branchBankFilter');
-                $filter.empty().append('<option value="">All Banks (அனைத்து வங்கிகள்)</option>');
+                $filter.empty().append('<option value="">All Banks</option>');
                 Array.from(bankNames).sort().forEach(function (bName) {
                     const isSelected = bName === currentSelected ? 'selected' : '';
                     $filter.append(`<option value="${bName}" ${isSelected}>${bName}</option>`);
@@ -618,7 +614,7 @@
                     <li class="page-item ${prevDisabled}">
                         <button class="page-link" type="button" data-page="${current - 1}" aria-label="Previous" title="Previous Page">
                             <i class="bi bi-chevron-left"></i>
-                        </button>
+</button>
                     </li>
                 `);
 
@@ -655,7 +651,7 @@
                     <li class="page-item ${nextDisabled}">
                         <button class="page-link" type="button" data-page="${current + 1}" aria-label="Next" title="Next Page">
                             <i class="bi bi-chevron-right"></i>
-                        </button>
+</button>
                     </li>
                 `);
             }
@@ -737,7 +733,7 @@
 
             // Open Modal for Add
             $('#addBranchBtn').on('click', function () {
-                $('#branchModalTitle').text('Add Branch (புதிய வங்கி கிளை தகவல்)');
+                $('#branchModalTitle').text('Add Branch ');
                 $('#saveBranchBtnText').text('Save Branch Details');
                 $('#branchEditId').val('');
                 $('#branchForm')[0].reset();
@@ -759,7 +755,7 @@
                 const fee = tr.data('fee');
                 const status = tr.data('status');
 
-                $('#branchModalTitle').text('Edit Branch (வங்கி கிளை விவரங்களை திருத்து)');
+                $('#branchModalTitle').text('Edit Branch ');
                 $('#saveBranchBtnText').text('Update Branch Details');
                 $('#branchEditId').val(id);
                 $('#modalBankId').val(bankId);
@@ -872,12 +868,12 @@
                                             <div class="d-flex align-items-center gap-2">
                                                 <div class="stat-icon-wrapper ${theme.iconWrapper} bank-icon-badge" style="width:36px; height:36px; font-size:1rem;">
                                                     <i class="bi bi-bank"></i>
-                                                </div>
+</div>
                                                 <div>
                                                     <div class="fw-bold text-dark fs-6 row-bank-title">${branch.bank_name}</div>
                                                     <small class="text-muted row-branch-subtitle">${branchSubtitle}</small>
-                                                </div>
-                                            </div>
+</div>
+</div>
                                         </td>
                                         <td>
                                             <div><span class="font-monospace badge ${theme.badge} row-ifsc">${branch.ifsc_code}</span></div>
@@ -894,13 +890,13 @@
                                             <div class="dropdown table-action-dropdown">
                                                 <button class="btn table-action-btn" type="button" data-bs-toggle="dropdown" data-bs-popper-config='{"strategy":"fixed"}' aria-expanded="false" title="Actions">
                                                     <i class="bi bi-three-dots-vertical"></i>
-                                                </button>
+</button>
                                                 <ul class="dropdown-menu dropdown-menu-end shadow-sm">
                                                     <li><button class="dropdown-item edit-branch-btn" type="button"><i class="bi bi-pencil text-primary me-2"></i>Edit</button></li>
                                                     <li><hr class="dropdown-divider my-1"></li>
                                                     <li><button class="dropdown-item text-danger delete-branch-btn" type="button"><i class="bi bi-trash3 text-danger me-2"></i>Delete</button></li>
                                                 </ul>
-                                            </div>
+</div>
                                         </td>
                                     </tr>
                                 `;

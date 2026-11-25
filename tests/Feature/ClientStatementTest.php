@@ -74,7 +74,7 @@ test('project site detail page displays client statement button and client print
     $response = $this->actingAs($this->siteManager)->get("/sites/{$this->site->encrypted_id}");
 
     $response->assertStatus(200);
-    $response->assertSee('Client (கிளையண்ட் அறிக்கை)');
+    $response->assertSee('Client');
     $response->assertSee('Client Statements & Print History', false);
     $response->assertSee('No Client Statements Generated Yet');
 });

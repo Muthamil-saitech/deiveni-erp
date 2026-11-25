@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('title', 'Site Cash Handling Report')
-@section('page_title', 'Site Cash Handling Report (தள பணப் புழக்கம் & செலவுகள் அறிக்கை)')
+@section('page_title', 'Site Cash Handling Report ')
 
 @push('styles')
     <style>
@@ -177,16 +177,16 @@
             <div class="d-flex justify-content-between align-items-center">
                 <div>
                     <h4 class="fw-bold mb-1 text-uppercase text-dark">DEIVENI CONSTRUCTIONS &amp; DEVELOPERS</h4>
-                    <h5 class="fw-bold mb-0 text-secondary">Site Cash Handling Report (தள பணப் புழக்கம் &amp; செலவுகள்
-                        அறிக்கை)</h5>
-                </div>
+                    <h5 class="fw-bold mb-0 text-secondary">Site Cash Handling Report
+                        </h5>
+</div>
                 <div class="text-end small">
                     <div>Generated: <strong>{{ date('d M Y, h:i A') }}</strong></div>
                     <div id="printActivePeriod">Period: <strong>{{ $filterMeta['this_week']['label'] }}</strong></div>
                     <div id="printActiveSite">Site: <strong>All Sites</strong></div>
-                </div>
-            </div>
-        </div>
+</div>
+</div>
+</div>
 
         <!-- Top Header & Action Toolbar -->
         <div class="card-custom p-3 p-md-4 mb-4 bg-white shadow-sm border-0" id="headerActionCard">
@@ -195,64 +195,63 @@
                     <div class="d-flex align-items-center gap-2 flex-wrap mb-1">
                         <h4 class="fw-bold mb-0 text-dark">
                             <i class="bi bi-cash-stack text-success me-2"></i>Site Cash Handling Report
-                            (தள பணப் புழக்கம் &amp; செலவுகள் அறிக்கை)
                         </h4>
                         @if ($isAdmin)
                             <span class="badge bg-primary-subtle text-primary border border-primary-subtle">
                                 <i class="bi bi-shield-lock me-1"></i> Admin View
-                            </span>
+</span>
                         @endif
-                    </div>
-                </div>
+</div>
+</div>
 
                 <!-- Export & Navigation Actions -->
                 <div class="d-flex gap-2 flex-wrap align-items-center">
                     <button type="button" class="btn btn-outline-success btn-sm" id="exportExcelBtn">
                         <i class="bi bi-file-earmark-excel me-1"></i> Export Excel
-                    </button>
+</button>
                     <button type="button" class="btn btn-outline-danger btn-sm" id="exportPdfBtn">
                         <i class="bi bi-file-earmark-pdf me-1"></i> Export PDF
-                    </button>
+</button>
                     <button type="button" class="btn btn-outline-secondary btn-sm" id="printReportBtn">
                         <i class="bi bi-printer me-1"></i> Print
-                    </button>
-                </div>
-            </div>
-        </div>
+</button>
+</div>
+</div>
+</div>
 
         <!-- Live Cash Formula Banner (Synchronized with Site Cash Handling Module) -->
         <div class="card-custom p-3 p-md-3 mb-4 bg-white border-start border-4 border-success shadow-sm formula-print-box">
             <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3">
                 <div>
                     <span class="badge bg-success-subtle text-success border border-success-subtle fw-semibold mb-1">
-                        <i class="bi bi-calculator me-1"></i> Site Cash Formula (தள ரொக்க சூத்திரம்)
-                    </span>
+                        <i class="bi bi-calculator me-1"></i> Site Cash Formula 
+</span>
                     <h6 class="fw-bold text-dark mb-1">Cash-in-Hand = Advance + Collections &minus; Purchases &minus; Wages
                         &minus; Returned</h6>
                     <p class="text-muted small mb-0 font-monospace" id="reportFormulaDisplay">
                         ₹0 (Adv) + ₹0 (Col) &minus; ₹0 (Pur) &minus; ₹0 (Wage) &minus; ₹0 (Ret) = <strong
                             class="text-success">₹0</strong>
                     </p>
-                </div>
+</div>
                 <div class="d-flex gap-2 flex-wrap align-items-center">
                     <div class="badge bg-light text-dark border p-2" id="chipAdvance">
                         <i class="bi bi-plus-circle text-primary me-1"></i>Adv: <strong>₹0</strong>
-                    </div>
+</div>
                     <div class="badge bg-light text-dark border p-2" id="chipCollections">
                         <i class="bi bi-cash-stack text-success me-1"></i>Col: <strong>₹0</strong>
-                    </div>
+</div>
                     <div class="badge bg-light text-dark border p-2" id="chipPurchases">
                         <i class="bi bi-cart-dash text-danger me-1"></i>Pur: <strong>₹0</strong>
-                    </div>
+</div>
                     <div class="badge bg-light text-dark border p-2" id="chipWages">
                         <i class="bi bi-people text-danger me-1"></i>Wage: <strong>₹0</strong>
-                    </div>
+</div>
                     <div class="badge bg-light text-dark border p-2" id="chipReturned">
                         <i class="bi bi-arrow-left-right text-warning me-1"></i>Ret: <strong>₹0</strong>
-                    </div>
-                </div>
-            </div>
-        </div>
+</div>
+</div>
+</div>
+</div>
 
         <!-- Filter Toolbar -->
         <div class="card-custom p-3 mb-4 bg-white shadow-sm border-0" id="filterCard">
@@ -260,64 +259,64 @@
                 <!-- Date Period Filter (Task 4: Order: today, this_week, last_week (date range), this_month, custom) -->
                 <div class="col-12 col-md-3">
                     <label class="form-label small fw-semibold mb-1 text-muted">
-                        <i class="bi bi-calendar3 me-1 text-primary"></i> Date Period (தேதி வடிகட்டி)
-                    </label>
+                        <i class="bi bi-calendar3 me-1 text-primary"></i> Date Period 
+</label>
                     <select class="form-select form-select-sm" id="filterPeriod" name="period">
                         <option value="today" {{ ($activeFilters['period'] ?? '') === 'today' ? 'selected' : '' }}>
-                            Today (இன்று - {{ $filterMeta['today']['label'] }})
-                        </option>
+                            Today ({{ $filterMeta['today']['label'] }})
+</option>
                         <option value="this_week" {{ ($activeFilters['period'] ?? 'this_week') === 'this_week' ? 'selected' : '' }}>
-                            This Week (இந்த வாரம் - {{ $filterMeta['this_week']['label'] }})
-                        </option>
+                            This Week ({{ $filterMeta['this_week']['label'] }})
+</option>
                         <option value="last_week" {{ ($activeFilters['period'] ?? '') === 'last_week' ? 'selected' : '' }}>
                             Last Week ({{ $filterMeta['last_week']['label'] }})
-                        </option>
+</option>
                         <option value="this_month" {{ ($activeFilters['period'] ?? '') === 'this_month' ? 'selected' : '' }}>
-                            This Month (நடப்பு மாதம் - {{ $filterMeta['this_month']['label'] }})
-                        </option>
+                            This Month ({{ $filterMeta['this_month']['label'] }})
+</option>
                         <option value="custom" {{ ($activeFilters['period'] ?? '') === 'custom' ? 'selected' : '' }}>
                             Custom Date Range...
-                        </option>
+</option>
                         <option value="all" {{ ($activeFilters['period'] ?? '') === 'all' ? 'selected' : '' }}>
-                            All Dates (அனைத்து தேதிகள்)
-                        </option>
+                            All Dates 
+</option>
                     </select>
-                </div>
+</div>
 
                 <!-- Custom Date Inputs -->
                 <div class="col-6 col-md-2" id="customDateStartCol" style="{{ ($activeFilters['period'] ?? '') === 'custom' ? '' : 'display: none;' }}">
                     <label class="form-label small fw-semibold mb-1 text-muted">From Date</label>
                     <input type="date" class="form-control form-control-sm" id="filterStartDate"
                         value="{{ $activeFilters['start_date'] ?? $filterMeta['this_week']['start'] }}">
-                </div>
+</div>
                 <div class="col-6 col-md-2" id="customDateEndCol" style="{{ ($activeFilters['period'] ?? '') === 'custom' ? '' : 'display: none;' }}">
                     <label class="form-label small fw-semibold mb-1 text-muted">To Date</label>
                     <input type="date" class="form-control form-control-sm" id="filterEndDate"
                         value="{{ $activeFilters['end_date'] ?? $filterMeta['this_week']['end'] }}">
-                </div>
+</div>
 
                 <!-- Project Site Filter -->
                 <div class="col-6 col-md-3">
                     <label class="form-label small fw-semibold mb-1 text-muted">
-                        <i class="bi bi-building me-1 text-primary"></i> Project Site (கட்டுமான தளம்)
-                    </label>
+                        <i class="bi bi-building me-1 text-primary"></i> Project Site 
+</label>
                     <select class="form-select form-select-sm" id="filterSite" name="site_id">
-                        <option value="all">All Sites (அனைத்து தளங்கள்)</option>
+                        <option value="all">All Sites</option>
                         @foreach ($sites as $site)
                             <option value="{{ $site->id }}" {{ (string) ($activeFilters['site_id'] ?? '') === (string) $site->id ? 'selected' : '' }}>
                                 {{ $site->name }}
-                            </option>
+</option>
                         @endforeach
                     </select>
-                </div>
+</div>
 
                 <!-- Cash Flow Type Filter -->
                 <div class="col-6 col-md-2">
                     <label class="form-label small fw-semibold mb-1 text-muted">
-                        <i class="bi bi-funnel me-1 text-primary"></i> Flow Type (வகை)
-                    </label>
+                        <i class="bi bi-funnel me-1 text-primary"></i> Flow Type 
+</label>
                     <select class="form-select form-select-sm" id="filterFlowType" name="flow_type">
-                        <option value="all">All Flow Types (அனைத்தும்)</option>
+                        <option value="all">All Flow Types</option>
                         <option value="Advance Received">Advance Received (+)</option>
                         <option value="Client Collection">Client Collection (+)</option>
                         <option value="Material Purchase">Material Purchase (-)</option>
@@ -327,39 +326,39 @@
                         <option value="Tool Rental">Tool Rental (-)</option>
                         <option value="Other Expense">Other Expense (-)</option>
                     </select>
-                </div>
+</div>
 
                 <!-- Text Search -->
                 <div class="col-12 col-md-4">
                     <label class="form-label small fw-semibold mb-1 text-muted">
                         <i class="bi bi-search me-1 text-primary"></i> Search Particulars / Payee / Bill No
-                    </label>
+</label>
                     <div class="input-group input-group-sm">
                         <input type="text" class="form-control" id="filterSearchInput"
                             placeholder="Search payee, bill no, material, notes...">
                         <button class="btn btn-outline-secondary" type="button" id="clearSearchBtn">
                             <i class="bi bi-x"></i>
-                        </button>
-                    </div>
-                </div>
+</button>
+</div>
+</div>
 
                 <!-- Reset Filter Button -->
                 <div class="col-12 col-md-2">
                     <button type="button" class="btn btn-sm btn-light border text-muted w-100" id="resetFilterBtn">
                         <i class="bi bi-arrow-counterclockwise me-1"></i> Reset Filters
-                    </button>
-                </div>
-            </div>
+</button>
+</div>
+</div>
 
             <div class="d-flex justify-content-between align-items-center mt-2 pt-2 border-top">
                 <span class="small text-muted" id="filterMatchCountBadge">
                     Active filters: <strong>This Week</strong> &bull; <strong>All Sites</strong>
-                </span>
+</span>
                 <span class="small text-muted">
                     <i class="bi bi-database-check text-success me-1"></i>Data Source: Site Cash Handling Register
-                </span>
-            </div>
-        </div>
+</span>
+</div>
+</div>
 
         <!-- KPI Summary Cards -->
         <div class="row g-3 mb-4 kpi-print-grid">
@@ -367,30 +366,30 @@
                 <div class="card-custom p-3 bg-white border-start border-4 border-success h-100 shadow-sm">
                     <div class="d-flex justify-content-between align-items-start">
                         <div>
-                            <div class="text-muted small fw-semibold">Total Cash Inflow (வரவு)</div>
+                            <div class="text-muted small fw-semibold">Total Cash Inflow</div>
                             <h4 class="fw-bold mb-0 text-success mt-1" id="kpiCashIn">₹0</h4>
                             <small class="text-muted" id="kpiCashInSub">Advance + Collections</small>
-                        </div>
+</div>
                         <div class="bg-success-subtle text-success p-2 rounded no-print">
                             <i class="bi bi-arrow-down-left-circle-fill fs-5"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
+</div>
+</div>
+</div>
+</div>
             <div class="col-6 col-md-3">
                 <div class="card-custom p-3 bg-white border-start border-4 border-danger h-100 shadow-sm">
                     <div class="d-flex justify-content-between align-items-start">
                         <div>
-                            <div class="text-muted small fw-semibold">Total Cash Outflow (பற்று)</div>
+                            <div class="text-muted small fw-semibold">Total Cash Outflow</div>
                             <h4 class="fw-bold mb-0 text-danger mt-1" id="kpiCashOut">₹0</h4>
                             <small class="text-muted" id="kpiCashOutSub">Purchases, Wages &amp; Returned</small>
-                        </div>
+</div>
                         <div class="bg-danger-subtle text-danger p-2 rounded no-print">
                             <i class="bi bi-arrow-up-right-circle-fill fs-5"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
+</div>
+</div>
+</div>
+</div>
             <div class="col-6 col-md-3">
                 <div class="card-custom p-3 bg-white border-start border-4 border-primary h-100 shadow-sm">
                     <div class="d-flex justify-content-between align-items-start">
@@ -398,13 +397,13 @@
                             <div class="text-muted small fw-semibold">Net Site Cash Balance</div>
                             <h4 class="fw-bold mb-0 text-primary mt-1" id="kpiNetCash">₹0</h4>
                             <small class="text-muted">Current cash-in-hand at site</small>
-                        </div>
+</div>
                         <div class="bg-primary-subtle text-primary p-2 rounded no-print">
                             <i class="bi bi-wallet-fill fs-5"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
+</div>
+</div>
+</div>
+</div>
             <div class="col-6 col-md-3">
                 <div class="card-custom p-3 bg-white border-start border-4 border-secondary h-100 shadow-sm">
                     <div class="d-flex justify-content-between align-items-start">
@@ -412,14 +411,14 @@
                             <div class="text-muted small fw-semibold">Total Cash Entries</div>
                             <h4 class="fw-bold mb-0 text-dark mt-1" id="kpiTxnCount">0</h4>
                             <small class="text-muted">Filtered transactions</small>
-                        </div>
+</div>
                         <div class="bg-light text-secondary p-2 rounded border no-print">
                             <i class="bi bi-receipt fs-5"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+</div>
+</div>
+</div>
+</div>
+</div>
 
         <!-- Site Cash Handling Table Card -->
         <div class="card-custom p-3 p-md-4 bg-white mb-4 shadow-sm border-0">
@@ -427,17 +426,17 @@
                 <div>
                     <h6 class="fw-bold mb-0 text-dark">
                         <i class="bi bi-journal-check text-success me-1"></i>
-                        Site Cash Register (தள பணப் புழக்க விவரங்கள்)
-                    </h6>
+                        Site Cash Register 
+</h6>
                     <small class="text-muted">Chronological site cash transactions with supplier details, bills, and cash
                         in/out breakdown</small>
-                </div>
+</div>
                 <div class="d-flex gap-2 align-items-center">
                     <span class="badge bg-success-subtle text-success border border-success-subtle"
                         id="siteCashNetBadge">Net Cash: ₹0</span>
                     <span class="badge bg-light text-dark border" id="siteCashCountBadge">0 Entries</span>
-                </div>
-            </div>
+</div>
+</div>
 
             <div class="table-responsive">
                 <table class="table table-hover align-middle mb-0" id="smSiteCashTable">
@@ -449,8 +448,8 @@
                             <th style="min-width: 220px;">Particulars / Description</th>
                             <th style="min-width: 140px;">Payee / Supplier</th>
                             <th style="min-width: 110px;">Bill / Ref No</th>
-                            <th class="text-end" style="min-width: 110px;">Cash In (+ரூ.)</th>
-                            <th class="text-end" style="min-width: 110px;">Cash Out (-ரூ.)</th>
+                            <th class="text-end" style="min-width: 110px;">Cash In</th>
+                            <th class="text-end" style="min-width: 110px;">Cash Out</th>
                             <th class="text-center no-print" style="min-width: 80px;">Action</th>
                         </tr>
                     </thead>
@@ -466,7 +465,7 @@
                         </tr>
                     </tfoot>
                 </table>
-            </div>
+</div>
 
             <!-- Table Pagination & Footer Summary -->
             <div class="p-3 bg-white border-top d-flex flex-column flex-md-row justify-content-between align-items-center gap-3 no-print" id="tablePaginationContainer">
@@ -480,17 +479,17 @@
                     </select>
                     <span class="small text-muted ms-md-2" id="paginationSummary">
                         Showing <strong class="text-dark" id="pageStart">1</strong> &minus; <strong class="text-dark" id="pageEnd">{{ min(10, count($transactions ?? [])) }}</strong> of <strong class="text-dark" id="pageTotal">{{ count($transactions ?? []) }}</strong> entries
-                    </span>
-                </div>
+</span>
+</div>
                 <nav aria-label="Site cash report pagination">
                     <ul class="pagination pagination-sm mb-0 gap-1" id="paginationNav">
                         <!-- Dynamic page links rendered by JS -->
                     </ul>
                 </nav>
-            </div>
-        </div>
+</div>
+</div>
 
-    </div>
+</div>
 @endsection
 
 @push('scripts')
@@ -651,9 +650,9 @@
                     const billCellHtml = `<div>${modeBadge}${imageBadge}</div>${refHtml}${bankHtml}${upiIdHtml}${acHolderHtml}${receiverHtml}${billNo ? `<div class="font-monospace text-muted small mt-1">Bill: ${escapeHtml(billNo)}</div>` : ''}`;
 
                     const viewActionHtml = tx.id
-                        ? `<a href="${baseUrl}/${tx.id}" class="btn btn-outline-primary btn-sm px-2 py-1" title="View Details in Site Cash (தள விவரங்கள்)">
+                        ? `<a href="${baseUrl}/${tx.id}" class="btn btn-outline-primary btn-sm px-2 py-1" title="View Details in Site Cash ">
                                            <i class="bi bi-eye me-1"></i>View
-                                       </a>`
+</a>`
                         : `<span class="text-muted small">-</span>`;
 
                     tbody.append(`
@@ -770,7 +769,7 @@
                     <li class="page-item ${prevDisabled}">
                         <button class="page-link" type="button" data-page="${current - 1}" aria-label="Previous" title="Previous Page">
                             <i class="bi bi-chevron-left"></i>
-                        </button>
+</button>
                     </li>
                 `);
 
@@ -807,7 +806,7 @@
                     <li class="page-item ${nextDisabled}">
                         <button class="page-link" type="button" data-page="${current + 1}" aria-label="Next" title="Next Page">
                             <i class="bi bi-chevron-right"></i>
-                        </button>
+</button>
                     </li>
                 `);
             }

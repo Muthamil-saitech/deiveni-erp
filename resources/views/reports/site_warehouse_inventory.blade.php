@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('title', 'Central Warehouse & Store Inventory Report')
-@section('page_title', 'Central Warehouse Report (மைய கிடங்கு அறிக்கை)')
+@section('page_title', 'Central Warehouse Report ')
 
 @push('styles')
     <style>
@@ -160,18 +160,18 @@
                 <div>
                     <h3 class="fw-bold mb-0 text-dark">DEIVENI CONSTRUCTIONS & DEVELOPERS</h3>
                     <div class="fs-6 fw-semibold text-secondary">
-                        Central Warehouse Report (மைய கிடங்கு அறிக்கை)
-                    </div>
-                </div>
+                        Central Warehouse Report 
+</div>
+</div>
                 <div class="text-end small text-muted">
                     <div>Generated: <strong>{{ date('d M Y, h:i A') }}</strong></div>
                     <div id="printActivePeriod">Period:
                         <strong>{{ $filterMeta['this_week']['label'] ?? 'This Week' }}</strong>
-                    </div>
+</div>
                     <div id="printActiveCategory">Category: <strong>All Categories</strong></div>
-                </div>
-            </div>
-        </div>
+</div>
+</div>
+</div>
 
         <!-- Top Header & Action Toolbar -->
         <div class="card-custom p-3 p-md-4 mb-4 bg-white shadow-sm border-0" id="headerActionCard">
@@ -180,30 +180,30 @@
                     <div class="d-flex align-items-center gap-2 flex-wrap mb-1">
                         <h4 class="fw-bold mb-0 text-dark">
                             <i class="bi bi-boxes text-secondary me-2"></i>Central Warehouse & Store Inventory Report
-                            (மைய கிடங்கு அறிக்கை)
-                        </h4>
+
+</h4>
                         @if ($isAdmin)
                             <span class="badge bg-primary-subtle text-primary border border-primary-subtle">
                                 <i class="bi bi-shield-lock me-1"></i> Admin View
-                            </span>
+</span>
                         @endif
-                    </div>
-                </div>
+</div>
+</div>
 
                 <!-- Export & Navigation Actions -->
                 <div class="d-flex gap-2 flex-wrap align-items-center">
                     <button type="button" class="btn btn-outline-success btn-sm" id="exportExcelBtn">
                         <i class="bi bi-file-earmark-excel me-1"></i> Export Excel
-                    </button>
+</button>
                     <button type="button" class="btn btn-outline-danger btn-sm" id="exportPdfBtn">
                         <i class="bi bi-file-earmark-pdf me-1"></i> Export PDF
-                    </button>
+</button>
                     <button type="button" class="btn btn-outline-secondary btn-sm" id="printReportBtn">
                         <i class="bi bi-printer me-1"></i> Print
-                    </button>
-                </div>
-            </div>
-        </div>
+</button>
+</div>
+</div>
+</div>
 
         <!-- Filter Toolbar -->
         <div class="card-custom p-3 mb-4 bg-white shadow-sm border-0" id="filterCard">
@@ -211,108 +211,108 @@
                 <!-- Date Period Filter (Strict Order: today, this_week, last_week with computed date range, this_month, custom) -->
                 <div class="col-12 col-md-3">
                     <label class="form-label small fw-semibold mb-1 text-muted" for="filterPeriod">
-                        <i class="bi bi-calendar3 me-1 text-primary"></i> Report Period (கால இடைவெளி)
-                    </label>
+                        <i class="bi bi-calendar3 me-1 text-primary"></i> Report Period 
+</label>
                     <select class="form-select form-select-sm" id="filterPeriod" name="period">
                         <option value="today" {{ ($activeFilters['period'] ?? '') === 'today' ? 'selected' : '' }}>
-                            Today (இன்று - {{ $filterMeta['today']['label'] }})
-                        </option>
+                            Today ({{ $filterMeta['today']['label'] }})
+</option>
                         <option value="this_week" {{ ($activeFilters['period'] ?? 'this_week') === 'this_week' ? 'selected' : '' }}>
-                            This Week (இந்த வாரம் - {{ $filterMeta['this_week']['label'] }})
-                        </option>
+                            This Week ({{ $filterMeta['this_week']['label'] }})
+</option>
                         <option value="last_week" {{ ($activeFilters['period'] ?? '') === 'last_week' ? 'selected' : '' }}>
-                            Last Week (கடந்த வாரம் - {{ $filterMeta['last_week']['label'] }})
-                        </option>
+                            Last Week ({{ $filterMeta['last_week']['label'] }})
+</option>
                         <option value="this_month" {{ ($activeFilters['period'] ?? '') === 'this_month' ? 'selected' : '' }}>
-                            This Month (நடப்பு மாதம் - {{ $filterMeta['this_month']['label'] }})
-                        </option>
+                            This Month ({{ $filterMeta['this_month']['label'] }})
+</option>
                         <option value="custom" {{ ($activeFilters['period'] ?? '') === 'custom' ? 'selected' : '' }}>
                             Custom Date Range...
-                        </option>
+</option>
                     </select>
-                </div>
+</div>
 
                 <!-- Custom Start Date -->
                 <div class="col-12 col-md-2" id="customDateStartCol"
                     style="{{ ($activeFilters['period'] ?? '') === 'custom' ? '' : 'display: none;' }}">
                     <label class="form-label small fw-semibold mb-1 text-muted" for="filterStartDate">
                         <i class="bi bi-calendar-event me-1"></i> From Date
-                    </label>
+</label>
                     <input type="date" class="form-control form-control-sm" id="filterStartDate"
                         value="{{ $activeFilters['start_date'] ?? '' }}">
-                </div>
+</div>
 
                 <!-- Custom End Date -->
                 <div class="col-12 col-md-2" id="customDateEndCol"
                     style="{{ ($activeFilters['period'] ?? '') === 'custom' ? '' : 'display: none;' }}">
                     <label class="form-label small fw-semibold mb-1 text-muted" for="filterEndDate">
                         <i class="bi bi-calendar-check me-1"></i> To Date
-                    </label>
+</label>
                     <input type="date" class="form-control form-control-sm" id="filterEndDate"
                         value="{{ $activeFilters['end_date'] ?? '' }}">
-                </div>
+</div>
 
                 <!-- Item Category Filter -->
                 <div class="col-12 col-md-3">
                     <label class="form-label small fw-semibold mb-1 text-muted" for="filterCategory">
-                        <i class="bi bi-tags me-1 text-primary"></i> Item Category (பிரிவு)
-                    </label>
+                        <i class="bi bi-tags me-1 text-primary"></i> Item Category 
+</label>
                     <select class="form-select form-select-sm" id="filterCategory" name="category">
-                        <option value="all" selected>All Categories (அனைத்து பிரிவுகள்)</option>
+                        <option value="all" selected>All Categories</option>
                         @foreach ($categories as $cat)
                             <option value="{{ $cat }}" {{ ($activeFilters['category'] ?? '') === $cat ? 'selected' : '' }}>
                                 {{ $cat }}
-                            </option>
+</option>
                         @endforeach
                     </select>
-                </div>
+</div>
 
                 <!-- Stock Level Status Filter -->
                 <div class="col-12 col-md-2">
                     <label class="form-label small fw-semibold mb-1 text-muted" for="filterStockStatus">
                         <i class="bi bi-shield-exclamation me-1 text-primary"></i> Stock Status
-                    </label>
+</label>
                     <select class="form-select form-select-sm" id="filterStockStatus" name="stock_status">
                         <option value="all" {{ ($activeFilters['stock_status'] ?? '') === 'all' ? 'selected' : '' }}>All Items
-                            (அனைத்தும்)</option>
+</option>
                         <option value="low" {{ ($activeFilters['stock_status'] ?? '') === 'low' ? 'selected' : '' }}>Low Stock
-                            Alert (குறைந்த இருப்பு)</option>
+                            Alert</option>
                         <option value="normal" {{ ($activeFilters['stock_status'] ?? '') === 'normal' ? 'selected' : '' }}>
-                            Normal Stock (போதுமான இருப்பு)</option>
+                            Normal Stock</option>
                     </select>
-                </div>
+</div>
 
                 <!-- Text Search -->
                 <div class="col-12 col-md-3">
                     <label class="form-label small fw-semibold mb-1 text-muted" for="filterSearchInput">
                         <i class="bi bi-search me-1 text-primary"></i> Search Item Name / SKU
-                    </label>
+</label>
                     <div class="input-group input-group-sm">
                         <input type="text" class="form-control" id="filterSearchInput"
                             placeholder="Search cement, trowel, WH-MAT-01..." value="{{ $activeFilters['search'] ?? '' }}">
                         <button class="btn btn-outline-secondary" type="button" id="clearSearchBtn">
                             <i class="bi bi-x"></i>
-                        </button>
-                    </div>
-                </div>
+</button>
+</div>
+</div>
 
                 <!-- Reset Filter Button -->
                 <div class="col-12 col-md-2">
                     <button type="button" class="btn btn-sm btn-light border text-muted w-100" id="resetFilterBtn">
                         <i class="bi bi-arrow-counterclockwise me-1"></i> Reset Filters
-                    </button>
-                </div>
-            </div>
+</button>
+</div>
+</div>
 
             <div class="d-flex justify-content-between align-items-center mt-2 pt-2 border-top">
                 <span class="small text-muted" id="filterMatchCountBadge">
                     Active filters:
                     <strong>{{ $filterMeta[$activeFilters['period'] ?? 'this_week']['label'] ?? 'This Week' }}</strong>
                     &bull; <strong>All Categories</strong> &bull; <strong>All Items</strong>
-                </span>
+</span>
                 <span class="small text-muted">Warehouse Central Store Inventory Register</span>
-            </div>
-        </div>
+</div>
+</div>
 
         <!-- KPI Summary Cards -->
         <div class="row g-3 mb-4 kpi-print-grid">
@@ -324,13 +324,13 @@
                             <h4 class="fw-bold mb-0 text-success mt-1" id="kpiValuation">
                                 ₹{{ number_format($kpis['total_valuation'], 2) }}</h4>
                             <small class="text-muted">Total inventory worth</small>
-                        </div>
+</div>
                         <div class="bg-success-subtle text-success p-2 rounded no-print">
                             <i class="bi bi-cash-stack fs-5"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
+</div>
+</div>
+</div>
+</div>
             <div class="col-6 col-lg-2">
                 <div class="card-custom p-3 bg-white border-start border-4 border-info h-100 shadow-sm">
                     <div class="d-flex justify-content-between align-items-start">
@@ -338,13 +338,13 @@
                             <div class="text-muted small fw-semibold">Active SKU Items</div>
                             <h4 class="fw-bold mb-0 text-dark mt-1" id="kpiSkuCount">{{ $kpis['sku_count'] }}</h4>
                             <small class="text-muted">Catalog items</small>
-                        </div>
+</div>
                         <div class="bg-info-subtle text-info p-2 rounded no-print">
                             <i class="bi bi-boxes fs-5"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
+</div>
+</div>
+</div>
+</div>
             <div class="col-6 col-lg-2">
                 <div class="card-custom p-3 bg-white border-start border-4 border-danger h-100 shadow-sm">
                     <div class="d-flex justify-content-between align-items-start">
@@ -352,13 +352,13 @@
                             <div class="text-muted small fw-semibold">Low Stock Items</div>
                             <h4 class="fw-bold mb-0 text-danger mt-1" id="kpiLowStock">{{ $kpis['low_stock_count'] }}</h4>
                             <small class="text-muted">Below threshold</small>
-                        </div>
+</div>
                         <div class="bg-danger-subtle text-danger p-2 rounded no-print">
                             <i class="bi bi-exclamation-triangle-fill fs-5"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
+</div>
+</div>
+</div>
+</div>
             <div class="col-6 col-lg-2">
                 <div class="card-custom p-3 bg-white border-start border-4 border-primary h-100 shadow-sm">
                     <div class="d-flex justify-content-between align-items-start">
@@ -366,31 +366,31 @@
                             <div class="text-muted small fw-semibold">Units in Warehouse</div>
                             <h4 class="fw-bold mb-0 text-primary mt-1" id="kpiTotalUnits">
                                 {{ number_format($kpis['total_units'], 2) }}
-                            </h4>
+</h4>
                             <small class="text-muted">Cumulative count</small>
-                        </div>
+</div>
                         <div class="bg-primary-subtle text-primary p-2 rounded no-print">
                             <i class="bi bi-check-all fs-5"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
+</div>
+</div>
+</div>
+</div>
             <div class="col-6 col-lg-3">
                 <div class="card-custom p-3 bg-white border-start border-4 border-warning h-100 shadow-sm">
                     <div class="d-flex justify-content-between align-items-start">
                         <div>
                             <div class="text-muted small fw-semibold">Period Movements</div>
                             <h4 class="fw-bold mb-0 text-dark mt-1" id="kpiMovementsCount">{{ $kpis['movements_count'] }}
-                            </h4>
+</h4>
                             <small class="text-muted">Dispatched & Inward logs</small>
-                        </div>
+</div>
                         <div class="bg-warning-subtle text-warning p-2 rounded no-print">
                             <i class="bi bi-arrow-left-right fs-5"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+</div>
+</div>
+</div>
+</div>
+</div>
 
         <!-- 1. Inventory Register Table Card -->
         <div class="card-custom p-3 p-md-4 bg-white mb-4 shadow-sm border-0">
@@ -398,34 +398,34 @@
                 <div>
                     <h6 class="fw-bold mb-0 text-dark">
                         <i class="bi bi-table text-secondary me-1"></i>
-                        1. Warehouse Inventory Register (மைய கிடங்கு இருப்பு விவரங்கள்)
-                    </h6>
+                        1. Warehouse Inventory Register 
+</h6>
                     <small class="text-muted">Current physical stock availability, safety thresholds, reorder status, and
                         valuation</small>
-                </div>
+</div>
                 <div class="d-flex gap-2 align-items-center">
                     <span class="badge bg-danger-subtle text-danger border border-danger-subtle" id="lowStockBadge">
                         {{ $kpis['low_stock_count'] }} Low Stock
-                    </span>
+</span>
                     <span class="badge bg-light text-dark border" id="valuationBadge">
                         Valuation: ₹{{ number_format($kpis['total_valuation'], 2) }}
-                    </span>
-                </div>
-            </div>
+</span>
+</div>
+</div>
 
             <div class="table-responsive">
                 <table class="table table-hover align-middle mb-0" id="smWarehouseTable">
                     <thead class="table-light text-muted small text-uppercase">
                         <tr>
                             <th style="min-width: 90px;">SKU Code</th>
-                            <th style="min-width: 180px;">Item Name (English & தமிழ்)</th>
+                            <th style="min-width: 180px;">Item Name</th>
                             <th style="min-width: 130px;">Category</th>
                             <th class="text-center" style="min-width: 90px;">Stock</th>
                             <th style="min-width: 80px;">Unit</th>
                             <th class="text-center" style="min-width: 100px;">Threshold</th>
                             <th class="text-center" style="min-width: 120px;">Stock Status</th>
                             <th style="min-width: 180px;">Issued to Site</th>
-                            <th class="text-end" style="min-width: 110px;">Valuation (ரூ.)</th>
+                            <th class="text-end" style="min-width: 110px;">Valuation (₹)</th>
                         </tr>
                     </thead>
                     <tbody id="smWarehouseTableBody" class="small">
@@ -440,7 +440,7 @@
                         </tr>
                     </tfoot>
                 </table>
-            </div>
+</div>
 
             <!-- Table Pagination & Summary Container -->
             <div class="d-flex flex-column flex-md-row justify-content-between align-items-center gap-3 pt-3 border-top mt-2" id="whPaginationContainer">
@@ -453,17 +453,17 @@
                         <option value="50">50</option>
                     </select>
                     <span class="text-muted small">entries per page</span>
-                </div>
+</div>
                 <div class="text-muted small" id="whPaginationSummary">
                     Showing 0 to 0 of 0 entries
-                </div>
+</div>
                 <nav aria-label="Warehouse Inventory Table Pagination">
                     <ul class="pagination pagination-sm mb-0" id="whPaginationNav">
                         <!-- Buttons rendered via JS -->
                     </ul>
                 </nav>
-            </div>
-        </div>
+</div>
+</div>
 
         <!-- 2. Stock Movement & Dispatch Register Table Card (Task 6) -->
         <div class="card-custom p-3 p-md-4 bg-white mb-4 shadow-sm border-0">
@@ -471,23 +471,23 @@
                 <div>
                     <h6 class="fw-bold mb-0 text-dark">
                         <i class="bi bi-clock-history text-secondary me-1"></i>
-                        2. Stock Movement & Dispatch Register (பொருட்கள் இயக்கம் & தள விநியோக அறிக்கை)
-                    </h6>
+                        2. Stock Movement & Dispatch Register 
+</h6>
                     <small class="text-muted">Item issue to construction sites, material inward shipments, and inventory
                         balance adjustments</small>
-                </div>
+</div>
                 <div class="d-flex gap-2 flex-wrap align-items-center">
                     <span class="badge bg-primary-subtle text-primary border border-primary-subtle" id="movementsBadge">
                         0 Movements
-                    </span>
+</span>
                     <span class="badge bg-success-subtle text-success border border-success-subtle" id="dispatchedBadge">
                         Dispatched: 0
-                    </span>
+</span>
                     <span class="badge bg-info-subtle text-info border border-info-subtle" id="inwardBadge">
                         Inward: 0
-                    </span>
-                </div>
-            </div>
+</span>
+</div>
+</div>
 
             <div class="table-responsive">
                 <table class="table table-hover align-middle mb-0" id="smMovementsTable">
@@ -517,7 +517,7 @@
                         </tr>
                     </tfoot>
                 </table>
-            </div>
+</div>
 
             <!-- Table Pagination & Summary Container -->
             <div class="d-flex flex-column flex-md-row justify-content-between align-items-center gap-3 pt-3 border-top mt-2" id="movPaginationContainer">
@@ -530,19 +530,19 @@
                         <option value="50">50</option>
                     </select>
                     <span class="text-muted small">entries per page</span>
-                </div>
+</div>
                 <div class="text-muted small" id="movPaginationSummary">
                     Showing 0 to 0 of 0 entries
-                </div>
+</div>
                 <nav aria-label="Stock Movement Table Pagination">
                     <ul class="pagination pagination-sm mb-0" id="movPaginationNav">
                         <!-- Buttons rendered via JS -->
                     </ul>
                 </nav>
-            </div>
-        </div>
+</div>
+</div>
 
-    </div>
+</div>
 @endsection
 
 @push('scripts')
