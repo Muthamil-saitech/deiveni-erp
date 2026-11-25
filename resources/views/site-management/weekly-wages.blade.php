@@ -62,11 +62,11 @@
                         <i class="bi bi-calendar-plus"></i>
                         <span>Go to Daily Allocation</span>
 </a>
-                    <button class="btn btn-deiveni btn-sm d-flex align-items-center gap-1" id="saveWeeklySettlementBtn" {{ !$isWeekend ? 'disabled' : '' }}
-                        title="{{ !$isWeekend ? 'Approve & Settle is only enabled on weekends (Saturday & Sunday)' : 'Approve & Settle Weekly Wages' }}">
+                    <button class="btn btn-deiveni btn-sm d-flex align-items-center gap-1" id="saveWeeklySettlementBtn"
+                        title="Approve & Settle Weekly Wages">
                         <i class="bi bi-check2-all"></i>
                         <span>Approve & Settle Weekly Wages</span>
-</button>
+                    </button>
 </div>
 </div>
 </div>
@@ -260,19 +260,8 @@
 </div>
 </div>
 
-            <!-- Common expense suggestions datalist -->
-            <datalist id="expenseCommonSuggestions">
-                <option value="பஸ் செலவு (Bus Fare)">
-                <option value="மெஷின் உடைப்பு (Machine Breaker)">
-                <option value="நூல்கயிறு (Rope)">
-                <option value="வெல்டிங் (Welding)">
-                <option value="டீ & சிற்றுண்டி (Tea & Snacks)">
-                <option value="மேற்பார்வையாளர் படி (Supervisor Allowance)">
-                <option value="இதர செலவுகள் (Other Expenses)">
-            </datalist>
-
             <!-- Expenses Table -->
-            <div class="table-responsive mb-2">
+            <div class="table-responsive mb-2" style="overflow: visible !important;">
                 <table class="table table-custom table-bordered align-middle mb-0" id="weeklyExpensesTable">
                     <thead class="bg-light text-muted small">
                         <tr>
@@ -371,11 +360,11 @@
                     <i class="bi bi-arrow-left"></i>
                     <span>Back to Daily Allocation</span>
 </a>
-                <button type="button" class="btn btn-deiveni btn-sm d-flex align-items-center gap-1" id="btnFinalApprove" {{ !$isWeekend ? 'disabled' : '' }}
-                    title="{{ !$isWeekend ? 'Approve & Settle is only enabled on weekends (Saturday & Sunday)' : 'Approve & Settle Week ' }}">
+                <button type="button" class="btn btn-deiveni btn-sm d-flex align-items-center gap-1" id="btnFinalApprove"
+                    title="Approve & Settle Week">
                     <i class="bi bi-check2-circle fs-6"></i>
                     <span>Approve & Settle Week</span>
-</button>
+                </button>
 </div>
 </div>
 
@@ -451,6 +440,212 @@
                 const ref = new Date(refDate);
                 ref.setDate(ref.getDate() + (offsetWeeks * 7));
                 return getWeekRangeForDate(ref);
+            }
+
+            const ROUTE_QUICK_ADD_MATERIAL = "{{ route('daily-allocation.quick-add-material') }}";
+            let availableMaterials = @json($materials ?? []);
+
+            function escapeHtml(str) {
+                return String(str ?? '')
+                    .replace(/&/g, '&amp;')
+                    .replace(/</g, '&lt;')
+                    .replace(/>/g, '&gt;')
+                    .replace(/"/g, '&quot;');
+            }
+
+            function createWeeklyExpenseRowHtml(e = null) {
+                const titleVal = e ? (e.title || '') : '';
+                const qty = e ? (parseFloat(e.qty) || 1) : 1;
+                const unitPrice = e ? (parseFloat(e.unitPrice) || 0) : '';
+                const cost = e ? Math.round(e.cost || (qty * (parseFloat(e.unitPrice) || 0))) : 0;
+
+                return `
+                    <tr class="weekly-exp-row align-middle">
+                        <td>
+                            <div class="position-relative expense-autocomplete-wrapper">
+                                <div class="input-group input-group-sm">
+                                    <span class="input-group-text bg-light text-muted"><i class="bi bi-search"></i></span>
+                                    <input type="text" class="form-control form-control-sm weekly-exp-title"
+                                        value="${escapeHtml(titleVal)}"
+                                        placeholder="Search Material Master or type new..."
+                                        autocomplete="off">
+                                </div>
+                                <div class="expense-suggestions-dropdown shadow rounded border d-none"
+                                    style="background: #fff; max-height: 220px; overflow-y: auto;"></div>
+                            </div>
+                        </td>
+                        <td>
+                            <input type="number" min="0" step="any" class="form-control form-control-sm text-center weekly-exp-qty" value="${qty}" placeholder="Qty">
+                        </td>
+                        <td>
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text">₹</span>
+                                <input type="number" min="0" step="any" class="form-control text-end fw-semibold weekly-exp-unit-price" value="${unitPrice}" placeholder="Price">
+                            </div>
+                        </td>
+                        <td class="text-end">
+                            <span class="fw-bold text-dark fs-6 weekly-exp-subtotal-text">₹${cost.toLocaleString('en-IN')}</span>
+                            <input type="hidden" class="weekly-exp-cost" value="${cost}">
+                        </td>
+                        <td class="text-center">
+                            <button type="button" class="btn btn-sm btn-link text-danger p-0 remove-weekly-exp-btn" title="Remove"><i class="bi bi-trash3 fs-5"></i></button>
+                        </td>
+                    </tr>
+                `;
+            }
+
+            function setupWeeklyExpenseAutocomplete(wrapper) {
+                const $wrap = $(wrapper);
+                const $input = $wrap.find('.weekly-exp-title');
+                const $dropdown = $wrap.find('.expense-suggestions-dropdown');
+
+                function positionDropdown() {
+                    if (!$input.length) return;
+                    const rect = $input[0].getBoundingClientRect();
+                    $dropdown.css({
+                        position: 'fixed',
+                        top: (rect.bottom + 2) + 'px',
+                        left: rect.left + 'px',
+                        width: Math.max(rect.width, 320) + 'px',
+                        zIndex: 99999
+                    });
+                }
+
+                function renderMatches(q) {
+                    const query = (q || '').toLowerCase().trim();
+                    let matches = availableMaterials;
+                    if (query) {
+                        matches = availableMaterials.filter(function (m) {
+                            const en = (m.name_en || '').toLowerCase();
+                            const ta = (m.name_ta || '').toLowerCase();
+                            return en.includes(query) || ta.includes(query);
+                        });
+                    }
+
+                    const trimmedQ = (q || '').trim();
+
+                    if (!matches || matches.length === 0) {
+                        let emptyHtml = `
+                            <div class="p-2 small text-muted text-center">
+                                <i class="bi bi-info-circle me-1"></i>No matching materials found in Master.
+                            </div>
+                        `;
+                        if (trimmedQ) {
+                            emptyHtml += `
+                                <div class="border-top p-1 bg-light">
+                                    <button type="button" class="btn btn-sm btn-outline-primary w-100 text-start quick-add-material-btn d-flex align-items-center justify-content-between py-1 px-2"
+                                        data-name="${escapeHtml(trimmedQ)}">
+                                        <span class="text-truncate small"><i class="bi bi-plus-circle-fill text-success me-1"></i>Add "<strong>${escapeHtml(trimmedQ)}</strong>" to Master</span>
+                                        <span class="badge bg-primary-subtle text-primary ms-1" style="font-size:0.65rem;">+ Add Master</span>
+                                    </button>
+                                </div>
+                            `;
+                        }
+                        $dropdown.html(emptyHtml).removeClass('d-none');
+                        positionDropdown();
+                        return;
+                    }
+
+                    let html = '<div class="py-1">';
+                    html += '<div class="px-2 py-1 small fw-bold text-uppercase text-muted" style="font-size:0.7rem; background:#f8fafc;"><i class="bi bi-box-seam me-1"></i>Materials Master</div>';
+                    matches.slice(0, 20).forEach(function (m) {
+                        const unitName = (m.unit && typeof m.unit === 'object') ? (m.unit.name_en || m.unit.code || '') : (m.unit || '');
+                        const unitBadge = unitName ? `<span class="badge bg-light text-secondary border ms-1" style="font-size:0.7rem;">${escapeHtml(unitName)}</span>` : '';
+                        const taText = m.name_ta ? `<span class="text-muted ms-1">(${escapeHtml(m.name_ta)})</span>` : '';
+                        html += `
+                            <a href="javascript:void(0)" class="dropdown-item py-1 px-2 d-flex justify-content-between align-items-center expense-sugg-item"
+                                data-en="${escapeHtml(m.name_en)}" data-ta="${escapeHtml(m.name_ta || '')}">
+                                <div class="text-truncate me-2">
+                                    <span class="fw-semibold text-dark">${escapeHtml(m.name_en)}</span>
+                                    ${taText}
+                                </div>
+                                ${unitBadge}
+                            </a>
+                        `;
+                    });
+
+                    const hasExactMatch = matches.some(function (m) {
+                        return (m.name_en || '').toLowerCase() === query || (m.name_ta || '').toLowerCase() === query;
+                    });
+
+                    if (trimmedQ && !hasExactMatch) {
+                        html += `
+                            <div class="border-top p-1 bg-light">
+                                <button type="button" class="btn btn-sm btn-link text-primary w-100 text-start text-decoration-none py-1 px-2 quick-add-material-btn d-flex align-items-center justify-content-between"
+                                    data-name="${escapeHtml(trimmedQ)}">
+                                    <span class="text-truncate small"><i class="bi bi-plus-circle text-success me-1"></i>Add "<strong>${escapeHtml(trimmedQ)}</strong>" to Materials Master</span>
+                                    <span class="badge bg-secondary-subtle text-secondary" style="font-size:0.65rem;">New</span>
+                                </button>
+                            </div>
+                        `;
+                    }
+
+                    html += '</div>';
+                    $dropdown.html(html).removeClass('d-none');
+                    positionDropdown();
+                }
+
+                $input.on('focus input', function () {
+                    renderMatches($(this).val());
+                    $(window).on('scroll.weeklyExpAutoc resize.weeklyExpAutoc', positionDropdown);
+                });
+
+                $(document).on('click', function (e) {
+                    if (!$(e.target).closest($wrap).length && !$(e.target).closest($dropdown).length) {
+                        $dropdown.addClass('d-none');
+                        $(window).off('scroll.weeklyExpAutoc resize.weeklyExpAutoc');
+                    }
+                });
+
+                $dropdown.on('click', '.expense-sugg-item', function () {
+                    const en = $(this).data('en');
+                    const ta = $(this).data('ta');
+                    const display = ta ? `${en} - ${ta}` : en;
+                    $input.val(display);
+                    $dropdown.addClass('d-none');
+                    $(window).off('scroll.weeklyExpAutoc resize.weeklyExpAutoc');
+                    recalculateWeeklySheet();
+                    autoSaveWeeklyExpenses();
+                });
+
+                $dropdown.on('click', '.quick-add-material-btn', function (e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const name = $(this).data('name');
+                    if (!name) return;
+
+                    const $btn = $(this);
+                    $btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-1"></span> Adding to Master...');
+
+                    $.ajax({
+                        url: ROUTE_QUICK_ADD_MATERIAL,
+                        type: 'POST',
+                        contentType: 'application/json',
+                        data: JSON.stringify({ name: name }),
+                        success: function (res) {
+                            if (res.success && res.material) {
+                                const exists = availableMaterials.some(m => m.id === res.material.id);
+                                if (!exists) {
+                                    availableMaterials.unshift(res.material);
+                                }
+                                const display = res.material.name_ta && res.material.name_ta !== res.material.name_en
+                                    ? `${res.material.name_en} - ${res.material.name_ta}`
+                                    : res.material.name_en;
+                                $input.val(display);
+                                $dropdown.addClass('d-none');
+                                $(window).off('scroll.weeklyExpAutoc resize.weeklyExpAutoc');
+                                recalculateWeeklySheet();
+                                autoSaveWeeklyExpenses();
+                                showToast(`Material "${res.material.name_en}" added into Materials Master!`, 'success');
+                            }
+                        },
+                        error: function (xhr) {
+                            $btn.prop('disabled', false).html('<i class="bi bi-plus-circle text-danger me-1"></i> Try Again');
+                            const msg = (xhr.responseJSON && xhr.responseJSON.message) ? xhr.responseJSON.message : 'Failed to add material.';
+                            showToast(msg, 'danger');
+                        }
+                    });
+                });
             }
 
             const now = new Date();
@@ -633,6 +828,8 @@
                 const endDate = selectedOption.data('end');
 
                 if (!startDate || !endDate) return;
+
+                updateSettleButtonState(startDate);
 
                 // Update Badges and labels according to active cycle
                 const startObj = new Date(startDate + 'T00:00:00');
@@ -943,33 +1140,9 @@
                     if (weeklyExpenses.length > 0) {
                         hasAnyExpenses = true;
                         weeklyExpenses.forEach(function (e) {
-                            const qty = parseFloat(e.qty) || 1;
-                            const unitPrice = parseFloat(e.unitPrice) || 0;
-                            const cost = Math.round(e.cost || (qty * unitPrice));
-                            const row = `
-                                <tr class="weekly-exp-row align-middle">
-                                    <td>
-                                        <input type="text" list="expenseCommonSuggestions" class="form-control form-control-sm weekly-exp-title" value="${e.title || ''}" placeholder="e.g. பஸ் செலவு (Bus Fare), மெஷின் உடைப்பு, நூல்கயிறு">
-                                    </td>
-                                    <td>
-                                        <input type="number" min="0" step="any" class="form-control form-control-sm text-center weekly-exp-qty" value="${qty}" placeholder="Qty">
-                                    </td>
-                                    <td>
-                                        <div class="input-group input-group-sm">
-                                            <span class="input-group-text">₹</span>
-                                            <input type="number" min="0" step="any" class="form-control text-end fw-semibold weekly-exp-unit-price" value="${unitPrice}" placeholder="Price">
-</div>
-                                    </td>
-                                    <td class="text-end">
-                                        <span class="fw-bold text-dark fs-6 weekly-exp-subtotal-text">₹${cost.toLocaleString('en-IN')}</span>
-                                        <input type="hidden" class="weekly-exp-cost" value="${cost}">
-                                    </td>
-                                    <td class="text-center">
-                                        <button type="button" class="btn btn-sm btn-link text-danger p-0 remove-weekly-exp-btn" title="Remove"><i class="bi bi-trash3 fs-5"></i></button>
-                                    </td>
-                                </tr>
-                            `;
-                            weeklyExpensesTbody.append(row);
+                            const $row = $(createWeeklyExpenseRowHtml(e));
+                            weeklyExpensesTbody.append($row);
+                            setupWeeklyExpenseAutocomplete($row.find('.expense-autocomplete-wrapper'));
                         });
                     }
 
@@ -1086,31 +1259,10 @@
             // Add Custom Weekly Expense Row
             $('#addWeeklyExpenseBtn').on('click', function () {
                 $('.empty-exp-placeholder').remove();
-                const newRow = `
-                    <tr class="weekly-exp-row align-middle">
-                        <td>
-                            <input type="text" list="expenseCommonSuggestions" class="form-control form-control-sm weekly-exp-title" placeholder="e.g. பஸ் செலவு (Bus Fare), மெஷின் உடைப்பு, நூல்கயிறு">
-                        </td>
-                        <td>
-                            <input type="number" min="0" step="any" class="form-control form-control-sm text-center weekly-exp-qty" value="1" placeholder="Qty">
-                        </td>
-                        <td>
-                            <div class="input-group input-group-sm">
-                                <span class="input-group-text">₹</span>
-                                <input type="number" min="0" step="any" class="form-control text-end fw-semibold weekly-exp-unit-price" placeholder="Price">
-</div>
-                        </td>
-                        <td class="text-end">
-                            <span class="fw-bold text-dark fs-6 weekly-exp-subtotal-text">₹0</span>
-                            <input type="hidden" class="weekly-exp-cost" value="0">
-                        </td>
-                        <td class="text-center">
-                            <button type="button" class="btn btn-sm btn-link text-danger p-0 remove-weekly-exp-btn" title="Remove"><i class="bi bi-trash3 fs-5"></i></button>
-                        </td>
-                    </tr>
-                `;
-                $('#weeklyExpensesBody').append(newRow);
-                $('#weeklyExpensesBody tr:last-child .weekly-exp-title').focus();
+                const $newRow = $(createWeeklyExpenseRowHtml());
+                $('#weeklyExpensesBody').append($newRow);
+                setupWeeklyExpenseAutocomplete($newRow.find('.expense-autocomplete-wrapper'));
+                $newRow.find('.weekly-exp-title').focus();
                 recalculateWeeklySheet();
                 autoSaveWeeklyExpenses();
                 showToast('Added weekly expense row', 'info');
@@ -1151,23 +1303,43 @@
                 renderWeeklySyncTable();
             });
 
-            // Approve & Settle Handler (Persists to database)
-            const isWeekend = {{ $isWeekend ? 'true' : 'false' }};
-            if (!isWeekend) {
-                $('#saveWeeklySettlementBtn, #btnFinalApprove').prop('disabled', true);
+            // Helper to determine if a selected week cycle is completed (Saturday reached or passed)
+            function canSettleWeek(startDateStr) {
+                if (!startDateStr) return false;
+                const startObj = new Date(startDateStr + 'T00:00:00');
+                const saturdayObj = new Date(startObj);
+                saturdayObj.setDate(startObj.getDate() + 5);
+                const saturdayStr = getLocalDateString(saturdayObj);
+                return todayStr >= saturdayStr;
             }
 
+            function updateSettleButtonState(startDateStr) {
+                const canSettle = canSettleWeek(startDateStr);
+                const btns = $('#saveWeeklySettlementBtn, #btnFinalApprove');
+                if (canSettle) {
+                    btns.prop('disabled', false).attr('title', 'Approve & Settle Weekly Wages');
+                } else {
+                    const startObj = new Date(startDateStr + 'T00:00:00');
+                    const satObj = new Date(startObj);
+                    satObj.setDate(startObj.getDate() + 5);
+                    const satStr = getLocalDateString(satObj);
+                    btns.prop('disabled', true).attr('title', `Available to settle from Saturday (${satStr}) onwards`);
+                }
+            }
+
+            // Approve & Settle Handler (Persists to database)
             $('#saveWeeklySettlementBtn, #btnFinalApprove').on('click', function () {
-                if (!isWeekend) {
-                    showToast('Approve and settle weekly wages is only enabled on weekends (Saturday and Sunday).', 'warning');
+                const selectedOption = $('#weeklyCycleSelect option:selected');
+                const startDate = selectedOption.data('start');
+                const endDate = selectedOption.data('end');
+
+                if (!canSettleWeek(startDate)) {
+                    showToast('This week is not completed yet. You can settle it from Saturday onwards.', 'warning');
                     return;
                 }
 
                 const siteId = $('#weeklySiteSelect').val();
                 const siteName = $('#weeklySiteSelect option:selected').data('name') || $('#weeklySiteSelect option:selected').text();
-                const selectedOption = $('#weeklyCycleSelect option:selected');
-                const startDate = selectedOption.data('start');
-                const endDate = selectedOption.data('end');
 
                 if (!siteId || !startDate || !endDate) {
                     showToast('Please select site and week cycle to settle.', 'warning');
@@ -1191,16 +1363,12 @@
                         expenses: expenses
                     }),
                     success: function (res) {
-                        if (isWeekend) {
-                            btn.prop('disabled', false);
-                        }
+                        updateSettleButtonState(startDate);
                         showToast(`Weekly Wages settlement of ${totalPayout} for "${siteName}" saved and settled!`, 'success');
                         renderWeeklySyncTable();
                     },
                     error: function (xhr) {
-                        if (isWeekend) {
-                            btn.prop('disabled', false);
-                        }
+                        updateSettleButtonState(startDate);
                         const msg = (xhr.responseJSON && xhr.responseJSON.message) ? xhr.responseJSON.message : 'Failed to settle weekly wages.';
                         showToast(msg, 'danger');
                     }

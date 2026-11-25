@@ -8,6 +8,7 @@ use App\Models\PurchaseOrder;
 use App\Models\SiteCash;
 use App\Models\Supplier;
 use App\Models\User;
+use App\Models\WeeklyWage;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
@@ -830,4 +831,112 @@ test('recording supplier payment persists is_site_based flag based on scope', fu
     $totalTxn = SiteCash::find($totalResponse->json('data.id'));
     expect($totalTxn->is_site_based)->toBeFalse();
     expect($totalTxn->project_site_id)->toBeNull();
+});
+
+test('weekly settlement endpoint returns settled weeks with daily site cash deducted and detail view marks paid days', function () {
+    $weekStart = '2026-11-16';
+    $weekEnd = '2026-11-22';
+
+    // Two daily allocations in that week: Mon (5000) and Tue (4000) => total 9000
+    $allocMon = DailyAllocation::create([
+        'project_site_id' => $this->site->id,
+        'date' => '2026-11-16',
+        'total_labour_count' => 5,
+        'total_labour_wage' => 5000.00,
+        'total_expenses' => 0.00,
+        'grand_total' => 5000.00,
+        'created_by' => $this->siteManager->id,
+    ]);
+
+    DailyAllocation::create([
+        'project_site_id' => $this->site->id,
+        'date' => '2026-11-17',
+        'total_labour_count' => 4,
+        'total_labour_wage' => 4000.00,
+        'total_expenses' => 0.00,
+        'grand_total' => 4000.00,
+        'created_by' => $this->siteManager->id,
+    ]);
+
+    // Settled WeeklyWage for that week (net_payout = 9000)
+    $settledWeek = WeeklyWage::create([
+        'project_site_id' => $this->site->id,
+        'week_start_date' => $weekStart,
+        'week_end_date' => $weekEnd,
+        'total_labour_man_days' => 9,
+        'total_labour_wages' => 9000.00,
+        'total_daily_expenses' => 0.00,
+        'total_weekly_expenses' => 0.00,
+        'net_payout' => 9000.00,
+        'status' => 'settled',
+        'settled_at' => now(),
+        'created_by' => $this->siteManager->id,
+    ]);
+
+    // Draft WeeklyWage should NOT appear
+    WeeklyWage::create([
+        'project_site_id' => $this->site->id,
+        'week_start_date' => '2026-11-09',
+        'week_end_date' => '2026-11-15',
+        'total_labour_man_days' => 2,
+        'total_labour_wages' => 2000.00,
+        'net_payout' => 2000.00,
+        'status' => 'draft',
+        'created_by' => $this->siteManager->id,
+    ]);
+
+    // Site Manager already paid Monday's wages (5000) via daily SiteCash
+    SiteCash::create([
+        'project_site_id' => $this->site->id,
+        'transaction_type' => 'Daily Wage Payment',
+        'flow_type' => 'outflow',
+        'amount' => 5000.00,
+        'out_amount' => 5000.00,
+        'is_expense' => true,
+        'payment_mode' => 'Cash',
+        'paid_to' => 'Site Manager',
+        'bill_no' => 'WAGE-2026-11-16',
+        'payment_date' => '2026-11-16',
+        'created_by' => $this->siteManager->id,
+    ]);
+
+    // 1. Fetch weekly settlements -> only settled week appears with balance = 9000 - 5000 = 4000
+    $listRes = $this->actingAs($this->siteManager)
+        ->getJson("/site-cash/weekly-settlements?project_site_id={$this->site->id}");
+
+    $listRes->assertStatus(200);
+    $settlements = collect($listRes->json('settlements'));
+    expect($settlements)->toHaveCount(1);
+    expect($settlements[0]['id'])->toBe($settledWeek->id);
+    expect((float) $settlements[0]['net_payout'])->toEqual(9000.00);
+    expect((float) $settlements[0]['daily_paid_amount'])->toEqual(5000.00);
+    expect((float) $settlements[0]['balance_amount'])->toEqual(4000.00);
+
+    // 2. View detail page (target="_blank") shows Paid status for Monday and Balance Payable ₹4,000.00
+    $detailRes = $this->actingAs($this->siteManager)
+        ->get("/site-cash/weekly-settlement/{$settledWeek->encrypted_id}");
+    $detailRes->assertStatus(200);
+    $detailRes->assertSee('Weekly Settlement Details');
+    $detailRes->assertSee('Weekly Workers Summary');
+    $detailRes->assertSee('Weekly Site Expenses Breakdown');
+    $detailRes->assertSee('Paid (₹5,000)');
+    $detailRes->assertSee('4,000.00');
+
+    // 3. Record Weekly Settlement payment for remaining 4000 -> week disappears from pending list
+    $storeRes = $this->actingAs($this->siteManager)->postJson('/site-cash', [
+        'project_site_id' => $this->site->id,
+        'transaction_type' => 'Weekly Settlement',
+        'weekly_wage_id' => $settledWeek->id,
+        'amount' => 4000.00,
+        'payment_mode' => 'Cash',
+        'paid_to' => 'Site Manager',
+        'bill_no' => "WEEKLY-{$weekStart}",
+        'payment_date' => '2026-11-23',
+    ]);
+    $storeRes->assertStatus(201);
+
+    $afterList = $this->actingAs($this->siteManager)
+        ->getJson("/site-cash/weekly-settlements?project_site_id={$this->site->id}");
+    $afterList->assertStatus(200);
+    expect($afterList->json('settlements'))->toBe([]);
 });

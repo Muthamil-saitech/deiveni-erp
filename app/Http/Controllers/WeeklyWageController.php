@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Material;
 use App\Services\Contracts\ProjectSiteServiceInterface;
 use App\Services\Contracts\WeeklyWageServiceInterface;
+use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -21,8 +23,9 @@ class WeeklyWageController extends Controller
     public function index(Request $request): View
     {
         $sites = $this->projectSiteService->getAllSites();
+        $materials = Material::with('unit')->where('status', 'Active')->orderBy('name_en')->get();
 
-        return view('site-management.weekly-wages', compact('sites'));
+        return view('site-management.weekly-wages', compact('sites', 'materials'));
     }
 
     /**
@@ -97,6 +100,15 @@ class WeeklyWageController extends Controller
         $siteId = (int) $validated['project_site_id'];
         $startDate = $validated['start_date'];
         $endDate = $validated['end_date'];
+
+        // Week can be settled once its Saturday (start_date + 5 days) is reached; no need to wait for Sunday
+        $weekSaturday = Carbon::parse($startDate)->addDays(5)->toDateString();
+        if (now()->toDateString() < $weekSaturday) {
+            return response()->json([
+                'success' => false,
+                'message' => "This week is not completed yet. It can be settled from Saturday ({$weekSaturday}) onwards.",
+            ], 422);
+        }
 
         // If expenses are passed along during settle, save them first
         if (isset($validated['expenses'])) {

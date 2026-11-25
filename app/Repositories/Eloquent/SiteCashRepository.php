@@ -176,7 +176,7 @@ class SiteCashRepository implements SiteCashRepositoryInterface
                 $collections += $inVal;
             } elseif (in_array($type, ['Material Purchase', 'Supplier Payment', 'Tool Rental', 'Other Expense'])) {
                 $purchases += $outVal;
-            } elseif ($type === 'Daily Wage Payment') {
+            } elseif (in_array($type, ['Daily Wage Payment', 'Weekly Settlement'], true)) {
                 $wages += $outVal;
             } elseif ($type === 'Balance Returned') {
                 $returned += $outVal;

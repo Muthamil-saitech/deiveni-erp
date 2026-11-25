@@ -34,7 +34,6 @@
                     <h5 class="fw-bold mb-0 text-dark">
                         <i class="bi bi-receipt text-primary me-2"></i>Temporary Billing (Painters &amp; Electricians)
                     </h5>
-                    <small class="text-muted">Saved temporary bills for site-wise Painter &amp; Electrician payments — click Reprint anytime</small>
                 </div>
                 <div>
                     <a href="{{ route('temporary-billing.create') }}" class="btn btn-deiveni btn-sm">

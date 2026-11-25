@@ -505,6 +505,7 @@ class SiteCashService implements SiteCashServiceInterface
             $paidBy = $existing->paid_by;
         }
         $ledgerId = ! empty($data['ledger_id']) ? (int) $data['ledger_id'] : ($existing?->ledger_id ?? null);
+        $weeklyWageId = ! empty($data['weekly_wage_id']) ? (int) $data['weekly_wage_id'] : ($existing?->weekly_wage_id ?? null);
         $cashTransferId = ! empty($data['cash_transfer_id']) ? (int) $data['cash_transfer_id'] : ($existing?->cash_transfer_id ?? null);
 
         // Fallback description if blank
@@ -528,6 +529,7 @@ class SiteCashService implements SiteCashServiceInterface
             'paid_to' => $paidTo,
             'paid_by' => $paidBy,
             'ledger_id' => $ledgerId,
+            'weekly_wage_id' => $weeklyWageId,
             'cash_transfer_id' => $cashTransferId,
             'wage_cash_source' => ! empty($data['wage_cash_source']) ? trim((string) $data['wage_cash_source']) : ($existing?->wage_cash_source ?? null),
             'returned_wage_ids' => $returnedWageIds,

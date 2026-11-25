@@ -199,6 +199,7 @@
                         <option value="Tool Rental">Tool Rental Purchase (-)</option>
                         <option value="Supplier Payment">Supplier Payment (-)</option>
                         <option value="Daily Wage Payment">Daily Worker Wage Payment (-)</option>
+                        <option value="Weekly Settlement">Weekly Settlement (-)</option>
                         <option value="Balance Returned">Balance Returned to Account Manager (-)</option>
                         <option value="Other Expense">Other Expense (-)</option>
                     </select>
@@ -502,6 +503,7 @@
                                     <option value="Tool Rental">Tool Rental Purchase (-)</option>
                                     <option value="Supplier Payment">Supplier Payment (-)</option>
                                     <option value="Daily Wage Payment">Daily Worker Wage Payment (-)</option>
+                                    <option value="Weekly Settlement">Weekly Settlement (-)</option>
                                     <option value="Balance Returned">Balance Returned to Account Manager (-)</option>
                                     <option value="Other Expense">Other Expense (-)</option>
                                 </select>
@@ -786,7 +788,28 @@
 </div>
                                 <input type="hidden" id="newTxnWorkersDisplay" name="workers_summary">
                                 <input type="hidden" id="newTxnPaidWageItemIds" name="paid_wage_item_ids" value="[]">
-</div>
+                            </div>
+
+                            <!-- Weekly Settlement Selection Group (When Flow Type is Weekly Settlement) -->
+                            <div class="col-12" id="weeklySettlementSelectGroup" style="display: none;">
+                                <div class="p-3 rounded-3 bg-light border">
+                                    <label class="form-label small fw-semibold text-dark mb-1" for="newTxnWeeklySettlement">
+                                        <i class="bi bi-calendar-range text-primary me-1"></i>Select Settled Week <span class="text-danger">*</span>
+                                    </label>
+                                    <div class="d-flex gap-2 align-items-center">
+                                        <select class="form-select fw-semibold" id="newTxnWeeklySettlement">
+                                            <option value="" selected>-- Select Project Site above --</option>
+                                        </select>
+                                        <a href="#" target="_blank" id="viewWeeklySettlementBtn"
+                                            class="btn btn-outline-primary btn-sm text-nowrap disabled"
+                                            title="View Weekly Details in New Tab">
+                                            <i class="bi bi-eye me-1"></i>View
+                                        </a>
+                                    </div>
+                                    <div class="small text-muted mt-2" id="weeklySettlementHint" style="display: none;"></div>
+                                    <input type="hidden" name="weekly_wage_id" id="newTxnWeeklyWageId" value="">
+                                </div>
+                            </div>
 
                             <!-- Balance Returned to Account Manager Section (Office Cash Wage & Cash Transfer Details) -->
                             <div class="col-12" id="balanceReturnedOfficeCashGroup" style="display: none;">
@@ -986,7 +1009,21 @@
                     $('#newTxnSupplier').val('');
                 }
 
-                // 3. Balance Returned to Account Manager handling
+                // 3. Weekly Settlement handling
+                if (type === 'Weekly Settlement') {
+                    $('#weeklySettlementSelectGroup').slideDown(200);
+                    $('#newTxnPaidTo').val('Site Manager');
+                    $('#txnAmountLabel').html('Weekly Settlement Balance (₹) <span class="text-danger">*</span>');
+                    updateWeeklySettlementList();
+                } else {
+                    $('#weeklySettlementSelectGroup').slideUp(200);
+                    $('#newTxnWeeklyWageId').val('');
+                    $('#newTxnWeeklySettlement').empty().append('<option value="" selected>-- Select Project Site above --</option>');
+                    $('#viewWeeklySettlementBtn').attr('href', '#').addClass('disabled');
+                    $('#weeklySettlementHint').hide();
+                }
+
+                // 4. Balance Returned to Account Manager handling
                 if (type === 'Balance Returned') {
                     $('#newTxnPaidTo').val('Account Manager');
                     $('#balanceReturnedOfficeCashGroup').slideDown(200);
@@ -1019,6 +1056,8 @@
                     updatePurchaseOrderList();
                 } else if (type === 'Daily Wage Payment' || type === 'Daily Worker Wage Payment') {
                     updateDailyAllocationList();
+                } else if (type === 'Weekly Settlement') {
+                    updateWeeklySettlementList();
                 } else if (type === 'Balance Returned') {
                     updateOfficeCashWages();
                     updatePendingCashTransfers();
@@ -1073,6 +1112,70 @@
                         updatePurchaseOrderList();
                     }
                 }
+            });
+
+            function updateWeeklySettlementList() {
+                const siteId = $('#newTxnSite').val();
+                const sel = $('#newTxnWeeklySettlement');
+                const viewBtn = $('#viewWeeklySettlementBtn');
+                const hint = $('#weeklySettlementHint');
+
+                $('#newTxnWeeklyWageId').val('');
+                viewBtn.attr('href', '#').addClass('disabled');
+                hint.hide();
+
+                if (!siteId) {
+                    sel.empty().append('<option value="" selected>-- Select Project Site above --</option>');
+                    return;
+                }
+
+                sel.empty().append('<option value="" selected>Loading settled weeks...</option>');
+
+                $.get('{{ route("site-cash.weekly-settlements") }}', { project_site_id: siteId }, function (res) {
+                    sel.empty();
+                    const list = (res && res.success && Array.isArray(res.settlements)) ? res.settlements : [];
+                    if (list.length === 0) {
+                        sel.append('<option value="" selected>-- No pending settled weeks found --</option>');
+                        return;
+                    }
+
+                    sel.append('<option value="" disabled selected>-- Select Settled Week --</option>');
+                    list.forEach(function (s) {
+                        const balFormatted = parseFloat(s.balance_amount).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                        const opt = $('<option></option>')
+                            .val(s.id)
+                            .text(`${s.date_range_label} (Balance: ₹${balFormatted})`)
+                            .data('settlement', s);
+                        sel.append(opt);
+                    });
+                }).fail(function () {
+                    sel.empty().append('<option value="" selected>-- Failed to load settled weeks --</option>');
+                });
+            }
+
+            $('#newTxnWeeklySettlement').on('change', function () {
+                const s = $(this).find('option:selected').data('settlement');
+                const viewBtn = $('#viewWeeklySettlementBtn');
+                const hint = $('#weeklySettlementHint');
+
+                if (!s) {
+                    $('#newTxnWeeklyWageId').val('');
+                    viewBtn.attr('href', '#').addClass('disabled');
+                    hint.hide();
+                    return;
+                }
+
+                $('#newTxnWeeklyWageId').val(s.id);
+                $('#newTxnAmount').val(parseFloat(s.balance_amount).toFixed(2));
+                $('#newTxnBill').val(`WEEKLY-${s.week_start_date}`);
+                $('#newTxnDesc').val(`Weekly settlement (${s.date_range_label})`);
+                viewBtn.attr('href', s.view_url).removeClass('disabled');
+
+                const settledFmt = parseFloat(s.net_payout).toLocaleString('en-IN', { minimumFractionDigits: 2 });
+                const paidFmt = parseFloat(s.daily_paid_amount).toLocaleString('en-IN', { minimumFractionDigits: 2 });
+                const balFmt = parseFloat(s.balance_amount).toLocaleString('en-IN', { minimumFractionDigits: 2 });
+
+                hint.html(`Settled Total: <strong>₹${settledFmt}</strong> &bull; Daily Site Cash Paid: <strong class="text-success">−₹${paidFmt}</strong> &bull; Balance Payable: <strong class="text-primary">₹${balFmt}</strong>`).show();
             });
 
             function updateDailyAllocationList() {

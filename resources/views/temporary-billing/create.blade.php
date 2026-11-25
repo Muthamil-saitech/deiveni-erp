@@ -13,7 +13,6 @@
                         <i class="bi bi-receipt-cutoff text-primary me-2"></i>
                         {{ $bill ? "Edit Temporary Bill — {$bill->bill_number}" : 'Temporary Billing — Painters & Electricians' }}
                     </h5>
-                    <small class="text-muted">Select a Project Site to load date-wise Painter &amp; Electrician payments, edit amounts, save, and print</small>
                 </div>
                 <div class="d-flex gap-2">
                     <a href="{{ route('temporary-billing.index') }}" class="btn btn-outline-secondary btn-sm">

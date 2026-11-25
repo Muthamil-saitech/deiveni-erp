@@ -10,6 +10,7 @@ use App\Models\DailyAllocationItem;
 use App\Models\ProjectSite;
 use App\Models\SiteCash;
 use App\Models\Supplier;
+use App\Models\WeeklyWage;
 use App\Services\Contracts\ProjectSiteServiceInterface;
 use App\Services\Contracts\SiteCashServiceInterface;
 use App\Services\Contracts\WarehouseServiceInterface;
@@ -450,6 +451,243 @@ class SiteCashController extends Controller
             'total_pending_amount' => $result['total_pending_amount'],
             'pending_count' => $result['pending_count'],
         ]);
+    }
+
+    /**
+     * Get settled weekly wage periods for a project site with daily SiteCash deductions.
+     */
+    public function getWeeklySettlements(Request $request): JsonResponse
+    {
+        $siteId = $request->query('project_site_id');
+        if (! $siteId) {
+            return response()->json([
+                'success' => true,
+                'settlements' => [],
+            ]);
+        }
+
+        $user = $request->user();
+        $site = ProjectSite::find((int) $siteId);
+        if (! $site || ($user && ! $user->isAdmin() && (int) $site->created_by !== (int) $user->id)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthorized access to project site.',
+                'settlements' => [],
+            ], 403);
+        }
+
+        $settledWeeks = WeeklyWage::with(['expenses'])
+            ->where('project_site_id', (int) $siteId)
+            ->where('status', 'settled')
+            ->orderByDesc('week_start_date')
+            ->get();
+
+        $settlements = $settledWeeks->map(function (WeeklyWage $ww) {
+            $summary = $this->computeWeeklySettlementSummary($ww);
+            $startFormatted = Carbon::parse($ww->week_start_date)->format('d M Y');
+            $endFormatted = Carbon::parse($ww->week_end_date)->format('d M Y');
+
+            return [
+                'id' => $ww->id,
+                'encrypted_id' => $ww->encrypted_id,
+                'week_start_date' => Carbon::parse($ww->week_start_date)->toDateString(),
+                'week_end_date' => Carbon::parse($ww->week_end_date)->toDateString(),
+                'date_range_label' => "{$startFormatted} – {$endFormatted}",
+                'net_payout' => $summary['net_payout'],
+                'daily_paid_amount' => $summary['daily_paid_amount'],
+                'weekly_already_settled' => $summary['weekly_already_settled'],
+                'balance_amount' => $summary['balance_amount'],
+                'view_url' => route('site-cash.weekly-settlement.show', $ww->encrypted_id),
+            ];
+        })->filter(fn (array $s) => $s['balance_amount'] > 0.01)->values();
+
+        return response()->json([
+            'success' => true,
+            'settlements' => $settlements,
+        ]);
+    }
+
+    /**
+     * Show detailed breakdown of a settled Weekly Wage for Site Cash Handling (target="_blank").
+     */
+    public function showWeeklySettlement(Request $request, string $encryptedId): View|RedirectResponse
+    {
+        $id = is_numeric($encryptedId) ? (int) $encryptedId : IdCipherService::decrypt($encryptedId);
+        $weeklyWage = WeeklyWage::with(['projectSite.client', 'expenses'])->find($id);
+
+        if (! $weeklyWage) {
+            return redirect()->route('site-cash.index')->with('error', 'Weekly settlement record not found.');
+        }
+
+        $user = $request->user();
+        if ($user && ! $user->isAdmin() && (int) ($weeklyWage->projectSite?->created_by) !== (int) $user->id) {
+            abort(403, 'Unauthorized access.');
+        }
+
+        $summary = $this->computeWeeklySettlementSummary($weeklyWage);
+
+        return view('site-management.weekly-settlement-detail', [
+            'weeklyWage' => $weeklyWage,
+            'site' => $weeklyWage->projectSite,
+            'summary' => $summary,
+        ]);
+    }
+
+    /**
+     * Compute settled weekly payout, daily SiteCash payments made within that week, and remaining balance.
+     *
+     * @return array{
+     *     net_payout: float,
+     *     daily_paid_amount: float,
+     *     weekly_already_settled: float,
+     *     balance_amount: float,
+     *     allocations: Collection<int, DailyAllocation>,
+     *     paid_dates_map: array<string, float>,
+     *     daily_wage_txns: Collection<int, SiteCash>,
+     *     total_workers: int,
+     *     total_labour_wage: float,
+     *     total_site_expenses: float,
+     *     worker_summary: array<int, array{label: string, name_en: string, total_workers: int, days_count: int, total_wage: float}>,
+     *     expense_summary: array<int, array{date_label: string, source: string, item_name: string, quantity: float, unit_price: float, amount: float}>
+     * }
+     */
+    protected function computeWeeklySettlementSummary(WeeklyWage $weeklyWage): array
+    {
+        $siteId = (int) $weeklyWage->project_site_id;
+        $startStr = Carbon::parse($weeklyWage->week_start_date)->toDateString();
+        $endStr = Carbon::parse($weeklyWage->week_end_date)->toDateString();
+
+        $allocations = DailyAllocation::with(['items', 'expenses'])
+            ->where('project_site_id', $siteId)
+            ->whereBetween('date', [$startStr, $endStr])
+            ->orderBy('date')
+            ->get();
+
+        $dailyWageTxns = SiteCash::query()
+            ->where('project_site_id', $siteId)
+            ->whereIn('transaction_type', ['Daily Wage Payment', 'Daily Worker Wage Payment'])
+            ->where(function ($q) {
+                $q->whereNull('paid_by')
+                    ->orWhere('paid_by', '!=', 'Account Manager');
+            })
+            ->get();
+
+        $paidDatesMap = [];
+        $matchedTxns = collect();
+
+        foreach ($dailyWageTxns as $txn) {
+            $resolvedDate = null;
+            $billNo = (string) ($txn->bill_no ?? '');
+            if (preg_match('/(\d{4}-\d{2}-\d{2})/', $billNo, $m)) {
+                $resolvedDate = $m[1];
+            } elseif ($txn->payment_date) {
+                $resolvedDate = Carbon::parse($txn->payment_date)->toDateString();
+            }
+
+            if ($resolvedDate && $resolvedDate >= $startStr && $resolvedDate <= $endStr) {
+                $paidDatesMap[$resolvedDate] = ($paidDatesMap[$resolvedDate] ?? 0.0) + (float) $txn->amount;
+                $matchedTxns->push($txn);
+            }
+        }
+
+        $dailyPaidAmount = round((float) array_sum($paidDatesMap), 2);
+
+        $weeklyAlreadySettled = (float) SiteCash::query()
+            ->where('project_site_id', $siteId)
+            ->where('weekly_wage_id', $weeklyWage->id)
+            ->where('transaction_type', 'Weekly Settlement')
+            ->sum('amount');
+
+        $netPayout = round((float) $weeklyWage->net_payout, 2);
+        $balanceAmount = max(0.0, round($netPayout - $dailyPaidAmount - $weeklyAlreadySettled, 2));
+
+        $workerCategoriesMap = [];
+        $totalWorkers = 0;
+        $totalLabourWage = 0.0;
+        $expenseSummary = [];
+        $totalSiteExpenses = 0.0;
+
+        foreach ($allocations as $alloc) {
+            $dateStr = Carbon::parse($alloc->date)->toDateString();
+            $dateLabel = Carbon::parse($alloc->date)->format('d M Y');
+
+            foreach ($alloc->items as $item) {
+                $catKey = (string) ($item->worker_category_id ?: ($item->name_ta ?: $item->name_en));
+                if (! isset($workerCategoriesMap[$catKey])) {
+                    $workerCategoriesMap[$catKey] = [
+                        'label' => (string) ($item->name_ta ?: $item->name_en),
+                        'name_en' => (string) ($item->name_en ?? ''),
+                        'total_workers' => 0,
+                        'dates' => [],
+                        'total_wage' => 0.0,
+                    ];
+                }
+
+                $count = (int) $item->worker_count;
+                $subtotal = (float) $item->subtotal;
+                $workerCategoriesMap[$catKey]['total_workers'] += $count;
+                $workerCategoriesMap[$catKey]['dates'][$dateStr] = true;
+                $workerCategoriesMap[$catKey]['total_wage'] += $subtotal;
+
+                $totalWorkers += $count;
+                $totalLabourWage += $subtotal;
+            }
+
+            foreach ($alloc->expenses as $exp) {
+                $amount = (float) $exp->amount;
+                $totalSiteExpenses += $amount;
+                $expenseSummary[] = [
+                    'date_label' => $dateLabel,
+                    'source' => 'Daily Allocation',
+                    'item_name' => (string) $exp->item_name,
+                    'quantity' => (float) ($exp->quantity ?? 1),
+                    'unit_price' => (float) ($exp->unit_price ?? $amount),
+                    'amount' => round($amount, 2),
+                ];
+            }
+        }
+
+        foreach ($weeklyWage->expenses as $wExp) {
+            $amount = (float) $wExp->amount;
+            $totalSiteExpenses += $amount;
+            $expenseSummary[] = [
+                'date_label' => 'Weekly',
+                'source' => 'Weekly Expense',
+                'item_name' => (string) $wExp->item_name,
+                'quantity' => (float) ($wExp->quantity ?? 1),
+                'unit_price' => (float) ($wExp->unit_price ?? $amount),
+                'amount' => round($amount, 2),
+            ];
+        }
+
+        $workerSummary = collect($workerCategoriesMap)
+            ->map(function (array $row): array {
+                return [
+                    'label' => $row['label'],
+                    'name_en' => $row['name_en'],
+                    'total_workers' => $row['total_workers'],
+                    'days_count' => count($row['dates']),
+                    'total_wage' => round($row['total_wage'], 2),
+                ];
+            })
+            ->sortByDesc('total_workers')
+            ->values()
+            ->all();
+
+        return [
+            'net_payout' => $netPayout,
+            'daily_paid_amount' => $dailyPaidAmount,
+            'weekly_already_settled' => round($weeklyAlreadySettled, 2),
+            'balance_amount' => $balanceAmount,
+            'allocations' => $allocations,
+            'paid_dates_map' => $paidDatesMap,
+            'daily_wage_txns' => $matchedTxns,
+            'total_workers' => $totalWorkers,
+            'total_labour_wage' => round($totalLabourWage, 2),
+            'total_site_expenses' => round($totalSiteExpenses, 2),
+            'worker_summary' => $workerSummary,
+            'expense_summary' => $expenseSummary,
+        ];
     }
 
     /**
