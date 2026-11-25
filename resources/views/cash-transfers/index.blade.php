@@ -312,12 +312,12 @@
                             </div>
                         </div>
 
-                        <!-- Read-only Project Client Received Amount Box -->
+                        <!-- Read-only Project Received & Available Amount Box -->
                         <div class="p-3 mb-3 rounded-3 bg-light border" id="siteReceivedAmountBox" style="display: none;">
-                            <div class="row g-2 align-items-center">
+                            <div class="row g-3 align-items-center">
                                 <div class="col-12 col-md-6">
                                     <label class="form-label small fw-semibold text-muted mb-1">
-                                        <i class="bi bi-cash-coin text-success me-1"></i>Amount Received from Client (Read-Only)
+                                        <i class="bi bi-cash-coin text-success me-1"></i>Received Amount
                                     </label>
                                     <div class="input-group input-group-sm">
                                         <span class="input-group-text bg-white fw-bold text-success">₹</span>
@@ -325,11 +325,12 @@
                                     </div>
                                 </div>
                                 <div class="col-12 col-md-6">
-                                    <div class="small text-muted">Client: <strong class="text-dark" id="siteClientNameReadonly">—</strong></div>
-                                    <div class="small text-muted mt-1">
-                                        Already Transferred: <strong class="text-primary" id="siteAlreadyTransferredReadonly">₹0.00</strong>
-                                        &bull;
-                                        Available: <strong class="text-success" id="siteAvailableBalanceReadonly">₹0.00</strong>
+                                    <label class="form-label small fw-semibold text-muted mb-1">
+                                        <i class="bi bi-wallet2 text-primary me-1"></i>Available Amount
+                                    </label>
+                                    <div class="input-group input-group-sm">
+                                        <span class="input-group-text bg-white fw-bold text-primary">₹</span>
+                                        <input type="text" class="form-control fw-bold text-primary bg-white" id="siteAvailableBalanceReadonly" value="0.00" readonly>
                                     </div>
                                 </div>
                             </div>
@@ -606,36 +607,45 @@
                 $('#paymentDetailsRow').hide();
             }
 
-            // Load read-only received amount when project site is selected
-            $('#transferSiteId').on('change', function () {
-                const siteId = $(this).val();
-                const info = siteFundsMap[siteId];
-                if (info) {
-                    $('#siteReceivedAmountReadonly').val(formatInrAmount(info.received_amount));
-                    $('#siteClientNameReadonly').text(info.client_name || 'N/A');
-                    $('#siteAlreadyTransferredReadonly').text('₹' + formatInrAmount(info.transferred_amount));
-                    $('#siteAvailableBalanceReadonly').text('₹' + formatInrAmount(info.available_amount));
-                    $('#siteReceivedAmountBox').slideDown(150);
-                } else {
-                    $('#siteReceivedAmountBox').slideUp(150);
-                }
-            });
+            function populateUsersByRole() {
+                const roleVal = $('#transferRoleSelect').val();
+                const userSelect = $('#transferUserSelect');
 
-            // Load users dynamically based on selected role
-            $('#transferRoleSelect').on('change', function () {
-                const selectedOpt = $(this).find('option:selected');
-                const roleId = String($(this).val() || '');
+                if (!roleVal) {
+                    userSelect.html('<option value="" disabled selected>-- Select Role First --</option>');
+                    return;
+                }
+
+                const selectedOpt = $('#transferRoleSelect').find('option:selected');
+                const roleId = String(roleVal || '');
                 const roleSlug = String(selectedOpt.data('slug') || '').toLowerCase().replace(/[-\s]+/g, '_');
 
-                const matchedUsers = transferUsers.filter(function (u) {
+                let matchedUsers = transferUsers.filter(function (u) {
                     const uSlug = String(u.role_slug || '').toLowerCase().replace(/[-\s]+/g, '_');
                     return (roleId && String(u.role_id || '') === roleId) || (roleSlug && uSlug === roleSlug);
                 });
 
-                const userSelect = $('#transferUserSelect');
+                if (roleSlug === 'site_manager') {
+                    const siteId = $('#transferSiteId').val();
+                    if (!siteId) {
+                        userSelect.html('<option value="" disabled selected>-- Select Project Site First --</option>');
+                        return;
+                    }
+                    const siteCreatedBy = siteFundsMap[siteId] ? siteFundsMap[siteId].created_by : null;
+                    matchedUsers = matchedUsers.filter(function (u) {
+                        return siteCreatedBy && Number(u.id) === Number(siteCreatedBy);
+                    });
+                }
+
                 userSelect.empty();
                 if (matchedUsers.length === 0) {
-                    userSelect.append('<option value="" disabled selected>-- No users in this role --</option>');
+                    userSelect.append('<option value="" disabled selected>-- No users found --</option>');
+                } else if (matchedUsers.length === 1) {
+                    userSelect.append($('<option>', {
+                        value: matchedUsers[0].name,
+                        text: matchedUsers[0].name,
+                        selected: true
+                    }));
                 } else {
                     userSelect.append('<option value="" disabled selected>-- Select User --</option>');
                     matchedUsers.forEach(function (u) {
@@ -652,7 +662,24 @@
                 } else {
                     $('#transferDirection').val('office_to_site');
                 }
+            }
+
+            // Load read-only received & available amount when project site is selected
+            $('#transferSiteId').on('change', function () {
+                const siteId = $(this).val();
+                const info = siteFundsMap[siteId];
+                if (info) {
+                    $('#siteReceivedAmountReadonly').val(formatInrAmount(info.received_amount));
+                    $('#siteAvailableBalanceReadonly').val(formatInrAmount(info.available_amount));
+                    $('#siteReceivedAmountBox').slideDown(150);
+                } else {
+                    $('#siteReceivedAmountBox').slideUp(150);
+                }
+                populateUsersByRole();
             });
+
+            // Load users dynamically based on selected role
+            $('#transferRoleSelect').on('change', populateUsersByRole);
 
             // Toggle payment mode details
             $('#transferPaymentMode').on('change', function () {

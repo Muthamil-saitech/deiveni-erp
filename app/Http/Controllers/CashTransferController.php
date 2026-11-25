@@ -65,13 +65,18 @@ class CashTransferController extends Controller
             $siteFundsMap[$s->id] = [
                 'site_name' => $s->name,
                 'client_name' => $s->client?->name ?? 'N/A',
+                'created_by' => $s->created_by,
                 'received_amount' => round($received, 2),
                 'transferred_amount' => round($transferred, 2),
                 'available_amount' => round(max(0.0, $received - $transferred), 2),
             ];
         }
 
-        $roles = Role::query()->orderBy('name')->get(['id', 'name', 'slug']);
+        $roles = Role::query()
+            ->whereNotIn('slug', ['owner'])
+            ->where('name', '!=', 'Owner')
+            ->orderBy('name')
+            ->get(['id', 'name', 'slug']);
         $transferUsers = User::query()
             ->with('role:id,name,slug')
             ->orderBy('name')
