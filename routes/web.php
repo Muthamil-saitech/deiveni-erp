@@ -30,7 +30,6 @@ use App\Http\Controllers\StockTransferController;
 use App\Http\Controllers\StockTransferReportController;
 use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\TemporaryBillController;
-use App\Http\Controllers\TransactionTypeController;
 use App\Http\Controllers\UnitController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\WarehouseController;
@@ -90,14 +89,6 @@ Route::middleware('auth')->group(function () {
         Route::put('/suppliers/{id}', [SupplierController::class, 'update']);
         Route::post('/suppliers/{id}/delete', [SupplierController::class, 'destroy'])->name('suppliers.destroy');
         Route::delete('/suppliers/{id}', [SupplierController::class, 'destroy']);
-
-        Route::get('/transaction-types', [TransactionTypeController::class, 'index'])->name('transaction-types.index');
-        Route::post('/transaction-types', [TransactionTypeController::class, 'store'])->name('transaction-types.store');
-        Route::get('/transaction-types/{id}', [TransactionTypeController::class, 'show'])->name('transaction-types.show');
-        Route::post('/transaction-types/{id}/update', [TransactionTypeController::class, 'update'])->name('transaction-types.update');
-        Route::put('/transaction-types/{id}', [TransactionTypeController::class, 'update']);
-        Route::post('/transaction-types/{id}/delete', [TransactionTypeController::class, 'destroy'])->name('transaction-types.destroy');
-        Route::delete('/transaction-types/{id}', [TransactionTypeController::class, 'destroy']);
     });
 
     // Bank Master, Branch Master & Rental Master (Accessible by Admin and Account Manager)

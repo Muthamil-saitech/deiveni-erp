@@ -33,6 +33,12 @@ test('suppliers index page renders successfully and displays seeded suppliers an
     $response->assertSee('id="supplierScopeFilter"', false);
     $response->assertSee('<th>Status</th>', false);
     $response->assertSee('<th>Materials</th>', false);
+    $response->assertSee('<th class="text-end">Total Purchased</th>', false);
+    $response->assertSee('<th class="text-end">Total Paid</th>', false);
+    $response->assertSee('<th class="text-end">Balance Payable</th>', false);
+    $response->assertDontSee('<th>Contact &amp; Phone</th>', false);
+    $response->assertDontSee('<th>Address / Location</th>', false);
+    $response->assertDontSee('<th>GST Number</th>', false);
     $response->assertSee('Site Based');
     $response->assertSee('supplier-site-based-toggle', false);
     $response->assertSee('view-supplier-btn', false);
@@ -400,6 +406,60 @@ test('suppliers index page renders table pagination elements and controls', func
     $response->assertSee('paginationNav');
     $response->assertSee('Rows per page:');
     $response->assertSee('paginationSummary');
+});
+
+test('suppliers index page renders purchased paid and payable totals per supplier', function () {
+    $user = User::factory()->create(['role' => UserRole::SiteManager]);
+    $supplier = Supplier::factory()->create([
+        'name' => 'Index Financial Summary Supplier',
+    ]);
+
+    $client = Client::create([
+        'name' => 'Index Summary Client',
+        'phone' => '9840112244',
+        'created_by' => $user->id,
+    ]);
+
+    $site = ProjectSite::create([
+        'client_id' => $client->id,
+        'name' => 'Index Summary Site',
+        'location' => 'Chennai',
+        'work_type' => 'Residential',
+        'created_by' => $user->id,
+    ]);
+
+    PurchaseOrder::create([
+        'po_number' => 'PO-INDEX-SUMMARY-01',
+        'order_date' => '2026-11-20',
+        'project_site_id' => $site->id,
+        'supplier_id' => $supplier->id,
+        'supplier_name' => $supplier->name,
+        'status' => 'Ordered',
+        'delivery_status' => 'Received',
+        'subtotal' => 12345.67,
+        'tax_amount' => 0,
+        'total_amount' => 12345.67,
+        'created_by' => $user->id,
+    ]);
+
+    Ledger::create([
+        'entry_date' => '2026-11-21',
+        'flow' => 'expense',
+        'source' => 'Supplier',
+        'amount' => 4000.67,
+        'supplier_id' => $supplier->id,
+        'supplier_name' => $supplier->name,
+        'project_site_id' => $site->id,
+        'created_by' => $user->id,
+    ]);
+
+    $response = $this->get('/suppliers');
+
+    $response->assertOk();
+    $response->assertSee('Index Financial Summary Supplier');
+    $response->assertSee('12,345.67');
+    $response->assertSee('4,000.67');
+    $response->assertSee('8,345.00');
 });
 
 test('supplier detail page renders total purchased, balance payable, site-based materials breakdown, and date filter', function () {

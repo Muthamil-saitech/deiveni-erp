@@ -19,15 +19,6 @@ beforeEach(function () {
     $this->siteManager = User::where('email', 'sm@deiveni.com')->first();
     $this->accountManager = User::where('email', 'am@deiveni.com')->first();
 
-    // Ensure initial permissions
-    foreach ([$this->owner, $this->siteManager, $this->accountManager] as $user) {
-        if ($user && $user->role_id) {
-            RoleMenu::firstOrCreate([
-                'role_id' => $user->role_id,
-                'menu_key' => 'transaction_types',
-            ]);
-        }
-    }
 });
 
 test('unauthenticated users cannot access transaction types page', function () {
@@ -207,14 +198,11 @@ test('transaction type can be deleted successfully', function () {
     expect(TransactionType::find($type->id))->toBeNull();
 });
 
-test('menu configuration and rbac check includes transaction_types', function () {
+test('transaction types are not available as a role access permission', function () {
     $menus = config('menus.items');
-    expect($menus)->toHaveKey('transaction_types')
-        ->and($menus['transaction_types']['url'])->toBe('/transaction-types')
-        ->and($menus['transaction_types']['section'])->toBe('MASTERS');
-
-    // Both site manager and account manager user models pass canAccess
-    expect($this->siteManager->canAccess('transaction_types'))->toBeTrue()
-        ->and($this->accountManager->canAccess('transaction_types'))->toBeTrue()
-        ->and($this->owner->canAccess('transaction_types'))->toBeTrue();
+    expect($menus)->not->toHaveKey('transaction_types')
+        ->and($this->siteManager->canAccess('transaction_types'))->toBeFalse()
+        ->and($this->accountManager->canAccess('transaction_types'))->toBeFalse()
+        ->and($this->owner->canAccess('transaction_types'))->toBeFalse()
+        ->and(RoleMenu::where('menu_key', 'transaction_types')->count())->toBe(0);
 });

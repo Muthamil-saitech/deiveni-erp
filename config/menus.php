@@ -87,14 +87,9 @@ return [
             'icon' => 'bi bi-buildings',
             'url' => '/property-types',
         ],
-        'transaction_types' => [
-            'key' => 'transaction_types',
-            'name' => 'Transaction Types',
+        /* Transaction Types is not exposed as a role-access menu.
             'name_ta' => 'பரிவர்த்தனை வகைகள்',
-            'section' => 'MASTERS',
-            'icon' => 'bi bi-arrow-left-right',
-            'url' => '/transaction-types',
-        ],
+        */
 
         // SITE OPERATIONS
         'sites' => [

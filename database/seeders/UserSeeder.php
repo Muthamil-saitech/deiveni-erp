@@ -41,7 +41,7 @@ class UserSeeder extends Seeder
         }
 
         $smMenus = [
-            'dashboard', 'worker_categories', 'units', 'materials', 'suppliers', 'transaction_types',
+            'dashboard', 'worker_categories', 'units', 'materials', 'suppliers',
             'sites', 'daily_allocation', 'weekly_wages', 'site_cash', 'purchases',
             'warehouse', 'reports', 'reports_labour_allocations', 'reports_daily_expenses', 'reports_cash_handling',
             'reports_purchases_inward', 'reports_warehouse_inventory', 'reports_stock_transfer', 'profile',
@@ -51,7 +51,7 @@ class UserSeeder extends Seeder
         }
 
         $amMenus = [
-            'dashboard', 'banks', 'branches', 'properties', 'property_types', 'transaction_types',
+            'dashboard', 'banks', 'branches', 'properties', 'property_types',
             'suppliers', 'ledger', 'reports', 'reports_ledger', 'profile',
         ];
         foreach ($amMenus as $key) {

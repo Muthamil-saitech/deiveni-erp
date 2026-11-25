@@ -3,6 +3,7 @@
 use App\Enums\UserRole;
 use App\Models\Client;
 use App\Models\DailyAllocation;
+use App\Models\DailyAllocationItem;
 use App\Models\ProjectSite;
 use App\Models\PurchaseOrder;
 use App\Models\SiteCash;
@@ -848,7 +849,7 @@ test('weekly settlement endpoint returns settled weeks with daily site cash dedu
         'created_by' => $this->siteManager->id,
     ]);
 
-    DailyAllocation::create([
+    $allocTue = DailyAllocation::create([
         'project_site_id' => $this->site->id,
         'date' => '2026-11-17',
         'total_labour_count' => 4,
@@ -856,6 +857,18 @@ test('weekly settlement endpoint returns settled weeks with daily site cash dedu
         'total_expenses' => 0.00,
         'grand_total' => 4000.00,
         'created_by' => $this->siteManager->id,
+    ]);
+
+    DailyAllocationItem::create([
+        'daily_allocation_id' => $allocTue->id,
+        'name_ta' => 'பெயிண்டர்',
+        'name_en' => 'Painter',
+        'worker_count' => 2,
+        'daily_wage' => 1100.00,
+        'master_wage' => 1100.00,
+        'subtotal' => 2200.00,
+        'paid_by' => 'Account Manager',
+        'wage_cash_source' => 'office_cash',
     ]);
 
     // Settled WeeklyWage for that week (net_payout = 9000)
@@ -919,6 +932,9 @@ test('weekly settlement endpoint returns settled weeks with daily site cash dedu
     $detailRes->assertSee('Weekly Settlement Details');
     $detailRes->assertSee('Weekly Workers Summary');
     $detailRes->assertSee('Weekly Site Expenses Breakdown');
+    $detailRes->assertSee('Site Manager Paid Workers');
+    $detailRes->assertSee('Account Manager Paid Workers');
+    $detailRes->assertSee('Total Paid by Account Manager:');
     $detailRes->assertSee('Paid (₹5,000)');
     $detailRes->assertSee('4,000.00');
 

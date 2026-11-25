@@ -598,7 +598,7 @@
                 @endif
 
                 @php
-                    $canSeeMasters = auth()->user()?->canAccessAny(['worker_categories', 'units', 'materials', 'suppliers', 'banks', 'branches', 'properties', 'property_types', 'transaction_types']) ?? true;
+                    $canSeeMasters = auth()->user()?->canAccessAny(['worker_categories', 'units', 'materials', 'suppliers', 'banks', 'branches', 'properties', 'property_types']) ?? true;
                 @endphp
 
                 @if ($canSeeMasters)
@@ -685,17 +685,6 @@
                                     data-menu="property_types">
                                     <i class="bi bi-buildings"></i>
                                     <span>Property Type Master</span>
-</a>
-                            </li>
-                        @endif
-
-                        @if (auth()->user()?->canAccess('transaction_types') ?? true)
-                            <li class="nav-item">
-                                <a href="{{ url('/transaction-types') }}"
-                                    class="nav-link {{ Request::is('transaction-types*') ? 'active' : '' }}"
-                                    data-menu="transaction_types">
-                                    <i class="bi bi-arrow-left-right"></i>
-                                    <span>Transaction Types</span>
 </a>
                             </li>
                         @endif

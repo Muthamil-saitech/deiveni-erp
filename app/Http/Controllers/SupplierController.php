@@ -28,18 +28,21 @@ class SupplierController extends Controller
     public function index(Request $request): View|JsonResponse
     {
         $suppliers = $this->supplierService->getAllSuppliers();
+        $financialSummaries = $this->supplierService->getFinancialSummaries();
         $materials = $this->materialService->getAllMaterials();
 
         if ($request->wantsJson() || $request->ajax()) {
             return response()->json([
                 'success' => true,
                 'data' => $suppliers,
+                'financial_summaries' => $financialSummaries,
                 'materials' => $materials,
             ]);
         }
 
         return view('masters.suppliers', [
             'suppliers' => $suppliers,
+            'financialSummaries' => $financialSummaries,
             'materials' => $materials,
         ]);
     }

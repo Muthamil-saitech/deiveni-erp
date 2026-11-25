@@ -102,10 +102,10 @@
                         <tr>
                             <th style="width: 60px;">#</th>
                             <th>Supplier / Company Name</th>
-                            <th>Contact & Phone</th>
-                            <th>Address / Location</th>
-                            <th>GST Number</th>
                             <th>Materials</th>
+                            <th class="text-end">Total Purchased</th>
+                            <th class="text-end">Total Paid</th>
+                            <th class="text-end">Balance Payable</th>
                             <th class="text-center" style="width: 140px;">Site Based</th>
                             <th>Status</th>
                             <th class="text-end" style="width: 125px;">Actions</th>
@@ -117,6 +117,11 @@
                                 $purchaseOrdersCount = (int) ($supplier->purchase_orders_count ?? 0);
                                 $inUse = $purchaseOrdersCount > 0;
                                 $isSiteBased = (bool) ($supplier->is_site_based ?? true);
+                                $financialSummary = $financialSummaries->get($supplier->id, [
+                                    'total_purchased' => 0,
+                                    'total_paid' => 0,
+                                    'balance_payable' => 0,
+                                ]);
                                 $materialsJson = json_encode($supplier->materials->map(function ($m) {
                                     return [
                                         'id' => $m->id,
@@ -152,17 +157,6 @@
                                         @endif
 </div>
                                 </td>
-                                <td class="row-supplier-phone">
-                                    <i class="bi bi-telephone text-muted me-1"></i>{{ $supplier->phone }}
-                                </td>
-                                <td class="row-supplier-address">{{ $supplier->address ?: '—' }}</td>
-                                <td class="row-supplier-gst">
-                                    @if ($supplier->gst_number)
-                                        <span class="font-monospace text-secondary small">{{ $supplier->gst_number }}</span>
-                                    @else
-                                        <span class="text-muted small">—</span>
-                                    @endif
-                                </td>
                                 <td class="row-supplier-materials">
                                     @if ($supplier->materials->isNotEmpty())
                                         <span
@@ -170,6 +164,11 @@
                                     @else
                                         <span class="text-muted small">—</span>
                                     @endif
+                                </td>
+                                <td class="text-end row-supplier-total-purchased">₹{{ number_format($financialSummary['total_purchased'], 2) }}</td>
+                                <td class="text-end text-success row-supplier-total-paid">₹{{ number_format($financialSummary['total_paid'], 2) }}</td>
+                                <td class="text-end fw-bold {{ $financialSummary['balance_payable'] > 0 ? 'text-danger' : 'text-success' }} row-supplier-balance-payable">
+                                    ₹{{ number_format($financialSummary['balance_payable'], 2) }}
                                 </td>
                                 <td class="text-center row-supplier-site-based">
                                     <div class="form-check form-switch d-inline-flex align-items-center gap-1 justify-content-center mb-0">
@@ -1102,13 +1101,9 @@
                                 };
                             }));
 
-                            const gstHtml = supplier.gst_number
-                                ? `<span class="font-monospace text-secondary small">${escapeHtml(supplier.gst_number)}</span>`
-                                : '<span class="text-muted small">—</span>';
                             const contactHtml = supplier.contact_person
                                 ? `<small class="text-muted row-supplier-contact"><i class="bi bi-person me-1"></i>${escapeHtml(supplier.contact_person)}</small>`
                                 : '<small class="text-muted row-supplier-contact"><i class="bi bi-person me-1"></i>—</small>';
-                            const addressHtml = supplier.address ? escapeHtml(supplier.address) : '—';
                             const statusBadgeHtml = renderStatusBadge(supplier.status);
                             const isSb = (supplier.is_site_based !== undefined ? Boolean(supplier.is_site_based) : true);
 
@@ -1143,9 +1138,6 @@
 
                                 tr.find('.row-supplier-name').text(supplier.name);
                                 tr.find('.row-supplier-contact').replaceWith(contactHtml);
-                                tr.find('.row-supplier-phone').html(`<i class="bi bi-telephone text-muted me-1"></i>${escapeHtml(supplier.phone)}`);
-                                tr.find('.row-supplier-address').text(addressHtml);
-                                tr.find('.row-supplier-gst').html(gstHtml);
                                 tr.find('.row-supplier-materials').html(materialNamesHtml);
                                 tr.find('.row-supplier-site-based').html(toggleCellHtml);
                                 tr.find('.row-supplier-status').html(statusBadgeHtml);
@@ -1169,10 +1161,10 @@
                                             <div class="fw-bold text-dark row-supplier-name">${escapeHtml(supplier.name)}</div>
                                             ${contactHtml}
                                         </td>
-                                        <td class="row-supplier-phone"><i class="bi bi-telephone text-muted me-1"></i>${escapeHtml(supplier.phone)}</td>
-                                        <td class="row-supplier-address">${addressHtml}</td>
-                                        <td class="row-supplier-gst">${gstHtml}</td>
                                         <td class="row-supplier-materials">${materialNamesHtml}</td>
+                                        <td class="text-end row-supplier-total-purchased">₹0.00</td>
+                                        <td class="text-end text-success row-supplier-total-paid">₹0.00</td>
+                                        <td class="text-end fw-bold text-success row-supplier-balance-payable">₹0.00</td>
                                         <td class="text-center row-supplier-site-based">${toggleCellHtml}</td>
                                         <td class="row-supplier-status">${statusBadgeHtml}</td>
                                         <td class="text-end">

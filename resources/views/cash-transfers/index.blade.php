@@ -278,158 +278,124 @@
 </div>
 
                     <div class="modal-body p-3 p-md-4">
-                        <!-- Step 1: Transfer Direction Visual Selector -->
-                        <div class="mb-3">
-                            <label class="form-label small fw-bold text-dark mb-2">
-                                1. Transfer Direction  <span class="text-danger">*</span>
-</label>
-                            <div class="row g-2">
-                                @php
-                                    $isSm = auth()->user()?->isSiteManager();
-                                @endphp
-                                <div class="col-12 col-md-4">
-                                    <div class="direction-card {{ $isSm ? '' : 'selected-office-site' }} h-100" id="dirCardOfficeToSite" data-dir="office_to_site">
-                                        <div class="d-flex align-items-start">
-                                            <input class="form-check-input m-0 me-2 mt-1" type="radio" name="transfer_direction" id="dirRadioOfficeToSite" value="office_to_site" {{ $isSm ? '' : 'checked' }}>
-                                            <div>
-                                                <strong class="text-primary d-block" style="font-size: 0.88rem;">
-                                                    <i class="bi bi-building me-1"></i>Office &rarr; Site
-</strong>
-                                                
-                                                <small class="text-muted d-block mt-1" style="font-size: 0.72rem; line-height: 1.25;">
-                                                    Site has no cash; Accountant sends advance/cash to Site Engineer.
-</small>
-</div>
-</div>
-</div>
-</div>
+                        @php
+                            $isSm = auth()->user()?->isSiteManager();
+                            $currentUserName = auth()->user()?->name ?? 'Owner';
+                        @endphp
+                        <input type="hidden" id="transferDirection" name="transfer_direction" value="{{ $isSm ? 'site_to_office' : 'office_to_site' }}">
+                        <input type="hidden" id="transferHandedOverBy" name="handed_over_by" value="{{ $currentUserName }}">
 
-                                <div class="col-12 col-md-4">
-                                    <div class="direction-card h-100" id="dirCardProjectCash" data-dir="project_cash">
-                                        <div class="d-flex align-items-start">
-                                            <input class="form-check-input m-0 me-2 mt-1" type="radio" name="transfer_direction" id="dirRadioProjectCash" value="project_cash">
-                                            <div>
-                                                <strong class="text-success d-block" style="font-size: 0.88rem;">
-                                                    <i class="bi bi-wallet2 me-1"></i>Project Cash
-</strong>
-                                                <div class="ta-text text-success small fw-semibold" style="font-size: 0.75rem;"></div>
-                                                <small class="text-muted d-block mt-1" style="font-size: 0.72rem; line-height: 1.25;">
-                                                    Accountant sends project cash to Site Manager (deducts from project fund).
-</small>
-</div>
-</div>
-</div>
-</div>
-
-                                <div class="col-12 col-md-4">
-                                    <div class="direction-card {{ $isSm ? 'selected-site-office' : '' }} h-100" id="dirCardSiteToOffice" data-dir="site_to_office">
-                                        <div class="d-flex align-items-start">
-                                            <input class="form-check-input m-0 me-2 mt-1" type="radio" name="transfer_direction" id="dirRadioSiteToOffice" value="site_to_office" {{ $isSm ? 'checked' : '' }}>
-                                            <div>
-                                                <strong class="text-warning-emphasis d-block" style="font-size: 0.88rem;">
-                                                    <i class="bi bi-cone-striped me-1"></i>Site &rarr; Office
-</strong>
-                                                
-                                                <small class="text-muted d-block mt-1" style="font-size: 0.72rem; line-height: 1.25;">
-                                                    Site Manager transfers cash to Accountant for office use.
-</small>
-</div>
-</div>
-</div>
-</div>
-</div>
-</div>
-
-                        <!-- Step 2: Site, Date & Amount Row -->
+                        <!-- Step 1: Project Site, Date & Time -->
                         <div class="row g-3 mb-3">
                             <div class="col-12 col-md-6">
                                 <label class="form-label small fw-semibold text-dark">
-                                    Associated Project Site  <span class="text-danger">*</span>
-</label>
+                                    Project Site  <span class="text-danger">*</span>
+                                </label>
                                 <select class="form-select fw-semibold" id="transferSiteId" name="project_site_id" required>
-                                    <option value="" disabled selected>-- Select Site --</option>
+                                    <option value="" disabled selected>-- Select Project Site --</option>
                                     @foreach ($sites as $site)
                                         <option value="{{ $site->id }}">{{ $site->name }}</option>
                                     @endforeach
                                 </select>
                                 <div class="invalid-feedback" id="errTransferSiteId"></div>
-</div>
+                            </div>
 
                             <div class="col-6 col-md-3">
                                 <label class="form-label small fw-semibold text-dark">Transfer Date  <span class="text-danger">*</span></label>
                                 <input type="date" class="form-control" id="transferDate" name="transfer_date" value="{{ date('Y-m-d') }}" required>
                                 <div class="invalid-feedback" id="errTransferDate"></div>
-</div>
+                            </div>
 
                             <div class="col-6 col-md-3">
                                 <label class="form-label small fw-semibold text-dark">Time</label>
                                 <input type="text" class="form-control" id="transferTime" name="transfer_time" value="{{ date('h:i A') }}">
-</div>
-</div>
+                            </div>
+                        </div>
 
+                        <!-- Read-only Project Client Received Amount Box -->
+                        <div class="p-3 mb-3 rounded-3 bg-light border" id="siteReceivedAmountBox" style="display: none;">
+                            <div class="row g-2 align-items-center">
+                                <div class="col-12 col-md-6">
+                                    <label class="form-label small fw-semibold text-muted mb-1">
+                                        <i class="bi bi-cash-coin text-success me-1"></i>Amount Received from Client (Read-Only)
+                                    </label>
+                                    <div class="input-group input-group-sm">
+                                        <span class="input-group-text bg-white fw-bold text-success">₹</span>
+                                        <input type="text" class="form-control fw-bold text-success bg-white" id="siteReceivedAmountReadonly" value="0.00" readonly>
+                                    </div>
+                                </div>
+                                <div class="col-12 col-md-6">
+                                    <div class="small text-muted">Client: <strong class="text-dark" id="siteClientNameReadonly">—</strong></div>
+                                    <div class="small text-muted mt-1">
+                                        Already Transferred: <strong class="text-primary" id="siteAlreadyTransferredReadonly">₹0.00</strong>
+                                        &bull;
+                                        Available: <strong class="text-success" id="siteAvailableBalanceReadonly">₹0.00</strong>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Step 2: Transfer Amount & Payment Mode -->
                         <div class="row g-3 mb-3">
                             <div class="col-12 col-md-6">
                                 <label class="form-label small fw-semibold text-dark">
                                     Transfer Amount  <span class="text-danger">*</span>
-</label>
+                                </label>
                                 <div class="input-group">
                                     <span class="input-group-text bg-white fw-bold">₹</span>
                                     <input type="number" step="any" class="form-control fw-bold fs-6" id="transferAmount" name="amount" placeholder="e.g. 10000" required>
-</div>
+                                </div>
                                 <div class="invalid-feedback" id="errTransferAmount"></div>
-</div>
+                            </div>
 
                             <div class="col-12 col-md-6">
                                 <label class="form-label small fw-semibold text-dark">Payment Mode  <span class="text-danger">*</span></label>
                                 <select class="form-select" id="transferPaymentMode" name="payment_mode" required>
                                     <option value="Cash" selected>Cash</option>
+                                    <option value="Cheque">Cheque</option>
                                     <option value="UPI">UPI / GPay / PhonePe</option>
                                     <option value="Bank Transfer">Bank Transfer (NEFT/RTGS/IMPS)</option>
-                                    <option value="Cheque">Cheque</option>
                                 </select>
-</div>
-</div>
+                            </div>
+                        </div>
 
                         <!-- Mode Details (Ref, Bank) -->
                         <div class="row g-3 mb-3" id="paymentDetailsRow" style="display: none;">
                             <div class="col-12 col-md-6">
                                 <label class="form-label small fw-semibold text-dark" id="paymentRefLabel">Transaction Ref / UTR / Cheque No</label>
                                 <input type="text" class="form-control font-monospace" id="transferPaymentRef" name="payment_reference" placeholder="e.g. UTR-4910284910">
-</div>
+                            </div>
                             <div class="col-12 col-md-6">
                                 <label class="form-label small fw-semibold text-dark">Bank Name</label>
                                 <input type="text" class="form-control" id="transferBankName" name="bank_name" placeholder="e.g. SBI, Indian Bank, HDFC">
-</div>
-</div>
+                            </div>
+                        </div>
 
-                        <!-- Step 3: Persons Row -->
+                        <!-- Step 3: Role -> User (Handed Over To) -->
                         <div class="row g-3 mb-3">
                             <div class="col-12 col-md-6">
-                                <label class="form-label small fw-semibold text-dark" id="lblHandedOverBy">
-                                    Handed Over By / Given By  <span class="text-danger">*</span>
-</label>
-                                <input type="text" class="form-control" id="transferHandedOverBy" name="handed_over_by" value="Accountant (Raja AM)" required>
-                                <div class="d-flex gap-1 mt-1">
-                                    <button type="button" class="btn btn-xs btn-outline-secondary py-0 px-1 btn-quick-person" data-target="transferHandedOverBy" data-val="Accountant (Raja AM)" style="font-size: 0.72rem;">Accountant</button>
-                                    <button type="button" class="btn btn-xs btn-outline-secondary py-0 px-1 btn-quick-person" data-target="transferHandedOverBy" data-val="Site Engineer" style="font-size: 0.72rem;">Site Engineer</button>
-                                    <button type="button" class="btn btn-xs btn-outline-secondary py-0 px-1 btn-quick-person" data-target="transferHandedOverBy" data-val="Site Manager" style="font-size: 0.72rem;">Site Manager</button>
-</div>
+                                <label class="form-label small fw-semibold text-dark" for="transferRoleSelect">
+                                    Role  <span class="text-danger">*</span>
+                                </label>
+                                <select class="form-select fw-semibold" id="transferRoleSelect" required>
+                                    <option value="" disabled selected>-- Select Role --</option>
+                                    @foreach ($roles as $roleItem)
+                                        <option value="{{ $roleItem->id }}" data-slug="{{ $roleItem->slug }}">{{ $roleItem->name }}</option>
+                                    @endforeach
+                                </select>
                                 <div class="invalid-feedback" id="errTransferHandedOverBy"></div>
-</div>
+                            </div>
 
                             <div class="col-12 col-md-6">
-                                <label class="form-label small fw-semibold text-dark" id="lblReceivedBy">
-                                    Received By / Handed Over To  <span class="text-danger">*</span>
-</label>
-                                <input type="text" class="form-control" id="transferReceivedBy" name="received_by" value="Site Engineer" required>
-                                <div class="d-flex gap-1 mt-1">
-                                    <button type="button" class="btn btn-xs btn-outline-secondary py-0 px-1 btn-quick-person" data-target="transferReceivedBy" data-val="Site Engineer" style="font-size: 0.72rem;">Site Engineer</button>
-                                    <button type="button" class="btn btn-xs btn-outline-secondary py-0 px-1 btn-quick-person" data-target="transferReceivedBy" data-val="Site Manager" style="font-size: 0.72rem;">Site Manager</button>
-                                    <button type="button" class="btn btn-xs btn-outline-secondary py-0 px-1 btn-quick-person" data-target="transferReceivedBy" data-val="Accountant (Raja AM)" style="font-size: 0.72rem;">Accountant</button>
-</div>
+                                <label class="form-label small fw-semibold text-dark" for="transferUserSelect">
+                                    Handed Over To (User)  <span class="text-danger">*</span>
+                                </label>
+                                <select class="form-select fw-semibold" id="transferUserSelect" name="received_by" required>
+                                    <option value="" disabled selected>-- Select Role First --</option>
+                                </select>
                                 <div class="invalid-feedback" id="errTransferReceivedBy"></div>
-</div>
-</div>
+                            </div>
+                        </div>
 
                         <!-- Step 4: Temporary Borrowing Details (Shown when Site to Office) -->
                         <div class="p-3 mb-3 rounded-3 bg-warning-subtle bg-opacity-25 border border-warning-subtle" id="temporaryBorrowingBox" style="display: none;">
@@ -625,62 +591,67 @@
             }
 
             const isSiteManagerUser = {{ auth()->user()?->isSiteManager() ? 'true' : 'false' }};
+            const siteFundsMap = @json($siteFundsMap);
+            const transferUsers = @json($transferUsers);
 
-            // Direction Selector visual click
-            function setDirection(dir) {
-                if (dir === 'office_to_site') {
-                    $('#dirCardOfficeToSite').addClass('selected-office-site');
-                    $('#dirCardProjectCash').removeClass('selected-project-cash');
-                    $('#dirCardSiteToOffice').removeClass('selected-site-office');
-                    $('#dirRadioOfficeToSite').prop('checked', true);
-
-                    $('#lblHandedOverBy').html('Handed Over By / Given By  <span class="text-danger">*</span>');
-                    $('#lblReceivedBy').html('Received By / Handed Over To  <span class="text-danger">*</span>');
-                    $('#transferHandedOverBy').val('Accountant (Raja AM)');
-                    $('#transferReceivedBy').val('Site Engineer');
-                    $('#transferPurpose').attr('placeholder', 'e.g. Urgent site materials & plumbing advance, or temporary office cash shortage...');
-                    $('#temporaryBorrowingBox').slideUp(150);
-                } else if (dir === 'project_cash') {
-                    $('#dirCardProjectCash').addClass('selected-project-cash');
-                    $('#dirCardOfficeToSite').removeClass('selected-office-site');
-                    $('#dirCardSiteToOffice').removeClass('selected-site-office');
-                    $('#dirRadioProjectCash').prop('checked', true);
-
-                    if (isSiteManagerUser) {
-                        $('#lblHandedOverBy').html('Handed Over By  <span class="text-danger">*</span>');
-                        $('#lblReceivedBy').html('Received By  <span class="text-danger">*</span>');
-                        $('#transferHandedOverBy').val('Site Manager');
-                        $('#transferReceivedBy').val('Accountant (Raja AM)');
-                    } else {
-                        $('#lblHandedOverBy').html('Handed Over By  <span class="text-danger">*</span>');
-                        $('#lblReceivedBy').html('Received By  <span class="text-danger">*</span>');
-                        $('#transferHandedOverBy').val('Accountant (Raja AM)');
-                        $('#transferReceivedBy').val('Site Manager');
-                    }
-                    $('#transferPurpose').attr('placeholder', 'e.g. Project cash transferred to Site Manager for site execution & materials...');
-                    $('#temporaryBorrowingBox').slideUp(150);
-                } else {
-                    $('#dirCardSiteToOffice').addClass('selected-site-office');
-                    $('#dirCardOfficeToSite').removeClass('selected-office-site');
-                    $('#dirCardProjectCash').removeClass('selected-project-cash');
-                    $('#dirRadioSiteToOffice').prop('checked', true);
-
-                    $('#lblHandedOverBy').html('Handed Over By  <span class="text-danger">*</span>');
-                    $('#lblReceivedBy').html('Received By  <span class="text-danger">*</span>');
-                    $('#transferHandedOverBy').val('Site Manager');
-                    $('#transferReceivedBy').val('Accountant (Raja AM)');
-                    $('#transferPurpose').attr('placeholder', 'e.g. Temporary office cash shortage borrowed from site...');
-                    $('#temporaryBorrowingBox').slideDown(150);
-                }
+            function formatInrAmount(val) {
+                return Number(val || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
             }
 
-            $('.direction-card').on('click', function () {
-                const dir = $(this).data('dir');
-                setDirection(dir);
+            function resetTransferFormDefaults() {
+                $('#transferDirection').val(isSiteManagerUser ? 'site_to_office' : 'office_to_site');
+                $('#siteReceivedAmountBox').hide();
+                $('#transferRoleSelect').val('');
+                $('#transferUserSelect').html('<option value="" disabled selected>-- Select Role First --</option>');
+                $('#paymentDetailsRow').hide();
+            }
+
+            // Load read-only received amount when project site is selected
+            $('#transferSiteId').on('change', function () {
+                const siteId = $(this).val();
+                const info = siteFundsMap[siteId];
+                if (info) {
+                    $('#siteReceivedAmountReadonly').val(formatInrAmount(info.received_amount));
+                    $('#siteClientNameReadonly').text(info.client_name || 'N/A');
+                    $('#siteAlreadyTransferredReadonly').text('₹' + formatInrAmount(info.transferred_amount));
+                    $('#siteAvailableBalanceReadonly').text('₹' + formatInrAmount(info.available_amount));
+                    $('#siteReceivedAmountBox').slideDown(150);
+                } else {
+                    $('#siteReceivedAmountBox').slideUp(150);
+                }
             });
 
-            $('input[name="transfer_direction"]').on('change', function () {
-                setDirection($(this).val());
+            // Load users dynamically based on selected role
+            $('#transferRoleSelect').on('change', function () {
+                const selectedOpt = $(this).find('option:selected');
+                const roleId = String($(this).val() || '');
+                const roleSlug = String(selectedOpt.data('slug') || '').toLowerCase().replace(/[-\s]+/g, '_');
+
+                const matchedUsers = transferUsers.filter(function (u) {
+                    const uSlug = String(u.role_slug || '').toLowerCase().replace(/[-\s]+/g, '_');
+                    return (roleId && String(u.role_id || '') === roleId) || (roleSlug && uSlug === roleSlug);
+                });
+
+                const userSelect = $('#transferUserSelect');
+                userSelect.empty();
+                if (matchedUsers.length === 0) {
+                    userSelect.append('<option value="" disabled selected>-- No users in this role --</option>');
+                } else {
+                    userSelect.append('<option value="" disabled selected>-- Select User --</option>');
+                    matchedUsers.forEach(function (u) {
+                        userSelect.append($('<option>', {
+                            value: u.name,
+                            text: u.name
+                        }));
+                    });
+                }
+
+                // Keep transfer_direction aligned for backend sync
+                if (isSiteManagerUser && roleSlug === 'account_manager') {
+                    $('#transferDirection').val('site_to_office');
+                } else {
+                    $('#transferDirection').val('office_to_site');
+                }
             });
 
             // Toggle payment mode details
@@ -698,13 +669,6 @@
                         $('#paymentRefLabel').text('Transaction / Reference No');
                     }
                 }
-            });
-
-            // Quick person buttons
-            $('.btn-quick-person').on('click', function () {
-                const target = $(this).data('target');
-                const val = $(this).data('val');
-                $(`#${target}`).val(val);
             });
 
             // Client-side filtering & rendering
@@ -959,7 +923,7 @@
 
                         $('#cashTransferModal').modal('hide');
                         form.reset();
-                        setDirection(isSiteManagerUser ? 'site_to_office' : 'office_to_site');
+                        resetTransferFormDefaults();
 
                         showToast(response.message || 'Cash transfer recorded successfully!', 'success');
 

@@ -565,6 +565,13 @@ class SiteCashController extends Controller
      *     total_labour_wage: float,
      *     total_site_expenses: float,
      *     worker_summary: array<int, array{label: string, name_en: string, total_workers: int, days_count: int, total_wage: float}>,
+     *     am_total_workers: int,
+     *     am_total_labour_wage: float,
+     *     sm_total_workers: int,
+     *     sm_total_labour_wage: float,
+     *     site_manager_paid_total: float,
+     *     sm_worker_summary: array<int, array{label: string, name_en: string, total_workers: int, days_count: int, total_wage: float}>,
+     *     am_worker_summary: array<int, array{label: string, name_en: string, total_workers: int, days_count: int, total_wage: float, cash_source: string}>,
      *     expense_summary: array<int, array{date_label: string, source: string, item_name: string, quantity: float, unit_price: float, amount: float}>
      * }
      */
@@ -617,19 +624,79 @@ class SiteCashController extends Controller
 
         $netPayout = round((float) $weeklyWage->net_payout, 2);
         $balanceAmount = max(0.0, round($netPayout - $dailyPaidAmount - $weeklyAlreadySettled, 2));
+        $isWeekFullySettled = $weeklyAlreadySettled > 0 && $balanceAmount <= 0.01;
 
         $workerCategoriesMap = [];
         $totalWorkers = 0;
         $totalLabourWage = 0.0;
+        $smWorkerCategoriesMap = [];
+        $smTotalWorkers = 0;
+        $smTotalLabourWage = 0.0;
+        $amWorkerCategoriesMap = [];
+        $amTotalWorkers = 0;
+        $amTotalLabourWage = 0.0;
         $expenseSummary = [];
         $totalSiteExpenses = 0.0;
 
         foreach ($allocations as $alloc) {
             $dateStr = Carbon::parse($alloc->date)->toDateString();
             $dateLabel = Carbon::parse($alloc->date)->format('d M Y');
+            $paidOnDate = $paidDatesMap[$dateStr] ?? 0.0;
+            $dayLabourSum = (float) $alloc->total_labour_wage;
+            $hasItemTracking = $alloc->items->contains(fn ($it) => ! empty($it->paid_by) || (bool) $it->referred_to_am);
 
             foreach ($alloc->items as $item) {
                 $catKey = (string) ($item->worker_category_id ?: ($item->name_ta ?: $item->name_en));
+                $count = (int) $item->worker_count;
+                $subtotal = (float) $item->subtotal;
+
+                if ($item->paid_by === 'Account Manager') {
+                    if (! isset($amWorkerCategoriesMap[$catKey])) {
+                        $amWorkerCategoriesMap[$catKey] = [
+                            'label' => (string) ($item->name_ta ?: $item->name_en),
+                            'name_en' => (string) ($item->name_en ?? ''),
+                            'total_workers' => 0,
+                            'dates' => [],
+                            'total_wage' => 0.0,
+                            'sources' => [],
+                        ];
+                    }
+
+                    $sourceLabel = $item->wage_cash_source === 'project_cash' ? 'Project Cash' : 'Office Cash';
+                    $amWorkerCategoriesMap[$catKey]['total_workers'] += $count;
+                    $amWorkerCategoriesMap[$catKey]['dates'][$dateStr] = true;
+                    $amWorkerCategoriesMap[$catKey]['total_wage'] += $subtotal;
+                    $amWorkerCategoriesMap[$catKey]['sources'][$sourceLabel] = true;
+
+                    $amTotalWorkers += $count;
+                    $amTotalLabourWage += $subtotal;
+
+                    continue;
+                }
+
+                $isPaidBySm = $item->paid_by === 'Site Manager'
+                    || $isWeekFullySettled
+                    || (! $hasItemTracking && $paidOnDate > 0 && $paidOnDate >= ($dayLabourSum - 0.01));
+
+                if ($isPaidBySm) {
+                    if (! isset($smWorkerCategoriesMap[$catKey])) {
+                        $smWorkerCategoriesMap[$catKey] = [
+                            'label' => (string) ($item->name_ta ?: $item->name_en),
+                            'name_en' => (string) ($item->name_en ?? ''),
+                            'total_workers' => 0,
+                            'dates' => [],
+                            'total_wage' => 0.0,
+                        ];
+                    }
+
+                    $smWorkerCategoriesMap[$catKey]['total_workers'] += $count;
+                    $smWorkerCategoriesMap[$catKey]['dates'][$dateStr] = true;
+                    $smWorkerCategoriesMap[$catKey]['total_wage'] += $subtotal;
+
+                    $smTotalWorkers += $count;
+                    $smTotalLabourWage += $subtotal;
+                }
+
                 if (! isset($workerCategoriesMap[$catKey])) {
                     $workerCategoriesMap[$catKey] = [
                         'label' => (string) ($item->name_ta ?: $item->name_en),
@@ -640,8 +707,6 @@ class SiteCashController extends Controller
                     ];
                 }
 
-                $count = (int) $item->worker_count;
-                $subtotal = (float) $item->subtotal;
                 $workerCategoriesMap[$catKey]['total_workers'] += $count;
                 $workerCategoriesMap[$catKey]['dates'][$dateStr] = true;
                 $workerCategoriesMap[$catKey]['total_wage'] += $subtotal;
@@ -691,6 +756,35 @@ class SiteCashController extends Controller
             ->values()
             ->all();
 
+        $amWorkerSummary = collect($amWorkerCategoriesMap)
+            ->map(function (array $row): array {
+                return [
+                    'label' => $row['label'],
+                    'name_en' => $row['name_en'],
+                    'total_workers' => $row['total_workers'],
+                    'days_count' => count($row['dates']),
+                    'total_wage' => round($row['total_wage'], 2),
+                    'cash_source' => implode(' / ', array_keys($row['sources'])),
+                ];
+            })
+            ->sortByDesc('total_workers')
+            ->values()
+            ->all();
+
+        $smWorkerSummary = collect($smWorkerCategoriesMap)
+            ->map(function (array $row): array {
+                return [
+                    'label' => $row['label'],
+                    'name_en' => $row['name_en'],
+                    'total_workers' => $row['total_workers'],
+                    'days_count' => count($row['dates']),
+                    'total_wage' => round($row['total_wage'], 2),
+                ];
+            })
+            ->sortByDesc('total_workers')
+            ->values()
+            ->all();
+
         return [
             'net_payout' => $netPayout,
             'daily_paid_amount' => $dailyPaidAmount,
@@ -703,6 +797,13 @@ class SiteCashController extends Controller
             'total_labour_wage' => round($totalLabourWage, 2),
             'total_site_expenses' => round($totalSiteExpenses, 2),
             'worker_summary' => $workerSummary,
+            'sm_total_workers' => $smTotalWorkers,
+            'sm_total_labour_wage' => round($smTotalLabourWage, 2),
+            'am_total_workers' => $amTotalWorkers,
+            'am_total_labour_wage' => round($amTotalLabourWage, 2),
+            'site_manager_paid_total' => round($dailyPaidAmount + $weeklyAlreadySettled, 2),
+            'sm_worker_summary' => $smWorkerSummary,
+            'am_worker_summary' => $amWorkerSummary,
             'expense_summary' => $expenseSummary,
         ];
     }

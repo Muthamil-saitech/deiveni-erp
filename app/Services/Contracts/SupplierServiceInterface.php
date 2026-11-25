@@ -4,6 +4,7 @@ namespace App\Services\Contracts;
 
 use App\Models\Supplier;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Collection as BaseCollection;
 
 interface SupplierServiceInterface
 {
@@ -13,6 +14,13 @@ interface SupplierServiceInterface
      * @return Collection<int, Supplier>
      */
     public function getAllSuppliers(): Collection;
+
+    /**
+     * Retrieve financial totals for all suppliers.
+     *
+     * @return BaseCollection<int, array{total_purchased: float, total_paid: float, balance_payable: float}>
+     */
+    public function getFinancialSummaries(): BaseCollection;
 
     /**
      * Find a supplier by ID.

@@ -67,6 +67,28 @@
             </div>
         </div>
 
+        <!-- Paid By Summary (Site Manager vs Account Manager) -->
+        <div class="row g-3 mb-4">
+            <div class="col-12 col-md-6">
+                <div class="card-custom p-3 bg-white border border-success-subtle d-flex justify-content-between align-items-center">
+                    <div>
+                        <span class="text-muted small fw-semibold d-block">Site Manager Total Paid (Daily + Weekly)</span>
+                        <small class="text-muted">Paid via Site Cash Handling</small>
+                    </div>
+                    <h4 class="fw-bold text-success mb-0">₹{{ number_format($summary['site_manager_paid_total'], 2) }}</h4>
+                </div>
+            </div>
+            <div class="col-12 col-md-6">
+                <div class="card-custom p-3 bg-white border border-info-subtle d-flex justify-content-between align-items-center">
+                    <div>
+                        <span class="text-muted small fw-semibold d-block">Account Manager Total Paid (Separate)</span>
+                        <small class="text-muted">{{ $summary['am_total_workers'] }} Workers paid directly by AM</small>
+                    </div>
+                    <h4 class="fw-bold text-info mb-0">₹{{ number_format($summary['am_total_labour_wage'], 2) }}</h4>
+                </div>
+            </div>
+        </div>
+
         <!-- Category-Wise Workers Summary & Site Expenses Breakdown -->
         <div class="row g-3 mb-4">
             <div class="col-12 col-lg-6">
@@ -166,6 +188,119 @@
                                     <tr>
                                         <td colspan="3" class="text-end">Total Site Expenses:</td>
                                         <td class="text-end text-dark">₹{{ number_format($summary['total_site_expenses'], 2) }}</td>
+                                    </tr>
+                                </tfoot>
+                            @endif
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Site Manager & Account Manager Paid Workers (Same Row) -->
+        <div class="row g-3 mb-4">
+            <div class="col-12 col-lg-6">
+                <div class="card-custom overflow-hidden bg-white h-100">
+                    <div class="p-3 bg-light border-bottom d-flex justify-content-between align-items-center">
+                        <h6 class="fw-bold mb-0 text-dark">
+                            <i class="bi bi-person-check-fill text-success me-2"></i>Site Manager Paid Workers
+                        </h6>
+                        <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1">
+                            Total: {{ $summary['sm_total_workers'] }} Workers
+                        </span>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-sm table-bordered align-middle mb-0">
+                            <thead class="table-light small">
+                                <tr>
+                                    <th>Worker Category</th>
+                                    <th class="text-center" style="width: 75px;">Days</th>
+                                    <th class="text-center" style="width: 110px;">Workers</th>
+                                    <th class="text-end" style="width: 130px;">Total Wage (₹)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @forelse ($summary['sm_worker_summary'] as $smRow)
+                                    <tr>
+                                        <td>
+                                            <span class="fw-semibold text-dark">{{ $smRow['label'] }}</span>
+                                            @if (!empty($smRow['name_en']) && $smRow['name_en'] !== $smRow['label'])
+                                                <span class="small text-muted ms-1">({{ $smRow['name_en'] }})</span>
+                                            @endif
+                                        </td>
+                                        <td class="text-center">{{ $smRow['days_count'] }}</td>
+                                        <td class="text-center fw-bold text-primary">{{ $smRow['total_workers'] }}</td>
+                                        <td class="text-end fw-semibold">₹{{ number_format($smRow['total_wage'], 2) }}</td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="4" class="text-center py-3 text-muted small">
+                                            No workers paid by Site Manager for this week.
+                                        </td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+                            @if (! empty($summary['sm_worker_summary']))
+                                <tfoot class="table-light fw-bold">
+                                    <tr>
+                                        <td colspan="2" class="text-end">Total Paid by Site Manager:</td>
+                                        <td class="text-center text-primary">{{ $summary['sm_total_workers'] }} Workers</td>
+                                        <td class="text-end">₹{{ number_format($summary['sm_total_labour_wage'], 2) }}</td>
+                                    </tr>
+                                </tfoot>
+                            @endif
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-12 col-lg-6">
+                <div class="card-custom overflow-hidden bg-white h-100">
+                    <div class="p-3 bg-light border-bottom d-flex justify-content-between align-items-center">
+                        <h6 class="fw-bold mb-0 text-dark">
+                            <i class="bi bi-person-badge-fill text-primary me-2"></i>Account Manager Paid Workers
+                        </h6>
+                        <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-2 py-1">
+                            Total: {{ $summary['am_total_workers'] }} Workers
+                        </span>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-sm table-bordered align-middle mb-0">
+                            <thead class="table-light small">
+                                <tr>
+                                    <th>Worker Category</th>
+                                    <th class="text-center" style="width: 75px;">Days</th>
+                                    <th class="text-center" style="width: 110px;">Workers</th>
+                                    <th class="text-end" style="width: 130px;">Total Wage (₹)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @forelse ($summary['am_worker_summary'] as $amRow)
+                                    <tr>
+                                        <td>
+                                            <span class="fw-semibold text-dark">{{ $amRow['label'] }}</span>
+                                            @if (!empty($amRow['name_en']) && $amRow['name_en'] !== $amRow['label'])
+                                                <span class="small text-muted ms-1">({{ $amRow['name_en'] }})</span>
+                                            @endif
+                                        </td>
+                                        <td class="text-center">{{ $amRow['days_count'] }}</td>
+                                        <td class="text-center fw-bold text-primary">{{ $amRow['total_workers'] }}</td>
+                                        <td class="text-end fw-semibold">₹{{ number_format($amRow['total_wage'], 2) }}</td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="4" class="text-center py-3 text-muted small">
+                                            No workers paid by Account Manager for this week.
+                                        </td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+                            @if (! empty($summary['am_worker_summary']))
+                                <tfoot class="table-light fw-bold">
+                                    <tr>
+                                        <td colspan="2" class="text-end">Total Paid by Account Manager:</td>
+                                        <td class="text-center text-primary">{{ $summary['am_total_workers'] }} Workers</td>
+                                        <td class="text-end">₹{{ number_format($summary['am_total_labour_wage'], 2) }}</td>
                                     </tr>
                                 </tfoot>
                             @endif

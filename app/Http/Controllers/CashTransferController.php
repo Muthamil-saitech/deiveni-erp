@@ -4,7 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreCashTransferRequest;
 use App\Http\Requests\UpdateCashTransferRequest;
+use App\Models\CashTransfer;
+use App\Models\Ledger;
 use App\Models\ProjectSite;
+use App\Models\Role;
+use App\Models\SiteCash;
+use App\Models\User;
 use App\Services\Contracts\CashTransferServiceInterface;
 use App\Services\IdCipherService;
 use Illuminate\Auth\Access\AuthorizationException;
@@ -30,6 +35,56 @@ class CashTransferController extends Controller
             $sitesQuery->where('created_by', $user->id);
         }
         $sites = $sitesQuery->get();
+        $siteIds = $sites->pluck('id')->all();
+
+        $ledgerIncomeBySite = Ledger::query()
+            ->whereIn('project_site_id', $siteIds)
+            ->where('flow', 'income')
+            ->selectRaw('project_site_id, COALESCE(SUM(amount), 0) as total')
+            ->groupBy('project_site_id')
+            ->pluck('total', 'project_site_id');
+
+        $siteCashClientBySite = SiteCash::query()
+            ->whereIn('project_site_id', $siteIds)
+            ->where('flow_type', 'inflow')
+            ->where('transaction_type', 'Client Collection')
+            ->selectRaw('project_site_id, COALESCE(SUM(amount), 0) as total')
+            ->groupBy('project_site_id')
+            ->pluck('total', 'project_site_id');
+
+        $transferredBySite = CashTransfer::query()
+            ->whereIn('project_site_id', $siteIds)
+            ->selectRaw('project_site_id, COALESCE(SUM(amount), 0) as total')
+            ->groupBy('project_site_id')
+            ->pluck('total', 'project_site_id');
+
+        $siteFundsMap = [];
+        foreach ($sites as $s) {
+            $received = (float) ($ledgerIncomeBySite[$s->id] ?? 0) + (float) ($siteCashClientBySite[$s->id] ?? 0);
+            $transferred = (float) ($transferredBySite[$s->id] ?? 0);
+            $siteFundsMap[$s->id] = [
+                'site_name' => $s->name,
+                'client_name' => $s->client?->name ?? 'N/A',
+                'received_amount' => round($received, 2),
+                'transferred_amount' => round($transferred, 2),
+                'available_amount' => round(max(0.0, $received - $transferred), 2),
+            ];
+        }
+
+        $roles = Role::query()->orderBy('name')->get(['id', 'name', 'slug']);
+        $transferUsers = User::query()
+            ->with('role:id,name,slug')
+            ->orderBy('name')
+            ->get(['id', 'name', 'role', 'role_id'])
+            ->map(function (User $u): array {
+                return [
+                    'id' => $u->id,
+                    'name' => $u->name,
+                    'role_id' => $u->role_id,
+                    'role_slug' => $u->roleValue(),
+                ];
+            })
+            ->values();
 
         $filters = [
             'direction' => $request->get('direction', 'all'),
@@ -48,6 +103,7 @@ class CashTransferController extends Controller
                 'success' => true,
                 'data' => $data,
                 'can_settle' => $canSettle,
+                'site_funds_map' => $siteFundsMap,
             ]);
         }
 
@@ -57,6 +113,9 @@ class CashTransferController extends Controller
             'transfers' => $data['transfers'],
             'kpis' => $data['kpis'],
             'sites' => $sites,
+            'roles' => $roles,
+            'transferUsers' => $transferUsers,
+            'siteFundsMap' => $siteFundsMap,
             'filters' => $filters,
         ]);
     }
