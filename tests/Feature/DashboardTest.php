@@ -363,12 +363,13 @@ test('admin can filter dashboard data by period tabs and custom dates', function
     $response->assertStatus(200);
     $response->assertSee(match ($period) {
         'this_week' => 'This Week',
+        'last_week' => 'Last Week',
         'this_month' => 'This Month',
         'this_year' => 'This Year',
         'all' => 'All Time',
         default => 'Today',
     }, false);
-})->with(['today', 'this_week', 'this_month', 'this_year', 'all']);
+})->with(['today', 'this_week', 'last_week', 'this_month', 'this_year', 'all']);
 
 test('admin can filter dashboard by custom date range', function () {
     $admin = User::where('role', 'owner')->first() ?? User::factory()->create([

@@ -101,10 +101,16 @@ class DashboardService implements DashboardServiceInterface
 
         return match ($period) {
             'this_week' => [
-                'start' => $now->copy()->subDays(6)->toDateString(),
-                'end' => $now->toDateString(),
+                'start' => $now->copy()->startOfWeek(Carbon::MONDAY)->toDateString(),
+                'end' => $now->copy()->endOfWeek(Carbon::SUNDAY)->toDateString(),
                 'label' => 'This Week',
                 'ta_label' => 'இந்த வாரம்',
+            ],
+            'last_week' => [
+                'start' => $now->copy()->subWeek()->startOfWeek(Carbon::MONDAY)->toDateString(),
+                'end' => $now->copy()->subWeek()->endOfWeek(Carbon::SUNDAY)->toDateString(),
+                'label' => 'Last Week',
+                'ta_label' => 'கடந்த வாரம்',
             ],
             'this_month' => [
                 'start' => $now->copy()->startOfMonth()->toDateString(),
@@ -196,6 +202,7 @@ class DashboardService implements DashboardServiceInterface
             'periodEnd' => $periodInfo['end'],
             'customStartDate' => $customDates['start_date'] ?? '',
             'customEndDate' => $customDates['end_date'] ?? '',
+            'filterMeta' => $this->getFilterMeta(),
         ], $siteManagerData, $accountManagerData, $adminExpenseBreakdown);
     }
 
@@ -712,10 +719,30 @@ class DashboardService implements DashboardServiceInterface
                 $totalPeriodIncome += $dayInflow;
                 $totalPeriodExpense += $dayOutflow;
             }
+        } elseif ($period === 'last_week') {
+            $lastWeekStart = Carbon::now()->subWeek()->startOfWeek(Carbon::MONDAY);
+            for ($i = 0; $i < 7; $i++) {
+                $date = $lastWeekStart->copy()->addDays($i);
+                $dateStr = $date->toDateString();
+                $chartLabels[] = $date->format('D d');
+
+                $dayInflow = (float) $this->scopeForUser(Ledger::income(), $user)
+                    ->whereDate('entry_date', $dateStr)
+                    ->sum('amount');
+
+                $dayOutflow = (float) $this->scopeForUser(Ledger::expense(), $user)
+                    ->whereDate('entry_date', $dateStr)
+                    ->sum('amount');
+
+                $incomeData[] = $dayInflow;
+                $expenseData[] = $dayOutflow;
+                $totalPeriodIncome += $dayInflow;
+                $totalPeriodExpense += $dayOutflow;
+            }
         } elseif ($period === 'this_week') {
-            // 7 days rolling window ending today
-            for ($i = 6; $i >= 0; $i--) {
-                $date = Carbon::today()->subDays($i);
+            $thisWeekStart = Carbon::now()->startOfWeek(Carbon::MONDAY);
+            for ($i = 0; $i < 7; $i++) {
+                $date = $thisWeekStart->copy()->addDays($i);
                 $dateStr = $date->toDateString();
                 $chartLabels[] = $date->format('D d');
 
@@ -820,6 +847,67 @@ class DashboardService implements DashboardServiceInterface
             'expenseBreakdownData' => $data,
             'totalExpenseBreakdown' => $total,
             'topExpenseItems' => $items,
+        ];
+    }
+
+    /**
+     * Get computed filter date ranges and metadata for dashboard filters.
+     *
+     * @return array<string, mixed>
+     */
+    public function getFilterMeta(): array
+    {
+        $today = Carbon::today();
+        $thisWeekStart = Carbon::now()->startOfWeek(Carbon::MONDAY);
+        $thisWeekEnd = Carbon::now()->endOfWeek(Carbon::SUNDAY);
+
+        $lastWeekStart = Carbon::now()->subWeek()->startOfWeek(Carbon::MONDAY);
+        $lastWeekEnd = Carbon::now()->subWeek()->endOfWeek(Carbon::SUNDAY);
+
+        $thisMonthStart = Carbon::now()->startOfMonth();
+        $thisMonthEnd = Carbon::now()->endOfMonth();
+
+        $thisYearStart = Carbon::now()->startOfYear();
+        $thisYearEnd = Carbon::now()->endOfYear();
+
+        return [
+            'today' => [
+                'start' => $today->toDateString(),
+                'end' => $today->toDateString(),
+                'label' => $today->format('d M Y'),
+                'ta_label' => 'இன்று',
+            ],
+            'this_week' => [
+                'start' => $thisWeekStart->toDateString(),
+                'end' => $thisWeekEnd->toDateString(),
+                'label' => $thisWeekStart->format('d M').' - '.$thisWeekEnd->format('d M Y'),
+                'ta_label' => 'இந்த வாரம்',
+            ],
+            'last_week' => [
+                'start' => $lastWeekStart->toDateString(),
+                'end' => $lastWeekEnd->toDateString(),
+                'label' => $lastWeekStart->format('d M').' - '.$lastWeekEnd->format('d M Y'),
+                'ta_label' => 'கடந்த வாரம்',
+            ],
+            'this_month' => [
+                'start' => $thisMonthStart->toDateString(),
+                'end' => $thisMonthEnd->toDateString(),
+                'label' => Carbon::now()->format('F Y'),
+                'ta_label' => 'இந்த மாதம்',
+            ],
+            'this_year' => [
+                'start' => $thisYearStart->toDateString(),
+                'end' => $thisYearEnd->toDateString(),
+                'label' => Carbon::now()->format('Y'),
+                'ta_label' => 'இந்த ஆண்டு',
+            ],
+            'all' => [
+                'start' => '1970-01-01',
+                'end' => '2099-12-31',
+                'label' => 'All Time',
+                'ta_label' => 'அனைத்தும்',
+            ],
+            'current_date' => $today->format('d M Y'),
         ];
     }
 }

@@ -34,4 +34,11 @@ interface DashboardServiceInterface
      * @return array<string, mixed>
      */
     public function getLedger7DayChartData(?User $user = null, string $period = 'today'): array;
+
+    /**
+     * Get computed filter date ranges and metadata for dashboard filters.
+     *
+     * @return array<string, mixed>
+     */
+    public function getFilterMeta(): array;
 }
