@@ -585,7 +585,7 @@
                 $('#categoryModalTitle').text('Add Worker Category ');
                 $('#categoryEditId').val('');
                 $('#categoryForm')[0].reset();
-                $('#catCodeGroup').show();
+                $('#catCodeGroup').hide();
                 $('#catShift').val('8 Hours (8:30 AM - 5:30 PM)');
                 $('#catStatus').val('Active');
                 clearFormErrors();
