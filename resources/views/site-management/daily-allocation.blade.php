@@ -1584,10 +1584,9 @@
                             const expText = (rec.expenses || []).map(e => `${e.item_name} (₹${Math.round(e.amount)})`).join(', ') || 'No extra expenses';
 
                             const rowHtml = `
-                                        <tr data-date="${dateStr}" class="history-date-row" style="cursor: pointer;" title="Click to view/edit allocation for ${dateStr}">
+                                        <tr data-date="${dateStr}" class="history-date-row" style="cursor: pointer;" title="Click to view/edit allocation for ${dateFormatted}">
                                             <td>
                                                 <strong class="text-dark d-block">${dayOfWeek}, ${dateFormatted}</strong>
-                                                <small class="text-muted">${dateStr}</small>
                                             </td>
                                             <td>
                                                 <span class="ta-text fw-semibold text-dark">${tradesText}</span>
@@ -1622,10 +1621,9 @@
 
                             const canAllocate = (!isSunday && dateStr <= todayStr);
                             const rowHtml = `
-                                        <tr data-date="${dateStr}" class="${canAllocate ? 'history-date-row' : ''} ${isSunday ? 'opacity-75 bg-light' : ''}" ${canAllocate ? 'style="cursor: pointer;" title="Click to add allocation for ' + dateStr + '"' : ''}>
+                                        <tr data-date="${dateStr}" class="${canAllocate ? 'history-date-row' : ''} ${isSunday ? 'opacity-75 bg-light' : ''}" ${canAllocate ? 'style="cursor: pointer;" title="Click to add allocation for ' + dateFormatted + '"' : ''}>
                                             <td>
                                                 <strong class="text-dark d-block">${dayOfWeek}, ${dateFormatted}</strong>
-                                                <small class="text-muted">${dateStr}</small>
                                             </td>
                                             <td>
                                                 <div>${badgeHtml}</div>
