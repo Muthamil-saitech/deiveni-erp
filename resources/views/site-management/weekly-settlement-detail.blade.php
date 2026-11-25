@@ -4,6 +4,9 @@
 @section('page_title', 'Weekly Settlement Details')
 
 @section('content')
+    @php
+        $isWeekFullySettled = ($summary['weekly_already_settled'] ?? 0) > 0 && ($summary['balance_amount'] ?? 0) <= 0.01;
+    @endphp
     <div class="container-fluid px-0">
         <!-- Header Card -->
         <div class="card-custom p-3 p-md-4 mb-4 bg-white">
@@ -15,6 +18,11 @@
                             Weekly Settlement Details — {{ $site?->name ?? 'Project Site' }}
                         </h5>
                         <span class="badge bg-success-subtle text-success border border-success-subtle">Settled Week</span>
+                        @if ($isWeekFullySettled)
+                            <span class="badge bg-success text-white">
+                                <i class="bi bi-check-all me-1"></i>Fully Paid (Site Cash Settled)
+                            </span>
+                        @endif
                     </div>
                     <div class="small text-muted mt-1">
                         Period:
@@ -195,6 +203,8 @@
                                 $dayExpensesSum = (float) $alloc->expenses->sum('amount');
                                 $dayLabourSum = (float) $alloc->total_labour_wage;
                                 $dayTotal = $dayLabourSum + $dayExpensesSum;
+                                $hasItemTracking = $alloc->items->contains(fn ($it) => ! empty($it->paid_by) || (bool) $it->referred_to_am);
+                                $isPartialDayPaid = $isDayPaid && $paidOnDate < ($dayLabourSum - 0.01);
                             @endphp
                             <tr>
                                 <td class="fw-semibold text-nowrap">
@@ -205,13 +215,16 @@
                                     <div class="d-flex flex-wrap gap-1">
                                         @foreach ($alloc->items as $item)
                                             @php
-                                                $itemPaidBySm = $item->paid_by === 'Site Manager' || ($isDayPaid && empty($item->paid_by));
+                                                $itemPaidBySm = $item->paid_by === 'Site Manager'
+                                                    || (! $hasItemTracking && $isDayPaid && $paidOnDate >= ($dayLabourSum - 0.01));
                                                 $itemPaidByAm = $item->paid_by === 'Account Manager';
+                                                $itemPaidViaWeekly = $isWeekFullySettled && ! $itemPaidBySm && ! $itemPaidByAm;
+                                                $isItemPaidGreen = $itemPaidBySm || $itemPaidViaWeekly;
                                             @endphp
-                                            <span class="badge {{ $itemPaidBySm ? 'bg-success-subtle text-success border-success-subtle' : ($itemPaidByAm ? 'bg-info-subtle text-info border-info-subtle' : 'bg-light text-dark') }} border px-2 py-1">
+                                            <span class="badge {{ $isItemPaidGreen ? 'bg-success-subtle text-success border-success-subtle' : ($itemPaidByAm ? 'bg-info-subtle text-info border-info-subtle' : 'bg-light text-dark') }} border px-2 py-1">
                                                 {{ $item->worker_count }} {{ $item->name_ta ?: $item->name_en }}
                                                 (₹{{ number_format((float) $item->subtotal, 0) }})
-                                                @if ($itemPaidBySm)
+                                                @if ($itemPaidBySm || $itemPaidViaWeekly)
                                                     <span class="ms-1 badge bg-success text-white" style="font-size:0.65rem;">Paid</span>
                                                 @elseif ($itemPaidByAm)
                                                     <span class="ms-1 badge bg-info text-white" style="font-size:0.65rem;">Paid by AM</span>
@@ -233,7 +246,18 @@
                                 <td class="text-end text-muted">₹{{ number_format($dayExpensesSum, 2) }}</td>
                                 <td class="text-end fw-bold">₹{{ number_format($dayTotal, 2) }}</td>
                                 <td class="text-center">
-                                    @if ($isDayPaid)
+                                    @if ($isWeekFullySettled)
+                                        <span class="badge bg-success text-white px-2 py-1">
+                                            <i class="bi bi-check-circle-fill me-1"></i>Paid
+                                        </span>
+                                    @elseif ($isPartialDayPaid)
+                                        <span class="badge bg-info text-white px-2 py-1">
+                                            <i class="bi bi-check-circle-fill me-1"></i>Partial Paid (₹{{ number_format($paidOnDate, 0) }})
+                                        </span>
+                                        <div class="small text-danger fw-semibold mt-1" style="font-size: 0.72rem;">
+                                            Unpaid: ₹{{ number_format($dayLabourSum - $paidOnDate, 0) }}
+                                        </div>
+                                    @elseif ($isDayPaid)
                                         <span class="badge bg-success text-white px-2 py-1">
                                             <i class="bi bi-check-circle-fill me-1"></i>Paid (₹{{ number_format($paidOnDate, 0) }})
                                         </span>

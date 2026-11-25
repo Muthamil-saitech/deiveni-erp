@@ -946,4 +946,11 @@ test('weekly settlement endpoint returns settled weeks with daily site cash dedu
     $txnDetailRes->assertStatus(200);
     $txnDetailRes->assertSee('View Weekly Details');
     $txnDetailRes->assertSee('/site-cash/weekly-settlement/');
+
+    // 5. Once Weekly Settlement is completed, every day & item in the detail page shows Paid
+    $settledDetailRes = $this->actingAs($this->siteManager)
+        ->get("/site-cash/weekly-settlement/{$settledWeek->encrypted_id}");
+    $settledDetailRes->assertStatus(200);
+    $settledDetailRes->assertSee('Fully Paid (Site Cash Settled)');
+    $settledDetailRes->assertDontSee('Unpaid');
 });
