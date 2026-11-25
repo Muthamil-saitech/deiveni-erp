@@ -267,6 +267,7 @@
                         <tr>
                             <th class="text-start" style="min-width: 250px;">Expense Item / Extra Purchase Description
 </th>
+                            <th style="width: 140px;" class="text-center">Unit</th>
                             <th style="width: 140px;" class="text-center">Quantity / Hours</th>
                             <th style="width: 160px;" class="text-end">Unit Price</th>
                             <th class="text-end" style="width: 160px;">Final Price (₹)</th>
@@ -278,17 +279,17 @@
                     </tbody>
                     <tfoot class="bg-light">
                         <tr class="text-muted small">
-                            <td colspan="3" class="fw-semibold text-end">Daily Allocation Expenses :</td>
+                            <td colspan="4" class="fw-semibold text-end">Daily Allocation Expenses :</td>
                             <td class="text-end fw-bold text-dark" id="footDailyExpensesSubtotal">₹0</td>
                             <td class="text-center"><span class="badge bg-success-subtle text-success">Daily Synced</span></td>
                         </tr>
                         <tr class="text-muted small">
-                            <td colspan="3" class="fw-semibold text-end">Additional Weekly Expenses :</td>
+                            <td colspan="4" class="fw-semibold text-end">Additional Weekly Expenses :</td>
                             <td class="text-end fw-bold text-warning" id="totalWeeklyExtraBadge">₹0</td>
                             <td class="text-center"><span class="badge bg-warning-subtle text-warning">Manual</span></td>
                         </tr>
                         <tr class="table-warning fw-bold">
-                            <td colspan="3" class="fw-bold text-end">Total Combined Site Expenses :</td>
+                            <td colspan="4" class="fw-bold text-end">Total Combined Site Expenses :</td>
                             <td class="text-end fw-bold text-dark fs-6" id="totalCombinedExpensesBadge">₹0</td>
                             <td></td>
                         </tr>
@@ -369,6 +370,49 @@
 </div>
 
 </div>
+
+{{-- Quick-Add Material Modal --}}
+<div class="modal fade" id="quickAddMaterialModal" tabindex="-1" aria-labelledby="quickAddMaterialModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content">
+            <div class="modal-header py-2 bg-primary text-white">
+                <h6 class="modal-title fw-bold" id="quickAddMaterialModalLabel">
+                    <i class="bi bi-plus-circle-fill me-1"></i> Add to Materials Master
+                </h6>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label small fw-semibold" for="qaMatNameEn">
+                        Material Name in English <span class="text-danger">*</span>
+                    </label>
+                    <input type="text" class="form-control form-control-sm" id="qaMatNameEn" placeholder="e.g. Binding Wire">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label small fw-semibold" for="qaMatNameTa">
+                        Material Name in Tamil
+                    </label>
+                    <input type="text" class="form-control form-control-sm ta-text" id="qaMatNameTa" placeholder="e.g. கட்டு கம்பி">
+                </div>
+                <div class="mb-1">
+                    <label class="form-label small fw-semibold" for="qaMatUnit">
+                        Unit <span class="text-danger">*</span>
+                    </label>
+                    <select class="form-select form-select-sm" id="qaMatUnit">
+                        {{-- populated by JS from availableUnits --}}
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer py-2">
+                <button type="button" class="btn btn-light btn-sm" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary btn-sm" id="qaMatSaveBtn">
+                    <i class="bi bi-check-circle me-1"></i> Add Material
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 @endsection
 
 @push('scripts')
@@ -443,7 +487,9 @@
             }
 
             const ROUTE_QUICK_ADD_MATERIAL = "{{ route('daily-allocation.quick-add-material') }}";
+            const ROUTE_MATERIALS_UPDATE = "{{ url('materials') }}";
             let availableMaterials = @json($materials ?? []);
+            const availableUnits = @json($units ?? []);
 
             function escapeHtml(str) {
                 return String(str ?? '')
@@ -453,14 +499,42 @@
                     .replace(/"/g, '&quot;');
             }
 
+            function findMatchedMaterial(title) {
+                const lowerTitle = (title || '').toLowerCase().trim();
+                if (!lowerTitle) return null;
+
+                return availableMaterials.find(m =>
+                    (m.name_en || '').toLowerCase() === lowerTitle ||
+                    (m.name_ta || '').toLowerCase() === lowerTitle ||
+                    `${m.name_en || ''} - ${m.name_ta || ''}`.toLowerCase() === lowerTitle
+                ) || null;
+            }
+
             function createWeeklyExpenseRowHtml(e = null) {
                 const titleVal = e ? (e.title || '') : '';
                 const qty = e ? (parseFloat(e.qty) || 1) : 1;
                 const unitPrice = e ? (parseFloat(e.unitPrice) || 0) : '';
                 const cost = e ? Math.round(e.cost || (qty * (parseFloat(e.unitPrice) || 0))) : 0;
 
+                const matchedMat = findMatchedMaterial(titleVal);
+                const matchedMaterialId = (e && e.material_id) ? String(e.material_id) : (matchedMat ? String(matchedMat.id) : '');
+
+                let selectedUnitId = (e && e.unit_id) ? String(e.unit_id) : '';
+                if (!selectedUnitId && matchedMat && matchedMat.unit_id) {
+                    selectedUnitId = String(matchedMat.unit_id);
+                }
+                if (!selectedUnitId && availableUnits.length > 0) {
+                    const nosUnit = availableUnits.find(u => (u.code || '').toUpperCase() === 'NOS' || (u.name_en || '').toLowerCase().includes('nos'));
+                    selectedUnitId = String((nosUnit || availableUnits[0]).id);
+                }
+
+                const unitOptionsHtml = availableUnits.map(u => {
+                    const isSel = String(u.id) === selectedUnitId ? 'selected' : '';
+                    return `<option value="${u.id}" ${isSel}>${escapeHtml(u.name_en || u.code || '')}</option>`;
+                }).join('');
+
                 return `
-                    <tr class="weekly-exp-row align-middle">
+                    <tr class="weekly-exp-row align-middle" data-material-id="${matchedMaterialId}">
                         <td>
                             <div class="position-relative expense-autocomplete-wrapper">
                                 <div class="input-group input-group-sm">
@@ -473,6 +547,11 @@
                                 <div class="expense-suggestions-dropdown shadow rounded border d-none"
                                     style="background: #fff; max-height: 220px; overflow-y: auto;"></div>
                             </div>
+                        </td>
+                        <td>
+                            <select class="form-select form-select-sm weekly-exp-unit">
+                                ${unitOptionsHtml}
+                            </select>
                         </td>
                         <td>
                             <input type="number" min="0" step="any" class="form-control form-control-sm text-center weekly-exp-qty" value="${qty}" placeholder="Qty">
@@ -554,7 +633,7 @@
                         const taText = m.name_ta ? `<span class="text-muted ms-1">(${escapeHtml(m.name_ta)})</span>` : '';
                         html += `
                             <a href="javascript:void(0)" class="dropdown-item py-1 px-2 d-flex justify-content-between align-items-center expense-sugg-item"
-                                data-en="${escapeHtml(m.name_en)}" data-ta="${escapeHtml(m.name_ta || '')}">
+                                data-id="${m.id || ''}" data-en="${escapeHtml(m.name_en)}" data-ta="${escapeHtml(m.name_ta || '')}" data-unit-id="${m.unit_id || ''}">
                                 <div class="text-truncate me-2">
                                     <span class="fw-semibold text-dark">${escapeHtml(m.name_en)}</span>
                                     ${taText}
@@ -600,10 +679,19 @@
                 $dropdown.on('click', '.expense-sugg-item', function () {
                     const en = $(this).data('en');
                     const ta = $(this).data('ta');
+                    const unitId = $(this).data('unit-id');
+                    const materialId = $(this).data('id') || '';
                     const display = ta ? `${en} - ${ta}` : en;
                     $input.val(display);
                     $dropdown.addClass('d-none');
                     $(window).off('scroll.weeklyExpAutoc resize.weeklyExpAutoc');
+
+                    const row = $input.closest('.weekly-exp-row');
+                    row.attr('data-material-id', materialId);
+                    if (unitId) {
+                        row.find('.weekly-exp-unit').val(String(unitId));
+                    }
+
                     recalculateWeeklySheet();
                     autoSaveWeeklyExpenses();
                 });
@@ -614,39 +702,137 @@
                     const name = $(this).data('name');
                     if (!name) return;
 
-                    const $btn = $(this);
-                    $btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-1"></span> Adding to Master...');
+                    const row = $input.closest('.weekly-exp-row');
+                    const currentUnitId = row.find('.weekly-exp-unit').val() || '';
 
-                    $.ajax({
-                        url: ROUTE_QUICK_ADD_MATERIAL,
-                        type: 'POST',
-                        contentType: 'application/json',
-                        data: JSON.stringify({ name: name }),
-                        success: function (res) {
-                            if (res.success && res.material) {
-                                const exists = availableMaterials.some(m => m.id === res.material.id);
-                                if (!exists) {
-                                    availableMaterials.unshift(res.material);
-                                }
-                                const display = res.material.name_ta && res.material.name_ta !== res.material.name_en
-                                    ? `${res.material.name_en} - ${res.material.name_ta}`
-                                    : res.material.name_en;
-                                $input.val(display);
-                                $dropdown.addClass('d-none');
-                                $(window).off('scroll.weeklyExpAutoc resize.weeklyExpAutoc');
-                                recalculateWeeklySheet();
-                                autoSaveWeeklyExpenses();
-                                showToast(`Material "${res.material.name_en}" added into Materials Master!`, 'success');
-                            }
-                        },
-                        error: function (xhr) {
-                            $btn.prop('disabled', false).html('<i class="bi bi-plus-circle text-danger me-1"></i> Try Again');
-                            const msg = (xhr.responseJSON && xhr.responseJSON.message) ? xhr.responseJSON.message : 'Failed to add material.';
-                            showToast(msg, 'danger');
-                        }
-                    });
+                    const $modal = $('#quickAddMaterialModal');
+                    $modal.data('qa-input', $input);
+                    $modal.data('qa-dropdown', $dropdown);
+                    $modal.data('qa-row', row);
+
+                    $('#qaMatNameEn').val(name);
+                    $('#qaMatNameTa').val('');
+
+                    const unitOptions = availableUnits.map(u => {
+                        const sel = String(u.id) === String(currentUnitId) ? 'selected' : '';
+                        return `<option value="${u.id}" ${sel}>${escapeHtml(u.name_en || u.code || '')}</option>`;
+                    }).join('');
+                    $('#qaMatUnit').html(unitOptions);
+
+                    $dropdown.addClass('d-none');
+                    $(window).off('scroll.weeklyExpAutoc resize.weeklyExpAutoc');
+                    $modal.modal('show');
                 });
             }
+
+            // Quick-Add Material Modal: Save button handler
+            $('#qaMatSaveBtn').on('click', function () {
+                const nameEn = $('#qaMatNameEn').val().trim();
+                if (!nameEn) {
+                    $('#qaMatNameEn').addClass('is-invalid').focus();
+                    return;
+                }
+                $('#qaMatNameEn').removeClass('is-invalid');
+
+                const nameTa = $('#qaMatNameTa').val().trim() || null;
+                const unitId = parseInt($('#qaMatUnit').val(), 10) || null;
+                const $modal = $('#quickAddMaterialModal');
+                const $qaInput = $modal.data('qa-input');
+                const qaRow = $modal.data('qa-row');
+
+                const $btn = $(this);
+                $btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-1"></span> Adding...');
+
+                $.ajax({
+                    url: ROUTE_QUICK_ADD_MATERIAL,
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({ name: nameEn, name_ta: nameTa, unit_id: unitId }),
+                    success: function (res) {
+                        $btn.prop('disabled', false).html('<i class="bi bi-check-circle me-1"></i> Add Material');
+                        if (res.success && res.material) {
+                            const exists = availableMaterials.some(m => m.id === res.material.id);
+                            if (!exists) {
+                                availableMaterials.unshift(res.material);
+                            }
+                            const display = res.material.name_ta && res.material.name_ta !== res.material.name_en
+                                ? `${res.material.name_en} - ${res.material.name_ta}`
+                                : res.material.name_en;
+
+                            if ($qaInput && $qaInput.length) {
+                                $qaInput.val(display);
+                            }
+                            if (qaRow && qaRow.length) {
+                                qaRow.attr('data-material-id', res.material.id);
+                                if (res.material.unit_id) {
+                                    qaRow.find('.weekly-exp-unit').val(String(res.material.unit_id));
+                                }
+                                const qtyInput = qaRow.find('.weekly-exp-qty');
+                                if (!qtyInput.val()) {
+                                    qtyInput.val(1);
+                                }
+                            }
+                            recalculateWeeklySheet();
+                            autoSaveWeeklyExpenses();
+                            $modal.modal('hide');
+                            showToast(`Material "${res.material.name_en}" added to Materials Master!`, 'success');
+                        }
+                    },
+                    error: function (xhr) {
+                        $btn.prop('disabled', false).html('<i class="bi bi-check-circle me-1"></i> Add Material');
+                        const msg = (xhr.responseJSON && xhr.responseJSON.message)
+                            ? xhr.responseJSON.message
+                            : 'Failed to add material.';
+                        showToast(msg, 'danger');
+                    }
+                });
+            });
+
+            $('#qaMatNameEn').on('input', function () {
+                $(this).removeClass('is-invalid');
+            });
+
+            $('#quickAddMaterialModal').on('hidden.bs.modal', function () {
+                $('#qaMatNameEn').val('').removeClass('is-invalid');
+                $('#qaMatNameTa').val('');
+                $(this).removeData('qa-input qa-dropdown qa-row');
+            });
+
+            // Unit change on existing material row → update Material Master
+            $(document).on('change', '.weekly-exp-unit', function () {
+                const $select = $(this);
+                const row = $select.closest('.weekly-exp-row');
+                const materialId = row.attr('data-material-id');
+
+                if (materialId) {
+                    const newUnitId = parseInt($select.val(), 10);
+                    const mat = availableMaterials.find(m => String(m.id) === String(materialId));
+                    if (newUnitId && mat) {
+                        $.ajax({
+                            url: `${ROUTE_MATERIALS_UPDATE}/${materialId}/update`,
+                            type: 'POST',
+                            data: {
+                                name_en: mat.name_en,
+                                name_ta: mat.name_ta || mat.name_en,
+                                unit_id: newUnitId,
+                                type: mat.type || 'Other',
+                                status: mat.status || 'Active',
+                                _token: $('meta[name="csrf-token"]').attr('content')
+                            },
+                            success: function () {
+                                mat.unit_id = newUnitId;
+                                const selectedText = $select.find('option:selected').text();
+                                showToast(`Unit updated to "${selectedText}" in Materials Master.`, 'success');
+                            },
+                            error: function () {
+                                showToast('Could not update unit in Materials Master.', 'warning');
+                            }
+                        });
+                    }
+                }
+
+                autoSaveWeeklyExpenses();
+            });
 
             const now = new Date();
             const todayStr = getLocalDateString(now);
@@ -1108,11 +1294,18 @@
                             const qty = parseFloat(de.qty) || 1;
                             const unitPrice = parseFloat(de.unitPrice) || 0;
                             const cost = Math.round(de.cost || (qty * unitPrice));
+                            const matchedMat = findMatchedMaterial(de.title || '');
+                            const unitName = matchedMat && matchedMat.unit
+                                ? (matchedMat.unit.name_en || matchedMat.unit.code || '—')
+                                : '—';
                             const row = `
                                 <tr class="daily-synced-exp-row table-light align-middle">
                                     <td class="text-start">
                                         <div class="fw-semibold text-dark">${de.title || 'Daily Expense'}</div>
                                         <small class="text-muted"><i class="bi bi-calendar-check text-success me-1"></i>Daily Allocation: ${de.date_formatted || de.date}</small>
+                                    </td>
+                                    <td class="text-center">
+                                        <span class="badge bg-light text-secondary border px-2 py-1">${escapeHtml(unitName)}</span>
                                     </td>
                                     <td class="text-center">
                                         <span class="badge bg-light text-dark border px-2 py-1">${qty}</span>
@@ -1147,7 +1340,7 @@
                     if (!hasAnyExpenses) {
                         weeklyExpensesTbody.append(`
                             <tr class="empty-exp-placeholder">
-                                <td colspan="5" class="text-center text-muted py-3 small">
+                                <td colspan="6" class="text-center text-muted py-3 small">
                                     <i class="bi bi-inbox fs-4 d-block mb-1 text-muted"></i>
                                     No site expenses recorded for this week yet. Click <strong>+ Add Expense</strong> above if you have any additional weekly expenses.
                                 </td>
@@ -1166,6 +1359,7 @@
                 let items = [];
                 $('.weekly-exp-row').each(function () {
                     const title = $(this).find('.weekly-exp-title').val().trim();
+                    const unitId = $(this).find('.weekly-exp-unit').val() || null;
                     const qty = parseFloat($(this).find('.weekly-exp-qty').val()) || 0;
                     const unitPrice = parseFloat($(this).find('.weekly-exp-unit-price').val()) || 0;
                     const amount = Math.round(qty * unitPrice);
@@ -1173,6 +1367,7 @@
                     if (title || amount > 0) {
                         items.push({
                             item_name: title,
+                            unit_id: unitId ? parseInt(unitId, 10) : null,
                             quantity: qty,
                             unit_price: unitPrice,
                             amount: amount
@@ -1272,7 +1467,7 @@
                 if ($('#weeklyExpensesBody tr').length === 0) {
                     $('#weeklyExpensesBody').append(`
                         <tr class="empty-exp-placeholder">
-                            <td colspan="5" class="text-center text-muted py-3 small">
+                            <td colspan="6" class="text-center text-muted py-3 small">
                                 <i class="bi bi-inbox fs-4 d-block mb-1 text-muted"></i>
                                 No site expenses recorded for this week yet. Click <strong>+ Add Expense</strong> above if you have any additional weekly expenses.
                             </td>
@@ -1301,28 +1496,9 @@
                 renderWeeklySyncTable();
             });
 
-            // Helper to determine if a selected week cycle is completed (Saturday reached or passed)
-            function canSettleWeek(startDateStr) {
-                if (!startDateStr) return false;
-                const startObj = new Date(startDateStr + 'T00:00:00');
-                const saturdayObj = new Date(startObj);
-                saturdayObj.setDate(startObj.getDate() + 5);
-                const saturdayStr = getLocalDateString(saturdayObj);
-                return todayStr >= saturdayStr;
-            }
-
             function updateSettleButtonState(startDateStr) {
-                const canSettle = canSettleWeek(startDateStr);
                 const btns = $('#saveWeeklySettlementBtn, #btnFinalApprove');
-                if (canSettle) {
-                    btns.prop('disabled', false).attr('title', 'Approve & Settle Weekly Wages');
-                } else {
-                    const startObj = new Date(startDateStr + 'T00:00:00');
-                    const satObj = new Date(startObj);
-                    satObj.setDate(startObj.getDate() + 5);
-                    const satStr = getLocalDateString(satObj);
-                    btns.prop('disabled', true).attr('title', `Available to settle from Saturday (${satStr}) onwards`);
-                }
+                btns.prop('disabled', !startDateStr).attr('title', 'Approve & Settle Weekly Wages');
             }
 
             // Approve & Settle Handler (Persists to database)
@@ -1331,11 +1507,6 @@
                 const startDate = selectedOption.data('start');
                 const endDate = selectedOption.data('end');
 
-                if (!canSettleWeek(startDate)) {
-                    showToast('This week is not completed yet. You can settle it from Saturday onwards.', 'warning');
-                    return;
-                }
-
                 const siteId = $('#weeklySiteSelect').val();
                 const siteName = $('#weeklySiteSelect option:selected').data('name') || $('#weeklySiteSelect option:selected').text();
 
@@ -1343,6 +1514,9 @@
                     showToast('Please select site and week cycle to settle.', 'warning');
                     return;
                 }
+
+                // Cancel any pending debounced autosave so settle() saves the latest expenses atomically
+                clearTimeout(saveExpensesTimeout);
 
                 const expenses = getWeeklyExpenseRows();
                 const totalPayout = $('#sumNetWeeklyPayout').text();

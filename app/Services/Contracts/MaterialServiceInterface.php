@@ -42,4 +42,9 @@ interface MaterialServiceInterface
      * Check if a material is currently used by any suppliers.
      */
     public function isMaterialInUse(int $id): bool;
+
+    /**
+     * Find an existing material or create a new one as type "Other".
+     */
+    public function findOrCreateOtherMaterial(string $rawTitle, ?int $unitId = null, ?string $customNameTa = null): Material;
 }
