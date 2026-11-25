@@ -500,3 +500,44 @@ test('site manager paying a PO in site cash hides that PO from admin ledger', fu
     expect(collect($alResponse->json('orders'))->pluck('po_number'))->not->toContain('PO-SM-PAID-001');
     expect($alResponse->json('total_pending_amount'))->toEqual(0.0);
 });
+
+test('owner without daily ledger permission does not see daily ledger tab on admin ledger page', function () {
+    $response = $this->actingAs($this->owner)->get('/admin-ledger');
+
+    $response->assertStatus(200);
+    $response->assertSee('Admin Ledger');
+    // Daily Ledger navigation tab should not be rendered
+    $response->assertDontSee('Daily Ledger', false);
+});
+
+test('account manager with daily ledger permission sees both daily ledger and admin ledger tabs', function () {
+    $accountManager = User::factory()->create([
+        'role' => UserRole::AccountManager,
+        'status' => 'Active',
+    ]);
+
+    $response = $this->actingAs($accountManager)->get('/admin-ledger');
+
+    $response->assertStatus(200);
+    $response->assertSee('Daily Ledger', false);
+    $response->assertSee('Admin Ledger', false);
+});
+
+test('owner cannot access daily ledger route and is redirected to dashboard', function () {
+    $response = $this->actingAs($this->owner)->get('/ledger');
+
+    $response->assertRedirect(route('dashboard'));
+    $response->assertSessionHas('error');
+});
+
+test('site manager cannot access daily ledger route and is redirected to dashboard', function () {
+    $siteManager = User::factory()->create([
+        'role' => UserRole::SiteManager,
+        'status' => 'Active',
+    ]);
+
+    $response = $this->actingAs($siteManager)->get('/ledger');
+
+    $response->assertRedirect(route('dashboard'));
+    $response->assertSessionHas('error');
+});

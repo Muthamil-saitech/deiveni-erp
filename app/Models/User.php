@@ -260,6 +260,11 @@ class User extends Authenticatable
      */
     public function canAccess(string $menu): bool
     {
+        // Daily Ledger is strictly for Account Manager & account-related roles; disabled for Owner & Site Manager
+        if (($this->isOwner() || $this->isSiteManager()) && $menu === 'ledger') {
+            return false;
+        }
+
         // Owner always retains access to administration and profile
         if ($this->isOwner() && in_array($menu, ['users', 'audit_logs', 'profile'], true)) {
             return true;

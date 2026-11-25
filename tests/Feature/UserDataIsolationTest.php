@@ -279,10 +279,10 @@ test('account manager only sees their own ledger entries while admin sees all', 
         ->assertStatus(200)
         ->assertJsonCount(1, 'data');
 
+    // Owner/Admin cannot access /ledger (Daily Ledger disabled for Owner)
     $this->actingAs($admin)
         ->getJson('/ledger')
-        ->assertStatus(200)
-        ->assertJsonCount(1, 'data');
+        ->assertStatus(403);
 });
 
 test('project site created by site manager is visible to account managers in ledger construction site select box while isolated between site managers', function () {

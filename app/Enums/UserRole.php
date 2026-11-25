@@ -62,6 +62,11 @@ enum UserRole: string
      */
     public function canAccess(string $menu): bool
     {
+        // Daily Ledger is strictly for Account Manager & account-related roles; disabled for Owner & Site Manager
+        if (($this === self::Owner || $this === self::Admin || $this === self::SiteManager) && $menu === 'ledger') {
+            return false;
+        }
+
         if ($this === self::Owner || $this === self::Admin) {
             return true;
         }

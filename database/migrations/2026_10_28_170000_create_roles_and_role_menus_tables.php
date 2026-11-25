@@ -35,8 +35,8 @@ return new class extends Migration
             $table->foreignId('role_id')->nullable()->after('email')->constrained('roles')->nullOnDelete();
         });
 
-        // Seed default initial roles & menu access
-        $allMenuKeys = array_keys(config('menus.items', []));
+        // Seed default initial roles & menu access (Daily Ledger disabled for Owner & Site Manager)
+        $allMenuKeys = array_diff(array_keys(config('menus.items', [])), ['ledger']);
 
         $defaultRoles = [
             [
@@ -80,6 +80,7 @@ return new class extends Migration
                     'property_types',
                     'suppliers',
                     'ledger',
+                    'admin_ledger',
                     'reports',
                     'profile',
                 ],

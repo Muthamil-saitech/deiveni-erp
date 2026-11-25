@@ -193,7 +193,8 @@ test('task 3: admin/owner sees all menus without restriction', function () {
     $response->assertSee(url('/weekly-wages'));
     $response->assertSee(url('/site-cash'));
     $response->assertSee(url('/purchases'));
-    $response->assertSee(url('/ledger'));
+    $response->assertDontSee('data-menu="ledger"', false);
+    $response->assertSee(url('/admin-ledger'));
     $response->assertSee(url('/warehouse'));
     $response->assertSee(url('/users'));
     $response->assertSee(url('/audit-logs'));
