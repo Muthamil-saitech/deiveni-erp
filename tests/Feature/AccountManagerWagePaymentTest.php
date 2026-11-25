@@ -542,3 +542,145 @@ test('account manager records wages with extra support workers and recalculates 
     $this->site->refresh();
     expect((float) $this->site->spent)->toEqual(0.00);
 });
+
+test('site manager removing workers in site cash refers them to account manager and partial payments show remaining pending balance', function () {
+    $date = '2026-11-24';
+
+    $smSite = ProjectSite::create([
+        'client_id' => $this->client->id,
+        'name' => 'SM Partial Wage Site',
+        'location' => 'Madurai',
+        'work_type' => 'New Build',
+        'start_date' => '2026-11-01',
+        'end_date' => '2027-05-31',
+        'estimated_budget' => 900000.00,
+        'spent' => 0.00,
+        'status' => 'In Progress',
+        'created_by' => $this->siteManager->id,
+    ]);
+
+    $alloc = DailyAllocation::create([
+        'project_site_id' => $smSite->id,
+        'date' => $date,
+        'total_labour_count' => 5,
+        'total_labour_wage' => 5200.00,
+        'total_expenses' => 0.00,
+        'grand_total' => 5200.00,
+        'created_by' => $this->siteManager->id,
+    ]);
+
+    $mason = DailyAllocationItem::create([
+        'daily_allocation_id' => $alloc->id,
+        'category_code' => 'CAT-001',
+        'name_ta' => 'கொத்தனார்',
+        'name_en' => 'Head Mason',
+        'daily_wage' => 1200.00,
+        'master_wage' => 1200.00,
+        'worker_count' => 2,
+        'subtotal' => 2400.00,
+    ]);
+
+    $helper = DailyAllocationItem::create([
+        'daily_allocation_id' => $alloc->id,
+        'category_code' => 'CAT-003',
+        'name_ta' => 'சித்தாள்',
+        'name_en' => 'Helper',
+        'daily_wage' => 900.00,
+        'master_wage' => 900.00,
+        'worker_count' => 2,
+        'subtotal' => 1800.00,
+    ]);
+
+    $electrician = DailyAllocationItem::create([
+        'daily_allocation_id' => $alloc->id,
+        'category_code' => 'CAT-008',
+        'name_ta' => 'எலக்ட்ரீஷியன்',
+        'name_en' => 'Electrician',
+        'daily_wage' => 1000.00,
+        'master_wage' => 1000.00,
+        'worker_count' => 1,
+        'subtotal' => 1000.00,
+    ]);
+
+    // 1. Site Manager removes Mason & Electrician and pays ONLY Helper (1,800)
+    $smPayRes = $this->actingAs($this->siteManager)->postJson('/site-cash', [
+        'project_site_id' => $smSite->id,
+        'transaction_type' => 'Daily Wage Payment',
+        'amount' => 1800.00,
+        'payment_mode' => 'Cash',
+        'paid_to' => 'Site Workers',
+        'payment_date' => $date,
+        'paid_wage_item_ids' => json_encode([$helper->id]),
+        'bill_no' => "WAGE-{$date}",
+    ]);
+    $smPayRes->assertStatus(201);
+
+    expect($helper->fresh()->paid_by)->toBe('Site Manager');
+    expect($mason->fresh()->paid_by)->toBeNull();
+    expect($mason->fresh()->referred_to_am)->toBeTrue();
+    expect($electrician->fresh()->referred_to_am)->toBeTrue();
+
+    // 2. Account Manager checks wages -> sees Mason (2,400) + Electrician (1,000) = 3,400, NOT Helper
+    $amCheck1 = $this->actingAs($this->accountManager)
+        ->getJson("/ledger/check-wages?project_site_id={$smSite->id}&entry_date={$date}");
+    $amCheck1->assertStatus(200);
+    expect($amCheck1->json('unpaid_total'))->toEqual(3400.00);
+    $amItemIds1 = collect($amCheck1->json('items'))->pluck('id');
+    expect($amItemIds1)->toContain($mason->id);
+    expect($amItemIds1)->toContain($electrician->id);
+    expect($amItemIds1)->not->toContain($helper->id);
+
+    // 3. Account Manager removes Electrician and pays ONLY Mason (2,400)
+    $amPay1 = $this->actingAs($this->accountManager)->postJson('/ledger', [
+        'entry_date' => $date,
+        'flow' => 'expense',
+        'source' => 'Construction',
+        'project_site_id' => $smSite->id,
+        'amount' => 2400.00,
+        'description' => 'Mason wages paid by AM',
+        'daily_allocation_id' => $alloc->id,
+        'is_am_wage_payment' => 1,
+        'wage_cash_source' => 'office_cash',
+        'wage_item_ids' => [$mason->id],
+    ]);
+    $amPay1->assertStatus(201);
+
+    expect($mason->fresh()->paid_by)->toBe('Account Manager');
+    expect($electrician->fresh()->paid_by)->toBeNull();
+
+    // 4. Account Manager checks wages AGAIN -> ONLY remaining pending Electrician (1,000) shows!
+    $amCheck2 = $this->actingAs($this->accountManager)
+        ->getJson("/ledger/check-wages?project_site_id={$smSite->id}&entry_date={$date}");
+    $amCheck2->assertStatus(200);
+    expect($amCheck2->json('unpaid_total'))->toEqual(1000.00);
+    expect($amCheck2->json('all_paid'))->toBeFalse();
+
+    // 5. Site Manager checks daily allocations -> allocation STILL appears with remaining payable 1,000!
+    $smAllocCheck = $this->actingAs($this->siteManager)
+        ->getJson("/site-cash/daily-allocations?project_site_id={$smSite->id}");
+    $smAllocCheck->assertStatus(200);
+    $foundAlloc = collect($smAllocCheck->json('allocations'))->firstWhere('id', $alloc->id);
+    expect($foundAlloc)->not->toBeNull();
+    expect((float) $foundAlloc['site_payable_wage'])->toEqual(1000.00);
+
+    // 6. Account Manager pays remaining Electrician (1,000) -> now all paid!
+    $amPay2 = $this->actingAs($this->accountManager)->postJson('/ledger', [
+        'entry_date' => $date,
+        'flow' => 'expense',
+        'source' => 'Construction',
+        'project_site_id' => $smSite->id,
+        'amount' => 1000.00,
+        'description' => 'Electrician balance wages paid by AM',
+        'daily_allocation_id' => $alloc->id,
+        'is_am_wage_payment' => 1,
+        'wage_cash_source' => 'office_cash',
+        'wage_item_ids' => [$electrician->id],
+    ]);
+    $amPay2->assertStatus(201);
+
+    $amCheck3 = $this->actingAs($this->accountManager)
+        ->getJson("/ledger/check-wages?project_site_id={$smSite->id}&entry_date={$date}");
+    $amCheck3->assertStatus(200);
+    expect($amCheck3->json('all_paid'))->toBeTrue();
+    expect($amCheck3->json('unpaid_total'))->toEqual(0);
+});

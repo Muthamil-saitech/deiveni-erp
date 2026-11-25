@@ -96,7 +96,7 @@
                                 </th>
                                 <th style="width: 145px;">Date</th>
                                 <th style="width: 130px;">Trade</th>
-                                <th>Description / Details</th>
+                                <th>Worker Category</th>
                                 <th style="width: 90px;" class="text-center">Workers</th>
                                 <th style="width: 110px;" class="text-end">Rate (₹)</th>
                                 <th style="width: 120px;" class="text-end">Actual (₹)</th>
@@ -150,6 +150,7 @@
 
             const IS_EDIT = {{ $bill ? 'true' : 'false' }};
             const SAVED_ITEMS = @json($bill ? ($bill->items ?? []) : []);
+            const WORKER_CATEGORIES = @json($workerCategories ?? []);
             const STORE_URL = "{{ $bill ? route('temporary-billing.update', $bill->encrypted_id) : route('temporary-billing.store') }}";
             const SITE_PAYMENTS_URL = "{{ route('temporary-billing.site-payments') }}";
 
@@ -164,16 +165,31 @@
             function addRowHtml(item) {
                 const date = item.date || $('#tbDate').val() || '{{ date('Y-m-d') }}';
                 const trade = item.trade || 'Painter';
-                const desc = item.description || '';
+                const desc = (item.description || '').trim();
                 const workers = parseInt(item.worker_count ?? 1) || 0;
                 const wage = parseFloat(item.daily_wage ?? 0).toFixed(2);
                 const orig = parseFloat(item.original_amount ?? item.billed_amount ?? 0).toFixed(2);
                 const billed = parseFloat(item.billed_amount ?? item.original_amount ?? 0).toFixed(2);
                 const paidBy = item.paid_by || 'Unpaid';
-                const isPaid = Boolean(item.is_paid);
-                const statusBadge = isPaid
-                    ? `<span class="badge bg-success-subtle text-success border border-success-subtle mt-1" style="font-size:0.68rem;">Paid: ${escapeHtml(paidBy)}</span>`
-                    : `<span class="badge bg-warning-subtle text-dark border border-warning-subtle mt-1" style="font-size:0.68rem;">Pending / Unpaid</span>`;
+
+                let matchedCatId = '';
+                WORKER_CATEGORIES.forEach(function (cat) {
+                    const ta = (cat.name_ta || '').trim();
+                    const en = (cat.name_en || '').trim();
+                    if ((ta && desc.startsWith(ta)) || (en && desc.toLowerCase().startsWith(en.toLowerCase()))) {
+                        matchedCatId = String(cat.id);
+                    }
+                });
+
+                const isOthers = (desc !== '' && matchedCatId === '');
+                let catOptionsHtml = `<option value="">-- Select Worker Category --</option>`;
+                WORKER_CATEGORIES.forEach(function (cat) {
+                    const label = cat.name_ta ? `${cat.name_ta} (${cat.name_en})` : cat.name_en;
+                    const shortLabel = cat.name_ta || cat.name_en;
+                    const selected = String(cat.id) === matchedCatId ? 'selected' : '';
+                    catOptionsHtml += `<option value="${cat.id}" data-rate="${parseFloat(cat.daily_wage || 0).toFixed(2)}" data-label="${escapeHtml(shortLabel)}" ${selected}>${escapeHtml(label)}</option>`;
+                });
+                catOptionsHtml += `<option value="__others__" ${isOthers ? 'selected' : ''}>+ Others (மற்றவை)</option>`;
 
                 return `
                     <tr class="tb-item-row" data-paid-by="${escapeHtml(paidBy)}">
@@ -190,8 +206,10 @@
                             </select>
                         </td>
                         <td>
-                            <input type="text" class="form-control form-control-sm row-desc" value="${escapeHtml(desc)}" required>
-                            ${statusBadge}
+                            <select class="form-select form-select-sm row-category-select">
+                                ${catOptionsHtml}
+                            </select>
+                            <input type="text" class="form-control form-control-sm mt-1 row-desc-custom ${isOthers ? '' : 'd-none'}" value="${isOthers ? escapeHtml(desc) : ''}" placeholder="Enter custom work / category...">
                         </td>
                         <td>
                             <input type="number" min="0" class="form-control form-control-sm text-center row-workers" value="${workers}">
@@ -324,6 +342,25 @@
                 recalculateTotal();
             });
 
+            $(document).on('change', '.row-category-select', function () {
+                const row = $(this).closest('tr');
+                const val = $(this).val();
+                const customInput = row.find('.row-desc-custom');
+
+                if (val === '__others__') {
+                    customInput.removeClass('d-none').focus();
+                } else {
+                    customInput.addClass('d-none');
+                    if (val) {
+                        const rate = parseFloat($(this).find('option:selected').data('rate')) || 0;
+                        row.find('.row-wage').val(rate.toFixed(2));
+                        const workers = parseFloat(row.find('.row-workers').val()) || 0;
+                        row.find('.row-billed').val((workers * rate).toFixed(2));
+                        recalculateTotal();
+                    }
+                }
+            });
+
             $(document).on('input change', '.row-workers, .row-wage', function () {
                 const row = $(this).closest('tr');
                 const workers = parseFloat(row.find('.row-workers').val()) || 0;
@@ -357,13 +394,25 @@
                 $('#tbItemsBody .tb-item-row').each(function () {
                     const row = $(this);
                     if (!row.find('.row-include-chk').is(':checked')) return;
-                    const desc = (row.find('.row-desc').val() || '').trim();
+
+                    const catSelect = row.find('.row-category-select');
+                    const catVal = catSelect.val();
+                    const workersCount = parseInt(row.find('.row-workers').val()) || 0;
+                    let desc = '';
+
+                    if (catVal === '__others__') {
+                        desc = (row.find('.row-desc-custom').val() || '').trim();
+                    } else if (catVal) {
+                        const label = catSelect.find('option:selected').data('label') || catSelect.find('option:selected').text();
+                        desc = `${label} (${workersCount} workers)`;
+                    }
+
                     if (!desc) return;
                     items.push({
                         date: row.find('.row-date').val(),
                         trade: row.find('.row-trade').val(),
                         description: desc,
-                        worker_count: parseInt(row.find('.row-workers').val()) || 0,
+                        worker_count: workersCount,
                         daily_wage: parseFloat(row.find('.row-wage').val()) || 0,
                         paid_by: row.data('paid-by') || 'Site Manager',
                         original_amount: parseFloat(row.find('.row-orig').data('orig')) || 0,

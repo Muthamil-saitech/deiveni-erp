@@ -374,18 +374,32 @@ class SiteCashController extends Controller
                 ->first();
 
             $amPaidTotal = (float) $alloc->items->where('paid_by', 'Account Manager')->sum('subtotal');
-            $payableWage = max(0.0, (float) $alloc->total_labour_wage - $amPaidTotal);
+            $smPaidTotal = (float) $alloc->items->where('paid_by', 'Site Manager')->sum('subtotal');
+            $unpaidTotal = (float) $alloc->items->filter(fn ($it) => empty($it->paid_by))->sum('subtotal');
+            $payableWage = $unpaidTotal > 0 || $smPaidTotal > 0 || $amPaidTotal > 0
+                ? $unpaidTotal
+                : max(0.0, (float) $alloc->total_labour_wage - $amPaidTotal);
             $alloc->setAttribute('am_paid_wage', $amPaidTotal);
+            $alloc->setAttribute('sm_paid_wage', $smPaidTotal);
             $alloc->setAttribute('site_payable_wage', $payableWage);
 
-            if ($payableWage <= 0 && $amPaidTotal > 0) {
-                // Entire allocation wage was paid by Account Manager from office cash
+            if ($payableWage <= 0.01 && ($amPaidTotal > 0 || $smPaidTotal > 0)) {
+                // Entire allocation wage was paid (by Account Manager and/or Site Manager)
                 return false;
             }
 
             if (! $matchingTxn) {
                 $alloc->setAttribute('is_wage_updated', false);
                 $alloc->setAttribute('is_wage_recorded', false);
+
+                return true;
+            }
+
+            // If Site Manager previously paid specific items and unpaid items still remain, allow paying the remaining balance
+            if ($smPaidTotal > 0 && $payableWage > 0.01) {
+                $alloc->setAttribute('is_wage_updated', true);
+                $alloc->setAttribute('is_wage_recorded', true);
+                $alloc->setAttribute('previous_wage_paid', $smPaidTotal);
 
                 return true;
             }

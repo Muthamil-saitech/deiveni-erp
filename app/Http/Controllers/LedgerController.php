@@ -302,16 +302,23 @@ class LedgerController extends Controller
                 continue;
             }
 
+            // Skip items already paid by Site Manager in Site Cash
+            if ($item->paid_by === 'Site Manager') {
+                continue;
+            }
+
             $catCode = strtoupper(trim((string) $item->category_code));
             $nameEn = strtolower(trim((string) $item->name_en));
             $nameTa = trim((string) $item->name_ta);
 
-            $isMatch = in_array($catCode, ['CAT-007', 'CAT-008', 'CAT-009'], true)
+            $isPainterOrElectrician = in_array($catCode, ['CAT-007', 'CAT-008', 'CAT-009'], true)
                 || str_contains($nameEn, 'painter')
                 || str_contains($nameEn, 'electrician')
                 || str_contains($nameEn, 'wireman')
                 || str_contains($nameTa, 'பெயிண்டர்')
                 || str_contains($nameTa, 'எலக்ட்ரீஷியன்');
+
+            $isMatch = $isPainterOrElectrician || (bool) $item->referred_to_am;
 
             if ($isMatch) {
                 $subtotal = (float) $item->subtotal;

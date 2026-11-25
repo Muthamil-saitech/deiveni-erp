@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\CashTransfer;
+use App\Models\DailyAllocationItem;
 use App\Models\Ledger;
 use App\Models\ProjectSite;
 use App\Models\SiteCash;
@@ -70,6 +71,33 @@ class SiteCashService implements SiteCashServiceInterface
             if (! empty($siteCash->returned_wage_ids) && is_array($siteCash->returned_wage_ids)) {
                 SiteCash::whereIn('id', $siteCash->returned_wage_ids)
                     ->update(['return_site_cash_id' => $siteCash->id]);
+            }
+
+            // Mark selected DailyAllocationItem rows as paid by Site Manager & refer removed items to Account Manager
+            if (in_array($siteCash->transaction_type, ['Daily Wage Payment', 'Daily Worker Wage Payment'], true)
+                && ! empty($data['paid_wage_item_ids'])) {
+                $paidItemIds = is_string($data['paid_wage_item_ids'])
+                    ? json_decode($data['paid_wage_item_ids'], true)
+                    : $data['paid_wage_item_ids'];
+
+                if (is_array($paidItemIds) && count($paidItemIds) > 0) {
+                    $paidIds = array_values(array_unique(array_map('intval', $paidItemIds)));
+                    $allocId = DailyAllocationItem::whereIn('id', $paidIds)->value('daily_allocation_id');
+
+                    DailyAllocationItem::whereIn('id', $paidIds)->update([
+                        'paid_by' => 'Site Manager',
+                        'site_cash_id' => $siteCash->id,
+                        'paid_at' => now(),
+                        'referred_to_am' => false,
+                    ]);
+
+                    if ($allocId) {
+                        DailyAllocationItem::where('daily_allocation_id', $allocId)
+                            ->whereNotIn('id', $paidIds)
+                            ->whereNull('paid_by')
+                            ->update(['referred_to_am' => true]);
+                    }
+                }
             }
 
             // Synchronize Balance Return to Account Manager's Ledger as Inflow (+)
@@ -275,6 +303,13 @@ class SiteCashService implements SiteCashServiceInterface
             // Unlink any wage transactions that were marked returned by this record
             SiteCash::where('return_site_cash_id', $siteCash->id)
                 ->update(['return_site_cash_id' => null]);
+
+            // Reset any DailyAllocationItem records paid by this SiteCash entry
+            DailyAllocationItem::where('site_cash_id', $siteCash->id)->update([
+                'paid_by' => null,
+                'site_cash_id' => null,
+                'paid_at' => null,
+            ]);
 
             // Delete synced balance return ledger entry if present
             if ($siteCash->transaction_type === 'Balance Returned' && $siteCash->ledger_id) {

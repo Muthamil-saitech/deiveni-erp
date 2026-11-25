@@ -633,6 +633,7 @@
 </div>
                                                 <input type="hidden" name="daily_allocation_id" id="ledgerDailyAllocationId">
                                                 <input type="hidden" name="is_am_wage_payment" id="ledgerIsAmWagePayment" value="0">
+                                                <div id="ledgerWageItemIdsInputs"></div>
 </div>
 </div>
 </div>
@@ -966,38 +967,17 @@
                     success: function (res) {
                         if (res.success && res.found && res.has_matching_trades && res.items.length > 0 && !res.all_paid && res.unpaid_total > 0) {
                             currentWageCheckData = res;
+                            currentWageCheckData.removedIds = new Set();
                             $('#ledgerDailyAllocationId').val(res.allocation_id);
-
-                            let itemsHtml = '';
-                            res.items.forEach(function (it) {
-                                const isPaint = (it.name_en || '').toLowerCase().includes('paint');
-                                const icon = isPaint ? 'bi-brush' : 'bi-lightning-charge';
-                                const iconColor = isPaint ? 'text-info' : 'text-warning';
-                                const statusHtml = it.is_paid
-                                    ? '<span class="badge bg-success-subtle text-success border border-success-subtle" style="font-size:0.68rem;"><i class="bi bi-check2"></i> Paid</span>'
-                                    : '<span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle" style="font-size:0.68rem;">Pending</span>';
-
-                                itemsHtml += `
-                                    <div class="px-2 py-1 rounded-2 border bg-light d-inline-flex align-items-center gap-2" style="font-size: 0.8rem;">
-                                        <i class="bi ${icon} ${iconColor}"></i>
-                                        <span class="fw-semibold text-dark">${it.name_ta || it.name_en}</span>
-                                        <span class="text-muted" style="font-size: 0.72rem;">(${it.count} workers)</span>
-                                        <strong class="text-success ms-1">₹${Math.round(it.subtotal).toLocaleString('en-IN')}</strong>
-                                        ${statusHtml}
-</div>
-                                `;
-                            });
-                            $('#wageCheckItemsContainer').html(itemsHtml);
-
-                            $('#wageCheckBadge').removeClass('bg-success-subtle text-success').addClass('bg-primary-subtle text-primary').text(`${res.items.length} Trade(s) Pending`);
+                            renderLedgerWageItems();
                             $('#wageCheckCard').removeClass('d-none');
-                            syncWageTotalsAndAutoFill();
                         } else {
                             // Once completed/settled or no unpaid trades, do NOT auto-fill and clear wage payment flags!
                             $('#wageCheckCard').addClass('d-none');
                             currentWageCheckData = null;
                             $('#ledgerDailyAllocationId').val('');
                             $('#ledgerIsAmWagePayment').val('0');
+                            $('#ledgerWageItemIdsInputs').empty();
                         }
                     },
                     error: function () {
@@ -1017,10 +997,80 @@
                 });
             }
 
-            function syncWageTotalsAndAutoFill() {
-                if (!currentWageCheckData || currentWageCheckData.unpaid_total <= 0) return;
+            function renderLedgerWageItems() {
+                if (!currentWageCheckData) return;
+                const removedIds = currentWageCheckData.removedIds || new Set();
+                let itemsHtml = '';
+                let activeUnpaidTotal = 0;
+                let pendingCount = 0;
+                const inputsContainer = $('#ledgerWageItemIdsInputs');
+                inputsContainer.empty();
 
-                const baseUnpaid = parseFloat(currentWageCheckData.unpaid_total) || 0;
+                currentWageCheckData.items.forEach(function (it) {
+                    const idStr = String(it.id || '');
+                    if (!it.is_paid && removedIds.has(idStr)) {
+                        return;
+                    }
+
+                    if (!it.is_paid) {
+                        activeUnpaidTotal += (parseFloat(it.subtotal) || 0);
+                        pendingCount++;
+                        inputsContainer.append(`<input type="hidden" name="wage_item_ids[]" value="${idStr}">`);
+                    }
+
+                    const isPaint = (it.name_en || '').toLowerCase().includes('paint');
+                    const icon = isPaint ? 'bi-brush' : 'bi-lightning-charge';
+                    const iconColor = isPaint ? 'text-info' : 'text-warning';
+                    const statusHtml = it.is_paid
+                        ? '<span class="badge bg-success-subtle text-success border border-success-subtle" style="font-size:0.68rem;"><i class="bi bi-check2"></i> Paid</span>'
+                        : '<span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle" style="font-size:0.68rem;">Pending</span>';
+                    const removeBtn = !it.is_paid
+                        ? `<button type="button" class="btn-close ms-1 remove-ledger-wage-item-btn" data-item-id="${idStr}" style="font-size: 0.62rem;" title="Remove worker (keep pending)"></button>`
+                        : '';
+
+                    itemsHtml += `
+                        <div class="px-2 py-1 rounded-2 border bg-light d-inline-flex align-items-center gap-2" style="font-size: 0.8rem;">
+                            <i class="bi ${icon} ${iconColor}"></i>
+                            <span class="fw-semibold text-dark">${it.name_ta || it.name_en}</span>
+                            <span class="text-muted" style="font-size: 0.72rem;">(${it.count} workers)</span>
+                            <strong class="text-success ms-1">₹${Math.round(it.subtotal).toLocaleString('en-IN')}</strong>
+                            ${statusHtml}
+                            ${removeBtn}
+                        </div>
+                    `;
+                });
+
+                if (removedIds.size > 0) {
+                    itemsHtml += `
+                        <button type="button" class="btn btn-outline-secondary btn-sm py-0 px-2" id="restoreLedgerWageItemsBtn" style="font-size: 0.72rem;">
+                            <i class="bi bi-arrow-counterclockwise me-1"></i>Restore (${removedIds.size})
+                        </button>
+                    `;
+                }
+
+                $('#wageCheckItemsContainer').html(itemsHtml);
+                $('#wageCheckBadge').removeClass('bg-success-subtle text-success').addClass('bg-primary-subtle text-primary').text(`${pendingCount} Trade(s) Pending`);
+                currentWageCheckData.active_unpaid_total = activeUnpaidTotal;
+                syncWageTotalsAndAutoFill();
+            }
+
+            $(document).on('click', '.remove-ledger-wage-item-btn', function () {
+                if (!currentWageCheckData) return;
+                const itemId = String($(this).data('item-id'));
+                currentWageCheckData.removedIds.add(itemId);
+                renderLedgerWageItems();
+            });
+
+            $(document).on('click', '#restoreLedgerWageItemsBtn', function () {
+                if (!currentWageCheckData) return;
+                currentWageCheckData.removedIds.clear();
+                renderLedgerWageItems();
+            });
+
+            function syncWageTotalsAndAutoFill() {
+                if (!currentWageCheckData) return;
+
+                const baseUnpaid = parseFloat(currentWageCheckData.active_unpaid_total ?? currentWageCheckData.unpaid_total) || 0;
                 let extraTotal = 0;
                 const extraDetails = [];
 

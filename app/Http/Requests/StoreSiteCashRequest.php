@@ -85,6 +85,7 @@ class StoreSiteCashRequest extends FormRequest
             'ledger_id' => ['nullable', 'integer'],
             'cash_transfer_id' => ['nullable', 'integer', 'exists:cash_transfers,id'],
             'returned_wage_ids' => ['nullable'],
+            'paid_wage_item_ids' => ['nullable'],
             'supplier_id' => [
                 'nullable',
                 Rule::requiredIf(fn () => $this->input('transaction_type') === 'Supplier Payment'

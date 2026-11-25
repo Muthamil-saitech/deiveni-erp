@@ -785,6 +785,7 @@
 </span>
 </div>
                                 <input type="hidden" id="newTxnWorkersDisplay" name="workers_summary">
+                                <input type="hidden" id="newTxnPaidWageItemIds" name="paid_wage_item_ids" value="[]">
 </div>
 
                             <!-- Balance Returned to Account Manager Section (Office Cash Wage & Cash Transfer Details) -->
@@ -1217,45 +1218,106 @@
                 $('#newTxnWorkersDisplay').val(`${summaryText} (Total: ${workers})`);
                 totalCountBadge.text(`Total: ${workers} Workers`).show();
 
-                // 3. SHOW EACH CATEGORY SEPARATELY AND FULLY IN DETAIL
-                workersContainer.empty();
+                // 3. SHOW EACH CATEGORY SEPARATELY WITH REMOVE OPTION FOR UNPAID ITEMS
+                let allSiteAllocationItems = [];
                 try {
-                    const itemsArr = JSON.parse(itemsJson);
-                    if (Array.isArray(itemsArr) && itemsArr.length > 0) {
-                        itemsArr.forEach(function (it) {
-                            const name = it.name_en || it.name_ta || 'Worker';
-                            const count = parseInt(it.worker_count) || 1;
-                            const dailyWage = parseFloat(it.daily_wage) || 0;
-                            const isAmPaid = (it.paid_by === 'Account Manager');
+                    const parsed = JSON.parse(itemsJson);
+                    if (Array.isArray(parsed)) allSiteAllocationItems = parsed;
+                } catch (e) {}
 
-                            workersContainer.append(`
-                                <span class="badge ${isAmPaid ? 'bg-info-subtle text-info border-info-subtle' : 'bg-white text-dark'} border px-3 py-2 shadow-xs d-inline-flex align-items-center gap-2" style="font-size: 0.875rem; font-weight: normal;">
-                                    <i class="bi ${isAmPaid ? 'bi-person-check text-info' : 'bi-person text-primary'} fs-6"></i>
-                                    <span class="fw-semibold text-dark">${name}:</span>
-                                    <strong class="${isAmPaid ? 'text-info' : 'text-primary'} fs-6">${count}</strong>
-                                    ${dailyWage > 0 ? `<span class="text-muted small ps-1 border-start">₹${dailyWage.toLocaleString('en-IN')}/day</span>` : ''}
-                                    ${isAmPaid ? `<span class="badge bg-info text-white ms-1" style="font-size:0.7rem;">Paid by AM</span>` : ''}
-</span>
-                            `);
-                        });
+                window.currentSiteWageState = {
+                    items: allSiteAllocationItems,
+                    removedIds: new Set(),
+                    rawDate: rawDate,
+                    isUpdated: isUpdated
+                };
 
-                        const formattedItems = itemsArr.map(function (it) {
-                            return {
-                                name: it.name_ta || it.name_en || 'Daily Labour',
-                                materialName: it.name_ta || it.name_en || 'Daily Labour',
-                                qty: it.worker_count || 1,
-                                rate: it.daily_wage || 0,
-                                total: it.subtotal || 0,
-                                unit: 'Worker(s)'
-                            };
-                        });
-                        $('#newTxnItemsJson').val(JSON.stringify(formattedItems));
-                    } else {
+                function renderSiteCashWageItems() {
+                    const state = window.currentSiteWageState;
+                    const itemsArr = state.items || [];
+                    workersContainer.empty();
+
+                    if (itemsArr.length === 0) {
                         workersContainer.html(`<span class="badge bg-white text-dark border px-3 py-2"><i class="bi bi-people me-1 text-primary"></i>${summaryText}</span>`);
+                        $('#newTxnPaidWageItemIds').val('[]');
+                        return;
                     }
-                } catch (e) {
-                    workersContainer.html(`<span class="badge bg-white text-dark border px-3 py-2"><i class="bi bi-people me-1 text-primary"></i>${summaryText}</span>`);
+
+                    const activeUnpaid = [];
+                    let totalWorkersCount = 0;
+
+                    itemsArr.forEach(function (it) {
+                        const name = it.name_en || it.name_ta || 'Worker';
+                        const count = parseInt(it.worker_count) || 1;
+                        const dailyWage = parseFloat(it.daily_wage) || 0;
+                        const subtotal = parseFloat(it.subtotal) || (count * dailyWage);
+                        const isPaid = Boolean(it.paid_by);
+                        const itemIdStr = String(it.id || '');
+
+                        if (!isPaid && state.removedIds.has(itemIdStr)) {
+                            return; // Removed by Site Manager (for AM payment)
+                        }
+
+                        if (!isPaid) {
+                            activeUnpaid.push(it);
+                            totalWorkersCount += count;
+                        }
+
+                        const paidLabel = it.paid_by === 'Account Manager' ? 'Paid by AM' : (it.paid_by ? `Paid by ${it.paid_by}` : '');
+                        const removeBtn = !isPaid && itemIdStr
+                            ? `<button type="button" class="btn-close ms-1 remove-site-wage-item-btn" data-item-id="${itemIdStr}" style="font-size: 0.65rem;" title="Remove worker (Account Manager will pay)"></button>`
+                            : '';
+
+                        workersContainer.append(`
+                            <span class="badge ${isPaid ? 'bg-info-subtle text-info border-info-subtle' : 'bg-white text-dark'} border px-3 py-2 shadow-xs d-inline-flex align-items-center gap-2" style="font-size: 0.875rem; font-weight: normal;">
+                                <i class="bi ${isPaid ? 'bi-person-check text-info' : 'bi-person text-primary'} fs-6"></i>
+                                <span class="fw-semibold text-dark">${name}:</span>
+                                <strong class="${isPaid ? 'text-info' : 'text-primary'} fs-6">${count}</strong>
+                                ${dailyWage > 0 ? `<span class="text-muted small ps-1 border-start">₹${dailyWage.toLocaleString('en-IN')}/day</span>` : ''}
+                                ${isPaid ? `<span class="badge bg-info text-white ms-1" style="font-size:0.7rem;">${paidLabel}</span>` : ''}
+                                ${removeBtn}
+                            </span>
+                        `);
+                    });
+
+                    if (state.removedIds.size > 0) {
+                        workersContainer.append(`
+                            <button type="button" class="btn btn-outline-secondary btn-sm py-1 px-2" id="restoreSiteWageItemsBtn" style="font-size: 0.75rem;">
+                                <i class="bi bi-arrow-counterclockwise me-1"></i>Restore (${state.removedIds.size})
+                            </button>
+                        `);
+                    }
+
+                    const activeTotal = activeUnpaid.reduce((sum, it) => sum + (parseFloat(it.subtotal) || 0), 0);
+                    const paidIds = activeUnpaid.map(it => it.id).filter(Boolean);
+                    $('#newTxnPaidWageItemIds').val(JSON.stringify(paidIds));
+
+                    $('#newTxnAmount').val(activeTotal.toFixed(2));
+                    if (state.isUpdated) {
+                        $('#labourWageHintText').html('₹' + activeTotal.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' <span class="badge bg-warning text-dark ms-1">Updated Allocation</span>');
+                    } else {
+                        $('#labourWageHintText').text('₹' + activeTotal.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
+                    }
+
+                    const activeSummary = activeUnpaid.map(it => `${it.worker_count} ${it.name_ta || it.name_en}`).join(' + ');
+                    $('#newTxnWorkersDisplay').val(activeUnpaid.length > 0 ? `${activeSummary} (Total: ${totalWorkersCount})` : 'No workers selected');
+                    totalCountBadge.text(`Total: ${totalWorkersCount} Workers`).show();
+
+                    const formattedItems = activeUnpaid.map(function (it) {
+                        return {
+                            name: it.name_ta || it.name_en || 'Daily Labour',
+                            materialName: it.name_ta || it.name_en || 'Daily Labour',
+                            qty: it.worker_count || 1,
+                            rate: it.daily_wage || 0,
+                            total: it.subtotal || 0,
+                            unit: 'Worker(s)'
+                        };
+                    });
+                    $('#newTxnItemsJson').val(JSON.stringify(formattedItems));
                 }
+
+                window.renderSiteCashWageItems = renderSiteCashWageItems;
+                renderSiteCashWageItems();
 
                 // 4. AUTO-FILL BILL / VOUCHER NO
                 if (rawDate) {
@@ -1264,6 +1326,23 @@
 
                 // 5. AUTO-FILL DESCRIPTION
                 $('#newTxnDesc').val(`Daily labour wage payment: ${summaryText} on ${dateFormatted}`);
+            });
+
+            $(document).on('click', '.remove-site-wage-item-btn', function () {
+                if (!window.currentSiteWageState) return;
+                const itemId = String($(this).data('item-id'));
+                window.currentSiteWageState.removedIds.add(itemId);
+                if (typeof window.renderSiteCashWageItems === 'function') {
+                    window.renderSiteCashWageItems();
+                }
+            });
+
+            $(document).on('click', '#restoreSiteWageItemsBtn', function () {
+                if (!window.currentSiteWageState) return;
+                window.currentSiteWageState.removedIds.clear();
+                if (typeof window.renderSiteCashWageItems === 'function') {
+                    window.renderSiteCashWageItems();
+                }
             });
 
             function calculateTotalSupplierPending(supplierId, supplierName) {

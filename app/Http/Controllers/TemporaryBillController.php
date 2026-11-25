@@ -7,6 +7,7 @@ use App\Models\ProjectSite;
 use App\Models\SiteCash;
 use App\Models\TemporaryBill;
 use App\Models\User;
+use App\Models\WorkerCategory;
 use App\Services\IdCipherService;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;
@@ -52,8 +53,9 @@ class TemporaryBillController extends Controller
             $selectedSiteId = null;
         }
         $bill = null;
+        $workerCategories = WorkerCategory::where('status', 'Active')->orderBy('name_en')->get();
 
-        return view('temporary-billing.create', compact('sites', 'selectedSiteId', 'bill'));
+        return view('temporary-billing.create', compact('sites', 'selectedSiteId', 'bill', 'workerCategories'));
     }
 
     /**
@@ -70,8 +72,9 @@ class TemporaryBillController extends Controller
 
         $sites = $this->getAccessibleSites($request->user());
         $selectedSiteId = $bill->project_site_id;
+        $workerCategories = WorkerCategory::where('status', 'Active')->orderBy('name_en')->get();
 
-        return view('temporary-billing.create', compact('sites', 'selectedSiteId', 'bill'));
+        return view('temporary-billing.create', compact('sites', 'selectedSiteId', 'bill', 'workerCategories'));
     }
 
     /**

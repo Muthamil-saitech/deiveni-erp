@@ -35,6 +35,8 @@ class DailyAllocationItem extends Model
         'paid_by',
         'wage_cash_source',
         'ledger_id',
+        'site_cash_id',
+        'referred_to_am',
         'paid_at',
     ];
 
@@ -53,6 +55,8 @@ class DailyAllocationItem extends Model
             'worker_count' => 'integer',
             'subtotal' => 'decimal:2',
             'ledger_id' => 'integer',
+            'site_cash_id' => 'integer',
+            'referred_to_am' => 'boolean',
             'paid_at' => 'datetime',
         ];
     }
