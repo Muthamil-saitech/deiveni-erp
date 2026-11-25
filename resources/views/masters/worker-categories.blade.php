@@ -255,13 +255,13 @@
                                 <div class="invalid-feedback" id="errNameEn"></div>
 </div>
                             <div class="col-12">
-                                <label class="form-label small fw-semibold" for="catNameTa">Category Name in Tamil (Tamil)
+                                <label class="form-label small fw-semibold" for="catNameTa">Category Name in Tamil
                                     <span class="text-danger">*</span></label>
                                 <input type="text" class="form-control ta-text" id="catNameTa" name="name_ta"
                                     placeholder="எ.கா. கொத்தனார் / மேஸ்திரி / சித்தாள்" required>
                                 <div class="invalid-feedback" id="errNameTa"></div>
 </div>
-                            <div class="col-12 col-md-6">
+                            <div class="col-12 col-md-6" id="catCodeGroup">
                                 <label
                                     class="form-label small fw-semibold d-flex justify-content-between align-items-center"
                                     for="catCode">
@@ -585,6 +585,7 @@
                 $('#categoryModalTitle').text('Add Worker Category ');
                 $('#categoryEditId').val('');
                 $('#categoryForm')[0].reset();
+                $('#catCodeGroup').show();
                 $('#catShift').val('8 Hours (8:30 AM - 5:30 PM)');
                 $('#catStatus').val('Active');
                 clearFormErrors();
@@ -596,6 +597,7 @@
                 const tr = $(this).closest('tr');
                 $('#categoryModalTitle').text('Edit Worker Category ');
                 $('#categoryEditId').val(tr.data('id'));
+                $('#catCodeGroup').hide();
                 $('#catNameTa').val(tr.data('name-ta'));
                 $('#catNameEn').val(tr.data('name-en'));
                 $('#catCode').val(tr.data('code'));

@@ -334,7 +334,7 @@
                             <input type="text" class="form-control" id="workerNameEn" placeholder="e.g. Ramesh" required>
 </div>
                         <div class="col-12 col-md-6">
-                            <label class="form-label small fw-semibold">Name in Tamil (Tamil) <span class="text-danger">*</span></label>
+                            <label class="form-label small fw-semibold">Name in Tamil <span class="text-danger">*</span></label>
                             <input type="text" class="form-control ta-text" id="workerNameTa" placeholder="எ.கா. ரமேஷ்" required>
 </div>
                         <div class="col-12 col-md-6">

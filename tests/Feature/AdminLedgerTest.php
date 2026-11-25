@@ -2,7 +2,9 @@
 
 use App\Enums\UserRole;
 use App\Models\AdminLedger;
+use App\Models\CashTransfer;
 use App\Models\Client;
+use App\Models\Ledger;
 use App\Models\ProjectSite;
 use App\Models\PurchaseOrder;
 use App\Models\SiteCash;
@@ -557,4 +559,92 @@ test('owner cannot record supplier payment when pending po total is zero', funct
     $response->assertStatus(422);
     $response->assertJsonValidationErrors(['amount']);
     expect(AdminLedger::count())->toBe(0);
+});
+
+test('admin creating a cash transfer deducts the transferred amount in admin ledger', function () {
+    $transferResponse = $this->actingAs($this->owner)->postJson('/cash-transfer', [
+        'transfer_direction' => 'office_to_site',
+        'project_site_id' => $this->site->id,
+        'transfer_date' => '2026-11-25',
+        'amount' => 15000.00,
+        'payment_mode' => 'Cash',
+        'handed_over_by' => 'K. Deiveni (Owner)',
+        'received_by' => 'Site Manager',
+        'purpose' => 'Site advance from Admin',
+    ]);
+
+    $transferResponse->assertStatus(201);
+    $transferId = $transferResponse->json('data.id');
+
+    $adminLedgerEntry = AdminLedger::where('category', 'cash_transfer')->first();
+    expect($adminLedgerEntry)->not->toBeNull();
+    expect($adminLedgerEntry->flow)->toBe('expense');
+    expect((float) $adminLedgerEntry->amount)->toBe(15000.00);
+    expect($adminLedgerEntry->project_site_id)->toBe($this->site->id);
+
+    $deleteResponse = $this->actingAs($this->owner)->deleteJson("/cash-transfer/{$transferId}");
+    $deleteResponse->assertStatus(200);
+    expect(AdminLedger::where('category', 'cash_transfer')->count())->toBe(0);
+});
+
+test('cash transfer site funds map includes admin ledger client payments and excludes internal cash transfer returns', function () {
+    AdminLedger::create([
+        'entry_date' => '2026-11-25',
+        'category' => 'client_payment',
+        'flow' => 'income',
+        'client_id' => $this->client->id,
+        'client_name' => $this->client->name,
+        'project_site_id' => $this->site->id,
+        'site_name' => $this->site->name,
+        'amount' => 50000.00,
+        'payment_mode' => 'Cash',
+        'created_by' => $this->owner->id,
+    ]);
+
+    Ledger::create([
+        'entry_date' => '2026-11-20',
+        'flow' => 'income',
+        'source' => 'Construction',
+        'amount' => 20000.00,
+        'project_site_id' => $this->site->id,
+        'site_name' => $this->site->name,
+        'client_name' => $this->client->name,
+        'transaction_type_name' => 'Cash Advance',
+        'created_by' => $this->owner->id,
+    ]);
+
+    // Internal transfer return in Ledger (must NOT inflate Received Amount)
+    Ledger::create([
+        'entry_date' => '2026-11-21',
+        'flow' => 'income',
+        'source' => 'Construction',
+        'amount' => 18000.00,
+        'project_site_id' => $this->site->id,
+        'site_name' => $this->site->name,
+        'client_name' => $this->client->name,
+        'transaction_type_name' => 'Cash Transfer from Site',
+        'created_by' => $this->owner->id,
+    ]);
+
+    // Outgoing project_cash transfer
+    CashTransfer::create([
+        'transfer_direction' => 'project_cash',
+        'project_site_id' => $this->site->id,
+        'transfer_date' => '2026-11-20',
+        'amount' => 12000.00,
+        'payment_mode' => 'Cash',
+        'handed_over_by' => 'Accountant',
+        'received_by' => 'Site Manager',
+        'settlement_status' => 'settled',
+        'acceptance_status' => 'accepted',
+        'created_by' => $this->owner->id,
+    ]);
+
+    $response = $this->actingAs($this->owner)->get('/cash-transfer');
+    $response->assertStatus(200);
+    $siteFundsMap = $response->viewData('siteFundsMap');
+
+    expect($siteFundsMap[$this->site->id]['received_amount'])->toEqual(70000.00);
+    expect($siteFundsMap[$this->site->id]['transferred_amount'])->toEqual(12000.00);
+    expect($siteFundsMap[$this->site->id]['available_amount'])->toEqual(58000.00);
 });

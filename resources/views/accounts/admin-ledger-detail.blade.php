@@ -101,12 +101,12 @@
                         <div>
                             <span class="text-muted small fw-semibold d-block text-uppercase">Category</span>
                             <h6 class="fw-bold mb-0 text-dark mt-1 text-truncate" style="max-width: 170px;">
-                                {{ $entry->category === 'client_payment' ? 'Client Payment' : 'Supplier Payment' }}
+                                {{ $entry->category === 'client_payment' ? 'Client Payment' : ($entry->category === 'cash_transfer' ? 'Cash Transfer' : 'Supplier Payment') }}
 </h6>
                             <small class="text-muted">{{ $partyName }}</small>
 </div>
                         <div class="bg-primary-subtle text-primary p-2 rounded-3">
-                            <i class="bi {{ $entry->category === 'client_payment' ? 'bi-person-check' : 'bi-truck' }} fs-5"></i>
+                            <i class="bi {{ $entry->category === 'client_payment' ? 'bi-person-check' : ($entry->category === 'cash_transfer' ? 'bi-arrow-left-right' : 'bi-truck') }} fs-5"></i>
 </div>
 </div>
 </div>

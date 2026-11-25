@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Enums\UserRole;
+use App\Models\AdminLedger;
 use App\Models\CashTransfer;
 use App\Models\Ledger;
 use App\Models\ProjectSite;
@@ -142,6 +143,11 @@ class CashTransferService implements CashTransferServiceInterface
             // Remove linked Ledger record if synced
             if ($transfer->ledger_id) {
                 Ledger::where('id', $transfer->ledger_id)->delete();
+            }
+
+            // Remove linked AdminLedger record if synced
+            if ($transfer->admin_ledger_id) {
+                AdminLedger::where('id', $transfer->admin_ledger_id)->delete();
             }
 
             // Remove linked return Ledger record if settled
@@ -600,6 +606,54 @@ class CashTransferService implements CashTransferServiceInterface
                 SiteCash::find($transfer->site_cash_id)?->delete();
                 $transfer->updateQuietly(['site_cash_id' => null]);
             }
+        }
+
+        $this->syncAdminLedgerDeduction($transfer, $siteName, $entryDateStr, $amount, $purpose);
+    }
+
+    /**
+     * Deduct transferred amount in Admin Ledger when an Admin/Owner transfers cash out to a site.
+     */
+    protected function syncAdminLedgerDeduction(
+        CashTransfer $transfer,
+        string $siteName,
+        string $entryDateStr,
+        float $amount,
+        string $purpose
+    ): void {
+        $creator = $transfer->created_by ? User::find($transfer->created_by) : Auth::user();
+        $isOutgoingFromAdmin = $creator?->isAdmin()
+            && in_array($transfer->transfer_direction, ['office_to_site', 'project_cash'], true);
+
+        if ($isOutgoingFromAdmin) {
+            $directionLabel = $transfer->transfer_direction === 'project_cash'
+                ? 'Project Cash Transfer to Site'
+                : 'Cash Transfer to Site';
+
+            $adminLedgerData = [
+                'entry_date' => $entryDateStr,
+                'category' => 'cash_transfer',
+                'flow' => 'expense',
+                'project_site_id' => $transfer->project_site_id,
+                'site_name' => $siteName,
+                'is_site_based' => true,
+                'amount' => $amount,
+                'payment_mode' => $transfer->payment_mode ?: 'Cash',
+                'payment_reference' => $transfer->payment_reference,
+                'bank_name' => $transfer->bank_name,
+                'description' => "{$directionLabel} ({$siteName}) #CTR-{$transfer->id} - Handed over by: {$transfer->handed_over_by}, Received by: {$transfer->received_by}. Purpose: {$purpose}",
+                'created_by' => $transfer->created_by ?? (Auth::id() ?? 1),
+            ];
+
+            if ($transfer->admin_ledger_id && ($existingAdminLedger = AdminLedger::find($transfer->admin_ledger_id))) {
+                $existingAdminLedger->update($adminLedgerData);
+            } else {
+                $adminLedger = AdminLedger::create($adminLedgerData);
+                $transfer->updateQuietly(['admin_ledger_id' => $adminLedger->id]);
+            }
+        } elseif ($transfer->admin_ledger_id) {
+            AdminLedger::where('id', $transfer->admin_ledger_id)->delete();
+            $transfer->updateQuietly(['admin_ledger_id' => null]);
         }
     }
 

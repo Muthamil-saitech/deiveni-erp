@@ -47,6 +47,7 @@ class CashTransfer extends Model
         'acceptance_notes',
         'receipt_image',
         'ledger_id',
+        'admin_ledger_id',
         'site_cash_id',
         'return_site_cash_id',
         'return_ledger_id',

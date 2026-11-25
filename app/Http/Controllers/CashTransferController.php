@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreCashTransferRequest;
 use App\Http\Requests\UpdateCashTransferRequest;
+use App\Models\AdminLedger;
 use App\Models\CashTransfer;
 use App\Models\Ledger;
 use App\Models\ProjectSite;
@@ -37,9 +38,24 @@ class CashTransferController extends Controller
         $sites = $sitesQuery->get();
         $siteIds = $sites->pluck('id')->all();
 
+        $adminLedgerIncomeBySite = AdminLedger::query()
+            ->whereIn('project_site_id', $siteIds)
+            ->where('category', 'client_payment')
+            ->where('flow', 'income')
+            ->selectRaw('project_site_id, COALESCE(SUM(amount), 0) as total')
+            ->groupBy('project_site_id')
+            ->pluck('total', 'project_site_id');
+
         $ledgerIncomeBySite = Ledger::query()
             ->whereIn('project_site_id', $siteIds)
             ->where('flow', 'income')
+            ->whereNull('cash_transfer_id')
+            ->whereNotIn('transaction_type_name', [
+                'Cash Transfer from Site',
+                'Project Cash Return from Site',
+                'Balance Returned (Cash Transfer)',
+                'Balance Returned',
+            ])
             ->selectRaw('project_site_id, COALESCE(SUM(amount), 0) as total')
             ->groupBy('project_site_id')
             ->pluck('total', 'project_site_id');
@@ -54,13 +70,22 @@ class CashTransferController extends Controller
 
         $transferredBySite = CashTransfer::query()
             ->whereIn('project_site_id', $siteIds)
+            ->where(function ($q) {
+                $q->where('transfer_direction', 'project_cash')
+                    ->orWhere(function ($sub) {
+                        $sub->where('transfer_direction', 'office_to_site')
+                            ->where('settlement_status', '!=', 'settled');
+                    });
+            })
             ->selectRaw('project_site_id, COALESCE(SUM(amount), 0) as total')
             ->groupBy('project_site_id')
             ->pluck('total', 'project_site_id');
 
         $siteFundsMap = [];
         foreach ($sites as $s) {
-            $received = (float) ($ledgerIncomeBySite[$s->id] ?? 0) + (float) ($siteCashClientBySite[$s->id] ?? 0);
+            $received = (float) ($adminLedgerIncomeBySite[$s->id] ?? 0)
+                + (float) ($ledgerIncomeBySite[$s->id] ?? 0)
+                + (float) ($siteCashClientBySite[$s->id] ?? 0);
             $transferred = (float) ($transferredBySite[$s->id] ?? 0);
             $siteFundsMap[$s->id] = [
                 'site_name' => $s->name,

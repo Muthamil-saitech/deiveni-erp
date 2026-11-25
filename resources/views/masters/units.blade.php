@@ -229,7 +229,7 @@
                                 <div class="invalid-feedback" id="errNameEn"></div>
 </div>
                             <div class="col-12">
-                                <label class="form-label small fw-semibold" for="unitNameTa">Unit Name in Tamil (Tamil) <span
+                                <label class="form-label small fw-semibold" for="unitNameTa">Unit Name in Tamil <span
                                         class="text-danger">*</span></label>
                                 <input type="text" class="form-control ta-text" id="unitNameTa" name="name_ta"
                                     placeholder="எ.கா. கிலோகிராம் / லிட்டர் / மூட்டை" required>

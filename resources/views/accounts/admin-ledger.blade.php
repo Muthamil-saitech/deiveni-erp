@@ -135,6 +135,7 @@
                         <option value="">All Categories</option>
                         <option value="client_payment">Client Payment (+ Income)</option>
                         <option value="supplier_payment">Supplier Payment (- Expense)</option>
+                        <option value="cash_transfer">Cash Transfer (- Expense)</option>
                     </select>
 </div>
                 <div class="col-6 col-md-2">
@@ -197,6 +198,10 @@
                                         <span class="badge bg-success-subtle text-success border border-success-subtle">
                                             <i class="bi bi-person-check me-1"></i>Client Payment (+)
 </span>
+                                    @elseif ($entry->category === 'cash_transfer')
+                                        <span class="badge bg-warning-subtle text-dark border border-warning-subtle">
+                                            <i class="bi bi-arrow-left-right me-1"></i>Cash Transfer (-)
+</span>
                                     @else
                                         <span class="badge bg-danger-subtle text-danger border border-danger-subtle">
                                             <i class="bi bi-truck me-1"></i>Supplier Payment (-)
@@ -213,6 +218,8 @@
                                 <td>
                                     @if ($entry->category === 'client_payment')
                                         <strong>{{ $entry->client_name ?: ($entry->client?->name ?? '—') }}</strong>
+                                    @elseif ($entry->category === 'cash_transfer')
+                                        <strong>Site Cash Transfer</strong>
                                     @else
                                         <strong>{{ $entry->supplier_name ?: ($entry->supplier?->name ?? '—') }}</strong>
                                     @endif

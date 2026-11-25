@@ -38,8 +38,9 @@ class DailyAllocationController extends Controller
             ->where('status', 'Active')
             ->where('type', Material::TYPE_OTHER)
             ->values();
+        $units = Unit::where('status', 'Active')->orderBy('name_en')->get();
 
-        return view('site-management.daily-allocation', compact('sites', 'workerCategories', 'materials'));
+        return view('site-management.daily-allocation', compact('sites', 'workerCategories', 'materials', 'units'));
     }
 
     /**
@@ -222,6 +223,7 @@ class DailyAllocationController extends Controller
             'items.*.paid_at' => 'nullable|date',
             'expenses' => 'nullable|array',
             'expenses.*.item_name' => 'nullable|string|max:255',
+            'expenses.*.unit_id' => 'nullable|integer|exists:units,id',
             'expenses.*.quantity' => 'nullable|numeric|min:0',
             'expenses.*.unit_price' => 'nullable|numeric|min:0',
             'expenses.*.amount' => 'nullable|numeric|min:0',
@@ -277,7 +279,8 @@ class DailyAllocationController extends Controller
                     continue;
                 }
 
-                $this->findOrCreateMaterial($rawTitle);
+                $unitId = ! empty($exp['unit_id']) ? (int) $exp['unit_id'] : null;
+                $this->findOrCreateMaterial($rawTitle, $unitId);
             }
         }
 

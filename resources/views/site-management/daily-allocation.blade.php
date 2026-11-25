@@ -304,9 +304,10 @@
                         <tr>
                             <th class="text-start" style="min-width: 250px;">Expense Item / Extra Purchase Description
 </th>
-                            <th style="width: 140px;">Quantity / Hours</th>
-                            <th style="width: 160px;">Unit Price</th>
-                            <th class="text-end" style="width: 160px;">Final Price (₹)</th>
+                            <th style="width: 140px;">Unit</th>
+                            <th style="width: 130px;">Quantity / Hours</th>
+                            <th style="width: 150px;">Unit Price</th>
+                            <th class="text-end" style="width: 150px;">Final Price (₹)</th>
                             <th style="width: 60px;" class="text-center">Action</th>
                         </tr>
                     </thead>
@@ -315,7 +316,7 @@
                     </tbody>
                     <tfoot class="bg-light">
                         <tr>
-                            <td colspan="3" class="fw-bold text-end">Total Same-Day Site Expenses:</td>
+                            <td colspan="4" class="fw-bold text-end">Total Same-Day Site Expenses:</td>
                             <td class="text-end fw-bold text-warning fs-6" id="totalExpensesBadge">₹0</td>
                             <td></td>
                         </tr>
@@ -431,6 +432,49 @@
 </div>
 
 </div>
+
+{{-- Quick-Add Material Modal --}}
+<div class="modal fade" id="quickAddMaterialModal" tabindex="-1" aria-labelledby="quickAddMaterialModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content">
+            <div class="modal-header py-2 bg-primary text-white">
+                <h6 class="modal-title fw-bold" id="quickAddMaterialModalLabel">
+                    <i class="bi bi-plus-circle-fill me-1"></i> Add to Materials Master
+                </h6>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label small fw-semibold" for="qaMatNameEn">
+                        Material Name in English <span class="text-danger">*</span>
+                    </label>
+                    <input type="text" class="form-control form-control-sm" id="qaMatNameEn" placeholder="e.g. Binding Wire">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label small fw-semibold" for="qaMatNameTa">
+                        Material Name in Tamil
+                    </label>
+                    <input type="text" class="form-control form-control-sm ta-text" id="qaMatNameTa" placeholder="e.g. கட்டு கம்பி">
+                </div>
+                <div class="mb-1">
+                    <label class="form-label small fw-semibold" for="qaMatUnit">
+                        Unit <span class="text-danger">*</span>
+                    </label>
+                    <select class="form-select form-select-sm" id="qaMatUnit">
+                        {{-- populated by JS from availableUnits --}}
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer py-2">
+                <button type="button" class="btn btn-light btn-sm" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary btn-sm" id="qaMatSaveBtn">
+                    <i class="bi bi-check-circle me-1"></i> Add Material
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 @endsection
 
 @push('scripts')
@@ -450,6 +494,7 @@
             const ROUTE_STORE_ALLOCATION = "{{ route('daily-allocation.store') }}";
             const ROUTE_QUICK_ADD_MATERIAL = "{{ route('daily-allocation.quick-add-material') }}";
             let availableMaterials = @json($materials ?? []);
+            const availableUnits = @json($units ?? []);
 
             function escapeHtml(text) {
                 if (!text) return '';
@@ -1201,8 +1246,30 @@
                 const amountVal = item && item.amount !== undefined ? item.amount : '';
                 const formattedAmount = amountVal ? '₹' + Math.round(amountVal).toLocaleString('en-IN') : '₹0';
 
+                let selectedUnitId = item && item.unit_id ? String(item.unit_id) : '';
+                if (!selectedUnitId && titleVal) {
+                    const lowerTitle = titleVal.toLowerCase().trim();
+                    const matchedMat = availableMaterials.find(m =>
+                        (m.name_en || '').toLowerCase() === lowerTitle ||
+                        (m.name_ta || '').toLowerCase() === lowerTitle ||
+                        `${m.name_en || ''} - ${m.name_ta || ''}`.toLowerCase() === lowerTitle
+                    );
+                    if (matchedMat && matchedMat.unit_id) {
+                        selectedUnitId = String(matchedMat.unit_id);
+                    }
+                }
+                if (!selectedUnitId && availableUnits.length > 0) {
+                    const nosUnit = availableUnits.find(u => (u.code || '').toUpperCase() === 'NOS' || (u.name_en || '').toLowerCase().includes('nos'));
+                    selectedUnitId = String((nosUnit || availableUnits[0]).id);
+                }
+
+                const unitOptionsHtml = availableUnits.map(u => {
+                    const isSel = String(u.id) === selectedUnitId ? 'selected' : '';
+                    return `<option value="${u.id}" ${isSel}>${escapeHtml(u.name_en || u.code || '')}</option>`;
+                }).join('');
+
                 return `
-                    <tr class="expense-row">
+                    <tr class="expense-row" data-material-id="${item && item.material_id ? item.material_id : ''}">
                         <td>
                             <div class="position-relative expense-autocomplete-wrapper">
                                 <div class="input-group input-group-sm">
@@ -1216,6 +1283,11 @@
                                      style="background: #fff; max-height: 220px; overflow-y: auto;">
 </div>
 </div>
+                        </td>
+                        <td>
+                            <select class="form-select form-select-sm expense-unit">
+                                ${unitOptionsHtml}
+                            </select>
                         </td>
                         <td>
                             <input type="number" min="0" step="any" class="form-control form-control-sm text-center expense-qty"
@@ -1301,7 +1373,7 @@
                         const taText = m.name_ta ? `<span class="text-muted ms-1">(${escapeHtml(m.name_ta)})</span>` : '';
                         html += `
                             <a href="javascript:void(0)" class="dropdown-item py-1 px-2 d-flex justify-content-between align-items-center expense-sugg-item"
-                               data-en="${escapeHtml(m.name_en)}" data-ta="${escapeHtml(m.name_ta || '')}" data-unit="${escapeHtml(unitName)}">
+                               data-id="${m.id || ''}" data-en="${escapeHtml(m.name_en)}" data-ta="${escapeHtml(m.name_ta || '')}" data-unit="${escapeHtml(unitName)}" data-unit-id="${m.unit_id || ''}">
                                 <div class="text-truncate me-2">
                                     <span class="fw-semibold text-dark">${escapeHtml(m.name_en)}</span>
                                     ${taText}
@@ -1348,12 +1420,18 @@
                 $dropdown.on('click', '.expense-sugg-item', function () {
                     const en = $(this).data('en');
                     const ta = $(this).data('ta');
+                    const unitId = $(this).data('unit-id');
+                    const materialId = $(this).data('id') || '';
                     const display = ta ? `${en} - ${ta}` : en;
                     $input.val(display);
                     $dropdown.addClass('d-none');
                     $(window).off('scroll.expenseAutoc resize.expenseAutoc');
 
                     const row = $input.closest('.expense-row');
+                    row.attr('data-material-id', materialId);
+                    if (unitId) {
+                        row.find('.expense-unit').val(String(unitId));
+                    }
                     const qtyInput = row.find('.expense-qty');
                     if (!qtyInput.val()) {
                         qtyInput.val(1);
@@ -1367,44 +1445,147 @@
                     const name = $(this).data('name');
                     if (!name) return;
 
-                    const $btn = $(this);
-                    $btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-1"></span> Adding to Master...');
+                    // Store references to the triggering row's input & dropdown
+                    // so the modal Save button knows which row to update.
+                    const row = $input.closest('.expense-row');
+                    const currentUnitId = row.find('.expense-unit').val() || '';
 
-                    $.ajax({
-                        url: ROUTE_QUICK_ADD_MATERIAL,
-                        type: 'POST',
-                        contentType: 'application/json',
-                        data: JSON.stringify({ name: name }),
-                        success: function (res) {
-                            if (res.success && res.material) {
-                                const exists = availableMaterials.some(m => m.id === res.material.id);
-                                if (!exists) {
-                                    availableMaterials.unshift(res.material);
+                    // Store on the modal for the save handler to retrieve
+                    const $modal = $('#quickAddMaterialModal');
+                    $modal.data('qa-input', $input);
+                    $modal.data('qa-dropdown', $dropdown);
+                    $modal.data('qa-row', row);
+
+                    // Pre-fill modal fields
+                    $('#qaMatNameEn').val(name);
+                    $('#qaMatNameTa').val('');
+
+                    // Populate unit options
+                    const unitOptions = availableUnits.map(u => {
+                        const sel = String(u.id) === String(currentUnitId) ? 'selected' : '';
+                        return `<option value="${u.id}" ${sel}>${escapeHtml(u.name_en || u.code || '')}</option>`;
+                    }).join('');
+                    $('#qaMatUnit').html(unitOptions);
+
+                    // Hide dropdown and open modal
+                    $dropdown.addClass('d-none');
+                    $(window).off('scroll.expenseAutoc resize.expenseAutoc');
+                    $modal.modal('show');
+                });
+            }
+
+            // ── Quick-Add Material Modal: Save button handler ──────────────────────
+            const ROUTE_MATERIALS_UPDATE = "{{ url('materials') }}";
+
+            $('#qaMatSaveBtn').on('click', function () {
+                const nameEn = $('#qaMatNameEn').val().trim();
+                if (!nameEn) {
+                    $('#qaMatNameEn').addClass('is-invalid').focus();
+                    return;
+                }
+                $('#qaMatNameEn').removeClass('is-invalid');
+
+                const nameTa   = $('#qaMatNameTa').val().trim() || null;
+                const unitId   = parseInt($('#qaMatUnit').val(), 10) || null;
+                const $modal   = $('#quickAddMaterialModal');
+                const $qaInput = $modal.data('qa-input');
+                const qaRow    = $modal.data('qa-row');
+
+                const $btn = $(this);
+                $btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-1"></span> Adding...');
+
+                $.ajax({
+                    url: ROUTE_QUICK_ADD_MATERIAL,
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({ name: nameEn, name_ta: nameTa, unit_id: unitId }),
+                    success: function (res) {
+                        $btn.prop('disabled', false).html('<i class="bi bi-check-circle me-1"></i> Add Material');
+                        if (res.success && res.material) {
+                            const exists = availableMaterials.some(m => m.id === res.material.id);
+                            if (!exists) {
+                                availableMaterials.unshift(res.material);
+                            }
+                            const display = res.material.name_ta && res.material.name_ta !== res.material.name_en
+                                ? `${res.material.name_en} - ${res.material.name_ta}`
+                                : res.material.name_en;
+
+                            if ($qaInput && $qaInput.length) {
+                                $qaInput.val(display);
+                            }
+                            if (qaRow && qaRow.length) {
+                                qaRow.attr('data-material-id', res.material.id);
+                                if (res.material.unit_id) {
+                                    qaRow.find('.expense-unit').val(String(res.material.unit_id));
                                 }
-                                const display = res.material.name_ta && res.material.name_ta !== res.material.name_en
-                                    ? `${res.material.name_en} - ${res.material.name_ta}`
-                                    : res.material.name_en;
-                                $input.val(display);
-                                $dropdown.addClass('d-none');
-                                $(window).off('scroll.expenseAutoc resize.expenseAutoc');
-
-                                const row = $input.closest('.expense-row');
-                                const qtyInput = row.find('.expense-qty');
+                                const qtyInput = qaRow.find('.expense-qty');
                                 if (!qtyInput.val()) {
                                     qtyInput.val(1);
                                 }
-                                recalculateDaily();
-                                showToast(`Material "${res.material.name_en}" added into Materials Master!`, 'success');
                             }
-                        },
-                        error: function (xhr) {
-                            $btn.prop('disabled', false).html('<i class="bi bi-plus-circle text-danger me-1"></i> Try Again');
-                            const msg = (xhr.responseJSON && xhr.responseJSON.message) ? xhr.responseJSON.message : 'Failed to add material.';
-                            showToast(msg, 'danger');
+                            recalculateDaily();
+                            $modal.modal('hide');
+                            showToast(`Material "${res.material.name_en}" added to Materials Master!`, 'success');
                         }
-                    });
+                    },
+                    error: function (xhr) {
+                        $btn.prop('disabled', false).html('<i class="bi bi-check-circle me-1"></i> Add Material');
+                        const msg = (xhr.responseJSON && xhr.responseJSON.message)
+                            ? xhr.responseJSON.message
+                            : 'Failed to add material.';
+                        showToast(msg, 'danger');
+                    }
                 });
-            }
+            });
+
+            // Reset invalid state when user types in name field
+            $('#qaMatNameEn').on('input', function () {
+                $(this).removeClass('is-invalid');
+            });
+
+            // Reset modal state when hidden
+            $('#quickAddMaterialModal').on('hidden.bs.modal', function () {
+                $('#qaMatNameEn').val('').removeClass('is-invalid');
+                $('#qaMatNameTa').val('');
+                $(this).removeData('qa-input qa-dropdown qa-row');
+            });
+
+            // ── Unit change on existing material row → update Material Master ──────
+            $(document).on('change', '.expense-unit', function () {
+                const $select = $(this);
+                const row = $select.closest('.expense-row');
+                const materialId = row.attr('data-material-id');
+                if (!materialId) return;   // new / unnamed row — nothing to update
+
+                const newUnitId = parseInt($select.val(), 10);
+                if (!newUnitId) return;
+
+                // Find material name for the PATCH payload
+                const mat = availableMaterials.find(m => String(m.id) === String(materialId));
+                if (!mat) return;
+
+                $.ajax({
+                    url: `${ROUTE_MATERIALS_UPDATE}/${materialId}/update`,
+                    type: 'POST',
+                    data: {
+                        name_en: mat.name_en,
+                        name_ta: mat.name_ta || mat.name_en,
+                        unit_id: newUnitId,
+                        type: mat.type || 'Other',
+                        status: mat.status || 'active',
+                        _token: $('meta[name="csrf-token"]').attr('content')
+                    },
+                    success: function () {
+                        // Update local cache
+                        if (mat) { mat.unit_id = newUnitId; }
+                        const selectedText = $select.find('option:selected').text();
+                        showToast(`Unit updated to "${selectedText}" in Materials Master.`, 'success');
+                    },
+                    error: function () {
+                        showToast('Could not update unit in Materials Master.', 'warning');
+                    }
+                });
+            });
 
             // Re-render categories in dropdown when new category is created
             function updateDropdownCategories(categories) {
@@ -1906,6 +2087,7 @@
                 let totalExpenses = 0;
                 $('.expense-row').each(function () {
                     const title = $(this).find('.expense-title').val().trim();
+                    const unitId = $(this).find('.expense-unit').val() || null;
                     const qty = parseFloat($(this).find('.expense-qty').val()) || 0;
                     const unitPrice = parseFloat($(this).find('.expense-unit-price').val()) || 0;
                     const amount = Math.round(qty * unitPrice);
@@ -1913,6 +2095,7 @@
                     if (title && amount > 0) {
                         expenses.push({
                             item_name: title,
+                            unit_id: unitId ? parseInt(unitId, 10) : null,
                             quantity: qty,
                             unit_price: unitPrice,
                             amount: amount

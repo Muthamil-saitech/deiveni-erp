@@ -287,7 +287,7 @@
                                 <div class="invalid-feedback" id="errNameEn"></div>
 </div>
                             <div class="col-12 col-md-6">
-                                <label class="form-label small fw-semibold" for="matNameTa">Name in Tamil (Tamil) <span
+                                <label class="form-label small fw-semibold" for="matNameTa">Name in Tamil <span
                                         class="text-danger">*</span></label>
                                 <input type="text" class="form-control ta-text" id="matNameTa" name="name_ta"
                                     placeholder="எ.கா. மணல் / சிமெண்ட்" required>
