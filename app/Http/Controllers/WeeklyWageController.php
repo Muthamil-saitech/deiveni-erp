@@ -3,18 +3,21 @@
 namespace App\Http\Controllers;
 
 use App\Models\Material;
+use App\Models\Unit;
+use App\Services\Contracts\MaterialServiceInterface;
 use App\Services\Contracts\ProjectSiteServiceInterface;
 use App\Services\Contracts\WeeklyWageServiceInterface;
-use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
 class WeeklyWageController extends Controller
 {
     public function __construct(
         public WeeklyWageServiceInterface $weeklyWageService,
-        public ProjectSiteServiceInterface $projectSiteService
+        public ProjectSiteServiceInterface $projectSiteService,
+        public MaterialServiceInterface $materialService
     ) {}
 
     /**
@@ -28,8 +31,9 @@ class WeeklyWageController extends Controller
             ->where('type', Material::TYPE_OTHER)
             ->orderBy('name_en')
             ->get();
+        $units = Unit::where('status', 'Active')->orderBy('name_en')->get();
 
-        return view('site-management.weekly-wages', compact('sites', 'materials'));
+        return view('site-management.weekly-wages', compact('sites', 'materials', 'units'));
     }
 
     /**
@@ -66,6 +70,7 @@ class WeeklyWageController extends Controller
             'end_date' => 'required|date_format:Y-m-d',
             'expenses' => 'nullable|array',
             'expenses.*.item_name' => 'nullable|string|max:255',
+            'expenses.*.unit_id' => 'nullable|integer|exists:units,id',
             'expenses.*.quantity' => 'nullable|numeric|min:0',
             'expenses.*.unit_price' => 'nullable|numeric|min:0',
             'expenses.*.amount' => 'nullable|numeric|min:0',
@@ -76,7 +81,11 @@ class WeeklyWageController extends Controller
         $endDate = $validated['end_date'];
         $expenses = $validated['expenses'] ?? [];
 
-        $weeklyWage = $this->weeklyWageService->saveWeeklyExpenses($siteId, $startDate, $endDate, $expenses);
+        $weeklyWage = DB::transaction(function () use ($siteId, $startDate, $endDate, $expenses) {
+            $this->syncOtherMaterialsFromExpenses($expenses);
+
+            return $this->weeklyWageService->saveWeeklyExpenses($siteId, $startDate, $endDate, $expenses);
+        });
 
         return response()->json([
             'success' => true,
@@ -96,6 +105,7 @@ class WeeklyWageController extends Controller
             'end_date' => 'required|date_format:Y-m-d',
             'expenses' => 'nullable|array',
             'expenses.*.item_name' => 'nullable|string|max:255',
+            'expenses.*.unit_id' => 'nullable|integer|exists:units,id',
             'expenses.*.quantity' => 'nullable|numeric|min:0',
             'expenses.*.unit_price' => 'nullable|numeric|min:0',
             'expenses.*.amount' => 'nullable|numeric|min:0',
@@ -105,30 +115,42 @@ class WeeklyWageController extends Controller
         $startDate = $validated['start_date'];
         $endDate = $validated['end_date'];
 
-        // Week can be settled once its Saturday (start_date + 5 days) is reached; no need to wait for Sunday
-        $weekSaturday = Carbon::parse($startDate)->addDays(5)->toDateString();
-        if (now()->toDateString() < $weekSaturday) {
-            return response()->json([
-                'success' => false,
-                'message' => "This week is not completed yet. It can be settled from Saturday ({$weekSaturday}) onwards.",
-            ], 422);
-        }
+        $weeklyWage = DB::transaction(function () use ($siteId, $startDate, $endDate, $validated) {
+            // If expenses are passed along during settle, save them first
+            if (isset($validated['expenses'])) {
+                $this->syncOtherMaterialsFromExpenses($validated['expenses']);
+                $this->weeklyWageService->saveWeeklyExpenses($siteId, $startDate, $endDate, $validated['expenses']);
+            }
 
-        // If expenses are passed along during settle, save them first
-        if (isset($validated['expenses'])) {
-            $this->weeklyWageService->saveWeeklyExpenses($siteId, $startDate, $endDate, $validated['expenses']);
-        }
-
-        $weeklyWage = $this->weeklyWageService->settleWeek(
-            $siteId,
-            $startDate,
-            $endDate
-        );
+            return $this->weeklyWageService->settleWeek(
+                $siteId,
+                $startDate,
+                $endDate
+            );
+        });
 
         return response()->json([
             'success' => true,
             'message' => 'Weekly wages of ₹'.number_format((float) $weeklyWage->net_payout, 2).' for this week have been approved and settled successfully!',
             'data' => $weeklyWage,
         ]);
+    }
+
+    /**
+     * Auto-create any new expense items in Materials Master as type "Other".
+     *
+     * @param  array<int, array<string, mixed>>  $expenses
+     */
+    private function syncOtherMaterialsFromExpenses(array $expenses): void
+    {
+        foreach ($expenses as $exp) {
+            $rawTitle = trim((string) ($exp['item_name'] ?? ''));
+            if ($rawTitle === '') {
+                continue;
+            }
+
+            $unitId = ! empty($exp['unit_id']) ? (int) $exp['unit_id'] : null;
+            $this->materialService->findOrCreateOtherMaterial($rawTitle, $unitId);
+        }
     }
 }

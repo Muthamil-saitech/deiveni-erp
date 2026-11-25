@@ -5,7 +5,9 @@ use App\Models\Client;
 use App\Models\DailyAllocation;
 use App\Models\DailyAllocationExpense;
 use App\Models\DailyAllocationItem;
+use App\Models\Material;
 use App\Models\ProjectSite;
+use App\Models\Unit;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -279,25 +281,84 @@ test('weekly wages data endpoint correctly loads allocations for previous year c
     expect($dayAllocations->firstWhere('date', '2025-11-11')['has_data'])->toBeFalse();
 });
 
-test('weekly wage cannot be settled before its saturday and can be settled any day from saturday onwards', function () {
-    $futureMonday = now()->addWeek()->startOfWeek(Carbon::MONDAY)->toDateString();
-    $futureSunday = now()->addWeek()->endOfWeek(Carbon::SUNDAY)->toDateString();
+test('weekly wage can be settled and updated with extra expenses on any day', function () {
+    $monday = now()->startOfWeek(Carbon::MONDAY)->toDateString();
+    $sunday = now()->endOfWeek(Carbon::SUNDAY)->toDateString();
 
-    $blockedRes = $this->actingAs($this->siteManager)->postJson('/weekly-wages/settle', [
+    DailyAllocation::create([
         'project_site_id' => $this->site->id,
-        'start_date' => $futureMonday,
-        'end_date' => $futureSunday,
+        'date' => $monday,
+        'total_labour_count' => 6,
+        'total_labour_wage' => 6800.00,
+        'total_expenses' => 6100.00,
+        'grand_total' => 12900.00,
+        'created_by' => $this->siteManager->id,
     ]);
-    $blockedRes->assertStatus(422);
 
-    $lastMonday = now()->subWeek()->startOfWeek(Carbon::MONDAY)->toDateString();
-    $lastSunday = now()->subWeek()->endOfWeek(Carbon::SUNDAY)->toDateString();
+    $unit = Unit::where('code', 'NOS')->first() ?? Unit::first();
 
-    $allowedRes = $this->actingAs($this->siteManager)->postJson('/weekly-wages/settle', [
+    $response = $this->actingAs($this->siteManager)->postJson('/weekly-wages/settle', [
         'project_site_id' => $this->site->id,
-        'start_date' => $lastMonday,
-        'end_date' => $lastSunday,
+        'start_date' => $monday,
+        'end_date' => $sunday,
+        'expenses' => [
+            [
+                'item_name' => 'Cable - மின்சார கேபிள்',
+                'unit_id' => $unit?->id,
+                'quantity' => 1,
+                'unit_price' => 150.00,
+                'amount' => 150.00,
+            ],
+        ],
     ]);
-    $allowedRes->assertStatus(200);
-    $allowedRes->assertJson(['success' => true]);
+
+    $response->assertStatus(200);
+    $response->assertJson(['success' => true]);
+
+    $this->assertDatabaseHas('weekly_wages', [
+        'project_site_id' => $this->site->id,
+        'week_start_date' => $monday,
+        'week_end_date' => $sunday,
+        'total_weekly_expenses' => 150.00,
+        'net_payout' => 13050.00,
+        'status' => 'settled',
+    ]);
+});
+
+test('saving weekly expenses with new material and unit stores it in materials master as type Other', function () {
+    $unit = Unit::where('code', 'LTR')->first() ?? Unit::create([
+        'name_en' => 'Test Litres',
+        'name_ta' => 'சோதனை லிட்டர்',
+        'code' => 'TLTR',
+        'status' => 'Active',
+    ]);
+
+    $monday = '2026-11-02';
+    $sunday = '2026-11-08';
+
+    $response = $this->actingAs($this->siteManager)->postJson('/weekly-wages/expenses', [
+        'project_site_id' => $this->site->id,
+        'start_date' => $monday,
+        'end_date' => $sunday,
+        'expenses' => [
+            [
+                'item_name' => 'Generator Diesel - ஜெனரேட்டர் டீசல்',
+                'unit_id' => $unit->id,
+                'quantity' => 10,
+                'unit_price' => 95.00,
+                'amount' => 950.00,
+            ],
+        ],
+    ]);
+
+    $response->assertStatus(200);
+    $response->assertJson(['success' => true]);
+
+    $this->assertDatabaseHas('materials', [
+        'name_en' => 'Generator Diesel',
+        'name_ta' => 'ஜெனரேட்டர் டீசல்',
+        'unit_id' => $unit->id,
+        'type' => Material::TYPE_OTHER,
+        'status' => 'Active',
+    ]);
 });
