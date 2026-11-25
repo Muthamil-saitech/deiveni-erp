@@ -731,11 +731,23 @@ class SiteCashController extends Controller
         $sites = $this->projectSiteService->getAllSites();
         $suppliers = Supplier::query()->where('status', 'Active')->orderBy('name')->get();
 
+        $weeklyWage = null;
+        if ($transaction->transaction_type === 'Weekly Settlement') {
+            if ($transaction->weekly_wage_id) {
+                $weeklyWage = WeeklyWage::find($transaction->weekly_wage_id);
+            } elseif ($transaction->project_site_id && preg_match('/WEEKLY-(\d{4}-\d{2}-\d{2})/', (string) ($transaction->bill_no ?? ''), $m)) {
+                $weeklyWage = WeeklyWage::where('project_site_id', $transaction->project_site_id)
+                    ->whereDate('week_start_date', $m[1])
+                    ->first();
+            }
+        }
+
         return view('site-management.site-cash-detail', [
             'transaction' => $transaction,
             'id' => $id,
             'sites' => $sites,
             'suppliers' => $suppliers,
+            'weeklyWage' => $weeklyWage,
         ]);
     }
 

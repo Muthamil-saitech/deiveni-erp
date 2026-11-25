@@ -939,4 +939,11 @@ test('weekly settlement endpoint returns settled weeks with daily site cash dedu
         ->getJson("/site-cash/weekly-settlements?project_site_id={$this->site->id}");
     $afterList->assertStatus(200);
     expect($afterList->json('settlements'))->toBe([]);
+
+    // 4. Completed Weekly Settlement transaction detail page has View Weekly Details button
+    $txn = SiteCash::where('weekly_wage_id', $settledWeek->id)->latest('id')->first();
+    $txnDetailRes = $this->actingAs($this->siteManager)->get("/site-cash/{$txn->encrypted_id}");
+    $txnDetailRes->assertStatus(200);
+    $txnDetailRes->assertSee('View Weekly Details');
+    $txnDetailRes->assertSee('/site-cash/weekly-settlement/');
 });

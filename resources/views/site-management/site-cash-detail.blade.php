@@ -42,11 +42,18 @@
                             <span>{{ $formattedDateTime }}</span></small>
 </div>
 </div>
-                <div class="d-flex align-items-center gap-2">
+                <div class="d-flex align-items-center gap-2 flex-wrap">
+                    @if (! empty($weeklyWage))
+                        <a href="{{ route('site-cash.weekly-settlement.show', $weeklyWage->encrypted_id) }}"
+                            target="_blank"
+                            class="btn btn-primary btn-sm d-inline-flex align-items-center shadow-sm">
+                            <i class="bi bi-eye-fill me-1"></i> View Weekly Details
+                        </a>
+                    @endif
                     <button type="button" class="btn btn-warning btn-sm d-inline-flex align-items-center shadow-sm"
                         data-bs-toggle="modal" data-bs-target="#editSiteCashModal">
                         <i class="bi bi-pencil-square me-1"></i> Edit Entry 
-</button>
+                    </button>
                     <button type="button" class="btn btn-outline-secondary btn-sm d-inline-flex align-items-center"
                         onclick="window.print()">
                         <i class="bi bi-printer me-1"></i> Print
