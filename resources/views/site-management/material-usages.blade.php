@@ -358,7 +358,7 @@
                                 <td class="ps-3 text-muted fw-semibold serial-cell">{{ str_pad($loop->iteration, 2, '0', STR_PAD_LEFT) }}</td>
                                 <td>
                                     <div class="fw-semibold text-dark" style="font-size:0.85rem;">{{ $usage->usage_no }}</div>
-                                    <div class="text-muted small">{{ $usage->usage_date?->format('d-m-Y') }}</div>
+                                    <div class="text-muted small">{{ $usage->usage_date?->format('d M Y') }}</div>
                                 </td>
                                 <td>
                                     <span class="fw-semibold text-dark">{{ $usage->projectSite?->name ?? '—' }}</span>

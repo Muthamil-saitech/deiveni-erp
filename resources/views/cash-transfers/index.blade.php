@@ -616,6 +616,14 @@
                 return $('<div>').text(text).html();
             }
 
+            function formatDateDisplay(dateStr) {
+                if (!dateStr) return '-';
+                const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+                const parts = String(dateStr).split('-');
+                if (parts.length !== 3) return dateStr;
+                return `${parts[2]} ${months[parseInt(parts[1], 10) - 1]} ${parts[0]}`;
+            }
+
             const isSiteManagerUser = {{ auth()->user()?->isSiteManager() ? 'true' : 'false' }};
 
             // Direction Selector visual click
@@ -752,7 +760,7 @@
                     }
 
                     const siteName = t.project_site ? escapeHtml(t.project_site.name) : '<span class="text-muted">—</span>';
-                    const dateDisplay = `<div class="fw-bold text-dark">${t.transfer_date}</div><div class="text-muted" style="font-size:0.75rem;">${escapeHtml(t.transfer_time || '')}</div>`;
+                    const dateDisplay = `<div class="fw-bold text-dark">${formatDateDisplay(t.transfer_date)}</div><div class="text-muted" style="font-size:0.75rem;">${escapeHtml(t.transfer_time || '')}</div>`;
 
                     const persons = `<div class="fw-semibold text-dark">${escapeHtml(t.handed_over_by)}</div><div class="text-muted" style="font-size:0.75rem;">&rarr; ${escapeHtml(t.received_by)}</div>`;
 
@@ -1152,7 +1160,7 @@
 </div>
                         <div class="d-flex justify-content-between align-items-center mb-1">
                             <span class="text-muted small">Date &amp; Time:</span>
-                            <span class="text-dark small">${t.transfer_date} ${t.transfer_time || ''}</span>
+                            <span class="text-dark small">${formatDateDisplay(t.transfer_date)} ${t.transfer_time || ''}</span>
 </div>
                         <div class="d-flex justify-content-between align-items-center mb-1">
                             <span class="text-muted small">Project Site:</span>
