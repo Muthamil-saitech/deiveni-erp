@@ -280,6 +280,7 @@
                     <div class="modal-body p-3 p-md-4">
                         @php
                             $isOwnerMode = auth()->user()?->isAdmin() ?? false;
+                            $isAm = auth()->user()?->isAccountManager() ?? false;
                             $isSm = auth()->user()?->isSiteManager() ?? false;
                             $currentUserName = auth()->user()?->name ?? 'Owner';
                         @endphp
@@ -372,8 +373,8 @@
                             </div>
                         </div>
 
-                        @if ($isOwnerMode)
-                            <!-- Read-only Project Received & Available Amount Box (Owner) -->
+                        @if ($isOwnerMode || $isAm)
+                            <!-- Read-only Project Received & Available Amount Box -->
                             <div class="p-3 mb-3 rounded-3 bg-light border" id="siteReceivedAmountBox" style="display: none;">
                                 <div class="row g-3 align-items-center">
                                     <div class="col-12 col-md-6">
@@ -491,29 +492,31 @@
                             </div>
                         @endif
 
-                        <!-- Step 4: Temporary Borrowing Details (Shown when Site to Office) -->
-                        <div class="p-3 mb-3 rounded-3 bg-warning-subtle bg-opacity-25 border border-warning-subtle" id="temporaryBorrowingBox" style="display: none;">
-                            <div class="d-flex justify-content-between align-items-center mb-2">
-                                <span class="small fw-bold text-dark">
-                                    <i class="bi bi-clock-history text-warning me-1"></i>Temporary Borrowing &amp; Return Terms
-</span>
-                                <span class="badge bg-warning text-dark small">Temporary Office Use</span>
-</div>
-                            <div class="row g-2">
-                                <div class="col-12 col-md-6">
-                                    <div class="form-check mt-1">
-                                        <input class="form-check-input" type="checkbox" id="transferIsTemporary" name="is_temporary" value="1" checked>
-                                        <label class="form-check-label small fw-semibold text-dark" for="transferIsTemporary">
-                                            This amount is temporary and will be returned to site budget 
-</label>
-</div>
-</div>
-                                <div class="col-12 col-md-6">
-                                    <label class="form-label small fw-semibold text-dark mb-1">Expected Return Date</label>
-                                    <input type="date" class="form-control form-control-sm" id="transferExpectedReturnDate" name="expected_return_date" value="{{ date('Y-m-d', strtotime('+3 days')) }}">
-</div>
-</div>
-</div>
+                        @if (! $isOwnerMode)
+                            <!-- Step 4: Temporary Borrowing Details (Shown when Site to Office) -->
+                            <div class="p-3 mb-3 rounded-3 bg-warning-subtle bg-opacity-25 border border-warning-subtle" id="temporaryBorrowingBox" style="display: none;">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <span class="small fw-bold text-dark">
+                                        <i class="bi bi-clock-history text-warning me-1"></i>Temporary Borrowing &amp; Return Terms
+                                    </span>
+                                    <span class="badge bg-warning text-dark small">Temporary Office Use</span>
+                                </div>
+                                <div class="row g-2">
+                                    <div class="col-12 col-md-6">
+                                        <div class="form-check mt-1">
+                                            <input class="form-check-input" type="checkbox" id="transferIsTemporary" name="is_temporary" value="1" checked>
+                                            <label class="form-check-label small fw-semibold text-dark" for="transferIsTemporary">
+                                                This amount is temporary and will be returned to site budget 
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-12 col-md-6">
+                                        <label class="form-label small fw-semibold text-dark mb-1">Expected Return Date</label>
+                                        <input type="date" class="form-control form-control-sm" id="transferExpectedReturnDate" name="expected_return_date" value="{{ date('Y-m-d', strtotime('+3 days')) }}">
+                                    </div>
+                                </div>
+                            </div>
+                        @endif
 
                         <!-- Purpose / Description -->
                         <div class="mb-3">
@@ -685,6 +688,7 @@
             }
 
             const isOwnerMode = {{ (auth()->user()?->isAdmin() ?? false) ? 'true' : 'false' }};
+            const isAccountManagerUser = {{ (auth()->user()?->isAccountManager() ?? false) ? 'true' : 'false' }};
             const isSiteManagerUser = {{ auth()->user()?->isSiteManager() ? 'true' : 'false' }};
             const siteFundsMap = @json($siteFundsMap);
             const transferUsers = @json($transferUsers);
@@ -826,14 +830,18 @@
             $('#transferSiteId').on('change', function () {
                 const siteId = $(this).val();
                 const info = siteFundsMap[siteId];
-                if (info) {
-                    $('#siteReceivedAmountReadonly').val(formatInrAmount(info.received_amount));
-                    $('#siteAvailableBalanceReadonly').val(formatInrAmount(info.available_amount));
+                if (info && (isOwnerMode || isAccountManagerUser)) {
+                    const receivedVal = isAccountManagerUser ? info.am_received_amount : info.received_amount;
+                    const availableVal = isAccountManagerUser ? info.am_available_amount : info.available_amount;
+                    $('#siteReceivedAmountReadonly').val(formatInrAmount(receivedVal));
+                    $('#siteAvailableBalanceReadonly').val(formatInrAmount(availableVal));
                     $('#siteReceivedAmountBox').slideDown(150);
                 } else {
                     $('#siteReceivedAmountBox').slideUp(150);
                 }
-                populateUsersByRole();
+                if (isOwnerMode) {
+                    populateUsersByRole();
+                }
             });
 
             // Load users dynamically based on selected role
@@ -937,7 +945,7 @@
                         acceptBtn = `<button class="btn btn-xs btn-success py-1 px-2 btn-accept-transfer text-white fw-bold shadow-sm" data-id="${t.id}" data-dir="${t.transfer_direction}" data-site="${escapeHtml(siteName)}" data-amt="₹${amt.toLocaleString('en-IN')}" data-from="${escapeHtml(t.handed_over_by)}" data-to="${escapeHtml(t.received_by)}" title="Accept & Confirm Cash Receipt"><i class="bi bi-check-circle me-1"></i>Accept</button>`;
                     }
 
-                    const settleBtn = (canSettle && t.settlement_status === 'pending' && t.acceptance_status === 'accepted' && !isProjectCash)
+                    const settleBtn = (canSettle && t.settlement_status === 'pending' && t.acceptance_status === 'accepted' && !isProjectCash && !t.admin_ledger_id)
                         ? `<button class="btn btn-xs btn-outline-success py-1 px-2 btn-settle-transfer" data-id="${t.id}" data-dir="${t.transfer_direction}" data-site="${escapeHtml(siteName)}" data-amt="₹${amt.toLocaleString('en-IN')}" data-date="${t.transfer_date}" title="Mark Settled / Returned"><i class="bi bi-check2"></i> Settle</button>`
                         : '';
 

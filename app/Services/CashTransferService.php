@@ -471,72 +471,161 @@ class CashTransferService implements CashTransferServiceInterface
                 }
             }
         } elseif ($transfer->transfer_direction === 'office_to_site') {
-            // Case 2: Office to Site
-            // Daily Ledger: Office Outflow (-) - Money given out by Office
+            $creator = $transfer->created_by ? User::find($transfer->created_by) : null;
             $amUser = User::where('role', UserRole::AccountManager)->orWhere('role', 'account_manager')->first();
-            $ledgerCreatorId = User::find($transfer->created_by)?->isAccountManager()
-                ? $transfer->created_by
-                : ($transfer->accepted_by ?: ($amUser?->id ?? $transfer->created_by));
 
-            $ledgerData = [
-                'entry_date' => $entryDateStr,
-                'flow' => 'expense',
-                'source' => 'Construction',
-                'amount' => $amount,
-                'project_site_id' => $transfer->project_site_id,
-                'cash_transfer_id' => $transfer->id,
-                'site_name' => $siteName,
-                'client_name' => $clientName,
-                'transaction_type_name' => 'Cash Transfer to Site',
-                'description' => "Cash transferred from Office to Site ({$siteName}) - Handed over by: {$transfer->handed_over_by}, Received by: {$transfer->received_by}. Purpose: {$purpose}{$acceptanceNote}",
-                'wage_cash_source' => 'office_cash',
-                'created_by' => $ledgerCreatorId,
-            ];
+            if ($creator?->isAdmin()) {
+                $recipientUser = User::where('name', $transfer->received_by)->first();
+                $isRecipientAm = ($recipientUser && $recipientUser->isAccountManager())
+                    || ($transfer->accepter && $transfer->accepter->isAccountManager())
+                    || str_contains(strtolower((string) $transfer->received_by), 'account');
 
-            if ($transfer->ledger_id && ($existingLedger = Ledger::find($transfer->ledger_id))) {
-                $existingLedger->update($ledgerData);
+                if ($isRecipientAm) {
+                    // Owner -> Account Manager: Once accepted, record as Income (+) in Account Manager's Daily Ledger
+                    if ($transfer->isAccepted()) {
+                        $ledgerCreatorId = $recipientUser?->id ?? $transfer->accepted_by ?? ($amUser?->id ?? $transfer->created_by);
+                        $ledgerData = [
+                            'entry_date' => $entryDateStr,
+                            'flow' => 'income',
+                            'source' => 'Construction',
+                            'amount' => $amount,
+                            'project_site_id' => $transfer->project_site_id,
+                            'cash_transfer_id' => $transfer->id,
+                            'site_name' => $siteName,
+                            'client_name' => $clientName,
+                            'transaction_type_name' => 'Cash Received from Owner',
+                            'description' => "Cash received from Owner ({$siteName}) - Given by: {$transfer->handed_over_by}, Received by: {$transfer->received_by}. Purpose: {$purpose}{$acceptanceNote}",
+                            'wage_cash_source' => 'office_cash',
+                            'created_by' => $ledgerCreatorId,
+                        ];
+
+                        if ($transfer->ledger_id && ($existingLedger = Ledger::find($transfer->ledger_id))) {
+                            $existingLedger->update($ledgerData);
+                        } else {
+                            $ledger = Ledger::create($ledgerData);
+                            $transfer->updateQuietly(['ledger_id' => $ledger->id]);
+                        }
+                    } elseif ($transfer->ledger_id) {
+                        Ledger::find($transfer->ledger_id)?->delete();
+                        $transfer->updateQuietly(['ledger_id' => null]);
+                    }
+
+                    if ($transfer->site_cash_id) {
+                        SiteCash::find($transfer->site_cash_id)?->delete();
+                        $transfer->updateQuietly(['site_cash_id' => null]);
+                    }
+                } else {
+                    // Owner -> Site Manager: Do not deduct from AM Daily Ledger; once accepted, record as Inflow (+) in Site Cash
+                    if ($transfer->ledger_id) {
+                        Ledger::find($transfer->ledger_id)?->delete();
+                        $transfer->updateQuietly(['ledger_id' => null]);
+                    }
+
+                    if ($transfer->project_site_id && $transfer->isAccepted()) {
+                        $site = ProjectSite::find($transfer->project_site_id);
+                        $siteCashCreator = $site?->created_by ?? $transfer->created_by;
+
+                        $siteCashData = [
+                            'project_site_id' => $transfer->project_site_id,
+                            'cash_transfer_id' => $transfer->id,
+                            'transaction_type' => 'Advance Received',
+                            'flow_type' => 'inflow',
+                            'amount' => $amount,
+                            'payment_mode' => $transfer->payment_mode ?: 'Cash',
+                            'payment_reference' => $transfer->payment_reference,
+                            'bank_name' => $transfer->bank_name,
+                            'paid_to' => $transfer->received_by,
+                            'paid_by' => $transfer->handed_over_by,
+                            'receiver_name' => $transfer->received_by,
+                            'is_expense' => false,
+                            'in_amount' => $amount,
+                            'out_amount' => 0.00,
+                            'bill_no' => 'XFER-'.$transfer->id,
+                            'payment_date' => $entryDateStr,
+                            'payment_time' => $transfer->transfer_time ?: now()->format('h:i A'),
+                            'description' => "Cash transfer received from Owner - Given by: {$transfer->handed_over_by}. Purpose: {$purpose}",
+                            'wage_cash_source' => 'office_cash',
+                            'created_by' => $siteCashCreator,
+                        ];
+
+                        if ($transfer->site_cash_id && ($existingSc = SiteCash::find($transfer->site_cash_id))) {
+                            $existingSc->update($siteCashData);
+                        } else {
+                            $siteCash = SiteCash::create($siteCashData);
+                            $transfer->updateQuietly(['site_cash_id' => $siteCash->id]);
+                        }
+                    } elseif (! $transfer->isAccepted() && $transfer->site_cash_id) {
+                        SiteCash::find($transfer->site_cash_id)?->delete();
+                        $transfer->updateQuietly(['site_cash_id' => null]);
+                    }
+                }
             } else {
-                $ledger = Ledger::create($ledgerData);
-                $transfer->updateQuietly(['ledger_id' => $ledger->id]);
-            }
+                // Case 2: Office to Site (Account Manager -> Site Manager)
+                // Daily Ledger: Office Outflow (-) - Money given out by Office
+                $ledgerCreatorId = $creator?->isAccountManager()
+                    ? $transfer->created_by
+                    : ($transfer->accepted_by ?: ($amUser?->id ?? $transfer->created_by));
 
-            // Site Cash: Site Inflow (+) - Only active once Accepted by Site Manager!
-            if ($transfer->project_site_id && $transfer->isAccepted()) {
-                $site = ProjectSite::find($transfer->project_site_id);
-                $siteCashCreator = $site?->created_by ?? $transfer->created_by;
-
-                $siteCashData = [
+                $ledgerData = [
+                    'entry_date' => $entryDateStr,
+                    'flow' => 'expense',
+                    'source' => 'Construction',
+                    'amount' => $amount,
                     'project_site_id' => $transfer->project_site_id,
                     'cash_transfer_id' => $transfer->id,
-                    'transaction_type' => 'Advance Received',
-                    'flow_type' => 'inflow',
-                    'amount' => $amount,
-                    'payment_mode' => $transfer->payment_mode ?: 'Cash',
-                    'payment_reference' => $transfer->payment_reference,
-                    'bank_name' => $transfer->bank_name,
-                    'paid_to' => $transfer->received_by,
-                    'paid_by' => $transfer->handed_over_by,
-                    'receiver_name' => $transfer->received_by,
-                    'is_expense' => false,
-                    'in_amount' => $amount,
-                    'out_amount' => 0.00,
-                    'bill_no' => 'XFER-'.$transfer->id,
-                    'payment_date' => $entryDateStr,
-                    'payment_time' => $transfer->transfer_time ?: now()->format('h:i A'),
-                    'description' => "Cash transfer received from Office - Given by: {$transfer->handed_over_by}. Purpose: {$purpose}",
+                    'site_name' => $siteName,
+                    'client_name' => $clientName,
+                    'transaction_type_name' => 'Cash Transfer to Site',
+                    'description' => "Cash transferred from Office to Site ({$siteName}) - Handed over by: {$transfer->handed_over_by}, Received by: {$transfer->received_by}. Purpose: {$purpose}{$acceptanceNote}",
                     'wage_cash_source' => 'office_cash',
-                    'created_by' => $siteCashCreator,
+                    'created_by' => $ledgerCreatorId,
                 ];
 
-                if ($transfer->site_cash_id && ($existingSc = SiteCash::find($transfer->site_cash_id))) {
-                    $existingSc->update($siteCashData);
+                if ($transfer->ledger_id && ($existingLedger = Ledger::find($transfer->ledger_id))) {
+                    $existingLedger->update($ledgerData);
                 } else {
-                    $siteCash = SiteCash::create($siteCashData);
-                    $transfer->updateQuietly(['site_cash_id' => $siteCash->id]);
+                    $ledger = Ledger::create($ledgerData);
+                    $transfer->updateQuietly(['ledger_id' => $ledger->id]);
                 }
-            } elseif (! $transfer->isAccepted() && $transfer->site_cash_id) {
-                SiteCash::find($transfer->site_cash_id)?->delete();
-                $transfer->updateQuietly(['site_cash_id' => null]);
+
+                // Site Cash: Site Inflow (+) - Only active once Accepted by Site Manager!
+                if ($transfer->project_site_id && $transfer->isAccepted()) {
+                    $site = ProjectSite::find($transfer->project_site_id);
+                    $siteCashCreator = $site?->created_by ?? $transfer->created_by;
+
+                    $siteCashData = [
+                        'project_site_id' => $transfer->project_site_id,
+                        'cash_transfer_id' => $transfer->id,
+                        'transaction_type' => 'Advance Received',
+                        'flow_type' => 'inflow',
+                        'amount' => $amount,
+                        'payment_mode' => $transfer->payment_mode ?: 'Cash',
+                        'payment_reference' => $transfer->payment_reference,
+                        'bank_name' => $transfer->bank_name,
+                        'paid_to' => $transfer->received_by,
+                        'paid_by' => $transfer->handed_over_by,
+                        'receiver_name' => $transfer->received_by,
+                        'is_expense' => false,
+                        'in_amount' => $amount,
+                        'out_amount' => 0.00,
+                        'bill_no' => 'XFER-'.$transfer->id,
+                        'payment_date' => $entryDateStr,
+                        'payment_time' => $transfer->transfer_time ?: now()->format('h:i A'),
+                        'description' => "Cash transfer received from Office - Given by: {$transfer->handed_over_by}. Purpose: {$purpose}",
+                        'wage_cash_source' => 'office_cash',
+                        'created_by' => $siteCashCreator,
+                    ];
+
+                    if ($transfer->site_cash_id && ($existingSc = SiteCash::find($transfer->site_cash_id))) {
+                        $existingSc->update($siteCashData);
+                    } else {
+                        $siteCash = SiteCash::create($siteCashData);
+                        $transfer->updateQuietly(['site_cash_id' => $siteCash->id]);
+                    }
+                } elseif (! $transfer->isAccepted() && $transfer->site_cash_id) {
+                    SiteCash::find($transfer->site_cash_id)?->delete();
+                    $transfer->updateQuietly(['site_cash_id' => null]);
+                }
             }
         } else {
             // Case 3: Project Cash (Account Manager transfers project funds received from Client/Owner to Site Manager)
@@ -704,6 +793,11 @@ class CashTransferService implements CashTransferServiceInterface
             : ($existing?->is_temporary ?? ($direction === 'site_to_office'));
 
         if ($direction === 'project_cash') {
+            $isTemporary = false;
+        }
+
+        // Owner/Admin outgoing transfers are direct transfers (not temporary borrowings)
+        if ($user && $user->isAdmin() && ! $existing && in_array($direction, ['office_to_site', 'project_cash'], true)) {
             $isTemporary = false;
         }
 

@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\AdminLedger;
 use App\Models\CashTransfer;
 use App\Models\Client;
 use App\Models\Ledger;
@@ -342,4 +343,84 @@ test('site manager can return cash transfer via site cash balance returned and a
     $ledgerDetailResponse->assertStatus(200);
     $ledgerDetailResponse->assertSee('Linked Cash Transfer Details', false);
     $ledgerDetailResponse->assertSee('Urgent plumbing emergency pipes and fittings', false);
+});
+
+test('owner cash transfer is settled without settle button and records entry in admin ledger', function () {
+    $owner = User::factory()->create(['role_id' => $this->ownerRole->id, 'role' => 'owner']);
+    $smSite = ProjectSite::create([
+        'client_id' => $this->client->id,
+        'name' => 'SM Owned Site',
+        'location' => 'Madurai',
+        'work_type' => 'Construction',
+        'status' => 'Ongoing',
+        'budget' => 1000000,
+        'spent' => 0,
+        'created_by' => $this->siteManager->id,
+    ]);
+
+    $response = $this->actingAs($owner)->postJson('/cash-transfer', [
+        'transfer_direction' => 'office_to_site',
+        'project_site_id' => $smSite->id,
+        'transfer_date' => Carbon::today()->toDateString(),
+        'amount' => 25000,
+        'payment_mode' => 'UPI',
+        'payment_reference' => 'UTR-OWNER-101',
+        'bank_name' => 'HDFC',
+        'handed_over_by' => $owner->name,
+        'received_by' => $this->siteManager->name,
+        'purpose' => 'Owner direct site advance',
+        'is_temporary' => 1,
+    ]);
+
+    $response->assertStatus(201);
+
+    $transfer = CashTransfer::latest('id')->first();
+    expect($transfer)->not->toBeNull();
+    expect($transfer->is_temporary)->toBeFalse();
+    expect($transfer->settlement_status)->toBe('settled');
+    expect($transfer->admin_ledger_id)->not->toBeNull();
+
+    $adminLedger = AdminLedger::find($transfer->admin_ledger_id);
+    expect($adminLedger)->not->toBeNull();
+    expect($adminLedger->category)->toBe('cash_transfer');
+    expect($adminLedger->flow)->toBe('expense');
+    expect((float) $adminLedger->amount)->toBe(25000.0);
+    expect($adminLedger->project_site_id)->toBe($smSite->id);
+    expect($adminLedger->payment_mode)->toBe('UPI');
+    expect($adminLedger->payment_reference)->toBe('UTR-OWNER-101');
+
+    // Site Manager accepts Owner's transfer -> Site Cash records Inflow (+), AM Daily Ledger has NO expense
+    $acceptSmRes = $this->actingAs($this->siteManager)->postJson("/cash-transfer/{$transfer->id}/accept");
+    $acceptSmRes->assertStatus(200);
+    $transfer->refresh();
+    expect($transfer->ledger_id)->toBeNull();
+    expect($transfer->site_cash_id)->not->toBeNull();
+    $siteCash = SiteCash::find($transfer->site_cash_id);
+    expect($siteCash->flow_type)->toBe('inflow');
+    expect((float) $siteCash->in_amount)->toBe(25000.0);
+
+    // Owner transfers to Account Manager -> AM accepts -> AM Daily Ledger records Income (+)
+    $amTransferRes = $this->actingAs($owner)->postJson('/cash-transfer', [
+        'transfer_direction' => 'office_to_site',
+        'project_site_id' => $smSite->id,
+        'transfer_date' => Carbon::today()->toDateString(),
+        'amount' => 40000,
+        'payment_mode' => 'Cash',
+        'handed_over_by' => $owner->name,
+        'received_by' => $this->accountManager->name,
+        'purpose' => 'Owner to AM fund',
+    ]);
+    $amTransferRes->assertStatus(201);
+    $amTransfer = CashTransfer::latest('id')->first();
+    expect($amTransfer->ledger_id)->toBeNull();
+
+    $acceptAmRes = $this->actingAs($this->accountManager)->postJson("/cash-transfer/{$amTransfer->id}/accept");
+    $acceptAmRes->assertStatus(200);
+    $amTransfer->refresh();
+    expect($amTransfer->site_cash_id)->toBeNull();
+    expect($amTransfer->ledger_id)->not->toBeNull();
+    $amLedger = Ledger::find($amTransfer->ledger_id);
+    expect($amLedger->flow)->toBe('income');
+    expect((float) $amLedger->amount)->toBe(40000.0);
+    expect($amLedger->transaction_type_name)->toBe('Cash Received from Owner');
 });

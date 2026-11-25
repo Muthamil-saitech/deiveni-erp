@@ -81,12 +81,28 @@ class CashTransferController extends Controller
             ->groupBy('project_site_id')
             ->pluck('total', 'project_site_id');
 
+        $amSiteIncomeBySite = Ledger::query()
+            ->whereIn('project_site_id', $siteIds)
+            ->where('flow', 'income')
+            ->selectRaw('project_site_id, COALESCE(SUM(amount), 0) as total')
+            ->groupBy('project_site_id')
+            ->pluck('total', 'project_site_id');
+
+        $amSiteExpenseBySite = Ledger::query()
+            ->whereIn('project_site_id', $siteIds)
+            ->where('flow', 'expense')
+            ->selectRaw('project_site_id, COALESCE(SUM(amount), 0) as total')
+            ->groupBy('project_site_id')
+            ->pluck('total', 'project_site_id');
+
         $siteFundsMap = [];
         foreach ($sites as $s) {
             $received = (float) ($adminLedgerIncomeBySite[$s->id] ?? 0)
                 + (float) ($ledgerIncomeBySite[$s->id] ?? 0)
                 + (float) ($siteCashClientBySite[$s->id] ?? 0);
             $transferred = (float) ($transferredBySite[$s->id] ?? 0);
+            $amIncome = (float) ($amSiteIncomeBySite[$s->id] ?? 0);
+            $amExpense = (float) ($amSiteExpenseBySite[$s->id] ?? 0);
             $siteFundsMap[$s->id] = [
                 'site_name' => $s->name,
                 'client_name' => $s->client?->name ?? 'N/A',
@@ -94,6 +110,8 @@ class CashTransferController extends Controller
                 'received_amount' => round($received, 2),
                 'transferred_amount' => round($transferred, 2),
                 'available_amount' => round(max(0.0, $received - $transferred), 2),
+                'am_received_amount' => round($amIncome, 2),
+                'am_available_amount' => round(max(0.0, $amIncome - $amExpense), 2),
             ];
         }
 

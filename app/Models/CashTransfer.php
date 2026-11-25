@@ -315,7 +315,12 @@ class CashTransfer extends Model
         }
 
         // Site Manager can accept
-        if ($user->isSiteManager()) {
+        if ($user->isSiteManager() && ! str_contains(strtolower((string) $this->received_by), 'account')) {
+            return true;
+        }
+
+        // Account Manager can accept when transfer is from Owner/Admin to Account Manager
+        if ($user->isAccountManager() && $this->creator?->isAdmin()) {
             return true;
         }
 

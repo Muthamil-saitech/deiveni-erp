@@ -51,7 +51,7 @@ class AdminLedgerController extends Controller
             ]);
         }
 
-        $clients = Client::with('projectSites')->orderBy('name')->get();
+        $clients = Client::whereHas('projectSites')->with('projectSites')->orderBy('name')->get();
         $sites = ProjectSite::with('client')->orderBy('name')->get();
         $suppliers = Supplier::where('status', 'Active')->orderBy('name')->get();
 
@@ -127,7 +127,7 @@ class AdminLedgerController extends Controller
             ]);
         }
 
-        $clients = Client::with('projectSites')->orderBy('name')->get();
+        $clients = Client::whereHas('projectSites')->with('projectSites')->orderBy('name')->get();
         $sites = ProjectSite::with('client')->orderBy('name')->get();
         $suppliers = Supplier::where('status', 'Active')->orderBy('name')->get();
 
