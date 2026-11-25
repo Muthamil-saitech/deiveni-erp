@@ -69,6 +69,7 @@ class UpdateMaterialRequest extends FormRequest
                 Rule::unique('materials', 'name_ta')->ignore($materialId),
             ],
             'unit_id' => ['required', 'integer', 'exists:units,id'],
+            'type' => ['nullable', 'string', 'in:Supplier,Other'],
             'status' => ['required', 'string', 'in:Active,Inactive'],
         ];
     }

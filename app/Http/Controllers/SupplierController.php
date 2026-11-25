@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreSupplierRequest;
 use App\Http\Requests\UpdateSupplierRequest;
 use App\Models\Ledger;
+use App\Models\Material;
 use App\Models\PurchaseOrder;
 use App\Models\SiteCash;
 use App\Services\Contracts\MaterialServiceInterface;
@@ -29,7 +30,9 @@ class SupplierController extends Controller
     {
         $suppliers = $this->supplierService->getAllSuppliers();
         $financialSummaries = $this->supplierService->getFinancialSummaries();
-        $materials = $this->materialService->getAllMaterials();
+        $materials = $this->materialService->getAllMaterials()
+            ->where('type', Material::TYPE_SUPPLIER)
+            ->values();
 
         if ($request->wantsJson() || $request->ajax()) {
             return response()->json([

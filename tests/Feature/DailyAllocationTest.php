@@ -3,7 +3,9 @@
 use App\Enums\UserRole;
 use App\Models\Client;
 use App\Models\DailyAllocation;
+use App\Models\Material;
 use App\Models\ProjectSite;
+use App\Models\Unit;
 use App\Models\User;
 use App\Models\WorkerCategory;
 use Carbon\Carbon;
@@ -329,9 +331,10 @@ test('storing daily allocation with new expense item automatically creates it in
     $response->assertStatus(200);
     $response->assertJsonPath('success', true);
 
-    // Verify it is created in Materials master table
+    // Verify it is created in Materials master table with type Other
     $this->assertDatabaseHas('materials', [
         'name_en' => 'Tea',
+        'type' => 'Other',
         'status' => 'Active',
     ]);
 });
@@ -347,6 +350,56 @@ test('quick add material endpoint creates new material in master', function () {
     $response->assertJsonPath('success', true);
     $this->assertDatabaseHas('materials', [
         'name_en' => 'Tea & Biscuits',
+        'type' => 'Other',
         'status' => 'Active',
     ]);
+});
+
+test('daily allocation and weekly wages only show Other materials while purchases and suppliers only show Supplier materials', function () {
+    $unit = Unit::first() ?? Unit::create([
+        'name_en' => 'Nos',
+        'name_ta' => 'எண்',
+        'code' => 'NOS',
+        'status' => 'Active',
+    ]);
+
+    Material::create([
+        'name_en' => 'OPC Cement 53',
+        'name_ta' => 'சிமெண்ட் 53',
+        'unit_id' => $unit->id,
+        'type' => 'Supplier',
+        'status' => 'Active',
+    ]);
+
+    Material::create([
+        'name_en' => 'Site Drinking Water',
+        'name_ta' => 'குடிநீர்',
+        'unit_id' => $unit->id,
+        'type' => 'Other',
+        'status' => 'Active',
+    ]);
+
+    $daRes = $this->actingAs($this->siteManager)->get('/daily-allocation');
+    $daRes->assertStatus(200);
+    $daMaterials = collect($daRes->viewData('materials'))->pluck('name_en');
+    expect($daMaterials)->toContain('Site Drinking Water');
+    expect($daMaterials)->not->toContain('OPC Cement 53');
+
+    $wwRes = $this->actingAs($this->siteManager)->get('/weekly-wages');
+    $wwRes->assertStatus(200);
+    $wwMaterials = collect($wwRes->viewData('materials'))->pluck('name_en');
+    expect($wwMaterials)->toContain('Site Drinking Water');
+    expect($wwMaterials)->not->toContain('OPC Cement 53');
+
+    $purRes = $this->actingAs($this->siteManager)->get('/purchases');
+    $purRes->assertStatus(200);
+    $purMaterials = collect($purRes->viewData('allMaterials'))->pluck('name_en');
+    expect($purMaterials)->toContain('OPC Cement 53');
+    expect($purMaterials)->not->toContain('Site Drinking Water');
+
+    $suppRes = $this->actingAs($this->siteManager)->get('/suppliers');
+    $suppRes->assertStatus(200);
+    $suppMaterials = collect($suppRes->viewData('materials'))->pluck('name_en');
+    expect($suppMaterials)->toContain('OPC Cement 53');
+    expect($suppMaterials)->not->toContain('Site Drinking Water');
 });

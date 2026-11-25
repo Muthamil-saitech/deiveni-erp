@@ -71,8 +71,33 @@ class AdminLedgerController extends Controller
      */
     public function store(StoreAdminLedgerRequest $request): JsonResponse
     {
+        $validated = $request->validated();
+
+        if (($validated['category'] ?? '') === 'supplier_payment') {
+            $isSiteBased = (bool) ($validated['is_site_based'] ?? (($validated['supplier_payment_scope'] ?? 'site_based') === 'site_based'));
+            $supplier = ! empty($validated['supplier_id']) ? Supplier::find((int) $validated['supplier_id']) : null;
+            $pendingResult = $this->purchaseOrderService->getPendingPurchaseOrders(
+                siteId: $isSiteBased && ! empty($validated['project_site_id']) ? (int) $validated['project_site_id'] : null,
+                supplierId: ! empty($validated['supplier_id']) ? (int) $validated['supplier_id'] : null,
+                supplierName: $supplier?->name,
+                isSiteBased: $isSiteBased,
+                user: $request->user(),
+                scopeToUserSites: false,
+            );
+
+            if ((float) ($pendingResult['total_pending_amount'] ?? 0) <= 0) {
+                $msg = 'Cannot record supplier payment because pending PO total is ₹0.00.';
+
+                return response()->json([
+                    'success' => false,
+                    'message' => $msg,
+                    'errors' => ['amount' => [$msg]],
+                ], 422);
+            }
+        }
+
         $entry = $this->service->createEntry(
-            $request->validated(),
+            $validated,
             $request->file('receipt_image')
         );
 

@@ -36,6 +36,7 @@ class DailyAllocationController extends Controller
             ->values();
         $materials = $this->materialService->getAllMaterials()
             ->where('status', 'Active')
+            ->where('type', Material::TYPE_OTHER)
             ->values();
 
         return view('site-management.daily-allocation', compact('sites', 'workerCategories', 'materials'));
@@ -288,6 +289,7 @@ class DailyAllocationController extends Controller
 
         $refreshedMaterials = $this->materialService->getAllMaterials()
             ->where('status', 'Active')
+            ->where('type', Material::TYPE_OTHER)
             ->values();
 
         return response()->json([
@@ -374,6 +376,7 @@ class DailyAllocationController extends Controller
             'name_en' => $finalEn,
             'name_ta' => $finalTa,
             'unit_id' => $unitId,
+            'type' => Material::TYPE_OTHER,
             'status' => 'Active',
         ])->load('unit');
     }

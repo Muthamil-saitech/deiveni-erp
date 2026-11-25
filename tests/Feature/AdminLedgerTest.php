@@ -541,3 +541,20 @@ test('site manager cannot access daily ledger route and is redirected to dashboa
     $response->assertRedirect(route('dashboard'));
     $response->assertSessionHas('error');
 });
+
+test('owner cannot record supplier payment when pending po total is zero', function () {
+    $response = $this->actingAs($this->owner)->postJson('/admin-ledger', [
+        'entry_date' => '2026-11-25',
+        'category' => 'supplier_payment',
+        'supplier_payment_scope' => 'site_based',
+        'supplier_id' => $this->supplier->id,
+        'project_site_id' => $this->site->id,
+        'amount' => 100.00,
+        'payment_mode' => 'Cash',
+        'description' => 'Should be blocked when pending total is zero',
+    ]);
+
+    $response->assertStatus(422);
+    $response->assertJsonValidationErrors(['amount']);
+    expect(AdminLedger::count())->toBe(0);
+});

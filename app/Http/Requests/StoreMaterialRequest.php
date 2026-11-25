@@ -57,6 +57,7 @@ class StoreMaterialRequest extends FormRequest
             'name_en' => ['required', 'string', 'max:255', Rule::unique('materials', 'name_en')],
             'name_ta' => ['required', 'string', 'max:255', Rule::unique('materials', 'name_ta')],
             'unit_id' => ['required', 'integer', 'exists:units,id'],
+            'type' => ['nullable', 'string', 'in:Supplier,Other'],
             'status' => ['required', 'string', 'in:Active,Inactive'],
         ];
     }

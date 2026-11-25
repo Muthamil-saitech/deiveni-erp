@@ -35,12 +35,18 @@ class PurchaseController extends Controller
         $suppliers = Supplier::where('status', 'Active')
             ->where('name', 'not like', '%warehouse%')
             ->with(['materials' => function ($q) {
-                $q->where('materials.status', 'Active')->with('unit');
+                $q->where('materials.status', 'Active')
+                    ->where('materials.type', Material::TYPE_SUPPLIER)
+                    ->with('unit');
             }])
             ->orderBy('name')
             ->get();
         $units = Unit::where('status', 'Active')->orderBy('name_en')->get();
-        $allMaterials = Material::where('status', 'Active')->with('unit')->orderBy('name_en')->get();
+        $allMaterials = Material::where('status', 'Active')
+            ->where('type', Material::TYPE_SUPPLIER)
+            ->with('unit')
+            ->orderBy('name_en')
+            ->get();
         $warehouseItems = $this->warehouseService->getInStockItems();
         $stats = $this->purchaseService->getStats();
         $nextPoNumber = $this->purchaseService->generateNextPoNumber('PO');

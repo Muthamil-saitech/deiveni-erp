@@ -23,7 +23,11 @@ class WeeklyWageController extends Controller
     public function index(Request $request): View
     {
         $sites = $this->projectSiteService->getAllSites();
-        $materials = Material::with('unit')->where('status', 'Active')->orderBy('name_en')->get();
+        $materials = Material::with('unit')
+            ->where('status', 'Active')
+            ->where('type', Material::TYPE_OTHER)
+            ->orderBy('name_en')
+            ->get();
 
         return view('site-management.weekly-wages', compact('sites', 'materials'));
     }

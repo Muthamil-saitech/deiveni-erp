@@ -387,8 +387,8 @@
                             <!-- SUPPLIER PAYMENT SECTION -->
                             <div class="col-12" id="supplierPaymentSection">
                                 <div class="p-3 bg-light rounded-3 border">
-                                    <!-- Payment Basis Radio: Site Based vs Total - Only shown if supplier in master is NOT site-based -->
-                                    <div class="mb-3" id="adminSupplierPaymentScopeBox" style="display: none;">
+                                    <!-- Payment Basis Radio: Site Based vs Total -->
+                                    <div class="mb-3" id="adminSupplierPaymentScopeBox">
                                         <label class="form-label small fw-semibold text-dark mb-1">
                                             <i class="bi bi-diagram-3 text-primary me-1"></i>Payment Basis  <span
                                                 class="text-danger">*</span>
@@ -447,17 +447,17 @@
                                             <div class="invalid-feedback" id="errSupplierProjectSiteId"></div>
 </div>
 
-                                        <!-- Purchase Order Selection (Shown ONLY when Site Based) -->
-                                        <div class="col-12" id="supplierPoGroup">
-                                            <label class="form-label small fw-semibold text-dark mb-1">
-                                                <i class="bi bi-file-earmark-text text-primary me-1"></i>Purchase Order (Optional)
-</label>
-                                            <select class="form-select font-monospace" id="purchaseOrderSelect"
-                                                name="purchase_order_no">
-                                                <option value="" selected>-- Select Site & Supplier above --</option>
-                                            </select>
-                                            <div class="invalid-feedback" id="errPurchaseOrderNo"></div>
-</div>
+                                        <!-- Total Amount Summary (Auto-fetched based on Payment Basis) -->
+                                        <div class="col-12" id="supplierTotalAmountGroup" style="display: none;">
+                                            <div class="d-flex align-items-center justify-content-between px-3 py-2 rounded-3 bg-white border border-primary-subtle">
+                                                <div class="small fw-semibold text-dark">
+                                                    <i class="bi bi-calculator text-primary me-1"></i>
+                                                    <span id="supplierTotalAmountLabel">Total Pending PO Amount</span>
+                                                    <span class="text-muted fw-normal ms-1" id="supplierPendingCountBadge"></span>
+                                                </div>
+                                                <div class="fw-bold text-primary fs-6" id="supplierTotalAmountDisplay">₹0.00</div>
+                                            </div>
+                                        </div>
 </div>
 </div>
 </div>
@@ -538,6 +538,20 @@
 @push('scripts')
     <script>
         $(document).ready(function () {
+            let currentSupplierPendingTotal = null;
+
+            function updateSupplierPaymentSubmitState(pendingTotal) {
+                currentSupplierPendingTotal = pendingTotal;
+                const isSupplierPayment = $('#categorySelect').val() === 'supplier_payment';
+                if (isSupplierPayment && pendingTotal !== null && pendingTotal <= 0) {
+                    $('#saveAdminLedgerBtn').prop('disabled', true);
+                    $('#supplierTotalAmountDisplay').removeClass('text-primary').addClass('text-danger');
+                } else {
+                    $('#saveAdminLedgerBtn').prop('disabled', false);
+                    $('#supplierTotalAmountDisplay').removeClass('text-danger').addClass('text-primary');
+                }
+            }
+
             // Category switch (Supplier Payment vs Client Payment)
             $('#categorySelect').on('change', function () {
                 const category = $(this).val();
@@ -548,14 +562,19 @@
                     // Reset supplier inputs
                     $('#supplierSelect').val('');
                     $('#supplierSiteSelect').val('');
-                    $('#purchaseOrderSelect').empty().append('<option value="" selected>-- Select Site & Supplier above --</option>');
+                    $('#supplierTotalAmountGroup').hide();
+                    $('#supplierTotalAmountDisplay').text('₹0.00');
+                    $('#supplierPendingCountBadge').text('');
+                    updateSupplierPaymentSubmitState(null);
                 } else {
                     $('#clientPaymentSection').slideUp(150);
                     $('#supplierPaymentSection').slideDown(150);
+                    $('#adminSupplierPaymentScopeBox').show();
                     $('#amountLabel').html('Expense Amount (₹) <span class="text-danger">*</span>');
                     // Reset client inputs
                     $('#clientSelect').val('');
                     $('#clientProjectSelect').empty().append('<option value="" disabled selected>-- Select Client First --</option>');
+                    updateSupplierPaymentSubmitState(currentSupplierPendingTotal);
                 }
             });
 
@@ -568,16 +587,15 @@
                 const isSiteBased = $('input[name="supplier_payment_scope"]:checked').val() === 'site_based';
                 if (isSiteBased) {
                     $('#supplierSiteGroup').slideDown(150);
-                    $('#supplierPoGroup').slideDown(150);
                     $('#adminAmount').val('');
                     $('#adminDescription').val('');
-                    loadPurchaseOrders();
+                    $('#supplierTotalAmountGroup').hide();
+                    loadSiteBasedSupplierTotal();
                 } else {
-                    // Total scope: hide site & PO
+                    // Total scope: hide site
                     $('#supplierSiteGroup').slideUp(150);
-                    $('#supplierPoGroup').slideUp(150);
                     $('#supplierSiteSelect').val('');
-                    $('#purchaseOrderSelect').val('');
+                    $('#supplierTotalAmountGroup').hide();
                     calculateTotalSupplierPending();
                 }
             }
@@ -625,47 +643,39 @@
 
             // Supplier change
             $('#supplierSelect').on('change', function () {
-                const selected = $(this).find('option:selected');
-                const supplierIsSiteBased = selected.data('is-site-based');
-                if (supplierIsSiteBased !== undefined && supplierIsSiteBased !== null && supplierIsSiteBased !== '') {
-                    const isSb = (String(supplierIsSiteBased) === '1' || supplierIsSiteBased === true);
-                    if (isSb) {
-                        $('#adminSupplierPaymentScopeBox').hide();
-                        $('#adminScopeSiteBased').prop('checked', true);
-                    } else {
-                        $('#adminSupplierPaymentScopeBox').slideDown(150);
-                        $('#adminScopeTotal').prop('checked', true);
-                    }
-                    syncSupplierPaymentScope();
+                const isSiteBased = $('input[name="supplier_payment_scope"]:checked').val() === 'site_based';
+                if (isSiteBased) {
+                    loadSiteBasedSupplierTotal();
                 } else {
-                    $('#adminSupplierPaymentScopeBox').hide();
-                    const isSiteBased = $('input[name="supplier_payment_scope"]:checked').val() === 'site_based';
-                    if (!isSiteBased) {
-                        calculateTotalSupplierPending();
-                    } else {
-                        loadPurchaseOrders();
-                    }
+                    calculateTotalSupplierPending();
                 }
             });
 
             // Supplier site change
             $('#supplierSiteSelect').on('change', function () {
-                loadPurchaseOrders();
+                loadSiteBasedSupplierTotal();
             });
 
-            // Load POs for Site Based
-            function loadPurchaseOrders() {
+            // Auto-fetch Total Pending PO Amount for Site Based
+            function loadSiteBasedSupplierTotal() {
                 const supplierId = $('#supplierSelect').val();
                 const supplierName = $('#supplierSelect option:selected').data('name') || '';
                 const siteId = $('#supplierSiteSelect').val();
-                const $poSelect = $('#purchaseOrderSelect');
+                const siteName = $('#supplierSiteSelect option:selected').data('name') || '';
 
                 if (!supplierId || !siteId) {
-                    $poSelect.empty().append('<option value="" selected>-- Select Site & Supplier above --</option>');
+                    $('#adminAmount').val('');
+                    $('#supplierTotalAmountGroup').hide();
+                    $('#supplierTotalAmountDisplay').text('₹0.00');
+                    $('#supplierPendingCountBadge').text('');
+                    updateSupplierPaymentSubmitState(null);
                     return;
                 }
 
-                $poSelect.empty().append('<option value="" selected>Loading purchase orders...</option>');
+                $('#supplierTotalAmountLabel').text('Site-Based Pending PO Total');
+                $('#supplierTotalAmountDisplay').text('Loading...');
+                $('#supplierPendingCountBadge').text('');
+                $('#supplierTotalAmountGroup').slideDown(150);
 
                 $.ajax({
                     url: '{{ route("admin-ledger.purchase-orders") }}',
@@ -678,35 +688,27 @@
                         is_site_based: 1
                     },
                     success: function (res) {
-                        $poSelect.empty();
-                        if (res.success && res.orders && res.orders.length > 0) {
-                            $poSelect.append('<option value="" selected>-- Select Purchase Order (Optional) --</option>');
-                            res.orders.forEach(function (po) {
-                                const amt = parseFloat(po.total_amount) || 0;
-                                const formatted = amt.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-                                $poSelect.append(`<option value="${po.po_number}" data-amount="${amt}">${po.po_number} - ₹${formatted} (${po.status})</option>`);
-                            });
-                        } else {
-                            $poSelect.append('<option value="" selected>-- No Pending POs for this site --</option>');
+                        if (res.success) {
+                            const total = parseFloat(res.total_pending_amount) || 0;
+                            const count = parseInt(res.pending_count) || 0;
+                            const formatted = total.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+                            $('#supplierTotalAmountDisplay').text(`₹${formatted}`);
+                            $('#supplierPendingCountBadge').text(`(${count} pending PO${count === 1 ? '' : 's'})`);
+                            updateSupplierPaymentSubmitState(total);
+
+                            if (total > 0) {
+                                $('#adminAmount').val(total.toFixed(2));
+                                $('#adminDescription').val(`Supplier payment to ${supplierName} for ${siteName} (${count} pending PO${count === 1 ? '' : 's'})`);
+                            } else {
+                                $('#adminAmount').val('');
+                                $('#adminDescription').val(`Supplier payment to ${supplierName} for ${siteName}`);
+                                showToast(`No pending POs for ${supplierName} on ${siteName}.`, 'info');
+                            }
                         }
                     }
                 });
             }
-
-            // PO selection -> auto fill amount & description
-            $('#purchaseOrderSelect').on('change', function () {
-                const selected = $(this).find('option:selected');
-                const amt = selected.data('amount');
-                const poNo = $(this).val();
-                const suppName = $('#supplierSelect option:selected').data('name') || '';
-
-                if (amt) {
-                    $('#adminAmount').val(parseFloat(amt).toFixed(2));
-                }
-                if (poNo) {
-                    $('#adminDescription').val(`Supplier payment to ${suppName} against PO: ${poNo}`);
-                }
-            });
 
             // Calculate Total Supplier Pending across all sites
             function calculateTotalSupplierPending() {
@@ -715,8 +717,17 @@
 
                 if (!supplierId) {
                     $('#adminAmount').val('');
+                    $('#supplierTotalAmountGroup').hide();
+                    $('#supplierTotalAmountDisplay').text('₹0.00');
+                    $('#supplierPendingCountBadge').text('');
+                    updateSupplierPaymentSubmitState(null);
                     return;
                 }
+
+                $('#supplierTotalAmountLabel').text('Total Pending PO Amount (All Sites)');
+                $('#supplierTotalAmountDisplay').text('Loading...');
+                $('#supplierPendingCountBadge').text('');
+                $('#supplierTotalAmountGroup').slideDown(150);
 
                 $.ajax({
                     url: '{{ route("admin-ledger.purchase-orders") }}',
@@ -732,6 +743,10 @@
                             const total = parseFloat(res.total_pending_amount) || 0;
                             const count = parseInt(res.pending_count) || 0;
                             const formatted = total.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+                            $('#supplierTotalAmountDisplay').text(`₹${formatted}`);
+                            $('#supplierPendingCountBadge').text(`(${count} pending PO${count === 1 ? '' : 's'})`);
+                            updateSupplierPaymentSubmitState(total);
 
                             if (total > 0) {
                                 $('#adminAmount').val(total.toFixed(2));
@@ -760,6 +775,11 @@
             // Submit Admin Ledger Form
             $('#adminLedgerForm').on('submit', function (e) {
                 e.preventDefault();
+
+                if ($('#categorySelect').val() === 'supplier_payment' && currentSupplierPendingTotal !== null && currentSupplierPendingTotal <= 0) {
+                    showToast('Cannot record supplier payment because pending PO total is ₹0.00.', 'danger');
+                    return;
+                }
 
                 // Clear previous errors
                 $('.is-invalid').removeClass('is-invalid');
@@ -842,8 +862,12 @@
                 $('.is-invalid').removeClass('is-invalid');
                 $('.invalid-feedback').text('').hide();
                 $('#categorySelect').val('supplier_payment').trigger('change');
-                $('#adminSupplierPaymentScopeBox').hide();
+                $('#adminSupplierPaymentScopeBox').show();
                 $('#adminScopeSiteBased').prop('checked', true).trigger('change');
+                $('#supplierTotalAmountGroup').hide();
+                $('#supplierTotalAmountDisplay').text('₹0.00');
+                $('#supplierPendingCountBadge').text('');
+                updateSupplierPaymentSubmitState(null);
                 $('#bankChequeDetailsGroup').hide();
                 $('#entryDate').val('{{ date("Y-m-d") }}');
             });

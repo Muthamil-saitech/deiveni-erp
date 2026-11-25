@@ -60,7 +60,7 @@
         <!-- Filter & Search Card -->
         <div class="card-custom p-3 mb-3 mb-md-4 bg-white">
             <div class="row g-2 align-items-center">
-                <div class="col-12 col-md-5">
+                <div class="col-12 col-md-4">
                     <div class="input-group input-group-sm">
                         <span class="input-group-text bg-light border-end-0"><i class="bi bi-search text-muted"></i></span>
                         <input type="text" class="form-control border-start-0 ps-0" id="materialSearchInput"
@@ -68,12 +68,20 @@
 </div>
 </div>
                 <!-- Unit Select Box Filter -->
-                <div class="col-6 col-md-3">
+                <div class="col-6 col-md-2">
                     <select class="form-select form-select-sm" id="unitFilter">
                         <option value="">All Units</option>
                         @foreach ($units as $unit)
                             <option value="{{ $unit->id }}">{{ $unit->name_en }} ({{ $unit->name_ta }})</option>
                         @endforeach
+                    </select>
+</div>
+                <!-- Type Filter -->
+                <div class="col-6 col-md-2">
+                    <select class="form-select form-select-sm" id="typeFilter">
+                        <option value="">All Types</option>
+                        <option value="Supplier">Supplier</option>
+                        <option value="Other">Other</option>
                     </select>
 </div>
                 <div class="col-6 col-md-1">
@@ -98,6 +106,7 @@
                             <th style="width: 50px;">#</th>
                             <th>Material / Item Name</th>
                             <th>Unit of Measurement</th>
+                            <th>Type</th>
                             <th>Status</th>
                             <th class="text-end" style="width: 70px;">Actions</th>
                         </tr>
@@ -132,9 +141,12 @@
                                     $unitIcon = 'bi bi-layers';
                                 }
                             @endphp
+                            @php
+                                $matType = $material->type ?? 'Supplier';
+                            @endphp
                             <tr data-id="{{ $material->id }}" data-name-en="{{ $material->name_en }}"
                                 data-name-ta="{{ $material->name_ta }}" data-unit-id="{{ $unitId }}" data-unit="{{ $unitName }}"
-                                data-status="{{ $material->status }}" data-suppliers-count="{{ $suppliersCount }}"
+                                data-type="{{ $matType }}" data-status="{{ $material->status }}" data-suppliers-count="{{ $suppliersCount }}"
                                 data-in-use="{{ $inUse ? '1' : '0' }}">
                                 <td class="text-muted fw-semibold serial-cell">{{ str_pad($index + 1, 2, '0', STR_PAD_LEFT) }}
                                 </td>
@@ -164,6 +176,13 @@
                                     <span class="badge bg-light text-primary border fw-semibold px-2 py-1 row-unit-badge">
                                         <i class="{{ $unitIcon }} me-1"></i><span class="row-unit-text">{{ $unitName }}</span>
 </span>
+                                </td>
+                                <td>
+                                    @if ($matType === 'Other')
+                                        <span class="badge bg-warning-subtle text-dark border border-warning-subtle row-type-badge">Other</span>
+                                    @else
+                                        <span class="badge bg-primary-subtle text-primary border border-primary-subtle row-type-badge">Supplier</span>
+                                    @endif
                                 </td>
                                 <td>
                                     @if ($material->status === 'Active')
@@ -204,14 +223,14 @@
                             </tr>
                         @empty
                             <tr id="emptyMaterialsRow">
-                                <td colspan="5" class="text-center py-5 text-muted">
+                                <td colspan="6" class="text-center py-5 text-muted">
                                     <i class="bi bi-box-seam fs-2 d-block mb-2 text-secondary"></i>
                                     No materials found. Click <strong>Add Material</strong> to create one.
                                 </td>
                             </tr>
                         @endforelse
                         <tr id="noResultsRow" class="d-none">
-                            <td colspan="5" class="text-center py-5 text-muted">
+                            <td colspan="6" class="text-center py-5 text-muted">
                                 <i class="bi bi-search fs-2 d-block mb-2 text-secondary"></i>
                                 No matching materials found for your search or filter criteria.
                             </td>
@@ -293,6 +312,16 @@
 </div>
 
                             <div class="col-12 col-md-6">
+                                <label class="form-label small fw-semibold" for="matType">Material Type <span
+                                        class="text-danger">*</span></label>
+                                <select class="form-select fw-semibold" id="matType" name="type" required>
+                                    <option value="Supplier" selected>Supplier</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                                <div class="invalid-feedback" id="errType"></div>
+</div>
+
+                            <div class="col-12 col-md-6">
                                 <label class="form-label small fw-semibold" for="matStatus">Status</label>
                                 <select class="form-select" id="matStatus" name="status">
                                     <option value="Active">Active</option>
@@ -350,6 +379,7 @@
             function getMatchingRows() {
                 const query = $('#materialSearchInput').val().toLowerCase().trim();
                 const selectedUnitId = $('#unitFilter').val();
+                const selectedType = $('#typeFilter').val();
                 const matching = [];
 
                 $('#materialsTableBody tr').each(function () {
@@ -360,11 +390,13 @@
                     const nameTa = String($(this).data('name-ta') || '').toLowerCase();
                     const rowUnit = String($(this).data('unit') || '').toLowerCase();
                     const rowUnitId = String($(this).data('unit-id') || '');
+                    const rowType = String($(this).data('type') || 'Supplier');
 
-                    const matchQuery = !query || nameEn.includes(query) || nameTa.includes(query) || rowUnit.includes(query);
+                    const matchQuery = !query || nameEn.includes(query) || nameTa.includes(query) || rowUnit.includes(query) || rowType.toLowerCase().includes(query);
                     const matchUnit = !selectedUnitId || rowUnitId === String(selectedUnitId);
+                    const matchType = !selectedType || rowType === selectedType;
 
-                    if (matchQuery && matchUnit) {
+                    if (matchQuery && matchUnit && matchType) {
                         matching.push(this);
                     }
                 });
@@ -393,7 +425,7 @@
                     if ($('#emptyMaterialsRow').length === 0) {
                         $('#materialsTableBody').html(`
                                 <tr id="emptyMaterialsRow">
-                                    <td colspan="5" class="text-center py-5 text-muted">
+                                    <td colspan="6" class="text-center py-5 text-muted">
                                         <i class="bi bi-box-seam fs-2 d-block mb-2 text-secondary"></i>
                                         No materials found. Click <strong>Add Material</strong> to create one.
                                     </td>
@@ -513,8 +545,8 @@
                 }
             });
 
-            // Filter on search or unit change
-            $('#materialSearchInput, #unitFilter').on('input change', function () {
+            // Filter on search, unit, or type change
+            $('#materialSearchInput, #unitFilter, #typeFilter').on('input change', function () {
                 currentPage = 1;
                 updatePagination();
             });
@@ -523,6 +555,7 @@
             $('#historyFilterResetBtn').on('click', function () {
                 $('#materialSearchInput').val('');
                 $('#unitFilter').val('');
+                $('#typeFilter').val('');
                 currentPage = 1;
                 updatePagination();
             });
@@ -546,6 +579,10 @@
                     const err = errors.unit_id ? errors.unit_id[0] : errors.unit[0];
                     $('#matUnitSelect').addClass('is-invalid');
                     $('#errUnitId').text(err).show();
+                }
+                if (errors.type) {
+                    $('#matType').addClass('is-invalid');
+                    $('#errType').text(errors.type[0]).show();
                 }
                 if (errors.status) {
                     $('#matStatus').addClass('is-invalid');
@@ -597,6 +634,7 @@
                 $('#materialForm')[0].reset();
                 $('#matUnitSelect option[data-inactive="true"]').remove();
                 $('#matUnitSelect').val('');
+                $('#matType').val('Supplier');
                 $('#matStatus').val('Active');
                 clearFormErrors();
             });
@@ -609,6 +647,7 @@
                 $('#matNameEn').val(tr.data('name-en'));
                 $('#matNameTa').val(tr.data('name-ta'));
                 setSelectUnit(tr.data('unit-id') || tr.data('unit'));
+                $('#matType').val(tr.data('type') || 'Supplier');
                 $('#matStatus').val(tr.data('status') || 'Active');
                 clearFormErrors();
 
@@ -629,6 +668,7 @@
                     name_en: $('#matNameEn').val().trim(),
                     name_ta: $('#matNameTa').val().trim(),
                     unit_id: $('#matUnitSelect').val(),
+                    type: $('#matType').val(),
                     status: $('#matStatus').val()
                 };
 
@@ -656,12 +696,15 @@
                                 : ($(`#matUnitSelect option[value="${mat.unit_id}"]`).data('name') || $('#matUnitSelect option:selected').data('name') || '');
                             const unitIcon = getUnitIcon(unitName);
 
+                            const matType = mat.type || 'Supplier';
+
                             if (isEdit) {
                                 const tr = $(`#materialsTableBody tr[data-id="${mat.id}"]`);
                                 tr.data('name-en', mat.name_en)
                                     .data('name-ta', mat.name_ta)
                                     .data('unit-id', mat.unit_id)
                                     .data('unit', unitName)
+                                    .data('type', matType)
                                     .data('status', mat.status);
 
                                 const hasTa = Boolean(mat.name_ta && mat.name_ta.trim() !== '');
@@ -673,6 +716,12 @@
                                     .text(hasTa ? mat.name_en : '');
                                 tr.find('.row-unit-badge').html(`<i class="${unitIcon} me-1"></i><span class="row-unit-text">${unitName}</span>`);
 
+                                if (matType === 'Other') {
+                                    tr.find('.row-type-badge').attr('class', 'badge bg-warning-subtle text-dark border border-warning-subtle row-type-badge').text('Other');
+                                } else {
+                                    tr.find('.row-type-badge').attr('class', 'badge bg-primary-subtle text-primary border border-primary-subtle row-type-badge').text('Supplier');
+                                }
+
                                 if (mat.status === 'Active') {
                                     tr.find('.row-status-badge').attr('class', 'badge bg-success-subtle text-success row-status-badge').text('Active');
                                 } else {
@@ -682,6 +731,10 @@
                                 showToast(res.message || `Material "${mat.name_en}" updated successfully!`, 'success');
                             } else {
                                 $('#emptyMaterialsRow').hide();
+
+                                const typeBadge = matType === 'Other'
+                                    ? '<span class="badge bg-warning-subtle text-dark border border-warning-subtle row-type-badge">Other</span>'
+                                    : '<span class="badge bg-primary-subtle text-primary border border-primary-subtle row-type-badge">Supplier</span>';
 
                                 const statusBadge = mat.status === 'Active'
                                     ? '<span class="badge bg-success-subtle text-success row-status-badge">Active</span>'
@@ -694,6 +747,7 @@
                                             data-name-ta="${mat.name_ta}"
                                             data-unit-id="${mat.unit_id}"
                                             data-unit="${unitName}"
+                                            data-type="${matType}"
                                             data-status="${mat.status}"
                                             data-suppliers-count="0"
                                             data-in-use="0">
@@ -709,6 +763,7 @@
                                                     <i class="${unitIcon} me-1"></i><span class="row-unit-text">${unitName}</span>
 </span>
                                             </td>
+                                            <td>${typeBadge}</td>
                                             <td>${statusBadge}</td>
                                             <td class="text-end">
                                                 <div class="dropdown table-action-dropdown">

@@ -13,6 +13,10 @@ class Material extends Model
     /** @use HasFactory<MaterialFactory> */
     use HasFactory;
 
+    public const TYPE_SUPPLIER = 'Supplier';
+
+    public const TYPE_OTHER = 'Other';
+
     /**
      * The attributes that are mass assignable.
      *
@@ -22,6 +26,7 @@ class Material extends Model
         'name_en',
         'name_ta',
         'unit_id',
+        'type',
         'status',
     ];
 
