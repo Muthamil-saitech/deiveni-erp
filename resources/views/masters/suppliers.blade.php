@@ -930,7 +930,7 @@
                 $switch.prop('disabled', true);
 
                 $.ajax({
-                    url: `/suppliers/${supplierId}/toggle-site-based`,
+                    url: '{{ route("suppliers.toggle-site-based", ":id") }}'.replace(':id', supplierId),
                     type: 'POST',
                     data: {
                         is_site_based: isChecked ? 1 : 0,

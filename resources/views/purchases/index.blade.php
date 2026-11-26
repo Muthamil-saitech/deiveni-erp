@@ -1078,7 +1078,7 @@
                 btn.prop('disabled', true);
 
                 $.ajax({
-                    url: '/purchases/' + poId + '/status',
+                    url: '{{ route("purchases.update-status", ":id") }}'.replace(':id', poId),
                     method: 'POST',
                     headers: {
                         'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
