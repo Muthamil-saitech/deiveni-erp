@@ -1321,37 +1321,35 @@
                     const menuWidth = Math.max(rect.width, 290);
                     const spaceBelow = window.innerHeight - rect.bottom - 8;
                     const spaceAbove = rect.top - 8;
-                    const menuHeight = Math.min(350, spaceBelow > 200 ? spaceBelow : spaceAbove);
-
-                    let top = rect.bottom + 2;
-                    let maxH = menuHeight;
-
-                    // Flip above if not enough space below
-                    if (spaceBelow < 180 && spaceAbove > spaceBelow) {
-                        const estimatedH = Math.min(350, spaceAbove);
-                        top = rect.top - estimatedH - 2;
-                        maxH = estimatedH;
-                    }
+                    const shouldFlip = spaceBelow < 180 && spaceAbove > spaceBelow;
+                    const maxH = Math.max(120, Math.min(350, shouldFlip ? spaceAbove : spaceBelow));
 
                     menu.css({
                         position: 'fixed',
-                        top: top + 'px',
                         left: rect.left + 'px',
                         width: menuWidth + 'px',
                         maxHeight: maxH + 'px',
                         zIndex: 99999
                     });
                     optionsList.css('max-height', (maxH - 70) + 'px');
+
+                    if (shouldFlip) {
+                        const actualH = menu.outerHeight() || maxH;
+                        const top = Math.max(8, rect.top - actualH - 2);
+                        menu.css('top', top + 'px');
+                    } else {
+                        menu.css('top', (rect.bottom + 2) + 'px');
+                    }
                 }
 
                 function openMenu() {
                     if (button.prop('disabled')) return;
                     // Close any other open searchable menus first
                     $('.searchable-menu').not(menu).addClass('d-none').removeData('ss-open');
-                    positionMenu();
                     menu.removeClass('d-none');
                     button.attr('aria-expanded', 'true');
                     searchInput.val('').trigger('input');
+                    positionMenu();
                     setTimeout(() => searchInput.focus(), 40);
                     $(window).on('scroll.ss resize.ss', positionMenu);
                 }
@@ -1532,6 +1530,10 @@
                                 }
                             });
                             optionsList.append(addNewBtn);
+                        }
+
+                        if (!menu.hasClass('d-none')) {
+                            positionMenu();
                         }
                     });
 
