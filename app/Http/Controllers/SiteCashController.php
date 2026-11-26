@@ -11,6 +11,7 @@ use App\Models\ProjectSite;
 use App\Models\SiteCash;
 use App\Models\Supplier;
 use App\Models\WeeklyWage;
+use App\Repositories\Contracts\WeeklyWageRepositoryInterface;
 use App\Services\Contracts\ProjectSiteServiceInterface;
 use App\Services\Contracts\SiteCashServiceInterface;
 use App\Services\Contracts\WarehouseServiceInterface;
@@ -30,7 +31,8 @@ class SiteCashController extends Controller
         public SiteCashServiceInterface $siteCashService,
         public ProjectSiteServiceInterface $projectSiteService,
         public WarehouseServiceInterface $warehouseService,
-        public SupplierPurchaseOrderService $purchaseOrderService
+        public SupplierPurchaseOrderService $purchaseOrderService,
+        public WeeklyWageRepositoryInterface $weeklyWageRepo
     ) {}
 
     /**
@@ -590,14 +592,11 @@ class SiteCashController extends Controller
         $dailyWageTxns = SiteCash::query()
             ->where('project_site_id', $siteId)
             ->whereIn('transaction_type', ['Daily Wage Payment', 'Daily Worker Wage Payment'])
-            ->where(function ($q) {
-                $q->whereNull('paid_by')
-                    ->orWhere('paid_by', '!=', 'Account Manager');
-            })
             ->get();
 
         $paidDatesMap = [];
         $matchedTxns = collect();
+        $amSiteCashPaidAmount = 0.0;
 
         foreach ($dailyWageTxns as $txn) {
             $resolvedDate = null;
@@ -609,8 +608,12 @@ class SiteCashController extends Controller
             }
 
             if ($resolvedDate && $resolvedDate >= $startStr && $resolvedDate <= $endStr) {
-                $paidDatesMap[$resolvedDate] = ($paidDatesMap[$resolvedDate] ?? 0.0) + (float) $txn->amount;
-                $matchedTxns->push($txn);
+                if ($txn->paid_by === 'Account Manager') {
+                    $amSiteCashPaidAmount += (float) $txn->amount;
+                } else {
+                    $paidDatesMap[$resolvedDate] = ($paidDatesMap[$resolvedDate] ?? 0.0) + (float) $txn->amount;
+                    $matchedTxns->push($txn);
+                }
             }
         }
 
@@ -647,7 +650,8 @@ class SiteCashController extends Controller
         }
 
         $amOfficePaidAmount = round($amOfficePaidAmount, 2);
-        $balanceAmount = max(0.0, round($netPayout - $dailyPaidAmount - $amOfficePaidAmount - $weeklyAlreadySettled, 2));
+        $amSiteCashPaidAmount = round($amSiteCashPaidAmount, 2);
+        $balanceAmount = max(0.0, round($netPayout - $dailyPaidAmount - $amOfficePaidAmount - $amSiteCashPaidAmount - $weeklyAlreadySettled, 2));
         $isWeekFullySettled = $weeklyAlreadySettled > 0 && $balanceAmount <= 0.01;
 
         foreach ($allocations as $alloc) {
@@ -896,7 +900,11 @@ class SiteCashController extends Controller
             $payload['receipt_image'] = $request->input('image');
         }
 
+        $existing = $this->siteCashService->getTransactionById($numericId);
         $transaction = $this->siteCashService->updateTransaction($numericId, $payload);
+
+        $this->resyncSettledWeekIfDailyWage($existing);
+        $this->resyncSettledWeekIfDailyWage($transaction);
 
         if ($request->wantsJson() || $request->ajax()) {
             return response()->json([
@@ -926,6 +934,7 @@ class SiteCashController extends Controller
         }
 
         $transaction = $this->siteCashService->createTransaction($payload);
+        $this->resyncSettledWeekIfDailyWage($transaction);
 
         if ($request->wantsJson() || $request->ajax()) {
             $site = $transaction->project_site_id ? ProjectSite::find($transaction->project_site_id) : null;
@@ -964,6 +973,7 @@ class SiteCashController extends Controller
 
         $siteId = $transaction->project_site_id;
         $this->siteCashService->deleteTransaction($id);
+        $this->resyncSettledWeekIfDailyWage($transaction);
         $site = $siteId ? ProjectSite::find($siteId) : null;
 
         if ($request->wantsJson() || $request->ajax()) {
@@ -976,5 +986,31 @@ class SiteCashController extends Controller
         }
 
         return redirect()->route('site-cash.index')->with('success', 'Cash transaction removed successfully.');
+    }
+
+    /**
+     * Re-sync any settled Weekly Wage's Site Cash settlement when a Daily Wage Payment changes.
+     */
+    protected function resyncSettledWeekIfDailyWage(?SiteCash $transaction): void
+    {
+        if (! $transaction || ! $transaction->project_site_id) {
+            return;
+        }
+
+        if (! in_array($transaction->transaction_type, ['Daily Wage Payment', 'Daily Worker Wage Payment'], true)) {
+            return;
+        }
+
+        $resolvedDate = null;
+        $billNo = (string) ($transaction->bill_no ?? '');
+        if (preg_match('/(\d{4}-\d{2}-\d{2})/', $billNo, $m)) {
+            $resolvedDate = $m[1];
+        } elseif ($transaction->payment_date) {
+            $resolvedDate = Carbon::parse($transaction->payment_date)->toDateString();
+        }
+
+        if ($resolvedDate) {
+            $this->weeklyWageRepo->resyncSettledWeekForDate((int) $transaction->project_site_id, $resolvedDate);
+        }
     }
 }

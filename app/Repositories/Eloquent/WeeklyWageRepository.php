@@ -157,13 +157,10 @@ class WeeklyWageRepository implements WeeklyWageRepositoryInterface
         $dailyWageTxns = SiteCash::query()
             ->where('project_site_id', $siteId)
             ->whereIn('transaction_type', ['Daily Wage Payment', 'Daily Worker Wage Payment'])
-            ->where(function ($q) {
-                $q->whereNull('paid_by')
-                    ->orWhere('paid_by', '!=', 'Account Manager');
-            })
             ->get();
 
         $dailyPaidAmount = 0.0;
+        $amSiteCashPaidAmount = 0.0;
         foreach ($dailyWageTxns as $txn) {
             $resolvedDate = null;
             $billNo = (string) ($txn->bill_no ?? '');
@@ -174,11 +171,16 @@ class WeeklyWageRepository implements WeeklyWageRepositoryInterface
             }
 
             if ($resolvedDate && $resolvedDate >= $startStr && $resolvedDate <= $endStr) {
-                $dailyPaidAmount += (float) $txn->amount;
+                if ($txn->paid_by === 'Account Manager') {
+                    $amSiteCashPaidAmount += (float) $txn->amount;
+                } else {
+                    $dailyPaidAmount += (float) $txn->amount;
+                }
             }
         }
 
         // 2. Sum Account Manager paid items: deduct ONLY office_cash, NOT project_cash
+        //    (project_cash AM items are already recorded as SiteCash AM-WAGE-* expenses and deducted via $amSiteCashPaidAmount).
         $amOfficePaidAmount = (float) DailyAllocationItem::query()
             ->whereHas('dailyAllocation', function ($q) use ($siteId, $startStr, $endStr) {
                 $q->where('project_site_id', $siteId)
@@ -192,7 +194,7 @@ class WeeklyWageRepository implements WeeklyWageRepositoryInterface
             ->sum('subtotal');
 
         $netPayout = round((float) $weeklyWage->net_payout, 2);
-        $payableAmount = max(0.0, round($netPayout - $dailyPaidAmount - $amOfficePaidAmount, 2));
+        $payableAmount = max(0.0, round($netPayout - $dailyPaidAmount - $amOfficePaidAmount - $amSiteCashPaidAmount, 2));
 
         $existing = SiteCash::query()
             ->where('project_site_id', $siteId)
@@ -251,5 +253,28 @@ class WeeklyWageRepository implements WeeklyWageRepositoryInterface
             ->with(['expenses'])
             ->orderBy('week_start_date', 'desc')
             ->get();
+    }
+
+    /**
+     * Re-sync the Weekly Settlement Site Cash entry if a settled week covers the given date.
+     */
+    public function resyncSettledWeekForDate(int $siteId, string $date): void
+    {
+        $dateStr = Carbon::parse($date)->toDateString();
+
+        $settledWeeks = WeeklyWage::query()
+            ->where('project_site_id', $siteId)
+            ->where('status', 'settled')
+            ->whereDate('week_start_date', '<=', $dateStr)
+            ->whereDate('week_end_date', '>=', $dateStr)
+            ->get();
+
+        foreach ($settledWeeks as $weeklyWage) {
+            DB::transaction(function () use ($weeklyWage, $siteId) {
+                $startStr = Carbon::parse($weeklyWage->week_start_date)->toDateString();
+                $endStr = Carbon::parse($weeklyWage->week_end_date)->toDateString();
+                $this->syncWeeklySettlementToSiteCash($weeklyWage, $siteId, $startStr, $endStr);
+            });
+        }
     }
 }

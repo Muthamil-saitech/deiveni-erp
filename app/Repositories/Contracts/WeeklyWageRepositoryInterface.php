@@ -35,4 +35,9 @@ interface WeeklyWageRepositoryInterface
      * @return Collection<int, WeeklyWage>
      */
     public function getBySite(int $siteId): Collection;
+
+    /**
+     * Re-sync the Weekly Settlement Site Cash entry if a settled week covers the given date.
+     */
+    public function resyncSettledWeekForDate(int $siteId, string $date): void;
 }

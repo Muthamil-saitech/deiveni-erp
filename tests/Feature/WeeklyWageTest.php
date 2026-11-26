@@ -7,6 +7,7 @@ use App\Models\DailyAllocationExpense;
 use App\Models\DailyAllocationItem;
 use App\Models\Material;
 use App\Models\ProjectSite;
+use App\Models\SiteCash;
 use App\Models\Unit;
 use App\Models\User;
 use Carbon\Carbon;
@@ -434,4 +435,92 @@ test('approving weekly wage automatically adds site cash expense deducting AM of
 
     $this->site->refresh();
     expect((float) $this->site->spent)->toEqual(5000.00);
+});
+
+test('weekly settlement deducts AM project cash site cash entries and resyncs when daily wage is paid after settling', function () {
+    $monday = '2026-10-19';
+    $sunday = '2026-10-25';
+
+    $alloc = DailyAllocation::create([
+        'project_site_id' => $this->site->id,
+        'date' => $monday,
+        'total_labour_count' => 3,
+        'total_labour_wage' => 3000.00, // 2000 SM + 1000 AM project_cash
+        'total_expenses' => 500.00,
+        'grand_total' => 3500.00,
+        'created_by' => $this->siteManager->id,
+    ]);
+
+    DailyAllocationItem::create([
+        'daily_allocation_id' => $alloc->id,
+        'name_ta' => 'கொத்தனார்',
+        'name_en' => 'Mason',
+        'worker_count' => 2,
+        'daily_wage' => 1000.00,
+        'master_wage' => 1000.00,
+        'subtotal' => 2000.00,
+    ]);
+
+    DailyAllocationItem::create([
+        'daily_allocation_id' => $alloc->id,
+        'name_ta' => 'பெயிண்டர்',
+        'name_en' => 'Painter',
+        'worker_count' => 1,
+        'daily_wage' => 1000.00,
+        'master_wage' => 1000.00,
+        'subtotal' => 1000.00,
+        'paid_by' => 'Account Manager',
+        'wage_cash_source' => 'project_cash',
+    ]);
+
+    // Simulate AM project_cash SiteCash already created by DailyAllocationService
+    SiteCash::create([
+        'project_site_id' => $this->site->id,
+        'transaction_type' => 'Daily Wage Payment',
+        'flow_type' => 'outflow',
+        'amount' => 1000.00,
+        'in_amount' => 0.00,
+        'out_amount' => 1000.00,
+        'is_expense' => true,
+        'payment_mode' => 'Cash',
+        'paid_by' => 'Account Manager',
+        'bill_no' => "AM-WAGE-{$alloc->id}",
+        'payment_date' => $monday,
+        'created_by' => $this->siteManager->id,
+    ]);
+
+    // Settle week before SM daily wage payment is recorded -> Weekly Settlement = 3500 - 1000 = 2500
+    $this->actingAs($this->siteManager)->postJson('/weekly-wages/settle', [
+        'project_site_id' => $this->site->id,
+        'start_date' => $monday,
+        'end_date' => $sunday,
+        'expenses' => [],
+    ])->assertStatus(200);
+
+    $this->assertDatabaseHas('site_cashes', [
+        'project_site_id' => $this->site->id,
+        'transaction_type' => 'Weekly Settlement',
+        'bill_no' => "WEEKLY-{$monday}",
+        'amount' => 2500.00,
+    ]);
+
+    // Now SM records Daily Wage Payment (2000) via Site Cash AFTER settling -> Weekly Settlement must resync to 500
+    $this->actingAs($this->siteManager)->postJson('/site-cash', [
+        'project_site_id' => $this->site->id,
+        'transaction_type' => 'Daily Wage Payment',
+        'amount' => 2000.00,
+        'payment_mode' => 'Cash',
+        'bill_no' => "WAGE-{$monday}",
+        'payment_date' => $monday,
+    ])->assertStatus(201);
+
+    $this->assertDatabaseHas('site_cashes', [
+        'project_site_id' => $this->site->id,
+        'transaction_type' => 'Weekly Settlement',
+        'bill_no' => "WEEKLY-{$monday}",
+        'amount' => 500.00,
+    ]);
+
+    $this->site->refresh();
+    expect((float) $this->site->spent)->toEqual(3500.00);
 });
