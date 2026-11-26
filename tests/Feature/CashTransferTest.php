@@ -64,6 +64,18 @@ test('cash transfer index page renders successfully and displays kpis', function
 test('accountant can record office to site cash transfer and syncs to daily ledger and site cash', function () {
     $today = Carbon::today()->toDateString();
 
+    Ledger::create([
+        'project_site_id' => $this->site->id,
+        'entry_date' => $today,
+        'category' => 'client_payment',
+        'flow' => 'income',
+        'source' => 'Client Advance',
+        'amount' => 50000,
+        'payment_mode' => 'Cash',
+        'transaction_type_name' => 'Client Advance',
+        'created_by' => $this->accountManager->id,
+    ]);
+
     $response = $this->actingAs($this->accountManager)->postJson('/cash-transfer', [
         'transfer_direction' => 'office_to_site',
         'project_site_id' => $this->site->id,
@@ -358,6 +370,16 @@ test('owner cash transfer is settled without settle button and records entry in 
         'created_by' => $this->siteManager->id,
     ]);
 
+    AdminLedger::create([
+        'project_site_id' => $smSite->id,
+        'entry_date' => Carbon::today()->toDateString(),
+        'category' => 'client_payment',
+        'flow' => 'income',
+        'amount' => 100000,
+        'payment_mode' => 'Cash',
+        'created_by' => $owner->id,
+    ]);
+
     $response = $this->actingAs($owner)->postJson('/cash-transfer', [
         'transfer_direction' => 'office_to_site',
         'project_site_id' => $smSite->id,
@@ -423,4 +445,74 @@ test('owner cash transfer is settled without settle button and records entry in 
     expect($amLedger->flow)->toBe('income');
     expect((float) $amLedger->amount)->toBe(40000.0);
     expect($amLedger->transaction_type_name)->toBe('Cash Received from Owner');
+});
+
+test('cash transfer cannot exceed total available amount for selected site', function () {
+    $today = Carbon::today()->toDateString();
+
+    Ledger::create([
+        'project_site_id' => $this->site->id,
+        'entry_date' => $today,
+        'category' => 'client_payment',
+        'flow' => 'income',
+        'source' => 'Client Advance',
+        'amount' => 10000,
+        'payment_mode' => 'Cash',
+        'transaction_type_name' => 'Client Advance',
+        'created_by' => $this->accountManager->id,
+    ]);
+
+    $response = $this->actingAs($this->accountManager)->postJson('/cash-transfer', [
+        'transfer_direction' => 'office_to_site',
+        'project_site_id' => $this->site->id,
+        'transfer_date' => $today,
+        'amount' => 15000,
+        'payment_mode' => 'Cash',
+        'handed_over_by' => 'Accountant (Raja AM)',
+        'received_by' => 'Site Engineer (Bala)',
+    ]);
+
+    $response->assertStatus(422);
+    $response->assertJsonValidationErrors(['amount']);
+});
+
+test('owner available amount only deducts admin ledger transfers and not account manager transfers', function () {
+    $owner = User::factory()->create(['role_id' => $this->ownerRole->id, 'role' => 'owner']);
+    $today = Carbon::today()->toDateString();
+
+    AdminLedger::create([
+        'project_site_id' => $this->site->id,
+        'entry_date' => $today,
+        'category' => 'client_payment',
+        'flow' => 'income',
+        'amount' => 50000,
+        'payment_mode' => 'Cash',
+        'created_by' => $owner->id,
+    ]);
+
+    // Account Manager records a 1,20,000 project_cash transfer (no admin_ledger_id)
+    CashTransfer::create([
+        'transfer_direction' => 'project_cash',
+        'project_site_id' => $this->site->id,
+        'transfer_date' => $today,
+        'amount' => 120000,
+        'payment_mode' => 'Cash',
+        'handed_over_by' => $this->accountManager->name,
+        'received_by' => $this->siteManager->name,
+        'settlement_status' => 'settled',
+        'created_by' => $this->accountManager->id,
+    ]);
+
+    // Owner still has 50,000 available and can transfer 1,000
+    $res = $this->actingAs($owner)->postJson('/cash-transfer', [
+        'transfer_direction' => 'office_to_site',
+        'project_site_id' => $this->site->id,
+        'transfer_date' => $today,
+        'amount' => 1000,
+        'payment_mode' => 'Cash',
+        'handed_over_by' => $owner->name,
+        'received_by' => $this->siteManager->name,
+    ]);
+
+    $res->assertStatus(201);
 });

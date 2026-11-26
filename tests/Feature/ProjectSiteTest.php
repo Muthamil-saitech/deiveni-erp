@@ -2,6 +2,7 @@
 
 use App\Enums\UserRole;
 use App\Models\Client;
+use App\Models\Ledger;
 use App\Models\DailyAllocation;
 use App\Models\ProjectSite;
 use App\Models\SiteCash;
@@ -378,6 +379,73 @@ test('delete project site route is not available', function () {
         ->deleteJson("/sites/{$site->id}");
 
     $response->assertStatus(405);
+});
+test('site manager does not see ledger view link on project site details page', function () {
+    $siteManager = User::factory()->create([
+        'role' => UserRole::SiteManager,
+    ]);
+    $accountManager = User::factory()->create([
+        'role' => UserRole::AccountManager,
+    ]);
+
+    $client = Client::create([
+        'name' => 'Site View Test Client',
+        'phone' => '9876500112',
+        'address' => 'Madurai',
+        'created_by' => $siteManager->id,
+    ]);
+
+    $site = ProjectSite::create([
+        'client_id' => $client->id,
+        'name' => 'Ledger Hide View Site',
+        'location' => 'Madurai',
+        'work_type' => 'Residential',
+        'start_date' => '2026-11-01',
+        'end_date' => '2027-04-30',
+        'estimated_budget' => 500000.00,
+        'spent' => 0.00,
+        'status' => 'In Progress',
+        'created_by' => $siteManager->id,
+    ]);
+
+    $ledger = Ledger::create([
+        'project_site_id' => $site->id,
+        'entry_date' => '2026-11-26',
+        'category' => 'project_expense',
+        'flow' => 'expense',
+        'source' => 'Office',
+        'amount' => 2000.00,
+        'payment_mode' => 'Cash',
+        'transaction_type_name' => 'Project Expense',
+        'description' => 'Painter & Electrician daily wages',
+        'created_by' => $accountManager->id,
+    ]);
+
+    $sc = SiteCash::create([
+        'project_site_id' => $site->id,
+        'transaction_type' => 'Daily Wage Payment',
+        'flow_type' => 'outflow',
+        'amount' => 1500.00,
+        'in_amount' => 0.00,
+        'out_amount' => 1500.00,
+        'is_expense' => true,
+        'payment_mode' => 'Cash',
+        'payment_date' => '2026-11-26',
+        'created_by' => $siteManager->id,
+    ]);
+
+    $response = $this->actingAs($siteManager)->get("/sites/{$site->encrypted_id}");
+    $response->assertStatus(200);
+    $response->assertDontSee("/ledger/{$ledger->encrypted_id}", false);
+
+    $txns = collect($response->viewData('combinedCashTransactions'));
+    $ledgerTxn = $txns->firstWhere('source', 'ledger');
+    $siteCashTxn = $txns->firstWhere('source', 'site_cash');
+
+    expect($ledgerTxn)->not->toBeNull();
+    expect($ledgerTxn['view_url'])->toBeNull();
+    expect($siteCashTxn)->not->toBeNull();
+    expect($siteCashTxn['view_url'])->toContain('/site-cash/');
 });
 
 test('show project site view renders weekly report tab with 7 monday to sunday rows per week', function () {

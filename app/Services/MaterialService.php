@@ -91,7 +91,7 @@ class MaterialService implements MaterialServiceInterface
     /**
      * Find an existing material or create a new one as type "Other".
      */
-    public function findOrCreateOtherMaterial(string $rawTitle, ?int $unitId = null, ?string $customNameTa = null): Material
+    public function findOrCreateOtherMaterial(string $rawTitle, ?int $unitId = null, ?string $customNameTa = null, bool $updateIfExists = false): Material
     {
         $rawTitle = trim($rawTitle);
         $nameEn = $rawTitle;
@@ -137,6 +137,25 @@ class MaterialService implements MaterialServiceInterface
         }
 
         if ($existing) {
+            if ($updateIfExists) {
+                $dirty = false;
+                if ($unitId && (int) $existing->unit_id !== $unitId) {
+                    $existing->unit_id = $unitId;
+                    $dirty = true;
+                }
+                if ($customNameTa !== null && trim($customNameTa) !== '' && $existing->name_ta !== trim($customNameTa)) {
+                    $trimmedTa = trim($customNameTa);
+                    if (! Material::where('name_ta', $trimmedTa)->where('id', '!=', $existing->id)->exists()) {
+                        $existing->name_ta = $trimmedTa;
+                        $dirty = true;
+                    }
+                }
+                if ($dirty) {
+                    $existing->save();
+                    $existing->load('unit');
+                }
+            }
+
             return $existing;
         }
 

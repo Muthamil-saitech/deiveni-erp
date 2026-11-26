@@ -327,7 +327,7 @@ class DailyAllocationController extends Controller
         $unitId = ! empty($validated['unit_id']) ? (int) $validated['unit_id'] : null;
         $nameTa = ! empty($validated['name_ta']) ? trim((string) $validated['name_ta']) : null;
 
-        $material = $this->findOrCreateMaterial($rawTitle, $unitId, $nameTa);
+        $material = $this->materialService->findOrCreateOtherMaterial($rawTitle, $unitId, $nameTa, true);
 
         return response()->json([
             'success' => true,

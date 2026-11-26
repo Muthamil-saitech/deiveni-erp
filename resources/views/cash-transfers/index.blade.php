@@ -361,15 +361,10 @@
                                 <div class="invalid-feedback" id="errTransferSiteId"></div>
                             </div>
 
-                            <div class="col-6 col-md-3">
+                            <div class="col-12 col-md-6">
                                 <label class="form-label small fw-semibold text-dark">Transfer Date  <span class="text-danger">*</span></label>
                                 <input type="date" class="form-control" id="transferDate" name="transfer_date" value="{{ date('Y-m-d') }}" required>
                                 <div class="invalid-feedback" id="errTransferDate"></div>
-                            </div>
-
-                            <div class="col-6 col-md-3">
-                                <label class="form-label small fw-semibold text-dark">Time</label>
-                                <input type="text" class="form-control" id="transferTime" name="transfer_time" value="{{ date('h:i A') }}">
                             </div>
                         </div>
 
@@ -379,7 +374,7 @@
                                 <div class="row g-3 align-items-center">
                                     <div class="col-12 col-md-6">
                                         <label class="form-label small fw-semibold text-muted mb-1">
-                                            <i class="bi bi-cash-coin text-success me-1"></i>Received Amount
+                                            <i class="bi bi-cash-coin text-success me-1"></i>Total Received Amount
                                         </label>
                                         <div class="input-group input-group-sm">
                                             <span class="input-group-text bg-white fw-bold text-success">₹</span>
@@ -388,7 +383,7 @@
                                     </div>
                                     <div class="col-12 col-md-6">
                                         <label class="form-label small fw-semibold text-muted mb-1">
-                                            <i class="bi bi-wallet2 text-primary me-1"></i>Available Amount
+                                            <i class="bi bi-wallet2 text-primary me-1"></i>Total Available Amount
                                         </label>
                                         <div class="input-group input-group-sm">
                                             <span class="input-group-text bg-white fw-bold text-primary">₹</span>
@@ -787,18 +782,6 @@
                     return (roleId && String(u.role_id || '') === roleId) || (roleSlug && uSlug === roleSlug);
                 });
 
-                if (roleSlug === 'site_manager') {
-                    const siteId = $('#transferSiteId').val();
-                    if (!siteId) {
-                        userSelect.html('<option value="" disabled selected>-- Select Project Site First --</option>');
-                        return;
-                    }
-                    const siteCreatedBy = siteFundsMap[siteId] ? siteFundsMap[siteId].created_by : null;
-                    matchedUsers = matchedUsers.filter(function (u) {
-                        return siteCreatedBy && Number(u.id) === Number(siteCreatedBy);
-                    });
-                }
-
                 userSelect.empty();
                 if (matchedUsers.length === 0) {
                     userSelect.append('<option value="" disabled selected>-- No users found --</option>');
@@ -826,6 +809,40 @@
                 }
             }
 
+            function getSelectedSiteAvailableAmount() {
+                const siteId = $('#transferSiteId').val();
+                const info = siteFundsMap[siteId];
+                if (!info || !(isOwnerMode || isAccountManagerUser)) {
+                    return null;
+                }
+                return isAccountManagerUser
+                    ? (parseFloat(info.am_available_amount) || 0)
+                    : (parseFloat(info.available_amount) || 0);
+            }
+
+            function validateTransferAmountAgainstAvailable() {
+                const available = getSelectedSiteAvailableAmount();
+                const $input = $('#transferAmount');
+                const $err = $('#errTransferAmount');
+
+                if (available === null) {
+                    $input.removeClass('is-invalid');
+                    $err.text('').removeClass('d-block');
+                    return true;
+                }
+
+                const entered = parseFloat($input.val());
+                if (!isNaN(entered) && entered > available + 0.001) {
+                    $input.addClass('is-invalid');
+                    $err.text(`Transfer amount cannot exceed Total Available Amount (₹${formatInrAmount(available)}).`).addClass('d-block');
+                    return false;
+                }
+
+                $input.removeClass('is-invalid');
+                $err.text('').removeClass('d-block');
+                return true;
+            }
+
             // Load read-only received & available amount when project site is selected
             $('#transferSiteId').on('change', function () {
                 const siteId = $(this).val();
@@ -839,10 +856,10 @@
                 } else {
                     $('#siteReceivedAmountBox').slideUp(150);
                 }
-                if (isOwnerMode) {
-                    populateUsersByRole();
-                }
+                validateTransferAmountAgainstAvailable();
             });
+
+            $('#transferAmount').on('input change', validateTransferAmountAgainstAvailable);
 
             // Load users dynamically based on selected role
             $('#transferRoleSelect').on('change', populateUsersByRole);
@@ -1094,6 +1111,11 @@
             $('#cashTransferForm').on('submit', function (e) {
                 e.preventDefault();
 
+                if (!validateTransferAmountAgainstAvailable()) {
+                    $('#transferAmount').focus();
+                    return;
+                }
+
                 const form = this;
                 const formData = new FormData(form);
 
@@ -1101,7 +1123,7 @@
                 $('#saveTransferSpinner').removeClass('d-none');
                 $('#saveTransferBtnText').text('Recording...');
                 $('.is-invalid').removeClass('is-invalid');
-                $('.invalid-feedback').text('');
+                $('.invalid-feedback').text('').removeClass('d-block');
 
                 $.ajax({
                     url: "{{ route('cash-transfer.store') }}",
@@ -1140,7 +1162,7 @@
                             }
                             if (errs.amount) {
                                 $('#transferAmount').addClass('is-invalid');
-                                $('#errTransferAmount').text(errs.amount[0]);
+                                $('#errTransferAmount').text(errs.amount[0]).addClass('d-block');
                             }
                             if (errs.handed_over_by) {
                                 $('#transferHandedOverBy').addClass('is-invalid');

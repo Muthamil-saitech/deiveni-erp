@@ -46,5 +46,5 @@ interface MaterialServiceInterface
     /**
      * Find an existing material or create a new one as type "Other".
      */
-    public function findOrCreateOtherMaterial(string $rawTitle, ?int $unitId = null, ?string $customNameTa = null): Material;
+    public function findOrCreateOtherMaterial(string $rawTitle, ?int $unitId = null, ?string $customNameTa = null, bool $updateIfExists = false): Material;
 }

@@ -1073,7 +1073,7 @@
                         workersBody.append(`
                                     <tr>
                                         <td class="fw-semibold text-dark">
-                                            ${w.name_en} <span class="badge bg-secondary-subtle text-secondary ms-1">${w.name_ta || ''}</span>
+                                            ${w.name_ta || w.name_en} ${w.name_ta && w.name_en && w.name_ta !== w.name_en ? `<span class="badge bg-secondary-subtle text-secondary ms-1">${w.name_en}</span>` : ''}
                                         </td>
                                         <td class="text-center fw-bold">${w.count}</td>
                                         <td class="text-end text-primary fw-bold">₹${parseFloat(w.rate || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}</td>

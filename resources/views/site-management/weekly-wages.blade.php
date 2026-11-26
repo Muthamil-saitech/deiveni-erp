@@ -326,7 +326,6 @@
                 <div class="card-stat bg-white h-100 border border-warning">
                     <div class="d-flex justify-content-between align-items-start">
                         <span class="text-muted small fw-semibold">3. Additional Weekly Expenses</span>
-                        <span class="badge bg-warning text-dark"><i class="bi bi-pencil-fill"></i> Added</span>
 </div>
                     <h3 class="fw-bold text-warning mb-1 mt-2" id="sumWeeklyExpenses">₹0</h3>
                     <small class="text-muted">Added directly on this page</small>
@@ -718,6 +717,8 @@
                     e.stopPropagation();
                     const name = $(this).data('name');
                     if (!name) return;
+
+                    clearTimeout(saveExpensesTimeout);
 
                     const row = $input.closest('.weekly-exp-row');
                     const currentUnitId = row.find('.weekly-exp-unit').val() || '';
@@ -1299,6 +1300,9 @@
                     $('#weeklyWageDisplayTable').data('labour-salary', calcTotalSalary);
                     $('#weeklyWageDisplayTable').data('am-wages', (data.summary && data.summary.total_am_wages) ? parseFloat(data.summary.total_am_wages) : 0);
 
+                    const isSettled = Boolean(data.weekly_wage && data.weekly_wage.status === 'settled');
+                    updateSettleButtonState(startDate, isSettled);
+
                     // Populate Expenses Table: Both Synced Daily Expenses and Additional Weekly Expenses
                     const weeklyExpensesTbody = $('#weeklyExpensesBody');
                     weeklyExpensesTbody.empty();
@@ -1516,9 +1520,20 @@
                 renderWeeklySyncTable();
             });
 
-            function updateSettleButtonState(startDateStr) {
-                const btns = $('#saveWeeklySettlementBtn, #btnFinalApprove');
-                btns.prop('disabled', !startDateStr).attr('title', 'Approve & Settle Weekly Wages');
+            function updateSettleButtonState(startDateStr, isSettled = false) {
+                const topBtn = $('#saveWeeklySettlementBtn');
+                const bottomBtn = $('#btnFinalApprove');
+                if (isSettled) {
+                    topBtn.prop('disabled', true).attr('title', 'This week is already settled');
+                    topBtn.find('span').text('Already Settled');
+                    bottomBtn.prop('disabled', true).attr('title', 'This week is already settled');
+                    bottomBtn.find('span').text('Already Settled');
+                } else {
+                    topBtn.prop('disabled', !startDateStr).attr('title', 'Approve & Settle Weekly Wages');
+                    topBtn.find('span').text('Approve & Settle Weekly Wages');
+                    bottomBtn.prop('disabled', !startDateStr).attr('title', 'Approve & Settle Weekly Wages');
+                    bottomBtn.find('span').text('Approve & Settle Week');
+                }
             }
 
             // Approve & Settle Handler (Persists to database)
@@ -1555,7 +1570,7 @@
                         expenses: expenses
                     }),
                     success: function (res) {
-                        updateSettleButtonState(startDate);
+                        updateSettleButtonState(startDate, true);
                         showToast(`Weekly Wages settlement of ${totalPayout} for "${siteName}" saved and settled!`, 'success');
                         renderWeeklySyncTable();
                     },

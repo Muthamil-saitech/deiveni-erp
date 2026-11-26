@@ -16,6 +16,7 @@ use App\Services\IdCipherService;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
 
@@ -36,84 +37,7 @@ class CashTransferController extends Controller
             $sitesQuery->where('created_by', $user->id);
         }
         $sites = $sitesQuery->get();
-        $siteIds = $sites->pluck('id')->all();
-
-        $adminLedgerIncomeBySite = AdminLedger::query()
-            ->whereIn('project_site_id', $siteIds)
-            ->where('category', 'client_payment')
-            ->where('flow', 'income')
-            ->selectRaw('project_site_id, COALESCE(SUM(amount), 0) as total')
-            ->groupBy('project_site_id')
-            ->pluck('total', 'project_site_id');
-
-        $ledgerIncomeBySite = Ledger::query()
-            ->whereIn('project_site_id', $siteIds)
-            ->where('flow', 'income')
-            ->whereNull('cash_transfer_id')
-            ->whereNotIn('transaction_type_name', [
-                'Cash Transfer from Site',
-                'Project Cash Return from Site',
-                'Balance Returned (Cash Transfer)',
-                'Balance Returned',
-            ])
-            ->selectRaw('project_site_id, COALESCE(SUM(amount), 0) as total')
-            ->groupBy('project_site_id')
-            ->pluck('total', 'project_site_id');
-
-        $siteCashClientBySite = SiteCash::query()
-            ->whereIn('project_site_id', $siteIds)
-            ->where('flow_type', 'inflow')
-            ->where('transaction_type', 'Client Collection')
-            ->selectRaw('project_site_id, COALESCE(SUM(amount), 0) as total')
-            ->groupBy('project_site_id')
-            ->pluck('total', 'project_site_id');
-
-        $transferredBySite = CashTransfer::query()
-            ->whereIn('project_site_id', $siteIds)
-            ->where(function ($q) {
-                $q->where('transfer_direction', 'project_cash')
-                    ->orWhere(function ($sub) {
-                        $sub->where('transfer_direction', 'office_to_site')
-                            ->where('settlement_status', '!=', 'settled');
-                    });
-            })
-            ->selectRaw('project_site_id, COALESCE(SUM(amount), 0) as total')
-            ->groupBy('project_site_id')
-            ->pluck('total', 'project_site_id');
-
-        $amSiteIncomeBySite = Ledger::query()
-            ->whereIn('project_site_id', $siteIds)
-            ->where('flow', 'income')
-            ->selectRaw('project_site_id, COALESCE(SUM(amount), 0) as total')
-            ->groupBy('project_site_id')
-            ->pluck('total', 'project_site_id');
-
-        $amSiteExpenseBySite = Ledger::query()
-            ->whereIn('project_site_id', $siteIds)
-            ->where('flow', 'expense')
-            ->selectRaw('project_site_id, COALESCE(SUM(amount), 0) as total')
-            ->groupBy('project_site_id')
-            ->pluck('total', 'project_site_id');
-
-        $siteFundsMap = [];
-        foreach ($sites as $s) {
-            $received = (float) ($adminLedgerIncomeBySite[$s->id] ?? 0)
-                + (float) ($ledgerIncomeBySite[$s->id] ?? 0)
-                + (float) ($siteCashClientBySite[$s->id] ?? 0);
-            $transferred = (float) ($transferredBySite[$s->id] ?? 0);
-            $amIncome = (float) ($amSiteIncomeBySite[$s->id] ?? 0);
-            $amExpense = (float) ($amSiteExpenseBySite[$s->id] ?? 0);
-            $siteFundsMap[$s->id] = [
-                'site_name' => $s->name,
-                'client_name' => $s->client?->name ?? 'N/A',
-                'created_by' => $s->created_by,
-                'received_amount' => round($received, 2),
-                'transferred_amount' => round($transferred, 2),
-                'available_amount' => round(max(0.0, $received - $transferred), 2),
-                'am_received_amount' => round($amIncome, 2),
-                'am_available_amount' => round(max(0.0, $amIncome - $amExpense), 2),
-            ];
-        }
+        $siteFundsMap = $this->computeSiteFundsMap($sites);
 
         $roles = Role::query()
             ->whereNotIn('slug', ['owner'])
@@ -173,7 +97,13 @@ class CashTransferController extends Controller
      */
     public function store(StoreCashTransferRequest $request): JsonResponse
     {
-        $transfer = $this->transferService->createTransfer($request->validated());
+        $validated = $request->validated();
+
+        if ($errorResponse = $this->validateAvailableAmount($validated)) {
+            return $errorResponse;
+        }
+
+        $transfer = $this->transferService->createTransfer($validated);
 
         return response()->json([
             'success' => true,
@@ -209,8 +139,13 @@ class CashTransferController extends Controller
     public function update(UpdateCashTransferRequest $request, string|int $id): JsonResponse
     {
         $numericId = is_numeric($id) ? (int) $id : IdCipherService::decrypt($id);
+        $validated = $request->validated();
 
-        $transfer = $this->transferService->updateTransfer($numericId, $request->validated());
+        if ($errorResponse = $this->validateAvailableAmount($validated, $numericId)) {
+            return $errorResponse;
+        }
+
+        $transfer = $this->transferService->updateTransfer($numericId, $validated);
 
         return response()->json([
             'success' => true,
@@ -300,5 +235,140 @@ class CashTransferController extends Controller
             'success' => true,
             'message' => 'Cash transfer deleted successfully.',
         ]);
+    }
+
+    /**
+     * Compute received, transferred, and available funds per site.
+     *
+     * @param  Collection<int, ProjectSite>  $sites
+     * @return array<int, array<string, mixed>>
+     */
+    private function computeSiteFundsMap($sites): array
+    {
+        $siteIds = $sites->pluck('id')->all();
+        if (empty($siteIds)) {
+            return [];
+        }
+
+        $adminLedgerIncomeBySite = AdminLedger::query()
+            ->whereIn('project_site_id', $siteIds)
+            ->where('category', 'client_payment')
+            ->where('flow', 'income')
+            ->selectRaw('project_site_id, COALESCE(SUM(amount), 0) as total')
+            ->groupBy('project_site_id')
+            ->pluck('total', 'project_site_id');
+
+        $siteCashClientBySite = SiteCash::query()
+            ->whereIn('project_site_id', $siteIds)
+            ->where('flow_type', 'inflow')
+            ->where('transaction_type', 'Client Collection')
+            ->selectRaw('project_site_id, COALESCE(SUM(amount), 0) as total')
+            ->groupBy('project_site_id')
+            ->pluck('total', 'project_site_id');
+
+        $adminTransferredBySite = CashTransfer::query()
+            ->whereIn('project_site_id', $siteIds)
+            ->whereNotNull('admin_ledger_id')
+            ->where(function ($q) {
+                $q->where('transfer_direction', 'project_cash')
+                    ->orWhere(function ($sub) {
+                        $sub->where('transfer_direction', 'office_to_site')
+                            ->where('settlement_status', '!=', 'settled');
+                    });
+            })
+            ->selectRaw('project_site_id, COALESCE(SUM(amount), 0) as total')
+            ->groupBy('project_site_id')
+            ->pluck('total', 'project_site_id');
+
+        $amSiteIncomeBySite = Ledger::query()
+            ->whereIn('project_site_id', $siteIds)
+            ->where('flow', 'income')
+            ->selectRaw('project_site_id, COALESCE(SUM(amount), 0) as total')
+            ->groupBy('project_site_id')
+            ->pluck('total', 'project_site_id');
+
+        $amSiteExpenseBySite = Ledger::query()
+            ->whereIn('project_site_id', $siteIds)
+            ->where('flow', 'expense')
+            ->selectRaw('project_site_id, COALESCE(SUM(amount), 0) as total')
+            ->groupBy('project_site_id')
+            ->pluck('total', 'project_site_id');
+
+        $siteFundsMap = [];
+        foreach ($sites as $s) {
+            $received = (float) ($adminLedgerIncomeBySite[$s->id] ?? 0)
+                + (float) ($siteCashClientBySite[$s->id] ?? 0);
+            $transferred = (float) ($adminTransferredBySite[$s->id] ?? 0);
+            $amIncome = (float) ($amSiteIncomeBySite[$s->id] ?? 0);
+            $amExpense = (float) ($amSiteExpenseBySite[$s->id] ?? 0);
+            $siteFundsMap[$s->id] = [
+                'site_name' => $s->name,
+                'client_name' => $s->client?->name ?? 'N/A',
+                'created_by' => $s->created_by,
+                'received_amount' => round($received, 2),
+                'transferred_amount' => round($transferred, 2),
+                'available_amount' => round(max(0.0, $received - $transferred), 2),
+                'am_received_amount' => round($amIncome, 2),
+                'am_available_amount' => round(max(0.0, $amIncome - $amExpense), 2),
+            ];
+        }
+
+        return $siteFundsMap;
+    }
+
+    /**
+     * Ensure transfer amount does not exceed the selected site's Total Available Amount.
+     *
+     * @param  array<string, mixed>  $validated
+     */
+    private function validateAvailableAmount(array $validated, ?int $ignoreTransferId = null): ?JsonResponse
+    {
+        $direction = $validated['transfer_direction'] ?? null;
+        $siteId = ! empty($validated['project_site_id']) ? (int) $validated['project_site_id'] : null;
+
+        if (! $siteId || ! in_array($direction, ['office_to_site', 'project_cash'], true)) {
+            return null;
+        }
+
+        $user = Auth::user();
+        if (! $user || (! $user->isAdmin() && ! $user->isAccountManager())) {
+            return null;
+        }
+
+        $site = ProjectSite::with('client')->find($siteId);
+        if (! $site) {
+            return null;
+        }
+
+        $funds = $this->computeSiteFundsMap(collect([$site]))[$siteId] ?? null;
+        if (! $funds) {
+            return null;
+        }
+
+        $available = $user->isAccountManager() && ! $user->isAdmin()
+            ? (float) $funds['am_available_amount']
+            : (float) $funds['available_amount'];
+
+        if ($ignoreTransferId) {
+            $existing = CashTransfer::find($ignoreTransferId);
+            if ($existing && (int) $existing->project_site_id === $siteId && in_array($existing->transfer_direction, ['office_to_site', 'project_cash'], true)) {
+                $available += (float) $existing->amount;
+            }
+        }
+
+        $amount = (float) ($validated['amount'] ?? 0);
+        if ($amount > $available + 0.001) {
+            $msg = 'Transfer amount (₹'.number_format($amount, 2).') cannot exceed Total Available Amount (₹'.number_format($available, 2).').';
+
+            return response()->json([
+                'success' => false,
+                'message' => $msg,
+                'errors' => [
+                    'amount' => [$msg],
+                ],
+            ], 422);
+        }
+
+        return null;
     }
 }

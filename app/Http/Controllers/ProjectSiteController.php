@@ -24,7 +24,8 @@ class ProjectSiteController extends Controller
 {
     public function __construct(
         public ProjectSiteServiceInterface $projectSiteService
-    ) {}
+    ) {
+    }
 
     /**
      * Display a listing of project sites and clients.
@@ -79,7 +80,7 @@ class ProjectSiteController extends Controller
     {
         $id = IdCipherService::decrypt($encryptedId);
 
-        if (! $id) {
+        if (!$id) {
             if ($request->wantsJson() || $request->ajax()) {
                 return response()->json([
                     'success' => false,
@@ -92,7 +93,7 @@ class ProjectSiteController extends Controller
 
         $site = $this->projectSiteService->getSiteById($id);
 
-        if (! $site) {
+        if (!$site) {
             if ($request->wantsJson() || $request->ajax()) {
                 return response()->json([
                     'success' => false,
@@ -162,21 +163,13 @@ class ProjectSiteController extends Controller
             ->merge($usageQuantities->keys())
             ->merge($transferredOut->keys())
             ->merge($transferredIn->keys())
-            ->filter(fn ($mId) => (int) $mId > 0)
+            ->filter(fn($mId) => (int) $mId > 0)
             ->unique()
             ->values();
 
         $materialsMap = Material::with('unit')->whereIn('id', $allMaterialIds)->get()->keyBy('id');
 
-        $balanceStockList = $allMaterialIds->map(function ($matId) use (
-            $id,
-            $siteStocks,
-            $poInward,
-            $usageQuantities,
-            $transferredOut,
-            $transferredIn,
-            $materialsMap
-        ) {
+        $balanceStockList = $allMaterialIds->map(function ($matId) use ($id, $siteStocks, $poInward, $usageQuantities, $transferredOut, $transferredIn, $materialsMap) {
             $material = $materialsMap->get($matId);
             $matPoItems = $poInward->get($matId, collect());
             $matUsageItems = $usageQuantities->get($matId, collect());
@@ -219,16 +212,16 @@ class ProjectSiteController extends Controller
 
             $latestPrice = (float) ($matPoItems->sortByDesc('id')->first()?->unit_price
                 ?: ($matInItems->sortByDesc('id')->first()?->unit_price
-                ?: ($matUsageItems->sortByDesc('id')->first()?->unit_price ?: 0)));
+                    ?: ($matUsageItems->sortByDesc('id')->first()?->unit_price ?: 0)));
 
             $unitName = $liveStock?->unit
                 ?: ($material?->unit?->name_en
-                ?: ($matPoItems->first()?->unit
-                ?: ($matUsageItems->first()?->unit ?: 'Units')));
+                    ?: ($matPoItems->first()?->unit
+                        ?: ($matUsageItems->first()?->unit ?: 'Units')));
 
             $matName = $material?->name_en
                 ?: ($matUsageItems->first()?->material_name
-                ?: ($matPoItems->first()?->material_name ?: 'Material'));
+                    ?: ($matPoItems->first()?->material_name ?: 'Material'));
 
             return [
                 'material_id' => $matId,
@@ -264,7 +257,7 @@ class ProjectSiteController extends Controller
             ->get();
 
         $supplierPurchases = $sitePurchaseOrders->groupBy(function ($po) {
-            return $po->supplier_id ? ('SUP_'.$po->supplier_id) : ('SUP_NAME_'.($po->supplier_name ?: 'Other'));
+            return $po->supplier_id ? ('SUP_' . $po->supplier_id) : ('SUP_NAME_' . ($po->supplier_name ?: 'Other'));
         })->map(function ($orders) {
             $firstPo = $orders->first();
             $supplier = $firstPo->supplier;
@@ -313,7 +306,7 @@ class ProjectSiteController extends Controller
             $totalSupplierAmount = (float) $allPoItems->sum('total_price');
             $totalSupplierQty = (float) $allPoItems->sum('quantity');
 
-            $supKey = $supplier?->id ? ('sup_'.$supplier->id) : ('ext_'.urlencode(strtolower(trim($supplierName))));
+            $supKey = $supplier?->id ? ('sup_' . $supplier->id) : ('ext_' . urlencode(strtolower(trim($supplierName))));
 
             return [
                 'supplier_id' => $supplier?->id,
@@ -336,7 +329,7 @@ class ProjectSiteController extends Controller
             'total_suppliers_count' => $supplierPurchases->count(),
             'total_purchase_orders_count' => $sitePurchaseOrders->count(),
             'total_purchased_value' => (float) $supplierPurchases->sum('total_amount'),
-            'total_materials_purchased_count' => (int) $supplierPurchases->sum(fn ($sp) => count($sp['material_summary'])),
+            'total_materials_purchased_count' => (int) $supplierPurchases->sum(fn($sp) => count($sp['material_summary'])),
         ];
 
         // Site Ledgers: records managed by Account Manager for this project site
@@ -360,7 +353,7 @@ class ProjectSiteController extends Controller
             $partyName = $sc->supplier_name ?: ($sc->supplier?->name ?: ($paidTo ?: ($receiverName ?: ($paidBy ?: '-'))));
 
             $combinedCashTransactions->push([
-                'id' => 'sc_'.$sc->id,
+                'id' => 'sc_' . $sc->id,
                 'raw_id' => $sc->id,
                 'source' => 'site_cash',
                 'source_label' => 'Site Cash Handling',
@@ -381,7 +374,7 @@ class ProjectSiteController extends Controller
                 'out_amount' => (float) $sc->out_amount,
                 'is_expense' => (bool) $sc->is_expense,
                 'items' => $sc->items,
-                'view_url' => route('site-cash.show', $sc->encrypted_id),
+                'view_url' => auth()->user()?->canAccess('site_cash') ? route('site-cash.show', $sc->encrypted_id) : null,
                 'encrypted_id' => $sc->encrypted_id,
                 'created_at' => $sc->created_at,
             ]);
@@ -393,10 +386,10 @@ class ProjectSiteController extends Controller
             $isIncome = $ldg->flow === 'income';
             $type = $ldg->transaction_type_name ?: ($isIncome ? 'Client Receipt (வரவு)' : 'Project Expense (செலவு)');
             $partyName = $ldg->supplier_name ?: ($ldg->supplier?->name ?: ($ldg->cash_received_from ?: ($isIncome ? ($ldg->client_name ?: 'Client / Owner') : '-')));
-            $handlerName = 'Accountant ('.$creatorName.')';
+            $handlerName = 'Accountant (' . $creatorName . ')';
 
             $combinedCashTransactions->push([
-                'id' => 'ldg_'.$ldg->id,
+                'id' => 'ldg_' . $ldg->id,
                 'raw_id' => $ldg->id,
                 'source' => 'ledger',
                 'source_label' => 'Office Ledger',
@@ -411,13 +404,13 @@ class ProjectSiteController extends Controller
                 'supplier_name' => $ldg->supplier_name ?: ($ldg->supplier?->name ?? ''),
                 'party_name' => $partyName,
                 'description' => $ldg->description,
-                'bill_no' => $ldg->cash_transfer_id ? ('XFER-'.$ldg->cash_transfer_id) : ('LEDGER-'.$ldg->id),
+                'bill_no' => $ldg->cash_transfer_id ? ('XFER-' . $ldg->cash_transfer_id) : ('LEDGER-' . $ldg->id),
                 'receipt_image' => $ldg->receipt_image,
                 'in_amount' => $isIncome ? (float) $ldg->amount : 0.0,
-                'out_amount' => ! $isIncome ? (float) $ldg->amount : 0.0,
-                'is_expense' => ! $isIncome,
+                'out_amount' => !$isIncome ? (float) $ldg->amount : 0.0,
+                'is_expense' => !$isIncome,
                 'items' => null,
-                'view_url' => route('ledger.show', $ldg->encrypted_id),
+                'view_url' => auth()->user()?->canAccess('ledger') ? route('ledger.show', $ldg->encrypted_id) : null,
                 'encrypted_id' => $ldg->encrypted_id,
                 'created_at' => $ldg->created_at,
             ]);
@@ -496,11 +489,11 @@ class ProjectSiteController extends Controller
                     'date_formatted' => $dayCarbon->format('d M Y'),
                     'day_name' => $dayCarbon->format('l'),
                     'has_data' => (bool) $alloc,
-                    'items' => $alloc ? $alloc->items->map(fn ($it) => [
+                    'items' => $alloc ? $alloc->items->map(fn($it) => [
                         'label' => $it->name_ta ?: ($it->name_en ?: ($it->workerCategory?->name ?? 'Worker')),
                         'count' => (int) $it->worker_count,
                     ])->all() : [],
-                    'expenses' => $alloc ? $alloc->expenses->map(fn ($ex) => [
+                    'expenses' => $alloc ? $alloc->expenses->map(fn($ex) => [
                         'item_name' => $ex->item_name,
                         'amount' => (float) $ex->amount,
                     ])->all() : [],
@@ -517,7 +510,7 @@ class ProjectSiteController extends Controller
             $weeklyReportPages[] = [
                 'week_start' => $mondayStr,
                 'week_end' => $sunday->toDateString(),
-                'week_label' => $monday->format('d M Y').' – '.$sunday->format('d M Y'),
+                'week_label' => $monday->format('d M Y') . ' – ' . $sunday->format('d M Y'),
                 'total_workers' => $weekTotalWorkers,
                 'total_labour_wage' => round($weekLabourWage, 2),
                 'total_daily_expenses' => round($weekDailyExpenses, 2),
@@ -573,13 +566,13 @@ class ProjectSiteController extends Controller
     {
         $id = IdCipherService::decrypt($encryptedId);
 
-        if (! $id) {
+        if (!$id) {
             abort(404, 'Project site record not found.');
         }
 
         $site = $this->projectSiteService->getSiteById($id);
 
-        if (! $site) {
+        if (!$site) {
             abort(404, 'Project site record not found.');
         }
 
@@ -592,14 +585,14 @@ class ProjectSiteController extends Controller
 
         // Match supplier orders
         $matchedOrders = $sitePurchaseOrders->filter(function ($po) use ($supplierKey) {
-            $key = $po->supplier_id ? ('sup_'.$po->supplier_id) : ('ext_'.urlencode(strtolower(trim($po->supplier_name ?: 'other'))));
+            $key = $po->supplier_id ? ('sup_' . $po->supplier_id) : ('ext_' . urlencode(strtolower(trim($po->supplier_name ?: 'other'))));
             if (strtolower($key) === strtolower($supplierKey)) {
                 return true;
             }
-            if ($po->supplier_id && ($supplierKey == $po->supplier_id || $supplierKey == 'sup_'.$po->supplier_id || $supplierKey == 'SUP_'.$po->supplier_id)) {
+            if ($po->supplier_id && ($supplierKey == $po->supplier_id || $supplierKey == 'sup_' . $po->supplier_id || $supplierKey == 'SUP_' . $po->supplier_id)) {
                 return true;
             }
-            if (! $po->supplier_id && (strtolower(urlencode(trim($po->supplier_name ?? ''))) === strtolower($supplierKey) || strtolower($po->supplier_name ?? '') === strtolower(urldecode($supplierKey)))) {
+            if (!$po->supplier_id && (strtolower(urlencode(trim($po->supplier_name ?? ''))) === strtolower($supplierKey) || strtolower($po->supplier_name ?? '') === strtolower(urldecode($supplierKey)))) {
                 return true;
             }
 

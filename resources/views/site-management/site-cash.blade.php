@@ -503,7 +503,6 @@
                                     <option value="Tool Rental">Tool Rental Purchase (-)</option>
                                     <option value="Supplier Payment">Supplier Payment (-)</option>
                                     <option value="Daily Wage Payment">Daily Worker Wage Payment (-)</option>
-                                    <option value="Weekly Settlement">Weekly Settlement (-)</option>
                                     <option value="Balance Returned">Balance Returned to Account Manager (-)</option>
                                     <option value="Other Expense">Other Expense (-)</option>
                                 </select>
@@ -1351,7 +1350,7 @@
                     let totalWorkersCount = 0;
 
                     itemsArr.forEach(function (it) {
-                        const name = it.name_en || it.name_ta || 'Worker';
+                        const name = it.name_ta || it.name_en || 'Worker';
                         const count = parseInt(it.worker_count, 10) || 0;
                         if (count <= 0) return;
                         const dailyWage = parseFloat(it.daily_wage) || 0;

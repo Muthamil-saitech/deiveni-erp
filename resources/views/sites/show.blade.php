@@ -499,7 +499,7 @@
                                                     <div class="d-flex flex-wrap gap-1">
                                                         @foreach ($da->items->take(3) as $item)
                                                             <span class="badge bg-light text-dark border" style="font-size:0.68rem;">
-                                                                {{ $item->name_en ?: ($item->workerCategory?->name_en ?? 'Worker') }}
+                                                                {{ $item->name_ta ?: ($item->workerCategory?->name_ta ?: ($item->name_en ?: ($item->workerCategory?->name_en ?? 'Worker'))) }}
                                                                 @if ($item->worker_count)
                                                                     <span class="text-primary fw-bold ms-1">×{{ $item->worker_count }}</span>
                                                                 @endif
@@ -1164,7 +1164,7 @@
                             'in_amount' => (float) $sc->in_amount,
                             'out_amount' => (float) $sc->out_amount,
                             'items' => $sc->items,
-                            'view_url' => route('site-cash.show', $sc->encrypted_id),
+                            'view_url' => auth()->user()?->canAccess('site_cash') ? route('site-cash.show', $sc->encrypted_id) : null,
                         ];
                     }) : collect());
 
@@ -1393,11 +1393,15 @@
                                         {{ (float) ($txn['out_amount'] ?? 0) > 0 ? '−₹' . number_format((float) $txn['out_amount'], 2) : '-' }}
                                     </td>
                                     <td class="text-center">
-                                        <a href="{{ $txn['view_url'] }}"
-                                            class="btn btn-outline-primary btn-sm px-2 py-1"
-                                            title="View Details ">
-                                            <i class="bi bi-eye me-1"></i>View
-</a>
+                                        @if (!empty($txn['view_url']))
+                                            <a href="{{ $txn['view_url'] }}"
+                                                class="btn btn-outline-primary btn-sm px-2 py-1"
+                                                title="View Details ">
+                                                <i class="bi bi-eye me-1"></i>View
+                                            </a>
+                                        @else
+                                            <span class="text-muted small">&mdash;</span>
+                                        @endif
                                     </td>
                                 </tr>
                             @endforeach
