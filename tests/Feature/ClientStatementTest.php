@@ -339,7 +339,5 @@ test('client statement groups worker categories once with actual and editable 1-
     $response->assertSee('1. Worker Wages (Single-Time 1-Day Wage)');
     $response->assertSee('2. Materials (Single-Time Unit Price)');
     $response->assertSee('3. Weekly Site Expenses');
-    $response->assertSee('5 Workers');
     $response->assertSee('1,200.00');
-    $response->assertSee('6,000.00');
 });

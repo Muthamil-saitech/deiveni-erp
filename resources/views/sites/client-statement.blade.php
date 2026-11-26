@@ -144,15 +144,13 @@
                                                 <tr>
                                                     <th class="text-center" style="width: 45px;">#</th>
                                                     <th>Worker Category</th>
-                                                    <th class="text-center" style="width: 130px;">Total Workers</th>
-                                                    <th class="text-end" style="width: 160px;">Actual 1-Day Wage (₹)</th>
-                                                    <th class="text-end" style="width: 185px;">1-Day Wage (Editable) (₹)</th>
-                                                    <th class="text-end" style="width: 160px;">Total Client Amount (₹)</th>
+                                                    <th class="text-end" style="width: 175px;">Actual 1-Day Wage (₹)</th>
+                                                    <th class="text-end" style="width: 200px;">1-Day Wage (Editable) (₹)</th>
                                                 </tr>
                                             </thead>
                                             <tbody id="labourCategoryRatesBody">
                                                 @forelse ($labourCategorySummary as $lIdx => $lab)
-                                                    <tr class="labour-cat-row" data-cat-idx="{{ $lIdx }}" data-cat-key="{{ $lab['cat_key'] }}" data-total-workers="{{ $lab['total_workers'] }}">
+                                                    <tr class="labour-cat-row" data-cat-idx="{{ $lIdx }}" data-cat-key="{{ $lab['cat_key'] }}">
                                                         <td class="text-center text-muted font-monospace">{{ str_pad($lIdx + 1, 2, '0', STR_PAD_LEFT) }}</td>
                                                         <td>
                                                             @if (! empty($lab['name_ta']))
@@ -161,9 +159,6 @@
                                                             @else
                                                                 <div class="fw-bold text-dark">{{ $lab['name_en'] }}</div>
                                                             @endif
-                                                        </td>
-                                                        <td class="text-center fw-semibold text-primary">
-                                                            {{ rtrim(rtrim(number_format((float) $lab['total_workers'], 2), '0'), '.') }} Workers
                                                         </td>
                                                         <td class="text-end text-muted">
                                                             ₹{{ number_format((float) $lab['actual_one_day_wage'], 2) }}
@@ -177,13 +172,10 @@
                                                                     value="{{ (float) $lab['editable_one_day_wage'] }}">
                                                             </div>
                                                         </td>
-                                                        <td class="text-end fw-bold text-dark labour-cat-total" data-amount="{{ (float) $lab['billed_amount'] }}">
-                                                            ₹{{ number_format((float) $lab['billed_amount'], 2) }}
-                                                        </td>
                                                     </tr>
                                                 @empty
                                                     <tr>
-                                                        <td colspan="6" class="text-center py-3 text-muted small">No worker wages recorded for this site.</td>
+                                                        <td colspan="4" class="text-center py-3 text-muted small">No worker wages recorded for this site.</td>
                                                     </tr>
                                                 @endforelse
                                             </tbody>
@@ -205,15 +197,13 @@
                                                 <tr>
                                                     <th class="text-center" style="width: 45px;">#</th>
                                                     <th>Material</th>
-                                                    <th class="text-center" style="width: 130px;">Total Qty</th>
-                                                    <th class="text-end" style="width: 160px;">Actual Unit Price (₹)</th>
-                                                    <th class="text-end" style="width: 185px;">Unit Price (Editable) (₹)</th>
-                                                    <th class="text-end" style="width: 160px;">Total Client Amount (₹)</th>
+                                                    <th class="text-end" style="width: 175px;">Actual Unit Price (₹)</th>
+                                                    <th class="text-end" style="width: 200px;">Unit Price (Editable) (₹)</th>
                                                 </tr>
                                             </thead>
                                             <tbody id="materialRatesBody">
                                                 @forelse ($materialSummary ?? [] as $mIdx => $mat)
-                                                    <tr class="material-rate-row" data-mat-key="{{ $mat['mat_key'] }}" data-total-qty="{{ $mat['total_qty'] }}">
+                                                    <tr class="material-rate-row" data-mat-key="{{ $mat['mat_key'] }}">
                                                         <td class="text-center text-muted font-monospace">{{ str_pad($mIdx + 1, 2, '0', STR_PAD_LEFT) }}</td>
                                                         <td>
                                                             @if (! empty($mat['name_ta']))
@@ -222,9 +212,6 @@
                                                             @else
                                                                 <div class="fw-bold text-dark">{{ $mat['name_en'] }}</div>
                                                             @endif
-                                                        </td>
-                                                        <td class="text-center fw-semibold text-primary">
-                                                            {{ rtrim(rtrim(number_format((float) $mat['total_qty'], 2), '0'), '.') }} {{ $mat['unit'] }}
                                                         </td>
                                                         <td class="text-end text-muted">
                                                             ₹{{ number_format((float) $mat['actual_unit_price'], 2) }}
@@ -238,13 +225,10 @@
                                                                     value="{{ (float) $mat['editable_unit_price'] }}">
                                                             </div>
                                                         </td>
-                                                        <td class="text-end fw-bold text-dark material-cat-total" data-amount="{{ (float) $mat['billed_amount'] }}">
-                                                            ₹{{ number_format((float) $mat['billed_amount'], 2) }}
-                                                        </td>
                                                     </tr>
                                                 @empty
                                                     <tr>
-                                                        <td colspan="6" class="text-center py-3 text-muted small">No material purchases recorded for this site.</td>
+                                                        <td colspan="4" class="text-center py-3 text-muted small">No material purchases recorded for this site.</td>
                                                     </tr>
                                                 @endforelse
                                             </tbody>
