@@ -305,7 +305,7 @@
                             <th class="text-start" style="min-width: 250px;">Expense Item / Extra Purchase Description
 </th>
                             <th style="width: 140px;">Unit</th>
-                            <th style="width: 130px;">Quantity / Hours</th>
+                            <th style="width: 130px;">Quantity</th>
                             <th style="width: 150px;">Unit Price</th>
                             <th class="text-end" style="width: 150px;">Final Price (₹)</th>
                             <th style="width: 60px;" class="text-center">Action</th>
@@ -1238,6 +1238,19 @@
                 `;
             }
 
+            function isHoursUnit(unitId) {
+                if (!unitId) return false;
+                const unit = availableUnits.find(u => String(u.id) === String(unitId));
+                if (!unit) return false;
+                const code = (unit.code || '').toUpperCase().trim();
+                const nameEn = (unit.name_en || '').toLowerCase().trim();
+                return code === 'HRS' || code === 'HR' || code === 'H' || nameEn.includes('hour');
+            }
+
+            function syncExpenseHoursSuffix($row, unitId) {
+                $row.find('.expense-qty-unit-suffix').toggleClass('d-none', !isHoursUnit(unitId));
+            }
+
             // Create Expense Row with Auto-Search from Materials
             function createExpenseRowHtml(item = null) {
                 const titleVal = item ? (item.item_name || '') : '';
@@ -1290,8 +1303,11 @@
                             </select>
                         </td>
                         <td>
-                            <input type="number" min="0" step="any" class="form-control form-control-sm text-center expense-qty"
-                                   value="${qtyVal}" placeholder="Qty">
+                            <div class="input-group input-group-sm">
+                                <input type="number" min="0" step="any" class="form-control form-control-sm text-center expense-qty"
+                                       value="${qtyVal}" placeholder="Qty">
+                                <span class="input-group-text expense-qty-unit-suffix ${isHoursUnit(selectedUnitId) ? '' : 'd-none'}">h</span>
+                            </div>
                         </td>
                         <td>
                             <div class="input-group input-group-sm">
@@ -1432,6 +1448,7 @@
                     if (unitId) {
                         row.find('.expense-unit').val(String(unitId));
                     }
+                    syncExpenseHoursSuffix(row, row.find('.expense-unit').val());
                     const qtyInput = row.find('.expense-qty');
                     if (!qtyInput.val()) {
                         qtyInput.val(1);
@@ -1518,6 +1535,7 @@
                                 if (res.material.unit_id) {
                                     qaRow.find('.expense-unit').val(String(res.material.unit_id));
                                 }
+                                syncExpenseHoursSuffix(qaRow, qaRow.find('.expense-unit').val());
                                 const qtyInput = qaRow.find('.expense-qty');
                                 if (!qtyInput.val()) {
                                     qtyInput.val(1);
@@ -1554,10 +1572,12 @@
             $(document).on('change', '.expense-unit', function () {
                 const $select = $(this);
                 const row = $select.closest('.expense-row');
+                const newUnitId = parseInt($select.val(), 10);
+                syncExpenseHoursSuffix(row, newUnitId);
+
                 const materialId = row.attr('data-material-id');
                 if (!materialId) return;   // new / unnamed row — nothing to update
 
-                const newUnitId = parseInt($select.val(), 10);
                 if (!newUnitId) return;
 
                 // Find material name for the PATCH payload

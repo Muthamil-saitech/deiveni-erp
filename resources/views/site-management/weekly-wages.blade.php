@@ -268,7 +268,7 @@
                             <th class="text-start" style="min-width: 250px;">Expense Item / Extra Purchase Description
 </th>
                             <th style="width: 140px;" class="text-center">Unit</th>
-                            <th style="width: 140px;" class="text-center">Quantity / Hours</th>
+                            <th style="width: 140px;" class="text-center">Quantity</th>
                             <th style="width: 160px;" class="text-end">Unit Price</th>
                             <th class="text-end" style="width: 160px;">Final Price (₹)</th>
                             <th style="width: 120px;" class="text-center">Type / Action</th>
@@ -499,6 +499,19 @@
                     .replace(/"/g, '&quot;');
             }
 
+            function isHoursUnit(unitId) {
+                if (!unitId) return false;
+                const unit = availableUnits.find(u => String(u.id) === String(unitId));
+                if (!unit) return false;
+                const code = (unit.code || '').toUpperCase().trim();
+                const nameEn = (unit.name_en || '').toLowerCase().trim();
+                return code === 'HRS' || code === 'HR' || code === 'H' || nameEn.includes('hour');
+            }
+
+            function syncWeeklyHoursSuffix($row, unitId) {
+                $row.find('.weekly-exp-qty-unit-suffix').toggleClass('d-none', !isHoursUnit(unitId));
+            }
+
             function findMatchedMaterial(title) {
                 const lowerTitle = (title || '').toLowerCase().trim();
                 if (!lowerTitle) return null;
@@ -554,7 +567,10 @@
                             </select>
                         </td>
                         <td>
-                            <input type="number" min="0" step="any" class="form-control form-control-sm text-center weekly-exp-qty" value="${qty}" placeholder="Qty">
+                            <div class="input-group input-group-sm">
+                                <input type="number" min="0" step="any" class="form-control form-control-sm text-center weekly-exp-qty" value="${qty}" placeholder="Qty">
+                                <span class="input-group-text weekly-exp-qty-unit-suffix ${isHoursUnit(selectedUnitId) ? '' : 'd-none'}">h</span>
+                            </div>
                         </td>
                         <td>
                             <div class="input-group input-group-sm">
@@ -691,6 +707,7 @@
                     if (unitId) {
                         row.find('.weekly-exp-unit').val(String(unitId));
                     }
+                    syncWeeklyHoursSuffix(row, row.find('.weekly-exp-unit').val());
 
                     recalculateWeeklySheet();
                     autoSaveWeeklyExpenses();
@@ -767,6 +784,7 @@
                                 if (res.material.unit_id) {
                                     qaRow.find('.weekly-exp-unit').val(String(res.material.unit_id));
                                 }
+                                syncWeeklyHoursSuffix(qaRow, qaRow.find('.weekly-exp-unit').val());
                                 const qtyInput = qaRow.find('.weekly-exp-qty');
                                 if (!qtyInput.val()) {
                                     qtyInput.val(1);
@@ -802,10 +820,12 @@
             $(document).on('change', '.weekly-exp-unit', function () {
                 const $select = $(this);
                 const row = $select.closest('.weekly-exp-row');
+                const newUnitId = parseInt($select.val(), 10);
+                syncWeeklyHoursSuffix(row, newUnitId);
+
                 const materialId = row.attr('data-material-id');
 
                 if (materialId) {
-                    const newUnitId = parseInt($select.val(), 10);
                     const mat = availableMaterials.find(m => String(m.id) === String(materialId));
                     if (newUnitId && mat) {
                         $.ajax({
