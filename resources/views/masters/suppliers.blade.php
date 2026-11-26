@@ -95,8 +95,8 @@
 </div>
 
         <!-- Suppliers Table -->
-        <div class="card-custom overflow-hidden">
-            <div class="table-responsive">
+        <div class="card-custom">
+            <div class="table-responsive" style="overflow: visible !important;">
                 <table class="table table-custom table-hover align-middle" id="suppliersTable">
                     <thead>
                         <tr>
@@ -196,7 +196,7 @@
                                     <div class="d-inline-flex align-items-center gap-1">
                                         <div class="dropdown table-action-dropdown">
                                             <button class="btn table-action-btn" type="button" data-bs-toggle="dropdown"
-                                                aria-expanded="false" title="Actions">
+                                                data-bs-boundary="viewport" aria-expanded="false" title="Actions">
                                                 <i class="bi bi-three-dots-vertical"></i>
 </button>
                                             <ul class="dropdown-menu dropdown-menu-end shadow-sm">
