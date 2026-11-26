@@ -92,8 +92,8 @@
         <!-- Category-Wise Workers Summary & Site Expenses Breakdown -->
         <div class="row g-3 mb-4">
             <div class="col-12 col-lg-6">
-                <div class="card-custom overflow-hidden bg-white h-100">
-                    <div class="p-3 bg-light border-bottom d-flex justify-content-between align-items-center">
+                <div class="card-custom overflow-hidden bg-white h-100" style="border: 1px solid #bfdbfe;">
+                    <div class="p-3 border-bottom d-flex justify-content-between align-items-center" style="background-color: #eff6ff; border-color: #dbeafe !important;">
                         <h6 class="fw-bold mb-0 text-dark">
                             <i class="bi bi-people-fill text-primary me-2"></i>Weekly Workers Summary
                         </h6>
@@ -103,7 +103,7 @@
                     </div>
                     <div class="table-responsive">
                         <table class="table table-sm table-bordered align-middle mb-0">
-                            <thead class="table-light small">
+                            <thead class="small" style="background-color: #f5f9ff;">
                                 <tr>
                                     <th>Worker Category</th>
                                     <th class="text-center" style="width: 75px;">Days</th>
@@ -131,7 +131,7 @@
                                 @endforelse
                             </tbody>
                             @if (!empty($summary['worker_summary']))
-                                <tfoot class="table-light fw-bold">
+                                <tfoot class="fw-bold" style="background-color: #eff6ff;">
                                     <tr>
                                         <td colspan="2" class="text-end">Total Labour:</td>
                                         <td class="text-center text-primary">{{ $summary['total_workers'] }} Workers</td>
@@ -145,8 +145,8 @@
             </div>
 
             <div class="col-12 col-lg-6">
-                <div class="card-custom overflow-hidden bg-white h-100">
-                    <div class="p-3 bg-light border-bottom d-flex justify-content-between align-items-center">
+                <div class="card-custom overflow-hidden bg-white h-100" style="border: 1px solid #fde68a;">
+                    <div class="p-3 border-bottom d-flex justify-content-between align-items-center" style="background-color: #fffbeb; border-color: #fef3c7 !important;">
                         <h6 class="fw-bold mb-0 text-dark">
                             <i class="bi bi-receipt-cutoff text-warning me-2"></i>Weekly Site Expenses Breakdown
                         </h6>
@@ -156,7 +156,7 @@
                     </div>
                     <div class="table-responsive">
                         <table class="table table-sm table-bordered align-middle mb-0">
-                            <thead class="table-light small">
+                            <thead class="small" style="background-color: #fefcf3;">
                                 <tr>
                                     <th style="width: 115px;">Date</th>
                                     <th>Expense Item</th>
@@ -184,7 +184,7 @@
                                 @endforelse
                             </tbody>
                             @if (!empty($summary['expense_summary']))
-                                <tfoot class="table-light fw-bold">
+                                <tfoot class="fw-bold" style="background-color: #fffbeb;">
                                     <tr>
                                         <td colspan="3" class="text-end">Total Site Expenses:</td>
                                         <td class="text-end text-dark">₹{{ number_format($summary['total_site_expenses'], 2) }}</td>
@@ -200,8 +200,8 @@
         <!-- Site Manager & Account Manager Paid Workers (Same Row) -->
         <div class="row g-3 mb-4">
             <div class="col-12 col-lg-6">
-                <div class="card-custom overflow-hidden bg-white h-100">
-                    <div class="p-3 bg-light border-bottom d-flex justify-content-between align-items-center">
+                <div class="card-custom overflow-hidden bg-white h-100" style="border: 1px solid #bbf7d0;">
+                    <div class="p-3 border-bottom d-flex justify-content-between align-items-center" style="background-color: #f0fdf4; border-color: #dcfce7 !important;">
                         <h6 class="fw-bold mb-0 text-dark">
                             <i class="bi bi-person-check-fill text-success me-2"></i>Site Manager Paid Workers
                         </h6>
@@ -211,7 +211,7 @@
                     </div>
                     <div class="table-responsive">
                         <table class="table table-sm table-bordered align-middle mb-0">
-                            <thead class="table-light small">
+                            <thead class="small" style="background-color: #f4fbf6;">
                                 <tr>
                                     <th>Worker Category</th>
                                     <th class="text-center" style="width: 75px;">Days</th>
@@ -241,7 +241,7 @@
                                 @endforelse
                             </tbody>
                             @if (! empty($summary['sm_worker_summary']))
-                                <tfoot class="table-light fw-bold">
+                                <tfoot class="fw-bold" style="background-color: #f0fdf4;">
                                     <tr>
                                         <td colspan="2" class="text-end">Total Paid by Site Manager:</td>
                                         <td class="text-center text-primary">{{ $summary['sm_total_workers'] }} Workers</td>
@@ -255,8 +255,8 @@
             </div>
 
             <div class="col-12 col-lg-6">
-                <div class="card-custom overflow-hidden bg-white h-100">
-                    <div class="p-3 bg-light border-bottom d-flex justify-content-between align-items-center">
+                <div class="card-custom overflow-hidden bg-white h-100" style="border: 1px solid #bae6fd;">
+                    <div class="p-3 border-bottom d-flex justify-content-between align-items-center" style="background-color: #f0f9ff; border-color: #e0f2fe !important;">
                         <h6 class="fw-bold mb-0 text-dark">
                             <i class="bi bi-person-badge-fill text-primary me-2"></i>Account Manager Paid Workers
                         </h6>
@@ -266,7 +266,7 @@
                     </div>
                     <div class="table-responsive">
                         <table class="table table-sm table-bordered align-middle mb-0">
-                            <thead class="table-light small">
+                            <thead class="small" style="background-color: #f4faff;">
                                 <tr>
                                     <th>Worker Category</th>
                                     <th class="text-center" style="width: 75px;">Days</th>
@@ -296,7 +296,7 @@
                                 @endforelse
                             </tbody>
                             @if (! empty($summary['am_worker_summary']))
-                                <tfoot class="table-light fw-bold">
+                                <tfoot class="fw-bold" style="background-color: #f0f9ff;">
                                     <tr>
                                         <td colspan="2" class="text-end">Total Paid by Account Manager:</td>
                                         <td class="text-center text-primary">{{ $summary['am_total_workers'] }} Workers</td>
@@ -311,15 +311,15 @@
         </div>
 
         <!-- Day-by-Day Allocations & Site Cash Paid Status -->
-        <div class="card-custom overflow-hidden bg-white mb-4">
-            <div class="p-3 bg-light border-bottom">
+        <div class="card-custom overflow-hidden bg-white mb-4" style="border: 1px solid #cbd5e1;">
+            <div class="p-3 border-bottom" style="background-color: #f8fafc; border-color: #e2e8f0 !important;">
                 <h6 class="fw-bold mb-0 text-dark">
                     <i class="bi bi-list-check text-primary me-2"></i>Day-by-Day Allocations &amp; Site Cash Payment Status
                 </h6>
             </div>
             <div class="table-responsive">
                 <table class="table table-custom table-bordered align-middle mb-0">
-                    <thead class="table-light small">
+                    <thead class="small" style="background-color: #f1f5f9;">
                         <tr>
                             <th style="width: 135px;">Date &amp; Day</th>
                             <th>Worker Categories &amp; Breakdown</th>
@@ -415,15 +415,15 @@
 
         <!-- Additional Weekly Expenses -->
         @if ($weeklyWage->expenses->isNotEmpty())
-            <div class="card-custom overflow-hidden bg-white">
-                <div class="p-3 bg-light border-bottom">
+            <div class="card-custom overflow-hidden bg-white" style="border: 1px solid #fed7aa;">
+                <div class="p-3 border-bottom" style="background-color: #fff7ed; border-color: #ffedd5 !important;">
                     <h6 class="fw-bold mb-0 text-dark">
                         <i class="bi bi-receipt text-warning me-2"></i>Additional Weekly Site Expenses
                     </h6>
                 </div>
                 <div class="table-responsive">
                     <table class="table table-bordered align-middle mb-0">
-                        <thead class="table-light small">
+                        <thead class="small" style="background-color: #fffaf3;">
                             <tr>
                                 <th>Expense Item</th>
                                 <th class="text-center" style="width: 100px;">Qty</th>

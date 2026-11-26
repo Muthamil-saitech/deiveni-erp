@@ -111,9 +111,6 @@
                                 </td>
                                 <td>
                                     <div class="fw-semibold text-dark">{{ $bill->title ?: 'Painter & Electrician Temporary Bill' }}</div>
-                                    <span class="badge bg-light text-secondary border" style="font-size: 0.7rem;">
-                                        {{ $bill->trade_filter === 'painter' ? 'Painter Only' : ($bill->trade_filter === 'electrician' ? 'Electrician Only' : 'Painters & Electricians') }}
-                                    </span>
                                 </td>
                                 <td class="text-center">
                                     <span class="badge bg-secondary-subtle text-dark">{{ is_array($bill->items) ? count($bill->items) : 0 }}</span>

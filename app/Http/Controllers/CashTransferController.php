@@ -109,6 +109,7 @@ class CashTransferController extends Controller
             'success' => true,
             'message' => 'Cash transfer recorded and synchronized successfully.',
             'data' => $transfer,
+            'site_funds_map' => $this->computeSiteFundsMap($transfer->project_site_id ? ProjectSite::with('client')->whereKey($transfer->project_site_id)->get() : collect()),
         ], 201);
     }
 
@@ -269,13 +270,7 @@ class CashTransferController extends Controller
         $adminTransferredBySite = CashTransfer::query()
             ->whereIn('project_site_id', $siteIds)
             ->whereNotNull('admin_ledger_id')
-            ->where(function ($q) {
-                $q->where('transfer_direction', 'project_cash')
-                    ->orWhere(function ($sub) {
-                        $sub->where('transfer_direction', 'office_to_site')
-                            ->where('settlement_status', '!=', 'settled');
-                    });
-            })
+            ->whereIn('transfer_direction', ['office_to_site', 'project_cash'])
             ->selectRaw('project_site_id, COALESCE(SUM(amount), 0) as total')
             ->groupBy('project_site_id')
             ->pluck('total', 'project_site_id');

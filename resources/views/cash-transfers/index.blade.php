@@ -1143,6 +1143,9 @@
                         showToast(response.message || 'Cash transfer recorded successfully!', 'success');
 
                         // Prepend newly created transfer to local dataset
+                        if (response.site_funds_map) {
+                            Object.assign(siteFundsMap, response.site_funds_map);
+                        }
                         if (response.data) {
                             rawTransfers.unshift(response.data);
                             renderTransfersTable();

@@ -159,11 +159,8 @@
             </div>
             <div class="col-6">
                 <div class="p-2 px-3 bg-light border rounded">
-                    <div class="text-muted fw-bold text-uppercase" style="font-size: 7.5pt;">Client / Scope</div>
+                    <div class="text-muted fw-bold text-uppercase" style="font-size: 7.5pt;">Client</div>
                     <div class="fw-bold text-dark">{{ $site?->client?->name ?? 'Internal / Site Work' }}</div>
-                    <div class="small text-muted">
-                        Scope: {{ $bill->trade_filter === 'painter' ? 'Painter Only' : ($bill->trade_filter === 'electrician' ? 'Electrician Only' : 'Painters & Electricians') }}
-                    </div>
                 </div>
             </div>
         </div>
@@ -174,7 +171,6 @@
                 <tr>
                     <th style="width: 35px;" class="text-center">#</th>
                     <th style="width: 90px;">Date</th>
-                    <th style="width: 95px;">Trade</th>
                     <th>Work / Payment Description</th>
                     <th style="width: 65px;" class="text-center">Workers</th>
                     <th style="width: 85px;" class="text-end">Rate (₹)</th>
@@ -186,7 +182,6 @@
                     <tr>
                         <td class="text-center">{{ $idx + 1 }}</td>
                         <td class="text-nowrap">{{ !empty($item['date']) ? \Carbon\Carbon::parse($item['date'])->format('d M Y') : '-' }}</td>
-                        <td class="fw-semibold">{{ $item['trade'] ?? '-' }}</td>
                         <td>{{ $item['description'] ?? '-' }}</td>
                         <td class="text-center">{{ (int) ($item['worker_count'] ?? 0) }}</td>
                         <td class="text-end">₹{{ number_format((float) ($item['daily_wage'] ?? 0), 2) }}</td>
@@ -196,7 +191,7 @@
             </tbody>
             <tfoot>
                 <tr class="table-light">
-                    <td colspan="6" class="text-end fw-bold text-uppercase" style="font-size: 9.5pt;">Grand Total</td>
+                    <td colspan="5" class="text-end fw-bold text-uppercase" style="font-size: 9.5pt;">Grand Total</td>
                     <td class="text-end fw-bold text-primary" style="font-size: 11pt;">₹{{ number_format((float) $bill->total_amount, 2) }}</td>
                 </tr>
             </tfoot>

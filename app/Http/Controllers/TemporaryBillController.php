@@ -397,7 +397,7 @@ class TemporaryBillController extends Controller
             'notes' => 'nullable|string|max:2000',
             'items' => 'required|array|min:1',
             'items.*.date' => 'required|date',
-            'items.*.trade' => 'required|string|max:100',
+            'items.*.trade' => 'nullable|string|max:100',
             'items.*.description' => 'required|string|max:500',
             'items.*.worker_count' => 'nullable|numeric|min:0',
             'items.*.daily_wage' => 'nullable|numeric|min:0',

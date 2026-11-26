@@ -49,16 +49,7 @@
                         <div class="invalid-feedback" id="errTbDate"></div>
                     </div>
 
-                    <div class="col-12 col-md-3">
-                        <label class="form-label small fw-semibold" for="tbTradeFilter">Trade Filter</label>
-                        <select class="form-select" id="tbTradeFilter" name="trade_filter">
-                            <option value="all" {{ ($bill->trade_filter ?? 'all') === 'all' ? 'selected' : '' }}>All (Painters &amp; Electricians)</option>
-                            <option value="painter" {{ ($bill->trade_filter ?? '') === 'painter' ? 'selected' : '' }}>Painter Only</option>
-                            <option value="electrician" {{ ($bill->trade_filter ?? '') === 'electrician' ? 'selected' : '' }}>Electrician Only</option>
-                        </select>
-                    </div>
-
-                    <div class="col-12 col-md-3">
+                    <div class="col-12 col-md-6">
                         <label class="form-label small fw-semibold" for="tbTitle">Bill Title</label>
                         <input type="text" class="form-control" id="tbTitle" name="title"
                             value="{{ $bill->title ?? 'Painter & Electrician Temporary Bill' }}"
@@ -94,7 +85,6 @@
                                     <input type="checkbox" class="form-check-input" id="selectAllRowsChk" checked>
                                 </th>
                                 <th style="width: 145px;">Date</th>
-                                <th style="width: 130px;">Trade</th>
                                 <th>Worker Category</th>
                                 <th style="width: 90px;" class="text-center">Workers</th>
                                 <th style="width: 110px;" class="text-end">Rate (₹)</th>
@@ -105,14 +95,14 @@
                         </thead>
                         <tbody id="tbItemsBody">
                             <tr id="tbEmptyPlaceholder">
-                                <td colspan="9" class="text-center py-4 text-muted">
+                                <td colspan="8" class="text-center py-4 text-muted">
                                     Select a Project Site above to load date-wise Painter &amp; Electrician payments.
                                 </td>
                             </tr>
                         </tbody>
                         <tfoot class="table-light">
                             <tr>
-                                <td colspan="7" class="text-end fw-bold fs-6">Total Temporary Bill Amount:</td>
+                                <td colspan="6" class="text-end fw-bold fs-6">Total Temporary Bill Amount:</td>
                                 <td class="text-end fw-bold text-primary fs-5" id="tbGrandTotal">₹0.00</td>
                                 <td></td>
                             </tr>
@@ -163,7 +153,6 @@
 
             function addRowHtml(item) {
                 const date = item.date || $('#tbDate').val() || '{{ date('Y-m-d') }}';
-                const trade = item.trade || 'Painter';
                 const desc = (item.description || '').trim();
                 const workers = parseInt(item.worker_count ?? 1) || 0;
                 const wage = parseFloat(item.daily_wage ?? 0).toFixed(2);
@@ -197,12 +186,6 @@
                         </td>
                         <td>
                             <input type="date" class="form-control form-control-sm row-date" value="${escapeHtml(date)}" required>
-                        </td>
-                        <td>
-                            <select class="form-select form-select-sm row-trade">
-                                <option value="Painter" ${trade === 'Painter' ? 'selected' : ''}>Painter</option>
-                                <option value="Electrician" ${trade === 'Electrician' ? 'selected' : ''}>Electrician</option>
-                            </select>
                         </td>
                         <td>
                             <select class="form-select form-select-sm row-category-select">
@@ -276,16 +259,15 @@
                 recalculateTotal();
 
                 if (!siteId) {
-                    $('#tbItemsBody').html('<tr id="tbEmptyPlaceholder"><td colspan="9" class="text-center py-4 text-muted">Select a Project Site above to load date-wise Painter &amp; Electrician payments.</td></tr>');
+                    $('#tbItemsBody').html('<tr id="tbEmptyPlaceholder"><td colspan="8" class="text-center py-4 text-muted">Select a Project Site above to load date-wise Painter &amp; Electrician payments.</td></tr>');
                     return;
                 }
 
-                const tradeFilter = $('#tbTradeFilter').val() || 'all';
-                $('#tbItemsBody').html('<tr><td colspan="9" class="text-center py-4 text-muted"><span class="spinner-border spinner-border-sm me-2"></span>Loading date-wise Painter &amp; Electrician payments...</td></tr>');
+                $('#tbItemsBody').html('<tr><td colspan="8" class="text-center py-4 text-muted"><span class="spinner-border spinner-border-sm me-2"></span>Loading date-wise Painter &amp; Electrician payments...</td></tr>');
 
                 activePaymentsRequest = $.get(SITE_PAYMENTS_URL, {
                     project_site_id: siteId,
-                    trade_filter: tradeFilter
+                    trade_filter: 'all'
                 }, function (res) {
                     activePaymentsRequest = null;
                     if (res.success) {
@@ -296,7 +278,7 @@
                 }).fail(function (xhr, status) {
                     activePaymentsRequest = null;
                     if (status === 'abort') return;
-                    $('#tbItemsBody').html('<tr><td colspan="9" class="text-center py-4 text-danger">Failed to load payments for this site.</td></tr>');
+                    $('#tbItemsBody').html('<tr><td colspan="8" class="text-center py-4 text-danger">Failed to load payments for this site.</td></tr>');
                     recalculateTotal();
                 });
             }
@@ -307,7 +289,7 @@
                 loadSitePayments();
             }
 
-            $('#tbSiteSelect, #tbTradeFilter').on('change', function () {
+            $('#tbSiteSelect').on('change', function () {
                 loadSitePayments();
             });
 
@@ -323,7 +305,6 @@
                 $('#tbEmptyPlaceholder').remove();
                 $('#tbItemsBody').append(addRowHtml({
                     date: $('#tbDate').val(),
-                    trade: $('#tbTradeFilter').val() === 'electrician' ? 'Electrician' : 'Painter',
                     description: '',
                     worker_count: 1,
                     daily_wage: 0,
@@ -336,7 +317,7 @@
             $(document).on('click', '.remove-tb-row', function () {
                 $(this).closest('tr').remove();
                 if ($('#tbItemsBody .tb-item-row').length === 0) {
-                    $('#tbItemsBody').html('<tr id="tbEmptyPlaceholder"><td colspan="9" class="text-center py-4 text-muted">No rows added.</td></tr>');
+                    $('#tbItemsBody').html('<tr id="tbEmptyPlaceholder"><td colspan="8" class="text-center py-4 text-muted">No rows added.</td></tr>');
                 }
                 recalculateTotal();
             });
@@ -409,7 +390,6 @@
                     if (!desc) return;
                     items.push({
                         date: row.find('.row-date').val(),
-                        trade: row.find('.row-trade').val(),
                         description: desc,
                         worker_count: workersCount,
                         daily_wage: parseFloat(row.find('.row-wage').val()) || 0,
@@ -435,7 +415,7 @@
                         project_site_id: siteId,
                         bill_date: billDate,
                         title: $('#tbTitle').val(),
-                        trade_filter: $('#tbTradeFilter').val(),
+                        trade_filter: 'all',
                         notes: $('#tbNotes').val(),
                         items: items,
                     }),

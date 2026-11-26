@@ -503,16 +503,17 @@ test('owner available amount only deducts admin ledger transfers and not account
         'created_by' => $this->accountManager->id,
     ]);
 
-    // Owner still has 50,000 available and can transfer 1,000
+    // Owner still has 50,000 available and can transfer 20,000
     $res = $this->actingAs($owner)->postJson('/cash-transfer', [
         'transfer_direction' => 'office_to_site',
         'project_site_id' => $this->site->id,
         'transfer_date' => $today,
-        'amount' => 1000,
+        'amount' => 20000,
         'payment_mode' => 'Cash',
         'handed_over_by' => $owner->name,
-        'received_by' => $this->siteManager->name,
+        'received_by' => $this->accountManager->name,
     ]);
 
     $res->assertStatus(201);
+    expect((float) $res->json("site_funds_map.{$this->site->id}.available_amount"))->toBe(30000.0);
 });
