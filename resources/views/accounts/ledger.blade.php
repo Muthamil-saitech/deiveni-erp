@@ -678,23 +678,6 @@
                                 <div class="invalid-feedback" id="errOfficeExpenseDetails"></div>
 </div>
 
-                            <!-- Dynamic Transaction Types from Master (Task 5) -->
-                            <div class="col-12 d-none" id="dynamicTransactionTypesContainer">
-                                <div class="p-3 bg-light rounded-3 border">
-                                    <span class="small fw-bold text-primary mb-2 d-block">
-                                        <i class="bi bi-tags-fill me-1"></i>Transaction Type Fields (<span
-                                            id="txnCategoryLabel">Category</span>)
-</span>
-                                    <p class="text-muted small mb-2" style="font-size: 0.75rem;">
-                                        Linked with Transaction Type Master. Enter any details or values for the
-                                        corresponding types below.
-                                    </p>
-                                    <div class="row g-2" id="txnTypeFieldsWrapper">
-                                        <!-- Dynamically populated transaction type input fields -->
-</div>
-</div>
-</div>
-
                             <div class="col-12 col-md-6">
                                 <label class="form-label small fw-semibold">Amount (₹) <span
                                         class="text-danger">*</span></label>
@@ -780,52 +763,6 @@
                 return `${year}-${month}-${day}`;
             }
 
-            // Task 5: Dynamic Transaction Type Inputs for the chosen category
-            function populateTransactionTypeFields(category) {
-                const container = $('#dynamicTransactionTypesContainer');
-                const wrapper = $('#txnTypeFieldsWrapper');
-                const label = $('#txnCategoryLabel');
-                wrapper.empty();
-
-                if (!category) {
-                    container.addClass('d-none');
-                    return;
-                }
-
-                // Match category flexibly (e.g. Bank vs Bank Valuation)
-                const targetCat = (category === 'Bank Valuation' || category === 'Bank') ? 'bank' : category.toLowerCase().trim();
-
-                const matchedTypes = activeTransactionTypesData.filter(function (t) {
-                    const tCat = (t.category || '').toLowerCase().trim();
-                    if (targetCat === 'bank') {
-                        return tCat === 'bank' || tCat === 'bank valuation';
-                    }
-                    return tCat === targetCat;
-                });
-
-                if (matchedTypes.length > 0) {
-                    label.text(category);
-                    matchedTypes.forEach(function (t) {
-                        const fieldHtml = `
-                                                            <div class="col-12 col-md-6">
-                                                                <label class="form-label small fw-semibold">
-                                                                    ${escapeHtml(t.name_en)}
-                                                                    <span class="badge bg-secondary-subtle text-secondary fw-normal ms-1" style="font-size: 0.68rem;">Input</span>
-</label>
-                                                                <input type="text" class="form-control form-control-sm transaction-type-input"
-                                                                    name="transaction_types[${t.id}]"
-                                                                    data-id="${t.id}"
-                                                                    data-name="${escapeHtml(t.name_en)}"
-                                                                    placeholder="Enter ${escapeHtml(t.name_en)} details...">
-</div>
-                                                        `;
-                        wrapper.append(fieldHtml);
-                    });
-                    container.removeClass('d-none');
-                } else {
-                    container.addClass('d-none');
-                }
-            }
             // Source / Category options based on Entry Flow Type
             const sourceOptionsByFlow = {
                 income: [
@@ -906,9 +843,7 @@
                     $('.office-expense-fields-group').removeClass('d-none');
                 }
 
-                // Task 5: Populate dynamic transaction type inputs for this category
-                populateTransactionTypeFields(val);
-                                syncCashReceivedFromVisibility();
+                syncCashReceivedFromVisibility();
             });
 
             function syncCashReceivedFromVisibility() {
@@ -1408,8 +1343,6 @@
                 $('#newLedgerDesc').removeData('autofilled');
                 $('#newLedgerImage').val('');
                 $('#newLedgerImagePreviewBox').attr('style', 'display: none !important;').removeClass('d-flex');
-                $('#dynamicTransactionTypesContainer').addClass('d-none');
-                $('#txnTypeFieldsWrapper').empty();
                 syncSourceOptions('Construction');
             }
 
