@@ -4,6 +4,7 @@ use App\Enums\UserRole;
 use App\Models\Client;
 use App\Models\DailyAllocation;
 use App\Models\DailyAllocationExpense;
+use App\Models\DailyAllocationItem;
 use App\Models\ProjectClientStatement;
 use App\Models\ProjectSite;
 use App\Models\PurchaseOrder;
@@ -298,4 +299,47 @@ test('weekly expenses in client statement calculates only daily allocation same-
 
     // Confirm that the redundant textarea input is removed from the item/description column
     $response->assertDontSee('<textarea class="form-control form-control-sm item-desc" rows="1"', false);
+});
+
+test('client statement groups worker categories once with actual and editable 1-day wage', function () {
+    $d1 = DailyAllocation::create([
+        'project_site_id' => $this->site->id,
+        'date' => '2026-11-10',
+        'status' => 'Approved',
+        'created_by' => $this->siteManager->id,
+    ]);
+    DailyAllocationItem::create([
+        'daily_allocation_id' => $d1->id,
+        'name_ta' => 'கொத்தனார்',
+        'name_en' => 'Mason',
+        'worker_count' => 2,
+        'daily_wage' => 1200.00,
+        'master_wage' => 1200.00,
+        'subtotal' => 2400.00,
+    ]);
+
+    $d2 = DailyAllocation::create([
+        'project_site_id' => $this->site->id,
+        'date' => '2026-11-11',
+        'status' => 'Approved',
+        'created_by' => $this->siteManager->id,
+    ]);
+    DailyAllocationItem::create([
+        'daily_allocation_id' => $d2->id,
+        'name_ta' => 'கொத்தனார்',
+        'name_en' => 'Mason',
+        'worker_count' => 3,
+        'daily_wage' => 1200.00,
+        'master_wage' => 1200.00,
+        'subtotal' => 3600.00,
+    ]);
+
+    $response = $this->actingAs($this->siteManager)->get("/sites/{$this->site->encrypted_id}/client-statement");
+    $response->assertStatus(200);
+    $response->assertSee('1. Worker Wages (Single-Time 1-Day Wage)');
+    $response->assertSee('2. Materials (Single-Time Unit Price)');
+    $response->assertSee('3. Weekly Site Expenses');
+    $response->assertSee('5 Workers');
+    $response->assertSee('1,200.00');
+    $response->assertSee('6,000.00');
 });

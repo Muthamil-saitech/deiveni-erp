@@ -38,6 +38,8 @@ class ClientStatementController extends Controller
 
         $expenseItems = collect();
 
+        $materialGroups = [];
+
         foreach ($purchaseOrders as $po) {
             $poDate = $po->order_date ? $po->order_date->format('Y-m-d') : '';
             $supplierName = $po->supplier_name ?: ($po->supplier?->name ?? '');
@@ -49,6 +51,21 @@ class ClientStatementController extends Controller
                 $qty = (float) $item->quantity;
                 $rate = (float) $item->unit_price;
                 $lineTotal = (float) $item->total_price;
+                $matKey = 'mat_'.($item->material_id ?: md5(strtolower(trim($matTa.'|'.$matEn.'|'.$unitName))));
+
+                if (! isset($materialGroups[$matKey])) {
+                    $materialGroups[$matKey] = [
+                        'mat_key' => $matKey,
+                        'name_ta' => $matTa,
+                        'name_en' => $matEn,
+                        'unit' => $unitName,
+                        'total_qty' => 0.0,
+                        'total_actual_amount' => 0.0,
+                        'actual_unit_price' => $rate,
+                    ];
+                }
+                $materialGroups[$matKey]['total_qty'] += $qty;
+                $materialGroups[$matKey]['total_actual_amount'] += $lineTotal;
 
                 $desc = $matTa
                     ? ($matTa.' ('.$matEn.')'.($supplierName ? ' — '.$supplierName : ''))
@@ -56,6 +73,7 @@ class ClientStatementController extends Controller
 
                 $expenseItems->push([
                     'id' => 'mat_'.$item->id,
+                    'mat_key' => $matKey,
                     'source_type' => 'Material',
                     'is_weekly' => 0,
                     'category' => 'Material Purchase',
@@ -74,12 +92,34 @@ class ClientStatementController extends Controller
             }
         }
 
-        // 2. Gather Labour & Wage Expenses (from Daily Allocations)
+        $materialSummary = collect($materialGroups)
+            ->map(function (array $grp): array {
+                $totalQty = (float) $grp['total_qty'];
+                $totalActual = (float) $grp['total_actual_amount'];
+                $unitPrice = $totalQty > 0 ? round($totalActual / $totalQty, 2) : (float) $grp['actual_unit_price'];
+
+                return [
+                    'mat_key' => $grp['mat_key'],
+                    'name_ta' => $grp['name_ta'],
+                    'name_en' => $grp['name_en'],
+                    'unit' => $grp['unit'],
+                    'total_qty' => $totalQty,
+                    'actual_unit_price' => $unitPrice,
+                    'editable_unit_price' => $unitPrice,
+                    'total_actual_amount' => round($totalActual, 2),
+                    'billed_amount' => round($totalQty * $unitPrice, 2),
+                ];
+            })
+            ->values()
+            ->all();
+
+        // 2. Gather Labour & Wage Expenses (grouped once per worker category for 1-day wage editing)
         $dailyAllocations = DailyAllocation::with(['items'])
             ->where('project_site_id', $site->id)
             ->orderBy('date', 'asc')
             ->get();
 
+        $labourGroups = [];
         foreach ($dailyAllocations as $alloc) {
             $allocDate = $alloc->date ? Carbon::parse($alloc->date)->format('Y-m-d') : '';
 
@@ -90,12 +130,29 @@ class ClientStatementController extends Controller
                 $wage = (float) $item->daily_wage;
                 $subtotal = (float) $item->subtotal;
 
+                $catKey = (string) ($item->worker_category_id ?: ($tradeTa ?: $tradeEn));
+                if (! isset($labourGroups[$catKey])) {
+                    $labourGroups[$catKey] = [
+                        'cat_key' => $catKey,
+                        'name_ta' => $tradeTa,
+                        'name_en' => $tradeEn,
+                        'total_workers' => 0.0,
+                        'total_actual_amount' => 0.0,
+                        'actual_one_day_wage' => $wage,
+                        'date_entries' => [],
+                    ];
+                }
+
+                $labourGroups[$catKey]['total_workers'] += $workerCount;
+                $labourGroups[$catKey]['total_actual_amount'] += $subtotal;
+
                 $desc = $tradeTa
                     ? ($tradeTa.' — '.$tradeEn.' ('.(int) $workerCount.' workers)')
                     : ($tradeEn.' ('.(int) $workerCount.' workers)');
 
                 $expenseItems->push([
                     'id' => 'lab_'.$item->id,
+                    'cat_key' => $catKey,
                     'source_type' => 'Labour',
                     'is_weekly' => 0,
                     'category' => 'Labour Work',
@@ -113,6 +170,26 @@ class ClientStatementController extends Controller
                 ]);
             }
         }
+
+        $labourCategorySummary = collect($labourGroups)
+            ->map(function (array $grp): array {
+                $totalWorkers = (float) $grp['total_workers'];
+                $totalActual = (float) $grp['total_actual_amount'];
+                $oneDayWage = $totalWorkers > 0 ? round($totalActual / $totalWorkers, 2) : (float) $grp['actual_one_day_wage'];
+
+                return [
+                    'cat_key' => $grp['cat_key'],
+                    'name_ta' => $grp['name_ta'],
+                    'name_en' => $grp['name_en'],
+                    'total_workers' => $totalWorkers,
+                    'actual_one_day_wage' => $oneDayWage,
+                    'editable_one_day_wage' => $oneDayWage,
+                    'total_actual_amount' => round($totalActual, 2),
+                    'billed_amount' => round($totalWorkers * $oneDayWage, 2),
+                ];
+            })
+            ->values()
+            ->all();
 
         // Sort all date-wise entries chronologically by date
         $expenseItems = $expenseItems->sortBy('date')->values();
@@ -256,6 +333,8 @@ class ClientStatementController extends Controller
         return view('sites.client-statement', [
             'site' => $site,
             'client' => $site->client,
+            'labourCategorySummary' => $labourCategorySummary,
+            'materialSummary' => $materialSummary,
             'expenseItems' => $expenseItems,
             'weeklyExpenses' => $weeklyExpenses,
             'nextStatementNumber' => $nextStatementNumber,

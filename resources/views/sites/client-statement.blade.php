@@ -64,9 +64,16 @@
 </div>
 
                 <div class="d-flex align-items-center gap-2 flex-wrap">
+                    @if (! empty($labourCategorySummary) || ! empty($materialSummary) || $weeklyExpenses->isNotEmpty())
+                        <button type="button" class="btn btn-outline-primary btn-sm d-inline-flex align-items-center gap-1 shadow-sm"
+                            id="btnOpenBulkWorkerRates" data-bs-toggle="modal" data-bs-target="#bulkWorkerRatesModal"
+                            title="Bulk Edit Materials, Worker Wages & Weekly Site Expenses">
+                            <i class="bi bi-pencil-square"></i>
+                        </button>
+                    @endif
                     <button type="button" class="btn btn-outline-success btn-sm d-inline-flex align-items-center gap-1 shadow-sm px-3" id="btnSaveOnly">
                         <i class="bi bi-floppy"></i> Save Draft 
-</button>
+                    </button>
                     <button type="button" class="btn btn-primary btn-sm d-inline-flex align-items-center gap-1 shadow-sm px-3" id="btnSaveAndPrint">
                         <i class="bi bi-printer-fill"></i> Print & Save A4 
 </button>
@@ -108,6 +115,202 @@
 </div>
 </div>
 
+            <!-- Bulk Edit Modal (Materials, Worker Wages & Weekly Site Expenses) -->
+            @if (! empty($labourCategorySummary) || ! empty($materialSummary) || $weeklyExpenses->isNotEmpty())
+                <div class="modal fade" id="bulkWorkerRatesModal" tabindex="-1" aria-labelledby="bulkWorkerRatesModalLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+                        <div class="modal-content border-0 shadow">
+                            <div class="modal-header bg-light py-3 border-bottom">
+                                <div>
+                                    <h5 class="modal-title fw-bold text-dark mb-0" id="bulkWorkerRatesModalLabel">
+                                        <i class="bi bi-pencil-square text-primary me-2"></i>Bulk Rate &amp; Amount Editor
+                                    </h5>
+                                    <small class="text-muted">Changes here automatically update all corresponding rows in the statement below.</small>
+                                </div>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body p-3 p-md-4 bg-light">
+                                {{-- 1. Worker Wages --}}
+                                <div class="card border shadow-sm mb-4">
+                                    <div class="card-header bg-white py-2 px-3 d-flex justify-content-between align-items-center">
+                                        <h6 class="fw-bold mb-0 text-dark">
+                                            <i class="bi bi-people-fill text-primary me-2"></i>1. Worker Wages (Single-Time 1-Day Wage)
+                                        </h6>
+                                        <span class="badge bg-primary-subtle text-primary border border-primary-subtle">{{ count($labourCategorySummary) }} Categories</span>
+                                    </div>
+                                    <div class="table-responsive">
+                                        <table class="table table-bordered table-hover align-middle table-statement mb-0" id="labourCategoryRatesTable">
+                                            <thead class="table-light">
+                                                <tr>
+                                                    <th class="text-center" style="width: 45px;">#</th>
+                                                    <th>Worker Category</th>
+                                                    <th class="text-center" style="width: 130px;">Total Workers</th>
+                                                    <th class="text-end" style="width: 160px;">Actual 1-Day Wage (₹)</th>
+                                                    <th class="text-end" style="width: 185px;">1-Day Wage (Editable) (₹)</th>
+                                                    <th class="text-end" style="width: 160px;">Total Client Amount (₹)</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="labourCategoryRatesBody">
+                                                @forelse ($labourCategorySummary as $lIdx => $lab)
+                                                    <tr class="labour-cat-row" data-cat-idx="{{ $lIdx }}" data-cat-key="{{ $lab['cat_key'] }}" data-total-workers="{{ $lab['total_workers'] }}">
+                                                        <td class="text-center text-muted font-monospace">{{ str_pad($lIdx + 1, 2, '0', STR_PAD_LEFT) }}</td>
+                                                        <td>
+                                                            @if (! empty($lab['name_ta']))
+                                                                <div class="fw-bold text-dark">{{ $lab['name_ta'] }}</div>
+                                                                <small class="text-muted">{{ $lab['name_en'] }}</small>
+                                                            @else
+                                                                <div class="fw-bold text-dark">{{ $lab['name_en'] }}</div>
+                                                            @endif
+                                                        </td>
+                                                        <td class="text-center fw-semibold text-primary">
+                                                            {{ rtrim(rtrim(number_format((float) $lab['total_workers'], 2), '0'), '.') }} Workers
+                                                        </td>
+                                                        <td class="text-end text-muted">
+                                                            ₹{{ number_format((float) $lab['actual_one_day_wage'], 2) }}
+                                                        </td>
+                                                        <td>
+                                                            <div class="input-group input-group-sm">
+                                                                <span class="input-group-text fw-bold">₹</span>
+                                                                <input type="number" step="0.01" min="0"
+                                                                    class="form-control text-end editable-amt-input labour-rate-input"
+                                                                    data-cat-key="{{ $lab['cat_key'] }}"
+                                                                    value="{{ (float) $lab['editable_one_day_wage'] }}">
+                                                            </div>
+                                                        </td>
+                                                        <td class="text-end fw-bold text-dark labour-cat-total" data-amount="{{ (float) $lab['billed_amount'] }}">
+                                                            ₹{{ number_format((float) $lab['billed_amount'], 2) }}
+                                                        </td>
+                                                    </tr>
+                                                @empty
+                                                    <tr>
+                                                        <td colspan="6" class="text-center py-3 text-muted small">No worker wages recorded for this site.</td>
+                                                    </tr>
+                                                @endforelse
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+
+                                {{-- 2. Materials --}}
+                                <div class="card border shadow-sm mb-4">
+                                    <div class="card-header bg-white py-2 px-3 d-flex justify-content-between align-items-center">
+                                        <h6 class="fw-bold mb-0 text-dark">
+                                            <i class="bi bi-box-seam-fill text-warning me-2"></i>2. Materials (Single-Time Unit Price)
+                                        </h6>
+                                        <span class="badge bg-warning-subtle text-dark border border-warning-subtle">{{ count($materialSummary ?? []) }} Materials</span>
+                                    </div>
+                                    <div class="table-responsive">
+                                        <table class="table table-bordered table-hover align-middle table-statement mb-0" id="materialRatesTable">
+                                            <thead class="table-light">
+                                                <tr>
+                                                    <th class="text-center" style="width: 45px;">#</th>
+                                                    <th>Material</th>
+                                                    <th class="text-center" style="width: 130px;">Total Qty</th>
+                                                    <th class="text-end" style="width: 160px;">Actual Unit Price (₹)</th>
+                                                    <th class="text-end" style="width: 185px;">Unit Price (Editable) (₹)</th>
+                                                    <th class="text-end" style="width: 160px;">Total Client Amount (₹)</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="materialRatesBody">
+                                                @forelse ($materialSummary ?? [] as $mIdx => $mat)
+                                                    <tr class="material-rate-row" data-mat-key="{{ $mat['mat_key'] }}" data-total-qty="{{ $mat['total_qty'] }}">
+                                                        <td class="text-center text-muted font-monospace">{{ str_pad($mIdx + 1, 2, '0', STR_PAD_LEFT) }}</td>
+                                                        <td>
+                                                            @if (! empty($mat['name_ta']))
+                                                                <div class="fw-bold text-dark">{{ $mat['name_ta'] }}</div>
+                                                                <small class="text-muted">{{ $mat['name_en'] }}</small>
+                                                            @else
+                                                                <div class="fw-bold text-dark">{{ $mat['name_en'] }}</div>
+                                                            @endif
+                                                        </td>
+                                                        <td class="text-center fw-semibold text-primary">
+                                                            {{ rtrim(rtrim(number_format((float) $mat['total_qty'], 2), '0'), '.') }} {{ $mat['unit'] }}
+                                                        </td>
+                                                        <td class="text-end text-muted">
+                                                            ₹{{ number_format((float) $mat['actual_unit_price'], 2) }}
+                                                        </td>
+                                                        <td>
+                                                            <div class="input-group input-group-sm">
+                                                                <span class="input-group-text fw-bold">₹</span>
+                                                                <input type="number" step="0.01" min="0"
+                                                                    class="form-control text-end editable-amt-input material-rate-input"
+                                                                    data-mat-key="{{ $mat['mat_key'] }}"
+                                                                    value="{{ (float) $mat['editable_unit_price'] }}">
+                                                            </div>
+                                                        </td>
+                                                        <td class="text-end fw-bold text-dark material-cat-total" data-amount="{{ (float) $mat['billed_amount'] }}">
+                                                            ₹{{ number_format((float) $mat['billed_amount'], 2) }}
+                                                        </td>
+                                                    </tr>
+                                                @empty
+                                                    <tr>
+                                                        <td colspan="6" class="text-center py-3 text-muted small">No material purchases recorded for this site.</td>
+                                                    </tr>
+                                                @endforelse
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+
+                                {{-- 3. Weekly Site Expenses --}}
+                                <div class="card border shadow-sm">
+                                    <div class="card-header bg-white py-2 px-3 d-flex justify-content-between align-items-center">
+                                        <h6 class="fw-bold mb-0 text-dark">
+                                            <i class="bi bi-calendar-week text-success me-2"></i>3. Weekly Site Expenses
+                                        </h6>
+                                        <span class="badge bg-success-subtle text-success border border-success-subtle">{{ count($weeklyExpenses) }} Weeks</span>
+                                    </div>
+                                    <div class="table-responsive">
+                                        <table class="table table-bordered table-hover align-middle table-statement mb-0" id="bulkWeeklyExpensesTable">
+                                            <thead class="table-light">
+                                                <tr>
+                                                    <th class="text-center" style="width: 45px;">#</th>
+                                                    <th style="width: 220px;">Week Period</th>
+                                                    <th>Description</th>
+                                                    <th class="text-end" style="width: 150px;">Actual Cost (₹)</th>
+                                                    <th class="text-end" style="width: 185px;">Client Amount (Editable) (₹)</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="bulkWeeklyExpensesBody">
+                                                @forelse ($weeklyExpenses as $wIdx => $week)
+                                                    <tr class="bulk-weekly-row" data-week-idx="{{ $wIdx }}">
+                                                        <td class="text-center text-muted font-monospace">{{ str_pad($wIdx + 1, 2, '0', STR_PAD_LEFT) }}</td>
+                                                        <td class="fw-semibold text-nowrap small">
+                                                            {{ \Carbon\Carbon::parse($week['start_date'])->format('d M Y') }} – {{ \Carbon\Carbon::parse($week['end_date'])->format('d M Y') }}
+                                                        </td>
+                                                        <td class="small text-dark">{{ $week['description'] }}</td>
+                                                        <td class="text-end text-muted">₹{{ number_format((float) $week['original_amount'], 2) }}</td>
+                                                        <td>
+                                                            <div class="input-group input-group-sm">
+                                                                <span class="input-group-text fw-bold">₹</span>
+                                                                <input type="number" step="0.01" min="0"
+                                                                    class="form-control text-end editable-amt-input bulk-weekly-amount-input"
+                                                                    data-week-idx="{{ $wIdx }}"
+                                                                    value="{{ (float) $week['billed_amount'] }}">
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                @empty
+                                                    <tr>
+                                                        <td colspan="5" class="text-center py-3 text-muted small">No weekly site expenses recorded for this site.</td>
+                                                    </tr>
+                                                @endforelse
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="modal-footer bg-white py-2 border-top">
+                                <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
+                                <button type="button" class="btn btn-primary btn-sm px-3" id="btnApplyBulkWorkerRates" data-bs-dismiss="modal">
+                                    <i class="bi bi-check2-circle me-1"></i>Apply &amp; Update Statement
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            @endif
+
             <!-- 1. Date-Wise Expense Items Table Card -->
             <div class="statement-card p-4 mb-4">
                 <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-3 border-bottom pb-3">
@@ -146,7 +349,7 @@
                         </thead>
                         <tbody id="statementItemsBody">
                             @forelse ($expenseItems as $index => $item)
-                                <tr class="statement-row" data-index="{{ $index }}">
+                                <tr class="statement-row" data-index="{{ $index }}" data-cat-key="{{ $item['cat_key'] ?? '' }}" data-mat-key="{{ $item['mat_key'] ?? '' }}">
                                     <td class="text-center text-muted font-monospace row-num">
                                         {{ str_pad($index + 1, 2, '0', STR_PAD_LEFT) }}
                                     </td>
@@ -441,6 +644,21 @@ document.addEventListener('DOMContentLoaded', function () {
         if (weeklyCountBadge) weeklyCountBadge.textContent = `${wRows.length} Weeks`;
     }
 
+    const labourRatesBody = document.getElementById('labourCategoryRatesBody');
+
+    function syncBulkWorkerRateToTable(catKey, newRate) {
+        if (!catKey) return;
+        tableBody.querySelectorAll('.statement-row').forEach(row => {
+            if (row.dataset.catKey === catKey) {
+                const qty = parseFloat(row.querySelector('.item-qty')?.value) || 0;
+                const amtInput = row.querySelector('.item-amount');
+                if (amtInput) {
+                    amtInput.value = (Math.round(qty * newRate * 100) / 100).toFixed(2);
+                }
+            }
+        });
+    }
+
     // Calculate Totals function
     function calculateTotals() {
         let itemsSubtotal = 0;
@@ -517,7 +735,106 @@ document.addEventListener('DOMContentLoaded', function () {
         return 'Rupees ' + words.trim() + ' Only';
     }
 
+    const materialRatesBody = document.getElementById('materialRatesBody');
+    const bulkWeeklyExpensesBody = document.getElementById('bulkWeeklyExpensesBody');
+
+    function syncBulkMaterialRateToTable(matKey, newRate) {
+        if (!matKey) return;
+        tableBody.querySelectorAll('.statement-row').forEach(row => {
+            if (row.dataset.matKey === matKey) {
+                const qty = parseFloat(row.querySelector('.item-qty')?.value) || 0;
+                const amtInput = row.querySelector('.item-amount');
+                if (amtInput) {
+                    amtInput.value = (Math.round(qty * newRate * 100) / 100).toFixed(2);
+                }
+            }
+        });
+    }
+
+    function syncBulkWeeklyAmountToTable(weekIdx, newAmount) {
+        const wRow = weeklyBody.querySelector(`.weekly-row[data-index="${weekIdx}"]`);
+        if (wRow) {
+            const amtInput = wRow.querySelector('.weekly-amount');
+            if (amtInput) {
+                amtInput.value = (Math.round(newAmount * 100) / 100).toFixed(2);
+            }
+        }
+    }
+
     // Event delegation on Date-Items table body
+    if (labourRatesBody) {
+        labourRatesBody.addEventListener('input', function (e) {
+            if (e.target.classList.contains('labour-rate-input')) {
+                const row = e.target.closest('.labour-cat-row');
+                const totalWorkers = parseFloat(row?.dataset.totalWorkers) || 0;
+                const rateVal = parseFloat(e.target.value) || 0;
+                const catTotal = totalWorkers * rateVal;
+                const totalCell = row?.querySelector('.labour-cat-total');
+                if (totalCell) {
+                    totalCell.dataset.amount = catTotal.toFixed(2);
+                    totalCell.textContent = '₹' + catTotal.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                }
+                syncBulkWorkerRateToTable(row?.dataset.catKey || '', rateVal);
+                calculateTotals();
+            }
+        });
+    }
+
+    if (materialRatesBody) {
+        materialRatesBody.addEventListener('input', function (e) {
+            if (e.target.classList.contains('material-rate-input')) {
+                const row = e.target.closest('.material-rate-row');
+                const totalQty = parseFloat(row?.dataset.totalQty) || 0;
+                const rateVal = parseFloat(e.target.value) || 0;
+                const matTotal = totalQty * rateVal;
+                const totalCell = row?.querySelector('.material-cat-total');
+                if (totalCell) {
+                    totalCell.dataset.amount = matTotal.toFixed(2);
+                    totalCell.textContent = '₹' + matTotal.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                }
+                syncBulkMaterialRateToTable(row?.dataset.matKey || '', rateVal);
+                calculateTotals();
+            }
+        });
+    }
+
+    if (bulkWeeklyExpensesBody) {
+        bulkWeeklyExpensesBody.addEventListener('input', function (e) {
+            if (e.target.classList.contains('bulk-weekly-amount-input')) {
+                const weekIdx = e.target.dataset.weekIdx;
+                const amtVal = parseFloat(e.target.value) || 0;
+                syncBulkWeeklyAmountToTable(weekIdx, amtVal);
+                calculateTotals();
+            }
+        });
+    }
+
+    const btnApplyBulkWorkerRates = document.getElementById('btnApplyBulkWorkerRates');
+    if (btnApplyBulkWorkerRates) {
+        btnApplyBulkWorkerRates.addEventListener('click', function () {
+            if (labourRatesBody) {
+                labourRatesBody.querySelectorAll('.labour-cat-row').forEach(row => {
+                    const rateVal = parseFloat(row.querySelector('.labour-rate-input')?.value) || 0;
+                    syncBulkWorkerRateToTable(row.dataset.catKey || '', rateVal);
+                });
+            }
+            if (materialRatesBody) {
+                materialRatesBody.querySelectorAll('.material-rate-row').forEach(row => {
+                    const rateVal = parseFloat(row.querySelector('.material-rate-input')?.value) || 0;
+                    syncBulkMaterialRateToTable(row.dataset.matKey || '', rateVal);
+                });
+            }
+            if (bulkWeeklyExpensesBody) {
+                bulkWeeklyExpensesBody.querySelectorAll('.bulk-weekly-row').forEach(row => {
+                    const weekIdx = row.dataset.weekIdx;
+                    const amtVal = parseFloat(row.querySelector('.bulk-weekly-amount-input')?.value) || 0;
+                    syncBulkWeeklyAmountToTable(weekIdx, amtVal);
+                });
+            }
+            calculateTotals();
+        });
+    }
+
     tableBody.addEventListener('input', function (e) {
         if (e.target.classList.contains('item-amount') || e.target.classList.contains('item-qty')) {
             calculateTotals();

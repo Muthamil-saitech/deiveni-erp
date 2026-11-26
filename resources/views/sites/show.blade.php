@@ -452,6 +452,15 @@
                         <span class="badge bg-info-subtle text-info border border-info-subtle" style="font-size:0.68rem;">{{ isset($balanceStockList) ? $balanceStockList->count() : 0 }}</span>
 </button>
                 </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link d-flex align-items-center gap-2 px-3 py-2" id="tab-weekly-report"
+                        data-bs-toggle="tab" data-bs-target="#panel-weekly-report" type="button" role="tab"
+                        aria-controls="panel-weekly-report" aria-selected="false" style="font-size:0.83rem;">
+                        <i class="bi bi-calendar-week-fill text-primary"></i>
+                        <span class="fw-semibold">Weekly Report</span>
+                        <span class="badge bg-primary-subtle text-primary border border-primary-subtle" style="font-size:0.68rem;">{{ isset($weeklyReportPages) ? count($weeklyReportPages) : 0 }}</span>
+                    </button>
+                </li>
             </ul>
 
             <div class="tab-content border border-top-0 rounded-bottom" id="siteExpTabsContent">
@@ -850,6 +859,114 @@
 </div>
                     @endif
 </div>
+
+                {{-- ===== WEEKLY REPORT TAB (7 Rows per Page: Monday to Sunday) ===== --}}
+                <div class="tab-pane fade" id="panel-weekly-report" role="tabpanel">
+                    @if (empty($weeklyReportPages))
+                        <div class="text-center py-5 text-muted">
+                            <i class="bi bi-calendar-week fs-1 d-block mb-2 text-secondary opacity-25"></i>
+                            <div class="fw-semibold">No Weekly Report Data</div>
+                            <small>No weekly labour wages or site expenses recorded for this site yet.</small>
+                        </div>
+                    @else
+                        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2 px-3 py-2 bg-light border-bottom">
+                            <div class="d-flex align-items-center gap-2 flex-wrap">
+                                <span class="badge bg-primary text-white" id="weeklyReportWeekBadge">
+                                    Week 1 of {{ count($weeklyReportPages) }}
+                                </span>
+                                <span class="fw-bold text-dark small" id="weeklyReportWeekRange">
+                                    {{ $weeklyReportPages[0]['week_label'] }} (Monday – Sunday)
+                                </span>
+                            </div>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0" style="font-size:0.84rem;">
+                                <thead class="table-light text-muted" style="font-size:0.74rem; text-transform:uppercase;">
+                                    <tr>
+                                        <th class="ps-3" style="width: 135px;">Date &amp; Day</th>
+                                        <th>Worker Categories</th>
+                                        <th class="text-center" style="width: 90px;">Labours</th>
+                                        <th class="text-end" style="width: 130px;">Labour Wage (₹)</th>
+                                        <th>Site Expenses</th>
+                                        <th class="text-end" style="width: 120px;">Expenses (₹)</th>
+                                        <th class="text-end pe-3" style="width: 130px;">Day Total (₹)</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="weeklyReportTabBody">
+                                    @foreach ($weeklyReportPages as $wIdx => $wPage)
+                                        @foreach ($wPage['days'] as $day)
+                                            <tr class="weekly-report-row {{ $day['has_data'] ? '' : 'table-light text-muted' }}"
+                                                data-week-idx="{{ $wIdx }}"
+                                                style="{{ $wIdx === 0 ? '' : 'display: none;' }}">
+                                                <td class="ps-3">
+                                                    <div class="fw-semibold text-dark text-nowrap">{{ $day['date_formatted'] }}</div>
+                                                    <small class="text-muted">{{ $day['day_name'] }}</small>
+                                                </td>
+                                                <td>
+                                                    @if (! empty($day['items']))
+                                                        <div class="d-flex flex-wrap gap-1">
+                                                            @foreach ($day['items'] as $it)
+                                                                <span class="badge bg-light text-dark border fw-normal" style="font-size:0.72rem;">
+                                                                    {{ $it['label'] }} <strong class="text-primary">&times;{{ $it['count'] }}</strong>
+                                                                </span>
+                                                            @endforeach
+                                                        </div>
+                                                    @else
+                                                        <span class="text-muted small">—</span>
+                                                    @endif
+                                                </td>
+                                                <td class="text-center">
+                                                    @if ($day['labour_count'] > 0)
+                                                        <span class="badge bg-primary-subtle text-primary border border-primary-subtle fw-bold">{{ $day['labour_count'] }}</span>
+                                                    @else
+                                                        <span class="text-muted">—</span>
+                                                    @endif
+                                                </td>
+                                                <td class="text-end fw-semibold text-dark">
+                                                    {{ $day['labour_wage'] > 0 ? number_format($day['labour_wage'], 2) : '—' }}
+                                                </td>
+                                                <td>
+                                                    @if (! empty($day['expenses']))
+                                                        <div class="d-flex flex-wrap gap-1">
+                                                            @foreach ($day['expenses'] as $ex)
+                                                                <span class="badge bg-warning-subtle text-dark border border-warning-subtle fw-normal" style="font-size:0.72rem;">
+                                                                    {{ $ex['item_name'] }}: ₹{{ number_format($ex['amount'], 0) }}
+                                                                </span>
+                                                            @endforeach
+                                                        </div>
+                                                    @else
+                                                        <span class="text-muted small">—</span>
+                                                    @endif
+                                                </td>
+                                                <td class="text-end text-muted">
+                                                    {{ $day['site_expenses'] > 0 ? number_format($day['site_expenses'], 2) : '—' }}
+                                                </td>
+                                                <td class="text-end pe-3 fw-bold {{ $day['day_total'] > 0 ? 'text-primary' : 'text-muted' }}">
+                                                    {{ $day['day_total'] > 0 ? number_format($day['day_total'], 2) : '—' }}
+                                                </td>
+                                            </tr>
+                                        @endforeach
+                                    @endforeach
+                                </tbody>
+                                <tfoot class="table-light fw-bold border-top">
+                                    <tr>
+                                        <td colspan="3" class="text-end text-dark">Week Total:</td>
+                                        <td class="text-end text-dark" id="weeklyReportLabourTotal">₹{{ number_format($weeklyReportPages[0]['total_labour_wage'], 2) }}</td>
+                                        <td></td>
+                                        <td class="text-end text-warning-emphasis" id="weeklyReportExpenseTotal">₹{{ number_format($weeklyReportPages[0]['total_expenses'], 2) }}</td>
+                                        <td class="text-end pe-3 text-primary" id="weeklyReportGrandTotal">₹{{ number_format($weeklyReportPages[0]['grand_total'], 2) }}</td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                        <div class="d-flex flex-column flex-md-row justify-content-between align-items-center gap-2 px-3 py-2 bg-light border-top rounded-bottom" id="weeklyReportPagination">
+                            <span class="small text-muted" id="weeklyReportTabSummary">
+                                Showing Week 1 of {{ count($weeklyReportPages) }} (7 rows: Monday – Sunday)
+                            </span>
+                            <nav><ul class="pagination pagination-sm mb-0 gap-1" id="weeklyReportTabNav"></ul></nav>
+                        </div>
+                    @endif
+                </div>
 
 </div>{{-- end tab-content --}}
 </div>{{-- end tabs card --}}
@@ -1709,6 +1826,49 @@
             // Stock balance tab
             if ($('#stockTabBody tr').length > 0) {
                 makeTabPaginator('stockTabBody', 'stockTabNav', 'stockTabSummary', 'stockPerPage');
+            }
+
+            // Weekly Report tab paginator (fixed 7 rows per page = Monday to Sunday)
+            const weeklyReportMeta = @json($weeklyReportPages ?? []);
+            if (weeklyReportMeta.length > 0) {
+                let currentWeekIdx = 0;
+                const totalWeeks = weeklyReportMeta.length;
+
+                function formatRupees(val) {
+                    return '₹' + Number(val || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                }
+
+                function renderWeeklyReportPage(idx) {
+                    currentWeekIdx = Math.max(0, Math.min(idx, totalWeeks - 1));
+                    $('#weeklyReportTabBody .weekly-report-row').hide();
+                    $(`#weeklyReportTabBody .weekly-report-row[data-week-idx="${currentWeekIdx}"]`).show();
+
+                    const meta = weeklyReportMeta[currentWeekIdx];
+                    $('#weeklyReportWeekBadge').text(`Week ${currentWeekIdx + 1} of ${totalWeeks}`);
+                    $('#weeklyReportWeekRange').text(`${meta.week_label} (Monday – Sunday)`);
+                    $('#weeklyReportLabourTotal').text(formatRupees(meta.total_labour_wage));
+                    $('#weeklyReportExpenseTotal').text(formatRupees(meta.total_expenses));
+                    $('#weeklyReportGrandTotal').text(formatRupees(meta.grand_total));
+                    $('#weeklyReportTabSummary').text(`Showing Week ${currentWeekIdx + 1} of ${totalWeeks} (7 rows: Monday – Sunday)`);
+
+                    const nav = $('#weeklyReportTabNav');
+                    nav.empty();
+                    nav.append(`<li class="page-item ${currentWeekIdx === 0 ? 'disabled' : ''}"><button class="page-link" type="button" data-wpage="${currentWeekIdx - 1}">&lsaquo;</button></li>`);
+                    for (let w = 0; w < totalWeeks; w++) {
+                        nav.append(`<li class="page-item ${w === currentWeekIdx ? 'active' : ''}"><button class="page-link" type="button" data-wpage="${w}">${w + 1}</button></li>`);
+                    }
+                    nav.append(`<li class="page-item ${currentWeekIdx === totalWeeks - 1 ? 'disabled' : ''}"><button class="page-link" type="button" data-wpage="${currentWeekIdx + 1}">&rsaquo;</button></li>`);
+                }
+
+                $('#weeklyReportTabNav').on('click', '.page-link', function (e) {
+                    e.preventDefault();
+                    const p = parseInt($(this).data('wpage'), 10);
+                    if (!isNaN(p) && p >= 0 && p < totalWeeks && p !== currentWeekIdx) {
+                        renderWeeklyReportPage(p);
+                    }
+                });
+
+                renderWeeklyReportPage(0);
             }
 
             // Supplier tab paginator

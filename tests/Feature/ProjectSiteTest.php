@@ -2,6 +2,7 @@
 
 use App\Enums\UserRole;
 use App\Models\Client;
+use App\Models\DailyAllocation;
 use App\Models\ProjectSite;
 use App\Models\SiteCash;
 use App\Models\User;
@@ -377,4 +378,43 @@ test('delete project site route is not available', function () {
         ->deleteJson("/sites/{$site->id}");
 
     $response->assertStatus(405);
+});
+
+test('show project site view renders weekly report tab with 7 monday to sunday rows per week', function () {
+    $siteManager = User::factory()->create([
+        'role' => UserRole::SiteManager,
+    ]);
+
+    $client = Client::create([
+        'name' => 'Weekly Report Client',
+        'phone' => '9876500111',
+    ]);
+
+    $site = ProjectSite::create([
+        'client_id' => $client->id,
+        'name' => 'Weekly Report Test Site',
+        'location' => 'Chennai',
+        'work_type' => 'Construction',
+        'status' => 'In Progress',
+        'created_by' => $siteManager->id,
+    ]);
+
+    DailyAllocation::create([
+        'project_site_id' => $site->id,
+        'date' => '2026-11-18', // Wednesday of 16 Nov - 22 Nov 2026
+        'total_labour_count' => 3,
+        'total_labour_wage' => 3500.00,
+        'total_expenses' => 250.00,
+        'grand_total' => 3750.00,
+        'created_by' => $siteManager->id,
+    ]);
+
+    $response = $this->actingAs($siteManager)->get("/sites/{$site->encrypted_id}");
+    $response->assertStatus(200);
+    $response->assertSee('Weekly Report');
+    $response->assertSee('16 Nov 2026 – 22 Nov 2026 (Monday – Sunday)');
+    $response->assertSee('Showing Week 1 of 1 (7 rows: Monday – Sunday)');
+    $response->assertSee('Monday');
+    $response->assertSee('Sunday');
+    $response->assertSee('3,500.00');
 });

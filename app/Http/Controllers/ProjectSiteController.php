@@ -448,6 +448,86 @@ class ProjectSiteController extends Controller
             'am_balance' => $amProjectBalance,
         ];
 
+        // Weekly Report tab: Group daily allocations into Monday–Sunday 7-day pages
+        $allocByDate = [];
+        $weekStartsSet = [];
+        foreach ($labourRecords as $alloc) {
+            $dateCarbon = Carbon::parse($alloc->date);
+            $dateKey = $dateCarbon->toDateString();
+            $allocByDate[$dateKey] = $alloc;
+            $mondayKey = $dateCarbon->copy()->startOfWeek(Carbon::MONDAY)->toDateString();
+            $weekStartsSet[$mondayKey] = true;
+        }
+
+        $weeklyWagesByStart = $site->weeklyWages()->with('expenses')->get()->keyBy(function ($ww) {
+            return Carbon::parse($ww->week_start_date)->toDateString();
+        });
+        foreach ($weeklyWagesByStart->keys() as $wStart) {
+            $weekStartsSet[$wStart] = true;
+        }
+
+        $weekStarts = array_keys($weekStartsSet);
+        rsort($weekStarts);
+
+        $weeklyReportPages = [];
+        foreach ($weekStarts as $mondayStr) {
+            $monday = Carbon::parse($mondayStr);
+            $sunday = $monday->copy()->addDays(6);
+            $days = [];
+            $weekLabourWage = 0.0;
+            $weekDailyExpenses = 0.0;
+            $weekTotalWorkers = 0;
+
+            for ($offset = 0; $offset < 7; $offset++) {
+                $dayCarbon = $monday->copy()->addDays($offset);
+                $dayStr = $dayCarbon->toDateString();
+                $alloc = $allocByDate[$dayStr] ?? null;
+
+                $dayLabourWage = $alloc ? (float) $alloc->total_labour_wage : 0.0;
+                $dayExpenses = $alloc ? (float) ($alloc->expenses->sum('amount') ?: $alloc->total_expenses) : 0.0;
+                $dayWorkers = $alloc ? (int) $alloc->total_labour_count : 0;
+
+                $weekLabourWage += $dayLabourWage;
+                $weekDailyExpenses += $dayExpenses;
+                $weekTotalWorkers += $dayWorkers;
+
+                $days[] = [
+                    'date_str' => $dayStr,
+                    'date_formatted' => $dayCarbon->format('d M Y'),
+                    'day_name' => $dayCarbon->format('l'),
+                    'has_data' => (bool) $alloc,
+                    'items' => $alloc ? $alloc->items->map(fn ($it) => [
+                        'label' => $it->name_ta ?: ($it->name_en ?: ($it->workerCategory?->name ?? 'Worker')),
+                        'count' => (int) $it->worker_count,
+                    ])->all() : [],
+                    'expenses' => $alloc ? $alloc->expenses->map(fn ($ex) => [
+                        'item_name' => $ex->item_name,
+                        'amount' => (float) $ex->amount,
+                    ])->all() : [],
+                    'labour_count' => $dayWorkers,
+                    'labour_wage' => round($dayLabourWage, 2),
+                    'site_expenses' => round($dayExpenses, 2),
+                    'day_total' => round($dayLabourWage + $dayExpenses, 2),
+                ];
+            }
+
+            $wwRecord = $weeklyWagesByStart->get($mondayStr);
+            $weekExtraExpenses = $wwRecord ? (float) $wwRecord->total_weekly_expenses : 0.0;
+
+            $weeklyReportPages[] = [
+                'week_start' => $mondayStr,
+                'week_end' => $sunday->toDateString(),
+                'week_label' => $monday->format('d M Y').' – '.$sunday->format('d M Y'),
+                'total_workers' => $weekTotalWorkers,
+                'total_labour_wage' => round($weekLabourWage, 2),
+                'total_daily_expenses' => round($weekDailyExpenses, 2),
+                'total_extra_expenses' => round($weekExtraExpenses, 2),
+                'total_expenses' => round($weekDailyExpenses + $weekExtraExpenses, 2),
+                'grand_total' => round($weekLabourWage + $weekDailyExpenses + $weekExtraExpenses, 2),
+                'days' => $days,
+            ];
+        }
+
         return view('sites.show', [
             'site' => $site,
             'labourRecords' => $labourRecords,
@@ -459,6 +539,7 @@ class ProjectSiteController extends Controller
             'supplierStats' => $supplierStats,
             'combinedCashTransactions' => $sortedCashTransactions,
             'projectCashKpis' => $projectCashKpis,
+            'weeklyReportPages' => $weeklyReportPages,
             'clientStatements' => $site->clientStatements()->with('creator')->get(),
         ]);
     }
